@@ -45,6 +45,7 @@ function renderTokenChip(){
     const ref = $('#connectBtn'); if(ref && ref.parentNode) ref.parentNode.insertBefore(el, ref);
   }
   el.innerHTML = '<i class="fa-solid fa-coins mr-1"></i>'+fmtUnits(S.tokenBal, S.tokenDecimals, 2)+' '+S.tokenSymbol;
+  if(typeof refreshWalletMenu==='function') refreshWalletMenu();
 }
 async function refreshBalances(){
   if(!S.account){ renderBalances(); return; }

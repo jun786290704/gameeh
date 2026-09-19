@@ -21,7 +21,24 @@
       </div>
     </div>
     <button id="pendingPillBtn" onclick="togglePendingPanel()" class="btn btn-sm btn-gold hidden" title="待揭示操作" data-page-node-id="BBsa2SmbyzqEDiqrSdrUc1"><i class="fa-solid fa-hourglass-half" data-page-node-id="PkT5S31RjdFOAGkaSnQLkv"></i><span id="pendingCount" data-page-node-id="8ntsTitIaYP74GNcMTuLsx">0</span></button>
-    <button id="connectBtn" onclick="connectWallet()" class="btn btn-sm btn-gold" data-page-node-id="8Vhhs1QBOzAvVvV8nJk0yL"><i class="fa-solid fa-wallet" data-page-node-id="GCNFoKDIvweCpLHURfuaB1"></i><span id="connectTxt" data-page-node-id="8JEkwPiiNkKDKqJAwtBcm6">连接钱包</span></button>
+    <div id="walletWrap" class="wallet-drop">
+      <button id="connectBtn" onclick="onWalletClick()" class="btn btn-sm btn-gold" data-page-node-id="8Vhhs1QBOzAvVvV8nJk0yL"><i class="fa-solid fa-wallet" data-page-node-id="GCNFoKDIvweCpLHURfuaB1"></i><span id="connectTxt" data-page-node-id="8JEkwPiiNkKDKqJAwtBcm6">连接钱包</span><span class="wallet-caret" data-page-node-id="wCrt001"></span></button>
+      <div id="walletMenu" class="wallet-menu hidden">
+        <div class="wm-sec">
+          <div class="wm-row"><span class="wm-label">我的地址</span><button type="button" class="wm-copy" onclick="copyMyAddress(event)" title="复制地址"><i class="fa-regular fa-copy"></i></button></div>
+          <div id="wmAddr" class="wm-addr">--</div>
+        </div>
+        <div class="wm-sec">
+          <div class="wm-row"><span class="wm-label">代币余额</span><span id="wmBal" class="wm-bal num-mono">--</span></div>
+        </div>
+        <div class="wm-links">
+          <a class="wm-link" href="https://t.me/bscehgame" target="_blank" rel="noopener"><i class="fa-brands fa-telegram"></i><span>电报</span></a>
+          <a class="wm-link" href="https://x.com/bscgamebuild" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter"></i><span>推特 X</span></a>
+          <a class="wm-link" href="./index.html" target="_blank" rel="noopener"><i class="fa-solid fa-globe"></i><span>官网</span></a>
+          <a class="wm-link" href="#" onclick="event.preventDefault();"><i class="fa-solid fa-book"></i><span>Docs</span></a>
+        </div>
+      </div>
+    </div>
   </div>
   <div id="chainWarn" class="hidden border-t border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-[12px] text-amber-200 text-center" data-page-node-id="XCR5Wel0rXHl3dgHAK7LiH">
     <i class="fa-solid fa-triangle-exclamation mr-1" data-page-node-id="ruHqYw8bXcUw7VuI7InjeR"></i><span id="chainWarnTxt" data-page-node-id="Nz4P8mpxt0rt4xtIqa8j7R"></span>

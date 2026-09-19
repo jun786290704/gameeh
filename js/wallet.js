@@ -44,8 +44,52 @@ async function connectWallet(){
 }
 function updateConnectUI(){
   if(S.mode==='wallet' && S.account){ $('#connectTxt').textContent = shortAddr(S.account); }
-  else { $('#connectTxt').textContent = '连接钱包'; }
+  else { $('#connectTxt').textContent = '连接钱包'; closeWalletMenu(); }
+  refreshWalletMenu();
 }
+
+/* ============ 钱包下拉菜单（地址 / 余额 / 社群链接） ============ */
+function onWalletClick(){
+  if(S.mode==='wallet' && S.account) toggleWalletMenu();
+  else { closeWalletMenu(); connectWallet(); }
+}
+function closeWalletMenu(){
+  const w = $('#walletWrap'), m = $('#walletMenu');
+  if(w) w.classList.remove('open');
+  if(m) m.classList.add('hidden');
+}
+function toggleWalletMenu(){
+  const w = $('#walletWrap'), m = $('#walletMenu');
+  if(!w || !m) return;
+  if(!m.classList.contains('hidden')){ closeWalletMenu(); return; }
+  refreshWalletMenu();
+  m.classList.remove('hidden');
+  w.classList.add('open');
+}
+function refreshWalletMenu(){
+  const a = $('#wmAddr'), b = $('#wmBal');
+  if(a) a.textContent = S.account || '--';
+  if(b) b.textContent = fmtUnits(S.tokenBal || 0n, S.tokenDecimals, 2) + ' ' + (S.tokenSymbol || (typeof TOKEN_SYMBOL!=='undefined'?TOKEN_SYMBOL:'EH'));
+}
+async function copyMyAddress(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  if(!S.account){ toast('请先连接钱包','warn'); return; }
+  try{
+    await navigator.clipboard.writeText(S.account);
+    toast('地址已复制','success');
+  }catch(err){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = S.account; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      toast('地址已复制','success');
+    }catch(e2){ toast('复制失败，请手动选择地址','error'); }
+  }
+}
+document.addEventListener('click', function(e){
+  const w = $('#walletWrap');
+  if(w && !w.contains(e.target)) closeWalletMenu();
+});
 function needWallet(){
   if(S.mode==='wallet' && S.signer) return true;
   toast('请先连接钱包','warn'); return false;
