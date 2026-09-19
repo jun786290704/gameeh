@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元素英雄 Element Heroes · 链上五行 RPG</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fbbf24'/%3E%3Cstop offset='1' stop-color='%23f97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%23070c18'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='url(%23g)' stroke-width='5'/%3E%3Cpath d='M32 16 L38 30 L53 30 L41 39 L46 53 L32 44 L18 53 L23 39 L11 30 L26 30 Z' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --bg:#070c18; --bg2:#0b1220; --panel:#0d1526; --panel2:#111a2e;
+  --line:#1c2a44; --line2:#24304a;
+  --gold:#fbbf24; --gold2:#f59e0b; --text:#e8eef7; --muted:#8ea0bd;
+  --el-gold:#f59e0b; --el-wood:#22c55e; --el-earth:#b45309; --el-water:#38bdf8; --el-fire:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.65;overflow-x:hidden}
+h1,h2,h3,.serif{font-family:'Noto Serif SC','Noto Sans SC',serif}
+::selection{background:rgba(251,191,36,.3)}
+img{display:block}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+.sec{padding:84px 0}
+.sec-title{font-size:clamp(26px,4vw,38px);font-weight:900;letter-spacing:.04em;text-align:center;margin-bottom:10px}
+.sec-sub{text-align:center;color:var(--muted);font-size:15px;margin-bottom:52px}
+.sec-title .t{background:linear-gradient(120deg,var(--gold),#fff7d6 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.gold-line{width:56px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--gold),transparent);margin:14px auto 0}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 34px;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;text-decoration:none;transition:transform .18s,box-shadow .18s;border:0;font-family:inherit}
+.btn:active{transform:scale(.96)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;box-shadow:0 10px 30px -8px rgba(251,191,36,.55)}
+.btn-gold:hover{box-shadow:0 14px 40px -6px rgba(251,191,36,.7);transform:translateY(-2px)}
+.btn-ghost{background:rgba(13,21,38,.7);color:var(--text);border:1.5px solid var(--line2)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.tag{display:inline-block;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:500;letter-spacing:.06em}
+/* ===== Hero ===== */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(1100px 520px at 50% 12%,rgba(251,191,36,.13),transparent 62%),radial-gradient(900px 600px at 85% 90%,rgba(56,189,248,.08),transparent 60%),radial-gradient(900px 600px at 8% 80%,rgba(239,68,68,.09),transparent 60%),#070c18}
+.hero-imgs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.55;filter:saturate(1.05)}
+.hero-imgs img{width:min(30vw,340px);height:min(30vw,340px);object-fit:cover;object-position:center 22%;opacity:.82;border-radius:24px}
+.hero-imgs img:nth-child(1){transform:translateX(-46%) translateY(-2%) rotate(-7deg)}
+.hero-imgs img:nth-child(2){transform:translateX(0) translateY(6%) scale(1.08);opacity:.95}
+.hero-imgs img:nth-child(3){transform:translateX(46%) translateY(-2%) rotate(7deg)}
+.hero-imgs img:nth-child(4){transform:translateX(-86%) translateY(26%) scale(.82) rotate(-14deg);opacity:.5}
+.hero-imgs img:nth-child(5){transform:translateX(86%) translateY(26%) scale(.82) rotate(14deg);opacity:.5}
+.hero-shade{position:absolute;inset:0;background:radial-gradient(70% 55% at 50% 45%,transparent 20%,rgba(7,12,24,.86) 78%)}
+.hero-in{position:relative;z-index:2;text-align:center;padding:40px 22px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:999px;border:1px solid rgba(251,191,36,.4);background:rgba(251,191,36,.08);color:var(--gold);font-size:13px;letter-spacing:.12em;margin-bottom:26px}
+.hero-badge svg{width:14px;height:14px}
+.hero h1{font-size:clamp(42px,8vw,88px);font-weight:900;letter-spacing:.1em;line-height:1.12}
+.hero h1 .zh{background:linear-gradient(180deg,#fff 8%,#fde68a 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 60px rgba(251,191,36,.25)}
+.hero h1 .en{display:block;font-size:clamp(15px,2.4vw,22px);letter-spacing:.5em;color:var(--muted);font-weight:500;margin-top:14px;-webkit-text-fill-color:var(--muted)}
+.hero-tagline{color:#c9d6ea;font-size:clamp(15px,2vw,19px);margin:26px auto 10px;max-width:640px;font-weight:300}
+.hero-cta{display:flex;gap:16px;justify-content:center;margin-top:40px;flex-wrap:wrap}
+.hero-meta{display:flex;gap:26px;justify-content:center;margin-top:34px;color:var(--muted);font-size:13px;flex-wrap:wrap}
+.hero-meta span{display:inline-flex;align-items:center;gap:7px}
+.hero-meta svg{width:15px;height:15px;color:var(--gold)}
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);color:var(--muted);font-size:12px;letter-spacing:.3em;z-index:3;animation:hint 2.2s ease-in-out infinite}
+@keyframes hint{0%,100%{opacity:.4}50%{opacity:1}}
+/* ===== 玩法 ===== */
+.play-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.play-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:30px 26px;transition:transform .2s,border-color .2s}
+.play-card:hover{transform:translateY(-4px);border-color:rgba(251,191,36,.35)}
+.play-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:22px}
+.play-card h3{font-size:19px;margin-bottom:8px;font-weight:700}
+.play-card p{color:var(--muted);font-size:14px}
+.play-card .step{position:absolute;font-size:60px;font-weight:900;color:rgba(255,255,255,.04);right:18px;top:6px;font-family:'Noto Serif SC',serif}
+.play-card{position:relative;overflow:hidden}
+/* 五行相克 */
+.wuxing{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:40px}
+.wx{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 18px;border-radius:16px;background:var(--panel);border:1px solid var(--line);min-width:96px}
+.wx svg{width:34px;height:34px}
+.wx b{font-size:14px}
+.wx small{color:var(--muted);font-size:11px}
+.wx-arrow{color:var(--gold);align-self:center;font-size:20px;font-weight:700;margin-top:-8px}
+/* ===== 角色 ===== */
+.char-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+.char-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;transition:transform .22s,border-color .22s}
+.char-card:hover{transform:translateY(-5px);border-color:rgba(251,191,36,.4)}
+.char-art{position:relative;aspect-ratio:1;overflow:hidden}
+.char-art img{width:100%;height:100%;object-fit:cover;object-position:center 18%;transition:transform .4s}
+.char-card:hover .char-art img{transform:scale(1.06)}
+.char-el{position:absolute;top:12px;left:12px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;backdrop-filter:blur(4px)}
+.char-body{padding:16px 16px 18px}
+.char-body h3{font-size:17px;font-weight:700}
+.char-role{font-size:12px;color:var(--muted);margin:4px 0 10px}
+.char-stat{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+/* ===== 武器 ===== */
+.weapon-hero{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;margin-bottom:46px}
+.weapon-hero h3{font-size:26px;font-weight:900;margin-bottom:14px}
+.weapon-hero p{color:var(--muted);font-size:15px;margin-bottom:12px}
+.weapon-feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:22px}
+.weapon-feat .feat{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px}
+.weapon-feat .feat b{display:block;font-size:17px;color:var(--gold);margin-bottom:4px}
+.weapon-feat .feat span{font-size:12px;color:var(--muted)}
+.weapon-stars{display:flex;gap:6px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+.star-box{width:64px;min-width:64px;height:56px;border-radius:10px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:var(--muted);overflow:hidden}
+.star-box b{font-size:14px;color:var(--gold);letter-spacing:-1.5px;white-space:nowrap}
+/* ===== 怪物 ===== */
+.mon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.mon-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:transform .2s,border-color .2s}
+.mon-card:hover{transform:translateY(-4px);border-color:rgba(239,68,68,.35)}
+.mon-art{position:relative;aspect-ratio:1;overflow:hidden}
+.mon-art img{width:100%;height:100%;object-fit:cover;object-position:center 26%;transition:transform .4s}
+.mon-card:hover .mon-art img{transform:scale(1.07)}
+.mon-diff{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;backdrop-filter:blur(4px)}
+.mon-body{padding:13px 14px 15px;display:flex;justify-content:space-between;align-items:center}
+.mon-body h3{font-size:15px;font-weight:700}
+.mon-body small{color:var(--muted);font-size:11px;display:block;margin-top:2px}
+.mon-reward{font-size:12px;font-weight:700;color:var(--gold);white-space:nowrap}
+/* ===== BOSS ===== */
+.boss-wrap{display:grid;grid-template-columns:1.25fr 1fr;gap:34px;align-items:center}
+.boss-art{position:relative;border-radius:24px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/9}
+.boss-art img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.boss-art .mask{position:absolute;inset:0;background:linear-gradient(200deg,transparent 30%,rgba(7,12,24,.88) 92%)}
+.boss-art .lbl{position:absolute;left:18px;bottom:16px;font-size:13px;color:#fecaca;letter-spacing:.14em}
+.boss-art .lbl b{display:block;font-size:22px;color:#fff;font-family:'Noto Serif SC',serif}
+.boss-info h3{font-size:24px;font-weight:900;margin-bottom:12px}
+.boss-info p{color:var(--muted);font-size:14px;margin-bottom:10px}
+.boss-info ul{list-style:none;margin-top:16px}
+.boss-info li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.boss-info li:last-child{border-bottom:0}
+.boss-info li svg{width:18px;height:18px;flex:0 0 auto;color:var(--gold);margin-top:3px}
+/* ===== CTA / footer ===== */
+.cta{text-align:center;padding:96px 22px;position:relative;overflow:hidden}
+.cta::before{content:'';position:absolute;inset:0;background:radial-gradient(800px 300px at 50% 100%,rgba(251,191,36,.1),transparent 70%)}
+.cta h2{font-size:clamp(28px,4.6vw,46px);font-weight:900;letter-spacing:.06em;margin-bottom:14px}
+.cta p{color:var(--muted);max-width:520px;margin:0 auto 34px;font-size:15px}
+/* ===== 社区与支持 ===== */
+.comm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.comm-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 22px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:inherit;transition:transform .2s,border-color .2s;position:relative;overflow:hidden}
+.comm-card:hover{transform:translateY(-4px);border-color:rgba(251,191,36,.4)}
+.comm-icon{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.comm-card h3{font-size:17px;font-weight:700}
+.comm-card p{color:var(--muted);font-size:13px;line-height:1.55;flex:1}
+.comm-go{display:inline-flex;align-items:center;gap:6px;color:var(--gold);font-size:13px;font-weight:700}
+.comm-go svg{width:14px;height:14px;transition:transform .18s}
+.comm-card:hover .comm-go svg{transform:translateX(4px)}
+footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--muted);font-size:13px}
+footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
+@media(max-width:820px){
+  .weapon-hero,.boss-wrap{grid-template-columns:1fr}
+  .hero-imgs img{width:min(44vw,180px);height:min(44vw,180px)}
+  .hero-imgs img:nth-child(4),.hero-imgs img:nth-child(5){display:none}
+  .sec{padding:64px 0}
+}
+.lang-sw{position:fixed;top:46px;right:18px;z-index:120}
+.lang-sw .lang-main{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:rgba(7,12,24,.72);color:#fff;font-size:13px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:all .18s;backdrop-filter:blur(8px);line-height:1}
+.lang-sw .lang-main:hover{border-color:rgba(251,191,36,.55)}
+.lang-sw .caret{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid rgba(255,255,255,.75);transition:transform .18s}
+.lang-sw.open .caret{transform:rotate(180deg)}
+.lang-sw .lang-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:132px;background:rgba(7,12,24,.95);border:1px solid var(--line2);border-radius:12px;padding:4px;display:none;flex-direction:column;gap:2px;box-shadow:0 12px 30px rgba(0,0,0,.55);backdrop-filter:blur(8px)}
+.lang-sw.open .lang-menu{display:flex}
+.lang-sw .lang-menu button{border:0;background:transparent;color:var(--muted);font-size:13px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;white-space:nowrap}
+.lang-sw .lang-menu button:hover{background:rgba(251,191,36,.14);color:var(--gold)}
+.lang-sw .lang-menu button.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;font-weight:700}
+/* ===== 币价滚动条 ===== */
+.crypto-ticker{position:fixed;top:0;left:0;right:0;height:32px;z-index:98;background:rgba(5,9,18,.94);border-bottom:1px solid rgba(251,191,36,.22);overflow:hidden;display:flex;align-items:center;backdrop-filter:blur(6px)}
+.ticker-track{display:inline-flex;align-items:center;gap:52px;white-space:nowrap;padding:0 26px;animation:ticker 42s linear infinite;will-change:transform}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tk-item{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em}
+.tk-dot{width:7px;height:7px;border-radius:50%;display:inline-block;box-shadow:0 0 6px currentColor}
+.tk-name{color:var(--gold);letter-spacing:.1em}
+.tk-price{color:#fff;font-variant-numeric:tabular-nums}
+.tk-up{color:#4ade80;font-size:12px;font-weight:600}
+.tk-down{color:#f87171;font-size:12px;font-weight:600}
+@media(max-width:640px){.ticker-track{gap:34px}.tk-item{font-size:12px}}
+</style>
+</head>
+<body>
+
+<!-- ===== 语言切换 ===== -->
+<div class="lang-sw" id="langSw">
+  <button type="button" class="lang-main" id="langMain"><span id="langMainLabel">中文</span><span class="caret"></span></button>
+  <div class="lang-menu">
+    <button type="button" data-lang="zh" class="active">中文</button>
+    <button type="button" data-lang="en">EN</button>
+    <button type="button" data-lang="ja">日本語</button>
+    <button type="button" data-lang="es">ES</button>
+  </div>
+</div>
+
+<!-- ===== 主流币价滚动 ===== -->
+<div class="crypto-ticker" id="cryptoTicker"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<!-- ===== Hero ===== -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-imgs">
+    <img src="img/hero_1.png" alt="木系英雄">
+    <img src="img/hero_0.png" alt="金系英雄">
+    <img src="img/hero_4.png" alt="火系英雄">
+    <img src="img/hero_3.png" alt="水系英雄">
+    <img src="img/hero_2.png" alt="土系英雄">
+  </div>
+  <div class="hero-shade"></div>
+  
+  <div class="hero-in">
+
+    <div class="hero-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4" stroke-linecap="round"/></svg>
+      <span data-i18n="">CA ：<br>
+        0xB1C2e66c9E0d65Ee1C30F8A45DcB12269924f61b </span>
+    </div>
+    <h1><span class="zh">元素英雄</span><span class="en">ELEMENT HEROES</span></h1>
+    <p class="hero-tagline" data-i18n="tagline">召唤元素英雄，锻造神器武器，讨伐远古怪物与世界 BOSS —— 每一场战斗都真实发生在链上。</p>
+    <div class="hero-cta">
+      <a class="btn btn-gold" href="game.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <span data-i18n="cta-start">开始游戏</span>
+      </a>
+      <a class="btn btn-ghost" href="#gameplay"><span data-i18n="cta-learn">了解玩法</span></a>
+    </div>
+    <div class="hero-meta">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h14M5 16h14"/></svg><span data-i18n="meta-heroes">5 行英雄</span></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h14M5 16h14"/></svg><span data-i18n="meta-mons">10 种怪物</span></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h14M5 16h14"/></svg><span data-i18n="meta-boss">世界 BOSS 轮次</span></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h14M5 16h14"/></svg><span data-i18n="meta-elem">斩获 ELEM 奖励</span></span>
+    </div>
+  </div>
+  <div class="scroll-hint" data-i18n="scroll">向下滚动</div>
+</header>
+
+<!-- ===== 玩法 ===== -->
+<section class="sec" id="gameplay">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="t" data-i18n="t-gameplay">核心玩法</span></h2>
+    <div class="gold-line"></div>
+    <p class="sec-sub" data-i18n="s-gameplay">从召唤第一只英雄开始，踏上链上冒险的完整循环</p>
+    <div class="play-grid">
+      <div class="play-card"><span class="step">1</span>
+        <div class="play-icon" style="background:rgba(245,158,11,.14);color:var(--el-gold)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.5 6.5L21 9l-5 4 1.5 7L12 16.5 6.5 20 8 13 3 9l6.5-.5z"/></svg>
+        </div>
+        <h3 data-i18n="p1-t">召唤英雄</h3>
+        <p data-i18n="p1-d">消耗代币召唤元素英雄，金木土水火五种元素各有命途。每位英雄拥有等级、经验、战力与体力，体力随时间自动恢复。</p>
+      </div>
+      <div class="play-card"><span class="step">2</span>
+        <div class="play-icon" style="background:rgba(34,197,94,.14);color:var(--el-wood)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M9 13h6M9 17h4"/></svg>
+        </div>
+        <h3 data-i18n="p2-t">锻造武器</h3>
+        <p data-i18n="p2-d">在锻造厂消耗材料锻造武器，武器带 1~5 星品质与五行属性，星级越高强化加成越强。</p>
+      </div>
+      <div class="play-card"><span class="step">3</span>
+        <div class="play-icon" style="background:rgba(180,83,9,.16);color:var(--el-earth)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/><path d="M12 8v5"/></svg>
+        </div>
+        <h3 data-i18n="p3-t">强化战力</h3>
+        <p data-i18n="p3-d">用精粹强化武器提升战力加成，经验升级英雄等级，合理搭配元素克制关系打出更高伤害。</p>
+      </div>
+      <div class="play-card"><span class="step">4</span>
+        <div class="play-icon" style="background:rgba(56,189,248,.14);color:var(--el-water)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 9a7 7 0 1 1-14 0z"/></svg>
+        </div>
+        <h3 data-i18n="p4-t">挑战怪物</h3>
+        <p data-i18n="p4-d">在战斗页面挑选出战英雄与武器，对战 10 种元素怪物。胜利可获得 ELEM 奖励与经验，奖励进入金库待领取。</p>
+      </div>
+      <div class="play-card"><span class="step">5</span>
+        <div class="play-icon" style="background:rgba(239,68,68,.14);color:var(--el-fire)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c1 4-4 5-4 10a4 4 0 0 0 8 0c0-2-1-3-1-3s3 2 3 6a7 7 0 1 1-14 0C4 8 8 4 12 2z"/></svg>
+        </div>
+        <h3 data-i18n="p5-t">讨伐世界 BOSS</h3>
+        <p data-i18n="p5-d">参与世界 BOSS 轮次，按伤害占比瓜分奖池。排行榜实时更新，击破 BOSS 后结算奖励，人人有份。</p>
+      </div>
+      <div class="play-card"><span class="step">6</span>
+        <div class="play-icon" style="background:rgba(251,191,36,.14);color:var(--gold)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>
+        </div>
+        <h3 data-i18n="p6-t">领取奖励</h3>
+        <p data-i18n="p6-d">战斗奖励存入金库，一键领取到钱包；也可以在市场交易武器与碎片，让战利品流动起来。</p>
+      </div>
+    </div>
+    <div class="wuxing">
+      <div class="wx"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg><b style="color:#f59e0b" data-i18n="el-gold">金</b><small data-i18n="el-gold-s">锐利 · 高爆发</small></div>
+      <div class="wx-arrow">→</div>
+      <div class="wx"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 3c4 2 6 6 5 10-1 4-5 7-9 6-3-1-4-5-3-9 0-3 2-5 3-6 1-1 2 0 2-1z"/></svg><b style="color:#22c55e" data-i18n="el-wood">木</b><small data-i18n="el-wood-s">生生不息</small></div>
+      <div class="wx-arrow">→</div>
+      <div class="wx"><svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg><b style="color:#b45309" data-i18n="el-earth">土</b><small data-i18n="el-earth-s">厚重 · 防御</small></div>
+      <div class="wx-arrow">→</div>
+      <div class="wx"><svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M12 2l7 9a7 7 0 1 1-14 0z"/></svg><b style="color:#38bdf8" data-i18n="el-water">水</b><small data-i18n="el-water-s">灵动 · 续航</small></div>
+      <div class="wx-arrow">→</div>
+      <div class="wx"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 2c1 4-4 5-4 10a4 4 0 0 0 8 0c0-2-1-3-1-3s3 2 3 6a7 7 0 1 1-14 0C4 8 8 4 12 2z"/></svg><b style="color:#ef4444" data-i18n="el-fire">火</b><small data-i18n="el-fire-s">狂暴 · 范围</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 英雄 ===== -->
+<section class="sec" id="heroes">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="t" data-i18n="t-heroes">元素英雄</span></h2>
+    <div class="gold-line"></div>
+    <p class="sec-sub" data-i18n="s-heroes">五种元素的守护者，选择与你命格相合的英雄出战</p>
+    <div class="char-grid">
+      <div class="char-card">
+        <div class="char-art"><img src="img/hero_0.png" alt="金系英雄 金甲圣骑士">
+          <span class="char-el" style="background:rgba(245,158,11,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.35)" data-i18n="el-gold">金</span></div>
+        <div class="char-body"><h3 data-i18n="h0-n">金甲圣骑士</h3><div class="char-role" data-i18n="h0-r">锐金之躯 · 攻守兼备的先锋</div>
+          <div class="char-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2l2.5 6.5L21 9l-5 4 1.5 7L12 16.5 6.5 20 8 13 3 9l6.5-.5z"/></svg><span data-i18n="h0-s">金属性 · 高爆发</span></div></div>
+      </div>
+      <div class="char-card">
+        <div class="char-art"><img src="img/hero_1.png" alt="木系英雄 精灵游侠">
+          <span class="char-el" style="background:rgba(34,197,94,.2);color:#4ade80;border:1px solid rgba(34,197,94,.35)" data-i18n="el-wood">木</span></div>
+        <div class="char-body"><h3 data-i18n="h1-n">精灵游侠</h3><div class="char-role" data-i18n="h1-r">森林的守望者 · 灵巧射手</div>
+          <div class="char-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M12 3c4 2 6 6 5 10-1 4-5 7-9 6-3-1-4-5-3-9 0-3 2-5 3-6 1-1 2 0 2-1z"/></svg><span data-i18n="h1-s">木属性 · 生生不息</span></div></div>
+      </div>
+      <div class="char-card">
+        <div class="char-art"><img src="img/hero_2.png" alt="土系英雄 岩石守护者">
+          <span class="char-el" style="background:rgba(180,83,9,.22);color:#d97706;border:1px solid rgba(180,83,9,.4)" data-i18n="el-earth">土</span></div>
+        <div class="char-body"><h3 data-i18n="h2-n">岩石守护者</h3><div class="char-role" data-i18n="h2-r">大地之盾 · 坚不可摧的壁垒</div>
+          <div class="char-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg><span data-i18n="h2-s">土属性 · 厚重防御</span></div></div>
+      </div>
+      <div class="char-card">
+        <div class="char-art"><img src="img/hero_3.png" alt="水系英雄 水灵法师">
+          <span class="char-el" style="background:rgba(56,189,248,.2);color:#7dd3fc;border:1px solid rgba(56,189,248,.35)" data-i18n="el-water">水</span></div>
+        <div class="char-body"><h3 data-i18n="h3-n">水灵法师</h3><div class="char-role" data-i18n="h3-r">冰晶秘术师 · 掌控战场节奏</div>
+          <div class="char-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M12 2l7 9a7 7 0 1 1-14 0z"/></svg><span data-i18n="h3-s">水属性 · 灵动续航</span></div></div>
+      </div>
+      <div class="char-card">
+        <div class="char-art"><img src="img/hero_4.png" alt="火系英雄 烈焰斗士">
+          <span class="char-el" style="background:rgba(239,68,68,.2);color:#f87171;border:1px solid rgba(239,68,68,.35)" data-i18n="el-fire">火</span></div>
+        <div class="char-body"><h3 data-i18n="h4-n">烈焰斗士</h3><div class="char-role" data-i18n="h4-r">燃烧之魂 · 吞噬一切的怒火</div>
+          <div class="char-stat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 2c1 4-4 5-4 10a4 4 0 0 0 8 0c0-2-1-3-1-3s3 2 3 6a7 7 0 1 1-14 0C4 8 8 4 12 2z"/></svg><span data-i18n="h4-s">火属性 · 狂暴范围</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 武器 ===== -->
+<section class="sec" id="weapons">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="t" data-i18n="t-weapons">神器武器</span></h2>
+    <div class="gold-line"></div>
+    <p class="sec-sub" data-i18n="s-weapons">锻造 · 强化 · 熔炼 —— 打造你的专属神器</p>
+    <div class="weapon-hero">
+      <div>
+        <h3 data-i18n="w-t">一把好武器，是英雄的第三只手</h3>
+        <p data-i18n="w-d1">在锻造厂使用碎片与材料锻造武器，每把武器随机获得 1~5 星品质与五行属性。星级决定基础潜力，元素决定克制走向，强化加成直接提升战力百分比。</p>
+        <p data-i18n="w-d2">用精粹可以对武器进行多阶强化，战力加成层层攀升；不合心意的武器可以熔炼回收，材料循环再利用。</p>
+        <div class="weapon-feat">
+          <div class="feat"><b>1~5★</b><span data-i18n="w-f1">随机品质</span></div>
+          <div class="feat"><b>5 元素</b><span data-i18n="w-f2">克制搭配</span></div>
+          <div class="feat"><b>4 阶强化</b><span data-i18n="w-f3">精粹提升</span></div>
+          <div class="feat"><b>熔炼回收</b><span data-i18n="w-f4">循环利用</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="char-grid" style="grid-template-columns:repeat(2,1fr)">
+          <div class="char-card">
+            <div class="char-art" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 32%,rgba(239,68,68,.2),#0d1526 78%)">
+              <svg width="86" height="86" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.4"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>
+              <span class="char-el" style="background:rgba(239,68,68,.2);color:#f87171;border:1px solid rgba(239,68,68,.35)" data-i18n="el-fire">火</span></div>
+            <div class="char-body"><h3 data-i18n="w1-n">炎魔之刃</h3><div class="char-role" data-i18n="w1-r">五星 · 火属性 · 锻造示例</div>
+              <div class="char-stat" style="color:#fbbf24">★★★★★</div></div>
+          </div>
+          <div class="char-card">
+            <div class="char-art" style="display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 32%,rgba(245,158,11,.2),#0d1526 78%)">
+              <svg width="86" height="86" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.4"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>
+              <span class="char-el" style="background:rgba(245,158,11,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.35)" data-i18n="el-gold">金</span></div>
+            <div class="char-body"><h3 data-i18n="w2-n">雷鸟之枪</h3><div class="char-role" data-i18n="w2-r">四星 · 金属性 · 强化示例</div>
+              <div class="char-stat" style="color:#fbbf24">★★★★☆</div></div>
+          </div>
+        </div>
+        <div class="weapon-stars">
+          <div class="star-box"><b>★</b><span data-i18n="st-1">一星</span></div>
+          <div class="star-box"><b>★★</b><span data-i18n="st-2">二星</span></div>
+          <div class="star-box"><b>★★★</b><span data-i18n="st-3">三星</span></div>
+          <div class="star-box"><b>★★★★</b><span data-i18n="st-4">四星</span></div>
+          <div class="star-box"><b>★★★★★</b><span data-i18n="st-5">五星</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 怪物 ===== -->
+<section class="sec" id="monsters">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="t" data-i18n="t-monsters">怪物图鉴</span></h2>
+    <div class="gold-line"></div>
+    <p class="sec-sub" data-i18n="s-monsters">从软萌史莱姆到远古巨龙，10 种怪物按奖励基数分档：简单 · 普通 · 困难 · 噩梦</p>
+    <div class="mon-grid">
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_0.png" alt="史莱姆" data-i18n-alt="m0-n"><span class="mon-diff" style="background:rgba(34,197,94,.22);color:#4ade80" data-i18n="diff-easy">简单</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m0-n">史莱姆</h3><small data-i18n="m0-s">水 · 入门之敌</small></div><span class="mon-reward">0.12 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_1.png" alt="野狼" data-i18n-alt="m1-n"><span class="mon-diff" style="background:rgba(34,197,94,.22);color:#4ade80" data-i18n="diff-easy">简单</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m1-n">野狼</h3><small data-i18n="m1-s">木 · 森林猎手</small></div><span class="mon-reward">0.2 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_2.png" alt="骷髅兵" data-i18n-alt="m2-n"><span class="mon-diff" style="background:rgba(34,197,94,.22);color:#4ade80" data-i18n="diff-easy">简单</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m2-n">骷髅兵</h3><small data-i18n="m2-s">土 · 亡灵哨卫</small></div><span class="mon-reward">0.3 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_3.png" alt="暗影刺客" data-i18n-alt="m3-n"><span class="mon-diff" style="background:rgba(234,179,8,.22);color:#eab308" data-i18n="diff-norm">普通</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m3-n">暗影刺客</h3><small data-i18n="m3-s">水 · 暗夜杀手</small></div><span class="mon-reward">0.45 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_4.png" alt="石头人" data-i18n-alt="m4-n"><span class="mon-diff" style="background:rgba(234,179,8,.22);color:#eab308" data-i18n="diff-norm">普通</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m4-n">石头人</h3><small data-i18n="m4-s">土 · 熔岩巨像</small></div><span class="mon-reward">1.2 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_5.png" alt="炎魔" data-i18n-alt="m5-n"><span class="mon-diff" style="background:rgba(249,115,22,.22);color:#fb923c" data-i18n="diff-hard">困难</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m5-n">炎魔</h3><small data-i18n="m5-s">火 · 地狱守门人</small></div><span class="mon-reward">1.8 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_6.png" alt="雷鸟" data-i18n-alt="m6-n"><span class="mon-diff" style="background:rgba(249,115,22,.22);color:#fb923c" data-i18n="diff-hard">困难</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m6-n">雷鸟</h3><small data-i18n="m6-s">金 · 雷暴之翼</small></div><span class="mon-reward">2.6 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_7.png" alt="水龙" data-i18n-alt="m7-n"><span class="mon-diff" style="background:rgba(249,115,22,.22);color:#fb923c" data-i18n="diff-hard">困难</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m7-n">水龙</h3><small data-i18n="m7-s">水 · 深渊霸主</small></div><span class="mon-reward">3.8 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_8.png" alt="混沌骑士" data-i18n-alt="m8-n"><span class="mon-diff" style="background:rgba(239,68,68,.24);color:#f87171" data-i18n="diff-night">噩梦</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m8-n">混沌骑士</h3><small data-i18n="m8-s">土 · 亡灵领主</small></div><span class="mon-reward">5.5 ELEM</span></div></div>
+      <div class="mon-card"><div class="mon-art"><img src="img/mon_9.png" alt="远古巨龙" data-i18n-alt="m9-n"><span class="mon-diff" style="background:rgba(239,68,68,.24);color:#f87171" data-i18n="diff-night">噩梦</span></div>
+        <div class="mon-body"><div><h3 data-i18n="m9-n">远古巨龙</h3><small data-i18n="m9-s">火 · 万兽之巅</small></div><span class="mon-reward">8 ELEM</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BOSS ===== -->
+<section class="sec" id="boss">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="t" data-i18n="t-boss">世界 BOSS</span></h2>
+    <div class="gold-line"></div>
+    <p class="sec-sub" data-i18n="s-boss">全服英雄共讨远古巨龙，伤害换奖池份额</p>
+    <div class="boss-wrap">
+      <div class="boss-art">
+        <img src="img/mon_9.png" alt="世界BOSS 远古巨龙" data-i18n-alt="boss-n">
+        <div class="mask"></div>
+        <div class="lbl"><b data-i18n="boss-n">远古巨龙</b><span data-i18n="boss-tag">WORLD BOSS · 轮次制</span></div>
+      </div>
+      <div class="boss-info">
+        <h3 data-i18n="boss-r">挑战规则</h3>
+        <p data-i18n="boss-d">BOSS 每轮拥有海量 HP，玩家选择英雄与武器发起攻击，造成真实伤害。击破后按伤害占比瓜分奖池，人人有份。</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg><span data-i18n="boss-li1">每轮 BOSS 血量庞大，需全服合力讨伐</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg><span data-i18n="boss-li2">伤害排行 TOP5 实时刷新，金色高亮你的排名</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span data-i18n="boss-li3">击破后按伤害占比瓜分奖池，一键结算领取</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg><span data-i18n="boss-li4">战斗中实时预估可分奖励，收益心中有数</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta">
+  <div class="wrap">
+    <h2 data-i18n="cta-t">准备好迎接你的英雄了吗？</h2>
+    <p data-i18n="cta-d">连接钱包，召唤第一位元素英雄，立刻开始链上冒险。</p>
+    <a class="btn btn-gold" href="game.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <span data-i18n="cta-start">开始游戏</span>
+    </a>
+  </div>
+</section>
+
+<!-- ===== 社区与支持 ===== -->
+<section class="sec" id="community">
+  <div class="wrap">
+    <h2 class="sec-title"><span class="t" data-i18n="t-comm">官方社区与支持</span></h2>
+    <div class="gold-line"></div>
+    <p class="sec-sub" data-i18n="s-comm">加入官方社区，第一时间获取游戏动态、空投与活动资讯</p>
+    <div class="comm-grid">
+      <a class="comm-card" href="https://flap.sh/" target="_blank" rel="noopener">
+        <div class="comm-icon" style="background:rgba(245,158,11,.14)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20c-4-2.5-7-5.5-7-9a4 4 0 0 1 7-2.8A4 4 0 0 1 19 11c0 3.5-3 6.5-7 9z"/><path d="M12 20c0-3 .5-5.5 2-8M12 20c0-3-.5-5.5-2-8"/></svg>
+        </div>
+        <h3 data-i18n="c0-n">蝴蝶平台</h3>
+        <p data-i18n="c0-d">BNB 链生态 Launchpad，项目发行与上币支持平台。</p>
+        <span class="comm-go"><span data-i18n="c0-g">访问平台</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a class="comm-card" href="https://www.binance.com/" target="_blank" rel="noopener">
+        <div class="comm-icon" style="background:rgba(245,158,11,.14)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2l3 3-3 3-3-3zM12 16l3 3-3 3-3-3zM2 12l3-3 3 3-3 3zM16 12l3-3 3 3-3 3zM12 9l3 3-3 3-3-3z"/></svg>
+        </div>
+        <h3 data-i18n="c1-n">币安</h3>
+        <p data-i18n="c1-d">全球领先的交易平台，GameFi 生态与流动性支持。</p>
+        <span class="comm-go"><span data-i18n="c0-g">访问平台</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a class="comm-card" href="https://x.com/" target="_blank" rel="noopener">
+        <div class="comm-icon" style="background:rgba(56,189,248,.14)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23.3 22h-6.3l-4.9-6.4L6.5 22H3.4l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2zm-1.1 18h1.7L7.1 3.8H5.3L17.8 20z"/></svg>
+        </div>
+        <h3 data-i18n="c2-n">官方推特 X</h3>
+        <p data-i18n="c2-d">每日动态、开发进度与社区活动公告。</p>
+        <span class="comm-go"><span data-i18n="c2-g">关注我们</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a class="comm-card" href="https://t.me/" target="_blank" rel="noopener">
+        <div class="comm-icon" style="background:rgba(34,197,94,.14)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 3.6L2.7 11.1c-1 .4-1 1.6.1 1.9l4.9 1.5 1.9 5.8c.3.9 1.4 1.1 2 .4l2.7-2.6 5 3.7c.8.6 2 .1 2.2-1L23.9 5c.3-1.2-.8-2.1-2-1.4zM8.3 13.8l9.9-6.2c.4-.3.9.3.5.6l-8.2 7.5c-.3.3-.5.7-.6 1.1l-.5 2.3c-.1.3-.5.4-.7.1l-1-2.6c-.1-.3 0-.7.3-.8l.7-.4 2.5-2.3z"/></svg>
+        </div>
+        <h3 data-i18n="c3-n">官方电报</h3>
+        <p data-i18n="c3-d">玩家交流社区与官方客服支持，实时答疑。</p>
+        <span class="comm-go"><span data-i18n="c3-g">加入社区</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><span data-i18n="foot">元素英雄 Element Heroes </span> <a class="foot-link" href="game.html"><span data-i18n="foot-enter">进入游戏</span></a></p>
+  </div>
+</footer>
+
+
+<script>
+/* ===== 多语言 i18n ===== */
+const I18N = {
+zh:{
+// badge:'BSC 测试网 · 链上真合约',
+tagline:'召唤元素英雄，锻造神器武器，讨伐远古怪物与世界 BOSS —— 每一场战斗都真实发生在链上。',
+'cta-start':'开始游戏','cta-learn':'了解玩法',
+'meta-heroes':'5 行英雄','meta-mons':'10 种怪物','meta-boss':'世界 BOSS 轮次','meta-elem':'斩获 ELEM 奖励',
+scroll:'向下滚动',
+'t-gameplay':'核心玩法','s-gameplay':'从召唤第一只英雄开始，踏上链上冒险的完整循环',
+'p1-t':'召唤英雄','p1-d':'消耗代币召唤元素英雄，金木土水火五种元素各有命途。每位英雄拥有等级、经验、战力与体力，体力随时间自动恢复。',
+'p2-t':'锻造武器','p2-d':'在锻造厂消耗材料锻造武器，武器带 1~5 星品质与五行属性，星级越高强化加成越强。',
+'p3-t':'强化战力','p3-d':'用精粹强化武器提升战力加成，经验升级英雄等级，合理搭配元素克制关系打出更高伤害。',
+'p4-t':'挑战怪物','p4-d':'在战斗页面挑选出战英雄与武器，对战 10 种元素怪物。胜利可获得 ELEM 奖励与经验，奖励进入金库待领取。',
+'p5-t':'讨伐世界 BOSS','p5-d':'参与世界 BOSS 轮次，按伤害占比瓜分奖池。排行榜实时更新，击破 BOSS 后结算奖励，人人有份。',
+'p6-t':'领取奖励','p6-d':'战斗奖励存入金库，一键领取到钱包；也可以在市场交易武器与碎片，让战利品流动起来。',
+'el-gold':'金','el-wood':'木','el-earth':'土','el-water':'水','el-fire':'火',
+'el-gold-s':'锐利 · 高爆发','el-wood-s':'生生不息','el-earth-s':'厚重 · 防御','el-water-s':'灵动 · 续航','el-fire-s':'狂暴 · 范围',
+'t-heroes':'元素英雄','s-heroes':'五种元素的守护者，选择与你命格相合的英雄出战',
+'h0-n':'金甲圣骑士','h0-r':'锐金之躯 · 攻守兼备的先锋','h0-s':'金属性 · 高爆发',
+'h1-n':'精灵游侠','h1-r':'森林的守望者 · 灵巧射手','h1-s':'木属性 · 生生不息',
+'h2-n':'岩石守护者','h2-r':'大地之盾 · 坚不可摧的壁垒','h2-s':'土属性 · 厚重防御',
+'h3-n':'水灵法师','h3-r':'冰晶秘术师 · 掌控战场节奏','h3-s':'水属性 · 灵动续航',
+'h4-n':'烈焰斗士','h4-r':'燃烧之魂 · 吞噬一切的怒火','h4-s':'火属性 · 狂暴范围',
+'t-weapons':'神器武器','s-weapons':'锻造 · 强化 · 熔炼 —— 打造你的专属神器',
+'w-t':'一把好武器，是英雄的第三只手',
+'w-d1':'在锻造厂使用碎片与材料锻造武器，每把武器随机获得 1~5 星品质与五行属性。星级决定基础潜力，元素决定克制走向，强化加成直接提升战力百分比。',
+'w-d2':'用精粹可以对武器进行多阶强化，战力加成层层攀升；不合心意的武器可以熔炼回收，材料循环再利用。',
+'w-f1':'随机品质','w-f2':'克制搭配','w-f3':'精粹提升','w-f4':'循环利用',
+'w1-n':'炎魔之刃','w1-r':'五星 · 火属性 · 锻造示例','w2-n':'雷鸟之枪','w2-r':'四星 · 金属性 · 强化示例',
+'st-1':'一星','st-2':'二星','st-3':'三星','st-4':'四星','st-5':'五星',
+'t-monsters':'怪物图鉴','s-monsters':'从软萌史莱姆到远古巨龙，10 种怪物按奖励基数分档：简单 · 普通 · 困难 · 噩梦',
+'diff-easy':'简单','diff-norm':'普通','diff-hard':'困难','diff-night':'噩梦',
+'m0-n':'史莱姆','m0-s':'水 · 入门之敌','m1-n':'野狼','m1-s':'木 · 森林猎手',
+'m2-n':'骷髅兵','m2-s':'土 · 亡灵哨卫','m3-n':'暗影刺客','m3-s':'水 · 暗夜杀手',
+'m4-n':'石头人','m4-s':'土 · 熔岩巨像','m5-n':'炎魔','m5-s':'火 · 地狱守门人',
+'m6-n':'雷鸟','m6-s':'金 · 雷暴之翼','m7-n':'水龙','m7-s':'水 · 深渊霸主',
+'m8-n':'混沌骑士','m8-s':'土 · 亡灵领主','m9-n':'远古巨龙','m9-s':'火 · 万兽之巅',
+'t-boss':'世界 BOSS','s-boss':'全服英雄共讨远古巨龙，伤害换奖池份额',
+'boss-n':'远古巨龙','boss-tag':'WORLD BOSS · 轮次制',
+'boss-r':'挑战规则','boss-d':'BOSS 每轮拥有海量 HP，玩家选择英雄与武器发起攻击，造成真实伤害。击破后按伤害占比瓜分奖池，人人有份。',
+'boss-li1':'每轮 BOSS 血量庞大，需全服合力讨伐','boss-li2':'伤害排行 TOP5 实时刷新，金色高亮你的排名','boss-li3':'击破后按伤害占比瓜分奖池，一键结算领取','boss-li4':'战斗中实时预估可分奖励，收益心中有数',
+'cta-t':'准备好迎接你的英雄了吗？','cta-d':'连接钱包，召唤第一位元素英雄，立刻开始链上冒险。',
+'t-comm':'官方社区与支持','s-comm':'加入官方社区，第一时间获取游戏动态、空投与活动资讯',
+'c0-n':'蝴蝶平台','c0-d':'BNB 链生态 Launchpad，项目发行与上币支持平台。','c0-g':'访问平台',
+'c1-n':'币安','c1-d':'全球领先的交易平台，GameFi 生态与流动性支持。','c1-g':'访问平台',
+'c2-n':'官方推特 X','c2-d':'每日动态、开发进度与社区活动公告。','c2-g':'关注我们',
+'c3-n':'官方电报','c3-d':'玩家交流社区与官方客服支持，实时答疑。','c3-g':'加入社区',
+foot:'元素英雄 Element Heroes ','foot-enter':'进入游戏'
+},
+en:{
+badge:'BSC Testnet · On-chain Contracts',
+tagline:'Summon five-element heroes, forge legendary weapons, and hunt ancient monsters and world bosses — every battle truly happens on-chain.',
+'cta-start':'Start Playing','cta-learn':'How to Play',
+'meta-heroes':'5 Heroes','meta-mons':'10 Monsters','meta-boss':'World Boss Rounds','meta-elem':'Earn ELEM Rewards',
+scroll:'Scroll down',
+'t-gameplay':'Core Gameplay','s-gameplay':'From summoning your first hero, embark on a full on-chain adventure loop',
+'p1-t':'Summon Heroes','p1-d':'Spend tokens to summon five-element heroes. Each hero has level, EXP, power and stamina; stamina regenerates over time.',
+'p2-t':'Forge Weapons','p2-d':'Forge weapons with materials. Each weapon has 1-5 star rarity and an element; higher stars mean stronger bonuses.',
+'p3-t':'Boost Power','p3-d':'Enhance weapons with essence, level up heroes with EXP, and exploit elemental counters for higher damage.',
+'p4-t':'Fight Monsters','p4-d':'Pick your hero and weapon, then fight 10 elemental monsters. Victory grants ELEM rewards and EXP, stored in your vault.',
+'p5-t':'World Boss','p5-d':'Join world boss rounds and share the prize pool by damage dealt. Live rankings refresh; claim rewards after each kill.',
+'p6-t':'Claim Rewards','p6-d':'Battle rewards go to your vault — claim them in one click, or trade weapons and shards on the market.',
+'el-gold':'Metal','el-wood':'Wood','el-earth':'Earth','el-water':'Water','el-fire':'Fire',
+'el-gold-s':'Sharp · Burst','el-wood-s':'Evergreen','el-earth-s':'Sturdy · Guard','el-water-s':'Agile · Sustain','el-fire-s':'Fury · AoE',
+'t-heroes':'Five Element Heroes','s-heroes':'Guardians of five elements — pick the hero that matches your destiny',
+'h0-n':'Golden Paladin','h0-r':'Blade of metal · vanguard','h0-s':'Metal · high burst',
+'h1-n':'Elf Ranger','h1-r':'Guardian of the forest · archer','h1-s':'Wood · evergreen',
+'h2-n':'Stone Sentinel','h2-r':'Shield of earth · unbreakable','h2-s':'Earth · tough guard',
+'h3-n':'Aqua Mage','h3-r':'Crystal sorcerer · battlefield control','h3-s':'Water · agile sustain',
+'h4-n':'Blaze Brawler','h4-r':'Burning soul · all-consuming rage','h4-s':'Fire · fury AoE',
+'t-weapons':'Legendary Weapons','s-weapons':'Forge · Enhance · Smelt — craft your signature weapon',
+'w-t':'A good weapon is a hero\'s third hand',
+'w-d1':'Forge weapons from shards and materials. Each weapon randomly rolls 1-5 star rarity and an element. Stars set the potential, elements decide the counter, and enhancement bonus directly raises your power percent.',
+'w-d2':'Enhance weapons through multiple stages with essence — bonuses climb higher. Smelt unwanted weapons to recycle materials.',
+'w-f1':'Random rarity','w-f2':'Element counters','w-f3':'Essence boost','w-f4':'Recycle',
+'w1-n':'Inferno Blade','w1-r':'5★ · Fire · forge sample','w2-n':'Thunder Lance','w2-r':'4★ · Metal · enhance sample',
+'st-1':'1★','st-2':'2★','st-3':'3★','st-4':'4★','st-5':'5★',
+'t-monsters':'Monster Bestiary','s-monsters':'From slimes to the ancient dragon — 10 monsters tiered by base reward: Easy · Normal · Hard · Nightmare',
+'diff-easy':'Easy','diff-norm':'Normal','diff-hard':'Hard','diff-night':'Nightmare',
+'m0-n':'Slime','m0-s':'Water · first foe','m1-n':'Wolf','m1-s':'Wood · forest hunter',
+'m2-n':'Skeleton','m2-s':'Earth · undead sentry','m3-n':'Shadow Assassin','m3-s':'Water · night killer',
+'m4-n':'Golem','m4-s':'Earth · lava colossus','m5-n':'Infernal','m5-s':'Fire · hell gatekeeper',
+'m6-n':'Thunderbird','m6-s':'Metal · thunder wing','m7-n':'Water Dragon','m7-s':'Water · abyss lord',
+'m8-n':'Chaos Knight','m8-s':'Earth · undead lord','m9-n':'Ancient Dragon','m9-s':'Fire · apex predator',
+'t-boss':'World Boss','s-boss':'All heroes join to slay the ancient dragon — damage turns into prize pool share',
+'boss-n':'Ancient Dragon','boss-tag':'WORLD BOSS · Round-based',
+'boss-r':'Battle Rules','boss-d':'Each round the boss holds massive HP. Pick your hero and weapon and deal real damage. After the kill, the pool is split by damage share.',
+'boss-li1':'Massive HP — requires the whole server','boss-li2':'Top-5 damage ranking, your rank highlighted in gold','boss-li3':'Prize pool split by damage share, claim in one click','boss-li4':'Real-time estimated reward during battle',
+'cta-t':'Ready to meet your hero?','cta-d':'Connect your wallet, summon your first hero and start your on-chain adventure now.',
+'t-comm':'Community & Support','s-comm':'Join official communities for game updates, airdrops and events',
+'c0-n':'Butterfly','c0-d':'BNB Chain launchpad supporting project issuance.','c0-g':'Visit',
+'c1-n':'Binance','c1-d':'World-leading exchange with GameFi ecosystem support.','c1-g':'Visit',
+'c2-n':'Official X','c2-d':'Daily updates, dev progress and community events.','c2-g':'Follow',
+'c3-n':'Telegram','c3-d':'Player community and official support, live Q&A.','c3-g':'Join',
+foot:'Element Heroes ','foot-enter':'Enter Game'
+},
+ja:{
+badge:'BSC テストネット · オンチェーン本物契約',
+tagline:'元素の英雄を召喚し、神器の武器を鍛造し、古代モンスターと世界BOSSに挑む —— すべての戦闘が本当にチェーン上で行われます。',
+'cta-start':'ゲーム開始','cta-learn':'遊び方を見る',
+'meta-heroes':'5種の英雄','meta-mons':'10種のモンスター','meta-boss':'世界BOSSラウンド','meta-elem':'ELEM報酬を獲得',
+scroll:'スクロール',
+'t-gameplay':'コアプレイ','s-gameplay':'最初の英雄召喚から始まる、オンチェーン冒険の完全ループ',
+'p1-t':'英雄を召喚','p1-d':'トークンで元素英雄を召喚。金・木・土・水・火の5元素それぞれに異なる運命があります。各英雄はレベル・経験値・戦力・スタミナを持ち、スタミナは時間とともに回復します。',
+'p2-t':'武器を鍛造','p2-d':'素材を消費して武器を鍛造。武器には1〜5星の品質と五行属性があり、星が高いほど強化ボーナスが強力です。',
+'p3-t':'戦力を強化','p3-d':'エッセンスで武器を強化し戦力ボーナスをアップ、経験値で英雄をレベルアップ。元素の相克関係を活かして大ダメージを狙いましょう。',
+'p4-t':'モンスターに挑戦','p4-d':'戦闘ページで出撃英雄と武器を選び、10種の元素モンスターと対戦。勝利でELEM報酬と経験値を獲得、報酬は金庫に保管されます。',
+'p5-t':'世界BOSS討伐','p5-d':'世界BOSSラウンドに参加し、与えたダメージに応じて賞金プールを山分け。ランキングはリアルタイム更新、撃破後に報酬が精算されます。',
+'p6-t':'報酬を獲得','p6-d':'戦闘報酬は金庫に保管され、ワンクリックでウォレットへ。マーケットで武器や破片を取引して、戦利品を循環させましょう。',
+'el-gold':'金','el-wood':'木','el-earth':'土','el-water':'水','el-fire':'火',
+'el-gold-s':'鋭利 · 高火力','el-wood-s':'生生不息','el-earth-s':'重厚 · 防御','el-water-s':'機敏 · 持続','el-fire-s':'暴虐 · 範囲',
+'t-heroes':'元素英雄','s-heroes':'五元素の守護者。あなたの相性に合う英雄を選んで出撃',
+'h0-n':'金甲聖騎士','h0-r':'鋭金の躯 · 攻守兼備の先鋒','h0-s':'金属性 · 高火力',
+'h1-n':'エルフレンジャー','h1-r':'森の見守り手 · 俊敏な射手','h1-s':'木属性 · 生生不息',
+'h2-n':'ストーンガーディアン','h2-r':'大地の盾 · 不屈の要塞','h2-s':'土属性 · 重厚防御',
+'h3-n':'アクアメイジ','h3-r':'氷晶の秘術師 · 戦場のペースメーカー','h3-s':'水属性 · 機敏持続',
+'h4-n':'ブレイズファイター','h4-r':'燃え上がる魂 · 全てを焼き尽くす怒り','h4-s':'火属性 · 暴虐範囲',
+'t-weapons':'神器武器','s-weapons':'鍛造 · 強化 · 溶解 —— あなただけの神器を',
+'w-t':'良い武器は英雄の第三の手',
+'w-d1':'破片と素材で武器を鍛造。各武器は1〜5星の品質と五行属性をランダムに獲得。星が基礎ポテンシャルを決め、元素が相克を決め、強化ボーナスが戦力％を直接押し上げます。',
+'w-d2':'エッセンスで武器を多段階強化し、戦力ボーナスはどんどん上昇。気に入らない武器は溶解して素材を再利用できます。',
+'w-f1':'ランダム品質','w-f2':'相克コンボ','w-f3':'エッセンス強化','w-f4':'循環利用',
+'w1-n':'インフェルノブレード','w1-r':'五星 · 火属性 · 鍛造例','w2-n':'サンダーランス','w2-r':'四星 · 金属性 · 強化例',
+'st-1':'一星','st-2':'二星','st-3':'三星','st-4':'四星','st-5':'五星',
+'t-monsters':'モンスター図鑑','s-monsters':'スライムから古代ドラゴンまで、10種のモンスターを報酬基数で分類：簡単 · 普通 · 困難 · 悪夢',
+'diff-easy':'簡単','diff-norm':'普通','diff-hard':'困難','diff-night':'悪夢',
+'m0-n':'スライム','m0-s':'水 · 入門の敵','m1-n':'ウルフ','m1-s':'木 · 森の狩人',
+'m2-n':'スケルトン','m2-s':'土 · 不死の番兵','m3-n':'シャドウアサシン','m3-s':'水 · 闇夜の殺し屋',
+'m4-n':'ゴーレム','m4-s':'土 · 溶岩の巨像','m5-n':'インフェルノ','m5-s':'火 · 地獄の門番',
+'m6-n':'サンダーバード','m6-s':'金 · 雷嵐の翼','m7-n':'ウォータードラゴン','m7-s':'水 · 深淵の覇者',
+'m8-n':'カオスナイト','m8-s':'土 · 不死の領主','m9-n':'古代ドラゴン','m9-s':'火 · 万獣の頂点',
+'t-boss':'世界BOSS','s-boss':'全サーバーの英雄で古代ドラゴンを討伐、ダメージを賞金シェアに',
+'boss-n':'古代ドラゴン','boss-tag':'WORLD BOSS · ラウンド制',
+'boss-r':'挑戦ルール','boss-d':'BOSSは毎ラウンド莫大なHPを持ちます。英雄と武器を選んで攻撃し、実際のダメージを与えましょう。撃破後はダメージ比率で賞金プールを山分け。',
+'boss-li1':'毎ラウンドHPは膨大、全サーバーで協力討伐','boss-li2':'ダメージTOP5がリアルタイム更新、あなたの順位は金色にハイライト','boss-li3':'撃破後はダメージ比率で賞金を山分け、ワンクリック精算','boss-li4':'戦闘中に報酬をリアルタイム試算、損得一目瞭然',
+'cta-t':'あなたの英雄に会う準備はできましたか？','cta-d':'ウォレットを接続して最初の元素英雄を召喚、今すぐオンチェーン冒険を始めましょう。',
+'t-comm':'公式コミュニティとサポート','s-comm':'公式コミュニティに参加して、ゲーム最新情報・エアドロップ・イベントをいち早く',
+'c0-n':'バタフライ','c0-d':'BNBチェーンエコシステムのLaunchpad、プロジェクト発行をサポート。','c0-g':'アクセス',
+'c1-n':'バイナンス','c1-d':'世界有数の取引所、GameFiエコシステムと流動性をサポート。','c1-g':'アクセス',
+'c2-n':'公式X','c2-d':'毎日の最新情報・開発進捗・コミュニティイベント。','c2-g':'フォロー',
+'c3-n':'テレグラム','c3-d':'プレイヤー交流コミュニティと公式サポート、リアルタイム対応。','c3-g':'参加する',
+foot:'エレメントヒーローズ Element Heroes','foot-enter':'ゲームへ'
+},
+es:{
+badge:'BSC Testnet · Contratos en cadena',
+tagline:'Invoca héroes de los cinco elementos, forja armas legendarias y caza monstruos antiguos y jefes mundiales — cada batalla ocurre de verdad en la cadena.',
+'cta-start':'Jugar Ahora','cta-learn':'Cómo Jugar',
+'meta-heroes':'5 Héroes','meta-mons':'10 Monstruos','meta-boss':'Rondas de Jefe','meta-elem':'Gana ELEM',
+scroll:'Desplázate',
+'t-gameplay':'Jugabilidad','s-gameplay':'Desde invocar a tu primer héroe, embárcate en un ciclo completo de aventura en cadena',
+'p1-t':'Invoca Héroes','p1-d':'Gasta tokens para invocar héroes de los cinco elementos. Cada héroe tiene nivel, EXP, poder y resistencia; la resistencia se regenera con el tiempo.',
+'p2-t':'Forja Armas','p2-d':'Forja armas con materiales. Cada arma tiene rareza de 1-5 estrellas y un elemento; cuantas más estrellas, más fuertes los bonos.',
+'p3-t':'Potencia','p3-d':'Mejora armas con esencia, sube de nivel a tus héroes con EXP y aprovecha los contadores elementales para más daño.',
+'p4-t':'Lucha contra Monstruos','p4-d':'Elige tu héroe y arma, luego lucha contra 10 monstruos elementales. La victoria otorga ELEM y EXP, guardados en tu bóveda.',
+'p5-t':'Jefe Mundial','p5-d':'Únete a las rondas del jefe mundial y comparte el pozo por daño causado. Rankings en vivo; reclama recompensas tras cada derrota.',
+'p6-t':'Reclama Recompensas','p6-d':'Las recompensas van a tu bóveda — reclámalas con un clic, o comercia armas y fragmentos en el mercado.',
+'el-gold':'Metal','el-wood':'Madera','el-earth':'Tierra','el-water':'Agua','el-fire':'Fuego',
+'el-gold-s':'Filo · gran daño','el-wood-s':'Vida eterna','el-earth-s':'Sólido · defensa','el-water-s':'Ágil · sustento','el-fire-s':'Furia · área',
+'t-heroes':'Héroes Elementales','s-heroes':'Guardianes de los cinco elementos — elige al héroe que combine contigo',
+'h0-n':'Paladín Dorado','h0-r':'Filo de metal · vanguardia','h0-s':'Metal · gran daño',
+'h1-n':'Guardabosques Elfo','h1-r':'Guardián del bosque · arquero','h1-s':'Madera · vida eterna',
+'h2-n':'Centinela de Piedra','h2-r':'Escudo de tierra · inexpugnable','h2-s':'Tierra · defensa dura',
+'h3-n':'Mago Acuático','h3-r':'Hechicero de cristal · control del campo','h3-s':'Agua · sustento ágil',
+'h4-n':'Luchador de Fuego','h4-r':'Alma ardiente · furia devoradora','h4-s':'Fuego · furia de área',
+'t-weapons':'Armas Legendarias','s-weapons':'Forja · Mejora · Funde — crea tu arma insignia',
+'w-t':'Una buena arma es la tercera mano del héroe',
+'w-d1':'Forja armas con fragmentos y materiales. Cada arma obtiene rareza de 1-5 estrellas y un elemento. Las estrellas marcan el potencial, los elementos deciden los contadores y el bono de mejora eleva directamente tu poder.',
+'w-d2':'Mejora armas en múltiples etapas con esencia — los bonos suben. Funde armas no deseadas para reciclar materiales.',
+'w-f1':'Rareza aleatoria','w-f2':'Contadores','w-f3':'Impulso de esencia','w-f4':'Reciclaje',
+'w1-n':'Espada Infernal','w1-r':'5★ · Fuego · ejemplo de forja','w2-n':'Lanza del Trueno','w2-r':'4★ · Metal · ejemplo de mejora',
+'st-1':'1★','st-2':'2★','st-3':'3★','st-4':'4★','st-5':'5★',
+'t-monsters':'Bestiario','s-monsters':'De slimes al dragón antiguo — 10 monstruos por recompensa base: Fácil · Normal · Difícil · Pesadilla',
+'diff-easy':'Fácil','diff-norm':'Normal','diff-hard':'Difícil','diff-night':'Pesadilla',
+'m0-n':'Slime','m0-s':'Agua · primer rival','m1-n':'Lobo','m1-s':'Madera · cazador del bosque',
+'m2-n':'Esqueleto','m2-s':'Tierra · centinela no-muerto','m3-n':'Asesino Sombrío','m3-s':'Agua · asesino nocturno',
+'m4-n':'Gólem','m4-s':'Tierra · coloso de lava','m5-n':'Infernal','m5-s':'Fuego · guardián del infierno',
+'m6-n':'Pájaro Trueno','m6-s':'Metal · ala de tormenta','m7-n':'Dragón de Agua','m7-s':'Agua · señor del abismo',
+'m8-n':'Caballero del Caos','m8-s':'Tierra · señor no-muerto','m9-n':'Dragón Antiguo','m9-s':'Fuego · depredador supremo',
+'t-boss':'Jefe Mundial','s-boss':'Todos los héroes se unen para matar al dragón antiguo — el daño se convierte en parte del pozo',
+'boss-n':'Dragón Antiguo','boss-tag':'JEFE MUNDIAL · Por rondas',
+'boss-r':'Reglas','boss-d':'Cada ronda el jefe tiene HP masivo. Elige tu héroe y arma y causa daño real. Tras la muerte, el pozo se reparte por daño.',
+'boss-li1':'HP masivo — requiere todo el servidor','boss-li2':'Ranking de daño TOP5, tu puesto en dorado','boss-li3':'Pozo repartido por daño, reclama con un clic','boss-li4':'Recompensa estimada en tiempo real durante la batalla',
+'cta-t':'¿Listo para conocer a tu héroe?','cta-d':'Conecta tu wallet, invoca a tu primer héroe y empieza tu aventura en cadena.',
+'t-comm':'Comunidad y Soporte','s-comm':'Únete a las comunidades oficiales para novedades, airdrops y eventos',
+'c0-n':'Butterfly','c0-d':'Launchpad de BNB Chain para emisión de proyectos.','c0-g':'Visitar',
+'c1-n':'Binance','c1-d':'Exchange líder mundial con soporte al ecosistema GameFi.','c1-g':'Visitar',
+'c2-n':'X Oficial','c2-d':'Novedades diarias, progreso de desarrollo y eventos.','c2-g':'Seguir',
+'c3-n':'Telegram','c3-d':'Comunidad de jugadores y soporte oficial en vivo.','c3-g':'Unirse',
+foot:'Element Heroes ','foot-enter':'Entrar al Juego'
+}
+};
+const LANG_KEY = 'eh_lang';
+let curLang = 'zh';
+try{ curLang = localStorage.getItem(LANG_KEY) || 'zh'; }catch(e){}
+function applyLang(l){
+  curLang = l;
+  const dict = I18N[l] || I18N.zh;
+  const LANGS = { zh:'zh-CN', en:'en', ja:'ja', es:'es' };
+  document.documentElement.lang = LANGS[l] || 'zh-CN';
+  const TITLES = { zh:'元素英雄 Element Heroes · 链上五行 RPG', en:'Element Heroes · On-chain Five Element RPG', ja:'エレメントヒーローズ Element Heroes · オンチェーン五行RPG', es:'Element Heroes · RPG de cinco elementos en cadena' };
+  document.title = TITLES[l] || TITLES.zh;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.getAttribute('data-i18n');
+    if(dict[k] != null) el.textContent = dict[k];
+  });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el=>{
+    const k = el.getAttribute('data-i18n-alt');
+    if(dict[k] != null) el.setAttribute('alt', dict[k]);
+  });
+  const LABELS = { zh:'中文', en:'EN', ja:'日本語', es:'ES' };
+  const ml = document.getElementById('langMainLabel');
+  if (ml) ml.textContent = LABELS[l] || l;
+  document.querySelectorAll('.lang-sw .lang-menu button').forEach(b=>b.classList.toggle('active', b.dataset.lang === l));
+  const sw = document.getElementById('langSw');
+  if (sw) sw.classList.remove('open');
+  try{ localStorage.setItem(LANG_KEY, l); }catch(e){}
+}
+document.getElementById('langMain').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const sw = document.getElementById('langSw');
+  if (sw) sw.classList.toggle('open');
+});
+document.querySelectorAll('.lang-sw .lang-menu button').forEach(b=>{
+  b.addEventListener('click', ()=>applyLang(b.dataset.lang));
+});
+document.addEventListener('click', ()=>{
+  const sw = document.getElementById('langSw');
+  if (sw) sw.classList.remove('open');
+});
+applyLang(curLang);
+</script>
+<script>
+(function () {
+  var COINS = [
+    { k: 'BTC', id: 'BTC_USDT', c: '#f7931a' },
+    { k: 'ETH', id: 'ETH_USDT', c: '#8a92b2' },
+    { k: 'BNB', id: 'BNB_USDT', c: '#f3ba2f' },
+    { k: 'SOL', id: 'SOL_USDT', c: '#9945ff' }
+  ];
+  var GATE_BASE = 'https://api.gateio.ws/api/v4/spot/tickers?currency_pair=';
+  function fmt(n) {
+    if (n == null || isNaN(n)) return '$ —';
+    return '$' + n.toLocaleString('en-US', { maximumFractionDigits: n >= 1000 ? 0 : 2 });
+  }
+  function render(map) {
+    var track = document.getElementById('tickerTrack');
+    if (!track) return;
+    var html = '';
+    for (var i = 0; i < COINS.length; i++) {
+      var c = COINS[i], d = (map && map[c.id]) || {};
+      var p = parseFloat(d.last), ch = parseFloat(d.change_percentage);
+      var chTxt = (isNaN(ch)) ? '' : '<span class="' + (ch >= 0 ? 'tk-up' : 'tk-down') + '">' + (ch >= 0 ? '▲' : '▼') + Math.abs(ch).toFixed(2) + '%</span>';
+      html += '<span class="tk-item"><span class="tk-dot" style="background:' + c.c + ';color:' + c.c + '"></span><span class="tk-name">' + c.k + '</span><span class="tk-price">' + fmt(p) + '</span>' + chTxt + '</span>';
+    }
+    track.innerHTML = html + html;
+  }
+  render(null);
+  var loading = false;
+  function load() {
+    if (loading) return; loading = true;
+    var jobs = COINS.map(function (c) {
+      return Promise.race([
+        fetch(GATE_BASE + c.id).then(function (r) { return r.json(); }),
+        new Promise(function (res) { setTimeout(function () { res(null); }, 9000); })
+      ]).catch(function () { return null; });
+    });
+    Promise.all(jobs).then(function (res) {
+      var map = {};
+      for (var i = 0; i < res.length; i++) {
+        var item = Array.isArray(res[i]) ? res[i][0] : res[i];
+        if (item && item.currency_pair) map[item.currency_pair] = item;
+      }
+      render(map); loading = false;
+    });
+  }
+  load();
+  setInterval(load, 60000);
+})();
+</script>
+</body>
+</html>

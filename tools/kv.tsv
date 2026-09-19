@@ -1,0 +1,522 @@
+0	金	Metal
+1	木	Wood
+2	土	Earth
+3	水	Water
+4	火	Fire
+5	一星	1★
+6	二星	2★
+7	三星	3★
+8	四星	4★
+9	五星	5★
+10	星	★
+11	未知	Unknown
+12	全部	All
+13	地址	Address
+14	状态	Status
+15	名称	Name
+16	数量	Amount
+17	元素	Element
+18	战力	Power
+19	奖励基数	Reward base
+20	经验	EXP
+21	英雄	Hero
+22	武器	Weapon
+23	碎片	Shards
+24	精粹	Essence
+25	物品	Item
+26	简单	Easy
+27	普通	Normal
+28	困难	Hard
+29	噩梦	Nightmare
+30	克制	Counter
+31	被克制	Countered
+32	中性	Neutral
+33	未知属性	Unknown trait
+34	未知操作	Unknown op
+35	未检测到钱包插件	No wallet extension detected
+36	请确认钱包已切换到 BSC 测试网	Switch wallet to BSC testnet
+37	链 ID 与当前网络不一致	Chain ID mismatch
+38	钱包已连接：	Wallet connected: 
+39	连接钱包	Connect Wallet
+40	请先连接钱包	Connect wallet first
+41	随机数预言机配置加载失败，使用默认值	Oracle config load failed, using defaults
+42	BSC 测试网	BSC Testnet
+43	钱包链已切换，请重新连接	Chain switched, please reconnect
+44	账户已断开	Account disconnected
+45	账户已切换：	Account switched: 
+46	账户切换失败，请手动连接	Account switch failed, connect manually
+47	用户取消交易	User cancelled
+48	⏳ 太早了：还需等待若干区块	Too early: wait for blocks
+49	⌛ 太晚了：commit 已过期	Too late: commit expired
+50	🔐 secret/salt 与 commit 不匹配	Secret/salt mismatch
+51	✅ 已经揭示过了	Already revealed
+52	❌ 不是本人 commit	Not your commit
+53	❌ 不是本人的英雄/武器，或 pending 已被清理	Not your hero/weapon, or pending cleaned
+54	🚫 英雄数量已达上限(4)	Hero limit reached (4)
+55	🔝 该武器强化已达上限	Weapon enhancement maxed
+56	🧪 该星级武器不可使用此阶精粹	Essence tier not usable here
+57	⏰ 不在 BOSS 攻击窗口期内	Outside boss attack window
+58	💀 BOSS 已被击败	Boss defeated
+59	⏳ 待处理操作过多，请先揭示或等待清理	Too many pending ops, reveal or wait
+60	⏳ BOSS 轮次尚未结束	Boss round not ended
+61	✅ 本轮的奖励已结算过了	Round rewards settled
+62	⚡ 英雄体力不足	Not enough stamina
+63	⏳ BOSS 新一轮需等待 7 天冷却	New round needs 7-day cooldown
+64	💰 余额或授权不足	Insufficient balance or allowance
+65	🔧 ABI 不匹配，请 Ctrl+F5	ABI mismatch, hard refresh
+66	Gas 余额不足	Insufficient gas
+67	Nonce 冲突，请刷新	Nonce conflict, refresh
+68	处理中…	Processing…
+69	交易处理中…	Transaction processing…
+70	JS错误	JS Error
+71	Promise 错误	Promise Error
+72	正在授权代币…	Approving token…
+73	授权成功	Approved
+74	英雄 NFT	Hero NFT
+75	武器 NFT	Weapon NFT
+76	正在授权 NFT…	Approving NFT…
+77	✅ 已授权	Approved
+78	正在取消授权…	Revoking…
+79	已取消授权	Revoked
+80	ForgeShop（锻造厂）	ForgeShop
+81	EnhanceShop（强化铺）	EnhanceShop
+82	未配置 	Not configured 
+83	英雄数量已达上限(4)	Hero limit reached (4)
+84	代币余额不足	Insufficient token balance
+85	刷新	Refresh
+86	怪物	Monster
+87	请先选择英雄	Pick a hero first
+88	请先选择武器	Pick a weapon first
+89	请选择怪物	Pick a monster
+90	预览失败	Preview failed
+91	请选择英雄与怪物	Pick hero and monster
+92	请先持有一把武器	Hold at least one weapon
+93	战斗结算中…	Battle settling…
+94	战斗已上链，等待确认…	Battle on-chain, waiting…
+95	战斗完成	Battle complete
+96	🗡️ 飞剑	Sword
+97	冲击	Impact
+98	🌪️ 旋风斩	Whirlwind
+99	✨ 星光弹	Star bolt
+100	👹 魔焰	Hellfire
+101	🦷 尖牙撕咬	Fang bite
+102	💀 骨刺	Bone spike
+103	🌋 熔岩弹	Lava bolt
+104	🎉 胜利！	Victory!
+105	💀 战败…	Defeat…
+106	继续冒险	Continue
+107	再战一次	Fight again
+108	世界BOSS	World Boss
+109	✅ 已讨伐	Defeated
+110	⚔ 讨伐中	In battle
+111	本轮已讨伐	Defeated this round
+112	发起攻击	Attack
+113	👤 我	Me
+114	需要英雄和武器	Need hero and weapon
+115	正在授权 USDT 保证金…	Approving USDT collateral…
+116	USDT 授权成功	USDT approved
+117	请先刷新	Refresh first
+118	结算中…	Settling…
+119	结算成功	Settled
+120	开轮 / 奖池 / 攻击待处理配置	Round / pool / pending attack config
+121	BOSS 轮次	Boss Round
+122	当前轮次	Current Round
+123	BOSS 血量	Boss HP
+124	进度	Progress
+125	奖池	Prize Pool
+126	总伤害	Total Damage
+127	武器得主	Weapon Winner
+128	本轮我的可领	My claim this round
+129	开启新一轮	Start New Round
+130	注入奖池	Top up pool
+131	确认开启新一轮世界BOSS？	Start a new World Boss round?
+132	开启新一轮 BOSS	Start New Boss Round
+133	BOSS 血量 HP（1000~10000000）	Boss HP (1000~10000000)
+134	开启 BOSS 轮次	Start Boss Round
+135	注入 BOSS 奖池	Top up Boss Pool
+136	注入数量	Amount
+137	如 5000	e.g. 5000
+138	清理过期攻击	Clean Expired Attacks
+139	设置 BOSS 关联合约	Set Boss Linked Contracts
+140	RandomOracle 地址	RandomOracle Address
+141	Vault 地址	Vault Address
+142	PriceOracle 地址	PriceOracle Address
+143	设置 BOSS 关联	Set Boss Links
+144	攻击待处理配置	Pending Attack Config
+145	过期块数	Expiry Blocks
+146	每人上限	Max Per Player
+147	修改过期块数	Edit Expiry Blocks
+148	修改每人上限	Edit Max Per Player
+149	奖池管理	Pool Management
+150	清理全部过期攻击	Clean All Expired Attacks
+151	英雄召唤成功	Hero summoned
+152	合成完成	Composed
+153	合成成功	Composed
+154	请先勾选武器	Select weapons first
+155	熔炼中…	Smelting…
+156	熔炼完成	Smelted
+157	合成中…	Composing…
+158	锻造	Forge
+159	锻造厂	Forge Shop
+160	强化铺	Enhance Shop
+161	召唤英雄	Summon Hero
+162	锻造武器	Forge Weapon
+163	10连锻造	Forge x10
+164	100连锻造	Forge x100
+165	购买成功！	Purchased!
+166	请填写完整	Fill in all fields
+167	请先授权	Approve first
+168	上架中…	Listing…
+169	上架成功！	Listed!
+170	在售	On sale
+171	已售	Sold
+172	已取消	Cancelled
+173	市场	Market
+174	手续费 / 挂单过期 / 关联设置	Fees / expiry / links
+175	市场状态	Market Status
+176	手续费率	Fee Rate
+177	挂单过期时间	Order Expiry
+178	挂单总数	Total Orders
+179	在售挂单	Active Orders
+180	分成金库	Fee Vault
+181	设置手续费	Set Fee
+182	设置挂单过期	Set Expiry
+183	关联设置	Link Settings
+184	设置金库	Set Vault
+185	设置 NFT 合约	Set NFT Contracts
+186	设置市场手续费	Set Market Fee
+187	手续费基点（0~1000，100=1%）	Fee basis points (0~1000, 100=1%)
+188	设置挂单过期时间	Set Order Expiry
+189	过期天数（默认 7）	Expiry days (default 7)
+190	设置市场 NFT 合约	Set Market NFT Contracts
+191	Characters 地址	Characters Address
+192	Weapons 地址	Weapons Address
+193	Shards 地址	Shards Address
+194	Essence 地址	Essence Address
+195	USDT 模式	USDT mode
+196	领取中…	Claiming…
+197	领取成功	Claimed
+198	胜	W
+199	负	L
+200	金库	Vault
+201	资金托管 / 奖励模式 / 授权游戏 / 存入	Custody / reward mode / games / deposit
+202	金库状态	Vault Status
+203	奖励代币	Reward Token
+204	奖励模式	Reward Mode
+205	USDT 地址	USDT Address
+206	清理间隔	Cleanup Interval
+207	金库余额	Vault Balance
+208	待发放总额(GAME)	Pending (GAME)
+209	待发放总额(USDT)	Pending (USDT)
+210	累计发放(GAME)	Paid (GAME)
+211	累计发放(USDT)	Paid (USDT)
+212	授权游戏数	Authorized Games
+213	我的待领取	My Claimable
+214	设置奖励代币	Set Reward Token
+215	切换奖励模式	Switch Reward Mode
+216	紧急切换模式	Emergency Switch
+217	设置清理间隔	Set Cleanup Interval
+218	授权游戏（负责发放奖励）	Authorize Game (pays rewards)
+219	添加/移除授权	Add/Remove Authorization
+220	存入资金	Deposit Funds
+221	存入 GAME	Deposit GAME
+222	存入 USDT	Deposit USDT
+223	应急管理	Emergency
+224	清理玩家待领取	Clean Player Claims
+225	暂停控制	Pause Control
+226	设置金库奖励代币（仅一次）	Set Vault Reward Token (once)
+227	代币合约地址（GameToken）	Token Contract (GameToken)
+228	切换金库奖励模式	Switch Vault Reward Mode
+229	GAME 代币模式	GAME Token Mode
+230	USDT 合约地址（模式=1 时必填）	USDT Address (required in mode 1)
+231	USDT 模式需填写 USDT 合约地址	USDT address required in USDT mode
+232	紧急切换模式会跳过“待发放资金需先转换”的检查，确定继续？	Emergency switch skips the convert-pending check. Continue?
+233	紧急切换奖励模式（跳过检查）	Emergency Switch (skip check)
+234	设置应急清理间隔	Set Emergency Cleanup Interval
+235	间隔天数（1~30）	Interval days (1~30)
+236	设置授权游戏	Authorize Game
+237	游戏合约地址	Game Contract Address
+238	授权	Authorize
+239	移除授权	Remove
+240	添加授权游戏	Add Authorized Game
+241	移除授权游戏	Remove Authorized Game
+242	玩家地址	Player Address
+243	存入数量	Deposit Amount
+244	如 1000	e.g. 1000
+245	金库奖励模式	Vault Reward Mode
+246	GAME 模式	GAME Mode
+247	已揭示过了	Already revealed
+248	揭示中	Revealing
+249	立即揭示	Reveal now
+250	钱包未连接	Wallet not connected
+251	BOSS攻击	Boss Attack
+252	精粹强化	Essence Enhance
+253	碎片合成	Shard Compose
+254	提交中…	Submitting…
+255	未能解析 commitId	Cannot parse commitId
+256	提交成功！	Submitted!
+257	该记录已失效，已自动清理	Record expired, auto-cleaned
+258	清除	Clear
+259	待揭示	Pending Reveal
+260	待揭示操作	Pending Actions
+261	概览	Overview
+262	全部合约状态与常用入口	All contract status & quick entries
+263	价格预言机	Price Oracle
+264	游戏价格 / 代币报价 / TWAP / 阈值	Prices / quotes / TWAP / thresholds
+265	核心玩法	Core Game
+266	怪物配置 / commit 配置 / 关联合约	Monsters / commit / linked contracts
+267	掉落概率 / 过期块数 / 清理	Drop odds / expiry / cleanup
+268	强化过期块数 / 清理	Enhance expiry / cleanup
+269	随机预言机	Random Oracle
+270	commit 延迟区间	Commit delay range
+271	NFT与代币	NFT & Tokens
+272	铸造权限 / 关联 / 代币增发	Minting / links / token supply
+273	我的授权	My Allowances
+274	NFT / 代币授权查看与撤销	View & revoke NFT/token allowances
+275	无管理权限	No admin permission
+276	恢复运行	Resume
+277	暂停合约	Pause Contract
+278	切换暂停状态	Toggle Pause
+279	地址格式不正确	Invalid address format
+280	设置地址	Set Address
+281	请输入数字	Enter a number
+282	设置数值	Set Value
+283	请输入有效数量	Enter a valid amount
+284	设置数量	Set Amount
+285	👑 管理员	Admin
+286	🔒 只读	Read-only
+287	市场费率	Market Fee
+288	英雄成本	Hero Cost
+289	快捷管理	Quick Admin
+290	合约 Owner 一览	Contract Owners
+291	角色制(DEFAULT_ADMIN)	Role-based (DEFAULT_ADMIN)
+292	未配置	Not configured
+293	无 owner()	No owner()
+294	读取失败	Read failed
+295	价格配置（USD）	Price Config (USD)
+296	英雄价格	Hero Price
+297	武器价格	Weapon Price
+298	10连锻造价格	Forge x10 Price
+299	100连锻造价格	Forge x100 Price
+300	修改价格	Edit Prices
+301	市场报价	Market Quotes
+302	当前代币价	Token Price
+303	TWAP 价格	TWAP Price
+304	最近成交价	Last Price
+305	保底价	Floor Price
+306	流动性 USD	Liquidity USD
+307	价格有效性	Price Validity
+308	更新 TWAP	Update TWAP
+309	实际成本（按当前报价换算）	Actual cost (at current quote)
+310	风控阈值	Risk Thresholds
+311	最低流动性门槛	Min Liquidity
+312	报价过期阈值（秒）	Quote Expiry (sec)
+313	修改阈值	Edit Thresholds
+314	修改保底价	Edit Floor
+315	交易对（Pancake）	Pairs (Pancake)
+316	在管理账户下配置。	Configured under admin account.
+317	设置交易对	Set Pairs
+318	设置游戏价格（USD）	Set Game Prices (USD)
+319	英雄价格（USD）	Hero Price (USD)
+320	武器价格（USD）	Weapon Price (USD)
+321	10连锻造价格（USD）	Forge x10 (USD)
+322	100连锻造价格（USD）	Forge x100 (USD)
+323	设置游戏价格	Set Game Prices
+324	设置预言机风控阈值	Set Oracle Risk Thresholds
+325	最低流动性 USD（如 1000）	Min liquidity USD (e.g. 1000)
+326	报价过期阈值（秒，60~3600）	Quote expiry sec (60~3600)
+327	设置风控阈值	Set Risk Thresholds
+328	设置保底代币价（USD）	Set Floor Price (USD)
+329	保底价（USD，如 0.0001）	Floor (USD, e.g. 0.0001)
+330	设置保底价	Set Floor
+331	设置 Pancake 交易对	Set Pancake Pairs
+332	代币/USDT 交易对地址	Token/USDT Pair
+333	代币/WBNB 交易对地址	Token/WBNB Pair
+334	WBNB/USDT 交易对地址	WBNB/USDT Pair
+335	体力恢复间隔	Stamina Regen Interval
+336	 点	 points
+337	体力上限	Max Stamina
+338	设置恢复间隔	Set Regen Interval
+339	设置体力上限	Set Max Stamina
+340	英雄体力系统	Hero Stamina System
+341	注册玩家数	Registered Players
+342	commit 配置	Commit Config
+343	每人待处理上限	Max Pending Per Player
+344	清理单个过期	Clean One Expired
+345	怪物图鉴（	Monster Bestiary (
+346	添加怪物	Add Monster
+347	更新怪物	Update Monster
+348	排除注册地址	Excluded Addresses
+349	怪物名称	Monster Name
+350	如 火焰巨魔	e.g. Flame Troll
+351	战力（≤1000000）	Power (<=1000000)
+352	奖励基数（≤10000，×0.01=基础ELEM）	Reward base (<=10000, x0.01=ELEM)
+353	经验（≤10000）	EXP (<=10000)
+354	暂无怪物可更新	No monster to update
+355	更新怪物（先填 ID）	Update Monster (fill ID)
+356	怪物 ID（0~	Monster ID (0~
+357	设置核心玩法关联合约	Set Core Game Links
+358	GameToken 地址	GameToken Address
+359	Boss 地址	Boss Address
+360	Registry 地址（可为 0x0）	Registry Address (0x0 ok)
+361	设置核心关联	Set Core Links
+362	设置排除注册地址	Set Excluded Addresses
+363	排除	Exclude
+364	取消排除	Un-exclude
+365	设置排除地址	Set Excluded Address
+366	锻造掉落概率（累计千分比 BP）	Forge Drop Odds (cumulative BP)
+367	修改掉落概率	Edit Drop Odds
+368	过期清理	Expiry Cleanup
+369	清理全部锻造	Clean All Forge
+370	清理全部合成	Clean All Composes
+371	清理单个	Clean One
+372	设置锻造掉落概率（累计 BP，0~10000，逐级递增）	Set Forge Odds (cumulative BP, 0~10000, ascending)
+373	★1 武器 累计	★1 Weapon cum.
+374	★2 武器 累计	★2 Weapon cum.
+375	★3 武器 累计	★3 Weapon cum.
+376	★4 武器 累计	★4 Weapon cum.
+377	★5 武器 累计	★5 Weapon cum.
+378	碎片1 累计	Shard1 cum.
+379	碎片2 累计	Shard2 cum.
+380	碎片3 累计	Shard3 cum.
+381	碎片4 累计	Shard4 cum.
+382	碎片5 累计	Shard5 cum.
+383	设置掉落概率	Set Drop Odds
+384	清理过期锻造	Clean Expired Forge
+385	清理过期合成	Clean Expired Composes
+386	设置锻造厂关联合约	Set Forge Shop Links
+387	设置锻造关联	Set Forge Links
+388	强化 commit 配置	Enhance Commit Config
+389	精粹强化手续费	Essence Enhance Fee
+390	1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 GAME·次	T1 2 / T2 10 / T3 30 / T4 80 GAME·per
+391	高阶精粹合成	High-tier Essence Compose
+392	3阶→4阶：500 GAME·次	T3→T4: 500 GAME·per
+393	清理全部	Clean All
+394	清理过期强化	Clean Expired Enhances
+395	设置强化铺关联合约	Set Enhance Shop Links
+396	设置强化关联	Set Enhance Links
+397	设置英雄体力恢复间隔	Set Hero Stamina Regen
+398	恢复间隔（分钟，1 ~ 10080 = 7天）	Regen interval (min, 1 ~ 10080 = 7d)
+399	设置体力恢复间隔	Set Regen Interval
+400	设置英雄体力上限	Set Hero Max Stamina
+401	体力上限（1 ~ 20）	Max stamina (1 ~ 20)
+402	最小延迟（块）	Min Delay (blocks)
+403	最大延迟（块）	Max Delay (blocks)
+404	已提交总数	Total Commits
+405	约束范围	Constraint Range
+406	修改延迟区间	Edit Delay Range
+407	设置 commit 延迟区间（块）	Set Commit Delay Range (blocks)
+408	最小延迟（3~500）	Min delay (3~500)
+409	最大延迟（≤500）	Max delay (<=500)
+410	设置延迟区间	Set Delay Range
+411	我是否铸造者	Am I Minter
+412	设为铸造者	Set Minter
+413	取消铸造者	Remove Minter
+414	🪙 GameToken（游戏代币）	GameToken
+415	设置 game	Set Game
+416	设置 registry	Set Registry
+417	设置 blacksmith	Set Blacksmith
+418	总供应	Total Supply
+419	铸造代币	Mint Tokens
+420	销毁我的代币	Burn My Tokens
+421	铸造给（地址）	Mint to (address)
+422	如 10000	e.g. 10000
+423	销毁数量（仅销毁您本人持有的代币）	Burn amount (only your own)
+424	如 100	e.g. 100
+425	？此操作不可逆。	? This cannot be undone.
+426	销毁代币	Burn Tokens
+427	已授权	Approved
+428	未授权	Not Approved
+429	NFT 授权	NFT Allowances
+430	代币授权（	Token Allowances (
+431	取消 NFT 授权	Revoke NFT Allowance
+432	撤销代币授权	Revoke Token Allowance
+433	撤销全部代币授权	Revoke All Token Allowances
+434	取消全部 NFT 授权	Revoke All NFT Allowances
+435	确认取消对 Marketplace / ForgeShop / EnhanceShop 的所有 NFT 授权？	Revoke ALL NFT allowances for Marketplace / ForgeShop / EnhanceShop?
+436	确认撤销对全部合约的代币授权？	Revoke token allowances for ALL contracts?
+437	设置关联	Set Links
+438	向 BOSS 合约注入奖励代币（按当前金库模式）。	Inject reward tokens into Boss (per vault mode).
+439	暂停后金库存入/领取全部冻结。	Deposits & claims frozen while paused.
+440	金库用于接收交易手续费分成；四个 NFT 合约用于校验挂单。	Vault receives fee share; 4 NFT contracts verify orders.
+441	交易对更新后需重新调用 updateTwap 生效。	Call updateTwap after changing pairs.
+442	BOSS 尚未开启	Boss not started
+443	每日自动领取	Auto-claim daily
+444	熔炼	Smelt
+445	合成	Compose
+446	战斗	Fight
+447	排行	Ranking
+448	图鉴	Bestiary
+449	管理	Admin
+450	我的英雄	My Heroes
+451	最多持有	Hold up to 
+452	个英雄。commit 后自动揭示。	 heroes. Auto-revealed after commit.
+453	我的武器	My Weapons
+454	铁匠铺 · 锻造	Forge · Blacksmith
+455	单抽	Single
+456	· 十连	 · x10
+457	· 百连	 · x100
+458	（另需 commit 押金 5%）。	(5% commit deposit required).
+459	🪙 单抽锻造	Forge x1
+460	随机获得 1 件结果	Randomly get 1 result
+461	🔥 十连锻造	Forge x10
+462	逐张展示 10 件结果	Reveal 10 results one by one
+463	十连	x10
+464	💎 百连锻造	Forge x100
+465	一次 100 件结果	100 results at once
+466	百连	x100
+467	🌿 碎片合成武器	Compose Weapon from Shards
+468	目标星级	Target Star
+469	1 星（需碎片 1 × 10）	1★ (10× shard 1)
+470	2 星（需碎片 2 × 10）	2★ (10× shard 2)
+471	3 星（需碎片 3 × 10）	3★ (10× shard 3)
+472	4 星（需碎片 4 × 10）	4★ (10× shard 4)
+473	5 星（需碎片 5 × 10）	5★ (10× shard 5)
+474	合成武器	Compose Weapon
+475	熔炼武器 → 精粹	Smelt Weapon → Essence
+476	熔炼所选 (	Smelt selected (
+477	选择要熔炼的武器	Select weapons to smelt
+478	精粹合成（50 合 1）	Essence Compose (50:1)
+479	🧪 合成配方	Compose Recipe
+480	消耗低阶精粹	Consume lower essence
+481	获得高阶精粹	Get higher essence
+482	合成次数（每次消耗 50 个低阶）	Times (50 lower each)
+483	执行合成	Compose
+484	野外战斗	Field Battle
+485	出战英雄	Hero
+486	出战武器	Weapon
+487	选择怪物	Pick Monster
+488	点击选择挑战目标	Click to pick a target
+489	战前分析	Pre-battle Analysis
+490	选择英雄、武器与怪物后自动分析	Auto analysis after picking all
+491	开始战斗	Start Battle
+492	预估胜率	Win Rate
+493	选择英雄、武器与怪物后开战	Fight after picking all
+494	开战	Fight
+495	世界 BOSS	World Boss
+496	结算奖励	Claim Rewards
+497	在售列表	On Sale
+498	上架	List
+499	我的上架	My Listings
+500	手续费	Fee
+501	🏷️ 上架出售	List for Sale
+502	NFT 类型	NFT Type
+503	选择资产	Select Asset
+504	价格（GameToken）	Price (GameToken)
+505	第 1 步：授权 NFT	Step 1: Approve NFT
+506	授权 NFT	Approve NFT
+507	第 2 步：确认上架	Step 2: Confirm Listing
+508	待领取奖励	Claimable Rewards
+509	领取	Claim
+510	排行榜	Leaderboard
+511	玩家	Player
+512	胜利	Wins
+513	场次	Matches
+514	胜率	Win Rate
+515	总战力	Total Power
+516	我的战斗记录	My Battle Records
+517	角色 & 怪物	Heroes & Monsters
+518	五行英雄与链上怪物的图鉴资料，点击战斗页可直接选择对应怪物挑战。	Bestiary of heroes & on-chain monsters; pick a monster directly in Fight.
+519	管理后台	Admin Panel
+520	自动检测当前账户对各合约的 owner 权限。	Auto-detect owner permissions across contracts.
+521	元素英雄	Element Heroes

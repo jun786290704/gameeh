@@ -1,0 +1,250 @@
+:root{--bg:#0b1220;--panel:#131c2e;--panel2:#0f1729;--line:#24304a;--gold:#fbbf24;--text:#e2e8f0;--muted:#8ea0bd;--ok:#22c55e;--err:#ef4444;--info:#38bdf8;}
+*{-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;}
+body{min-height:100vh;background:radial-gradient(1200px 500px at 80% -10%,rgba(245,158,11,.08),transparent 60%),radial-gradient(900px 500px at -10% 10%,rgba(56,189,248,.06),transparent 55%),var(--bg);padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#2c3a57;border-radius:3px}::-webkit-scrollbar-track{background:transparent}
+.panel{background:linear-gradient(160deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;}
+.game-card{background:linear-gradient(160deg,#17233b,#101a2c);border:1px solid var(--line);border-radius:16px;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden;}
+.game-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px -8px rgba(251,191,36,.22);border-color:rgba(251,191,36,.45);}
+.game-card::after{content:'';position:absolute;inset:0;background:radial-gradient(320px 90px at 50% -20%,rgba(255,255,255,.08),transparent 70%);pointer-events:none;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;min-height:44px;padding:.55rem 1.1rem;border-radius:12px;font-weight:600;font-size:.9rem;cursor:pointer;transition:transform .12s,filter .15s,box-shadow .15s,opacity .2s;border:1px solid transparent;user-select:none;}
+.btn:active{transform:scale(.955);}.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn-gold{background:linear-gradient(135deg,#fde68a,#f59e0b);color:#3a2503;box-shadow:0 4px 18px -4px rgba(245,158,11,.5);}
+.btn-gold:hover{filter:brightness(1.06);box-shadow:0 6px 24px -4px rgba(245,158,11,.65);}
+.btn-blue{background:linear-gradient(135deg,#7dd3fc,#0ea5e9);color:#062c44;box-shadow:0 4px 18px -4px rgba(14,165,233,.5);}
+.btn-ghost{background:rgba(148,163,184,.08);color:#cbd5e1;border-color:var(--line);}
+.btn-ghost:hover{background:rgba(148,163,184,.16);}
+.btn-danger{background:linear-gradient(135deg,#fca5a5,#dc2626);color:#450a0a;}
+.btn-sm{min-height:34px;padding:.3rem .7rem;font-size:.8rem;border-radius:9px;}
+.input{width:100%;background:#0d1526;border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem;color:var(--text);font-size:.9rem;outline:none;transition:border-color .15s,box-shadow .15s;}
+.input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(251,191,36,.15);}
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238ea0bd' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .8rem center;padding-right:2.2rem;}
+.lbl{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.35rem;font-weight:600;letter-spacing:.03em;}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .6rem;border-radius:999px;font-size:.72rem;font-weight:700;}
+.el-badge{display:inline-flex;align-items:center;gap:.28rem;padding:.12rem .6rem;border-radius:999px;font-size:.75rem;font-weight:700;border:1px solid;}
+.bar{height:10px;background:#0d1526;border-radius:999px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:999px;transition:width 1.1s cubic-bezier(.22,1,.36,1);background:linear-gradient(90deg,#22c55e,#a3e635);}
+.bar-fill.stamina{background:linear-gradient(90deg,#38bdf8,#22d3ee);}
+.bar-fill.boss{background:linear-gradient(90deg,#f43f5e,#f97316,#fbbf24);}
+.skeleton{position:relative;overflow:hidden;background:#111c31;border-radius:12px;}
+.skeleton::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);animation:shimmer 1.4s infinite;}
+@keyframes shimmer{100%{transform:translateX(100%);}}
+@keyframes popIn{0%{opacity:0;transform:scale(.86) translateY(10px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,0) scale(.7);}15%{opacity:1;}100%{opacity:0;transform:translate(-50%,-120px) scale(1.25);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 18px -4px rgba(251,191,36,.5);}50%{box-shadow:0 0 34px -2px rgba(251,191,36,.85);}}
+@keyframes flipIn{0%{transform:perspective(700px) rotateY(90deg) scale(.8);opacity:0;}60%{opacity:1;}100%{transform:perspective(700px) rotateY(0) scale(1);opacity:1;}}
+.anim-pop{animation:popIn .3s cubic-bezier(.22,1,.36,1) both;}
+.anim-fade{animation:fadeIn .35s ease both;}
+.anim-flip{animation:flipIn .55s cubic-bezier(.22,1,.36,1) both;}
+.anim-glow{animation:glowPulse 1.8s ease-in-out infinite;}
+.fight-select-card{width:100%;cursor:pointer;outline:none;}
+.fight-select-card:hover{transform:translateY(-2px);}
+.fight-card-active{transform:translateY(-1px);}
+.fight-card-inactive:hover{border-color:#3b4a6b !important;}
+.monster-card-inactive:hover{border-color:#3b4a6b !important;transform:translateY(-2px);}
+@keyframes battleWin{0%{transform:scale(0.5) rotate(-15deg);opacity:0;}50%{transform:scale(1.2) rotate(5deg);}100%{transform:scale(1) rotate(0);opacity:1;}}
+@keyframes battleLose{0%{transform:scale(1.2);opacity:0;}100%{transform:scale(1);opacity:1;}}
+@keyframes sparkle{0%,100%{opacity:0;transform:scale(0.5) rotate(0deg);}50%{opacity:1;transform:scale(1.2) rotate(180deg);}}
+.battle-win-anim{animation:battleWin .6s cubic-bezier(.22,1,.36,1) both;}
+.battle-lose-anim{animation:battleLose .5s ease both;}
+.battle-sparkle{animation:sparkle 1.2s ease-in-out infinite;font-size:1.5rem;}
+.battle-reward-card{animation:battleWin .5s cubic-bezier(.22,1,.36,1) both;}
+.battle-reward-card:nth-child(2){animation-delay:.15s;}
+.float-text{position:fixed;left:50%;top:45%;z-index:100;font-weight:900;font-size:1.7rem;letter-spacing:.05em;transform:translate(-50%,0);animation:floatUp 1.8s ease-out forwards;pointer-events:none;text-shadow:0 2px 18px rgba(0,0,0,.6);}
+.spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+.dim{filter:grayscale(.85) brightness(.75);}
+.elbg-0{background:radial-gradient(500px 260px at 50% -10%,rgba(251,191,36,.16),transparent 70%);}
+.elbg-1{background:radial-gradient(500px 260px at 50% -10%,rgba(34,197,94,.16),transparent 70%);}
+.elbg-2{background:radial-gradient(500px 260px at 50% -10%,rgba(180,120,60,.16),transparent 70%);}
+.elbg-3{background:radial-gradient(500px 260px at 50% -10%,rgba(56,189,248,.16),transparent 70%);}
+.elbg-4{background:radial-gradient(500px 260px at 50% -10%,rgba(239,68,68,.16),transparent 70%);}
+.tab-btn{flex:0 0 auto;display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:.55rem .95rem;border-radius:12px;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;white-space:nowrap;border:1px solid transparent;}
+.tab-btn i{font-size:1rem;}
+.tab-btn:hover{color:#fff;background:rgba(148,163,184,.08);}
+.tab-btn.active{color:#fbbf24;background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);}
+#tabBar{scrollbar-width:none;}#tabBar::-webkit-scrollbar{display:none;}
+.flip-card{perspective:800px;}
+.flip-inner{position:relative;width:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.34,1.2,.4,1);}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-face{backface-visibility:hidden;}
+.flip-back{position:absolute;inset:0;transform:rotateY(180deg);}
+#toastStack{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none;}
+.toast{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .9rem;border-radius:12px;font-size:.85rem;font-weight:600;box-shadow:0 10px 30px -8px rgba(0,0,0,.6);animation:popIn .28s ease both;backdrop-filter:blur(6px);}
+.toast-success{background:rgba(21,50,32,.95);border:1px solid rgba(34,197,94,.5);color:#bbf7d0;}
+.toast-error{background:rgba(60,18,22,.95);border:1px solid rgba(239,68,68,.55);color:#fecaca;}
+.toast-info{background:rgba(16,42,60,.95);border:1px solid rgba(56,189,248,.5);color:#bae6fd;}
+.toast-warn{background:rgba(64,46,12,.95);border:1px solid rgba(251,191,36,.5);color:#fde68a;}
+#modalRoot .mask{position:fixed;inset:0;background:rgba(5,10,20,.78);backdrop-filter:blur(4px);z-index:150;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .25s ease;}
+#modalRoot .mbody{width:min(94vw,520px);max-height:84vh;overflow-y:auto;border-radius:20px;animation:popIn .35s cubic-bezier(.22,1,.36,1) both;}
+.market-tab{padding:.5rem 1rem;border-radius:10px;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;border:1px solid transparent;}
+.market-tab.active{background:rgba(251,191,36,.12);color:var(--gold);border-color:rgba(251,191,36,.35);}
+.bg-grid{background-image:linear-gradient(rgba(148,163,184,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.045) 1px,transparent 1px);background-size:34px 34px;}
+.text-gold{color:var(--gold);}.text-muted{color:var(--muted);}.num-mono{font-variant-numeric:tabular-nums;}
+
+/* ============ 选择芯片行（英雄/武器/怪物） ============ */
+.pick-row{display:flex;gap:.5rem;overflow-x:auto;padding:.35rem .1rem .65rem;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.pick-row::-webkit-scrollbar{display:none;}
+.pick-chip{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;min-width:172px;max-width:236px;padding:.55rem .65rem;border-radius:14px;border:1.5px solid #24304a;background:#0d1526;cursor:pointer;text-align:left;scroll-snap-align:start;transition:transform .15s,border-color .18s,box-shadow .18s,background .18s;user-select:none;-webkit-tap-highlight-color:transparent;}
+.pick-chip:active{transform:scale(.97);}
+.pick-chip.pick-active{box-shadow:0 0 18px -4px rgba(251,191,36,.35);}
+.pick-avatar{flex:0 0 auto;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;}
+.pick-body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.pick-title{display:flex;align-items:center;gap:.35rem;font-size:.82rem;min-width:0;}
+.pick-title b{color:#e2e8f0;}
+.pick-tag{font-style:normal;font-size:.62rem;padding:.05rem .4rem;border-radius:6px;background:rgba(148,163,184,.12);white-space:nowrap;}
+.pick-sub{display:flex;align-items:center;gap:.45rem;font-size:.7rem;white-space:nowrap;overflow:hidden;}
+.pick-sub b{font-weight:700;}
+.pick-sub i{font-style:normal;}
+.pick-bar{display:block;height:3px;border-radius:999px;background:#1a2740;overflow:hidden;margin-top:2px;}
+.pick-bar i{display:block;height:100%;border-radius:999px;transition:width .6s ease;}
+.pick-radio{flex:0 0 auto;width:18px;height:18px;border-radius:50%;border:1.5px solid #33415c;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#0d1526;transition:all .18s;}
+.pick-radio-on{background:#fbbf24;border-color:#fbbf24;}
+.monster-chip{min-width:150px;max-width:196px;}
+@media(min-width:640px){
+  .monster-row{display:grid;grid-template-columns:repeat(3,1fr);overflow:visible;padding-bottom:.3rem;}
+  .monster-row .pick-chip{width:100%;max-width:none;min-width:0;}
+}
+
+/* ============ 召唤动画 ============ */
+#summonOverlay{position:fixed;inset:0;z-index:400;background:radial-gradient(900px 500px at 50% 18%,rgba(251,191,36,.10),transparent 60%),radial-gradient(700px 500px at 50% 92%,rgba(56,189,248,.07),transparent 60%),#070c18;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.summon-stage{position:relative;display:flex;flex-direction:column;align-items:center;padding:1.5rem;width:min(92vw,360px);}
+.summon-ring{position:relative;width:188px;height:188px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 18deg,rgba(251,191,36,.85) 40deg,transparent 62deg 100%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));animation:summonSpin 2.4s linear infinite;}
+.summon-ring-dot{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(251,191,36,.35);animation:summonSpinRev 14s linear infinite;}
+.summon-core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:116px;height:116px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,rgba(251,191,36,.16),rgba(13,21,38,.92) 75%);border:1px solid rgba(251,191,36,.4);animation:summonPulse 1.6s ease-in-out infinite;}
+.summon-core-icon{font-size:2.6rem;animation:summonBob 1.2s ease-in-out infinite;}
+.summon-title{font-size:1.05rem;font-weight:900;color:#fde68a;margin-top:1rem;letter-spacing:.06em;text-shadow:0 0 24px rgba(251,191,36,.5);}
+.summon-sub{font-size:.72rem;color:#8ea0bd;margin-top:.2rem;}
+@keyframes summonSpin{to{transform:rotate(360deg);}}
+@keyframes summonSpinRev{to{transform:rotate(-360deg);}}
+@keyframes summonPulse{0%,100%{box-shadow:0 0 40px -8px rgba(251,191,36,.4);transform:translate(-50%,-50%) scale(1);}50%{box-shadow:0 0 70px -4px rgba(251,191,36,.75);transform:translate(-50%,-50%) scale(1.05);}}
+@keyframes summonBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+.summon-done{gap:.9rem;}
+.summon-burst{position:absolute;inset:0;display:flex;justify-content:space-around;pointer-events:none;font-size:1.4rem;}
+.summon-burst span{animation:summonBurst 1.1s ease-in-out infinite;opacity:0;}
+.summon-burst span:nth-child(2){animation-delay:.35s;}
+.summon-burst span:nth-child(3){animation-delay:.7s;}
+@keyframes summonBurst{0%,100%{opacity:0;transform:translateY(8px) scale(.6);}50%{opacity:1;transform:translateY(-14px) scale(1.15);}}
+.summon-result-card{width:100%;max-width:330px;background:linear-gradient(170deg,#1d2a45,#0f1729);border:1.5px solid rgba(251,191,36,.55);border-radius:22px;padding:1.4rem 1.2rem;text-align:center;animation:summonCardIn .55s cubic-bezier(.22,1,.36,1) both;box-shadow:0 0 60px -10px rgba(251,191,36,.5);}
+@keyframes summonCardIn{0%{opacity:0;transform:scale(.75) translateY(26px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+.summon-hero-avatar{width:96px;height:96px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.7rem;animation:summonHeroIn .7s cubic-bezier(.34,1.4,.44,1) .12s both;}
+@keyframes summonHeroIn{0%{opacity:0;transform:scale(.3) rotate(-18deg);}60%{transform:scale(1.12) rotate(4deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+.summon-result-title{font-size:1.45rem;font-weight:900;background:linear-gradient(90deg,#fde68a,#f59e0b,#fde68a);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:.7rem;animation:summonTitleGlow 2s ease-in-out infinite;}
+@keyframes summonTitleGlow{0%,100%{filter:brightness(1);}50%{filter:brightness(1.25);}}
+.summon-hero-name{font-size:.95rem;font-weight:800;margin-top:.2rem;}
+.summon-hero-stats{display:flex;align-items:center;justify-content:center;gap:.6rem;font-size:.76rem;color:#8ea0bd;margin:.6rem 0 .9rem;flex-wrap:wrap;}
+.summon-hero-stats .el-badge{font-size:.68rem;}
+
+/* ============ 战斗动画舞台 ============ */
+#battleStage{position:fixed;inset:0;z-index:160;background:radial-gradient(1000px 600px at 50% 12%,rgba(245,158,11,.09),transparent 60%),radial-gradient(800px 500px at 50% 95%,rgba(56,189,248,.07),transparent 60%),#080d18;display:flex;align-items:center;justify-content:center;animation:fadeIn .3s ease;}
+.battle-box{width:min(94vw,440px);padding:1rem .5rem 1.4rem;position:relative;}
+.battle-ground{display:flex;align-items:flex-end;justify-content:space-between;gap:.5rem;min-height:212px;position:relative;}
+.battle-fighter{flex:0 0 34%;display:flex;flex-direction:column;align-items:center;gap:.4rem;border-radius:18px;padding:1rem .4rem .8rem;border:1.5px solid transparent;}
+.battle-fighter-emoji{font-size:3.4rem;line-height:1;filter:drop-shadow(0 8px 14px rgba(0,0,0,.5));}
+.battle-fighter-name{font-size:.7rem;font-weight:700;color:#cbd5e1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.battle-hero{animation:bHeroIn .5s cubic-bezier(.22,1,.36,1) both;}
+.battle-monster{animation:bMonIn .5s cubic-bezier(.22,1,.36,1) both;}
+.battle-vs{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-size:1.6rem;font-weight:900;color:#fbbf24;letter-spacing:.05em;opacity:0;text-shadow:0 0 20px rgba(251,191,36,.8);}
+.battle-vs-pop{animation:bVs .7s cubic-bezier(.22,1,.36,1) both;}
+@keyframes bHeroIn{from{opacity:0;transform:translateX(-130px);}to{opacity:1;transform:translateX(0);}}
+@keyframes bMonIn{from{opacity:0;transform:translateX(130px);}to{opacity:1;transform:translateX(0);}}
+@keyframes bVs{0%{opacity:0;transform:translate(-50%,-50%) scale(2.2);}45%{opacity:1;transform:translate(-50%,-50%) scale(1);}70%{opacity:1;transform:translate(-50%,-50%) scale(1.18);}100%{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+.battle-attack-l{animation:bAttackL .85s cubic-bezier(.3,1.2,.4,1) both;}
+.battle-attack-r{animation:bAttackR .85s cubic-bezier(.3,1.2,.4,1) both;}
+@keyframes bAttackL{0%{transform:translateX(0);}40%{transform:translateX(118px) rotate(6deg);}70%{transform:translateX(110px);}100%{transform:translateX(0);}}
+@keyframes bAttackR{0%{transform:translateX(0);}40%{transform:translateX(-118px) rotate(-6deg);}70%{transform:translateX(-110px);}100%{transform:translateX(0);}}
+.battle-hit{animation:bHit .5s ease both;}
+@keyframes bHit{0%{filter:brightness(3) saturate(2);transform:scale(1.08);}100%{filter:brightness(1) saturate(1);transform:scale(1);}}
+.battle-shake{animation:bShake .5s ease;}
+@keyframes bShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-9px);}40%{transform:translateX(9px);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}}
+.battle-dmg-layer{position:absolute;left:0;right:0;top:30%;height:90px;pointer-events:none;z-index:5;}
+.battle-dmg{position:absolute;transform:translateX(-50%);font-size:2.4rem;animation:bDmg .9s ease-out both;text-shadow:0 4px 18px rgba(0,0,0,.7);}
+@keyframes bDmg{0%{opacity:0;transform:translate(-50%,20px) scale(.4);}25%{opacity:1;}100%{opacity:0;transform:translate(-50%,-70px) scale(1.3);}}
+.battle-hpbar-row{display:flex;gap:.6rem;margin-top:.9rem;}
+.battle-hp{flex:1;height:9px;border-radius:999px;background:#1a2740;overflow:hidden;}
+.battle-hp i{display:block;height:100%;border-radius:999px;transition:width 1.1s cubic-bezier(.22,1,.36,1);}
+.battle-hp.hero i{background:linear-gradient(90deg,#38bdf8,#22d3ee);width:100%;}
+.battle-hp.mon i{background:linear-gradient(90deg,#f43f5e,#f97316);width:100%;}
+.battle-result{opacity:0;pointer-events:none;margin-top:1.1rem;text-align:center;transition:opacity .35s ease;}
+.battle-result-show .battle-result{opacity:1;pointer-events:auto;}
+.battle-banner{font-size:1.7rem;font-weight:900;opacity:0;}
+.battle-win .battle-banner{color:#fbbf24;text-shadow:0 0 26px rgba(251,191,36,.6);}
+.battle-lose .battle-banner{color:#f87171;text-shadow:0 0 26px rgba(239,68,68,.5);}
+.battle-banner-in{animation:bBanner .55s cubic-bezier(.22,1,.36,1) both;}
+@keyframes bBanner{0%{opacity:0;transform:scale(.5) rotate(-4deg);}60%{opacity:1;transform:scale(1.12) rotate(2deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+.battle-stats{display:flex;justify-content:center;gap:.8rem;margin-top:.7rem;font-size:.72rem;color:#8ea0bd;}
+.battle-stats b{color:#e2e8f0;}
+.battle-reward{display:flex;gap:.6rem;justify-content:center;margin-top:.8rem;flex-wrap:wrap;}
+.battle-reward-item{display:flex;align-items:center;gap:.4rem;padding:.45rem .8rem;border-radius:12px;font-size:.8rem;font-weight:800;opacity:0;transform:translateY(16px);}
+.battle-rewards-in .battle-reward-item{animation:bReward .5s cubic-bezier(.22,1,.36,1) both;}
+.battle-rewards-in .battle-reward-item:nth-child(2){animation-delay:.12s;}
+.battle-reward-item.gold{background:linear-gradient(135deg,rgba(251,191,36,.16),rgba(251,191,36,.04));border:1px solid rgba(251,191,36,.4);color:#fbbf24;}
+.battle-reward-item.xp{background:linear-gradient(135deg,rgba(34,197,94,.16),rgba(34,197,94,.04));border:1px solid rgba(34,197,94,.4);color:#4ade80;}
+@keyframes bReward{to{opacity:1;transform:translateY(0);}}
+.battle-result .btn{margin-top:.9rem;}
+
+/* ============ 移动端细节打磨 ============ */
+@media(max-width:639px){
+  .panel{padding:14px !important;border-radius:16px;}
+  .tab-btn{padding:.5rem .7rem;font-size:.74rem;}
+  #tabBar{top:52px;}
+  .btn{min-height:42px;}
+  .btn-sm{min-height:32px;}
+}
+
+
+/* ===== 回合制战斗（12秒） ===== */
+.battle-top{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;}
+.battle-hp-card{flex:1;min-width:0;background:#0d1526;border:1px solid #24304a;border-radius:12px;padding:.4rem .55rem;}
+.battle-hp-card.hc-mon{text-align:right;}
+.bch-head{display:flex;align-items:center;gap:.35rem;margin-bottom:.25rem;}
+.hc-mon .bch-head{flex-direction:row-reverse;}
+.bch-emoji{font-size:1.15rem;line-height:1;flex-shrink:0;}
+.bch-name{font-size:.66rem;font-weight:800;color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bch-hpnum{font-size:.6rem;color:#8ea0bd;margin-left:auto;white-space:nowrap;}
+.hc-mon .bch-hpnum{margin-left:0;margin-right:auto;}
+.battle-log{min-height:2.1rem;margin-top:.55rem;display:flex;flex-direction:column;align-items:center;gap:.15rem;font-size:.7rem;color:#a5b4cd;text-align:center;padding:0 .2rem;}
+.battle-log-row{animation:bLogIn .3s ease both;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.battle-projectile{position:absolute;z-index:7;font-size:1.5rem;line-height:1;pointer-events:none;filter:drop-shadow(0 0 12px rgba(251,191,36,.9));}
+.battle-dmg-num{position:absolute;top:26%;transform:translateX(-50%);font-size:1.25rem;font-weight:900;color:#f87171;z-index:8;pointer-events:none;animation:bDmgNum .95s ease-out both;text-shadow:0 3px 14px rgba(0,0,0,.85);}
+.battle-lunge-r{animation:bLungeR .5s cubic-bezier(.3,1.3,.4,1) both;}
+.battle-lunge-l{animation:bLungeL .5s cubic-bezier(.3,1.3,.4,1) both;}
+.battle-hurt{animation:bHurt .45s ease both;}
+.battle-dead{animation:bDead .85s ease both;}
+@keyframes bLogIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes bDmgNum{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}25%{opacity:1;transform:translate(-50%,0) scale(1.2)}100%{opacity:0;transform:translate(-50%,-28px) scale(1)}}
+@keyframes bLungeR{0%{transform:translateX(0)}35%{transform:translateX(-34px) scale(1.06)}100%{transform:translateX(0)}}
+@keyframes bLungeL{0%{transform:translateX(0)}35%{transform:translateX(34px) scale(1.06)}100%{transform:translateX(0)}}
+@keyframes bHurt{0%,100%{filter:none}25%{filter:brightness(1.9) sepia(1) hue-rotate(-50deg)}50%{filter:brightness(1.6) saturate(3)}}
+@keyframes bDead{0%{filter:none;transform:rotate(0)}100%{filter:grayscale(1) brightness(.55);transform:rotate(86deg) translateY(16px);opacity:.45}}
+
+.battle-reward-note{margin-top:.55rem;font-size:.64rem;color:#8ea0bd;display:flex;align-items:center;justify-content:center;gap:.3rem;}
+
+
+/* ===== 图鉴 ===== */
+.pick-avatar{overflow:hidden;padding:0;}
+.pick-avatar img{width:100%;height:100%;object-fit:cover;}
+.battle-fighter-emoji{display:flex;align-items:center;justify-content:center;height:76px;}
+.battle-fighter-emoji img{width:76px;height:76px;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.5));}
+.gallery-sec-title{font-size:1.05rem;font-weight:900;margin:0 0 .8rem;display:flex;align-items:center;color:#e2e8f0;}
+.gallery-card{border-radius:16px;border:1.5px solid #24304a;overflow:hidden;background:#0d1526;transition:transform .2s ease,border-color .2s ease;}
+.gallery-card:hover{transform:translateY(-3px);border-color:#fbbf2455;}
+.gallery-art{aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.gallery-art img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease;}
+.gallery-card:hover .gallery-art img{transform:scale(1.06);}
+.gallery-info{padding:.6rem .7rem .7rem;}
+.gallery-name{font-size:.82rem;font-weight:800;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gallery-sub{font-size:.66rem;color:#8ea0bd;margin:.28rem 0 .35rem;display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;}
+.gallery-stats{font-size:.66rem;color:#cbd5e1;display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;}
+
+/* ===== 3D 动态角色立绘 ===== */
+.char3d-wrap{position:relative;overflow:hidden;perspective:900px;animation:charFloat 4.6s ease-in-out infinite;will-change:transform;}
+@keyframes charFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+.char3d-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%);animation:charShine 4s linear infinite;pointer-events:none;z-index:3;}
+@keyframes charShine{0%{transform:translateX(-130%);}60%,100%{transform:translateX(140%);}}
+.char3d-card{transform-style:preserve-3d;transition:transform .35s ease;}
+.char3d-card:hover{transform:perspective(900px) rotateX(3.5deg) rotateY(-4deg) scale(1.02);}
+.char3d-card:hover .char3d{transform:translateZ(34px);}
+.char3d{transition:transform .35s ease;}
+.char3d-card:hover .gallery-art img{transform:scale(1.06) translateZ(34px);}

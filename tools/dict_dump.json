@@ -1,0 +1,2612 @@
+{
+ "金": {
+  "en": "Metal",
+  "ja": "金",
+  "es": "Metal"
+ },
+ "木": {
+  "en": "Wood",
+  "ja": "木",
+  "es": "Madera"
+ },
+ "土": {
+  "en": "Earth",
+  "ja": "土",
+  "es": "Tierra"
+ },
+ "水": {
+  "en": "Water",
+  "ja": "水",
+  "es": "Agua"
+ },
+ "火": {
+  "en": "Fire",
+  "ja": "火",
+  "es": "Fuego"
+ },
+ "一星": {
+  "en": "1★",
+  "ja": "一星",
+  "es": "1★"
+ },
+ "二星": {
+  "en": "2★",
+  "ja": "二星",
+  "es": "2★"
+ },
+ "三星": {
+  "en": "3★",
+  "ja": "三星",
+  "es": "3★"
+ },
+ "四星": {
+  "en": "4★",
+  "ja": "四星",
+  "es": "4★"
+ },
+ "五星": {
+  "en": "5★",
+  "ja": "五星",
+  "es": "5★"
+ },
+ "星": {
+  "en": "★",
+  "ja": "星",
+  "es": "★"
+ },
+ "未知": {
+  "en": "Unknown",
+  "ja": "不明",
+  "es": "Desconocido"
+ },
+ "全部": {
+  "en": "All",
+  "ja": "すべて",
+  "es": "Todos"
+ },
+ "地址": {
+  "en": "Address",
+  "ja": "アドレス",
+  "es": "Dirección"
+ },
+ "状态": {
+  "en": "Status",
+  "ja": "状態",
+  "es": "Estado"
+ },
+ "名称": {
+  "en": "Name",
+  "ja": "名前",
+  "es": "Nombre"
+ },
+ "数量": {
+  "en": "Amount",
+  "ja": "数量",
+  "es": "Cantidad"
+ },
+ "元素": {
+  "en": "Element",
+  "ja": "元素",
+  "es": "Elemento"
+ },
+ "战力": {
+  "en": "Power",
+  "ja": "戦力",
+  "es": "Poder"
+ },
+ "奖励基数": {
+  "en": "Reward base",
+  "ja": "報酬基数",
+  "es": "Base de recompensa"
+ },
+ "经验": {
+  "en": "EXP",
+  "ja": "経験値",
+  "es": "EXP"
+ },
+ "英雄": {
+  "en": "Hero",
+  "ja": "英雄",
+  "es": "Héroe"
+ },
+ "武器": {
+  "en": "Weapon",
+  "ja": "武器",
+  "es": "Arma"
+ },
+ "碎片": {
+  "en": "Shards",
+  "ja": "破片",
+  "es": "Fragmentos"
+ },
+ "精粹": {
+  "en": "Essence",
+  "ja": "エッセンス",
+  "es": "Esencia"
+ },
+ "物品": {
+  "en": "Item",
+  "ja": "アイテム",
+  "es": "Objeto"
+ },
+ "简单": {
+  "en": "Easy",
+  "ja": "簡単",
+  "es": "Fácil"
+ },
+ "普通": {
+  "en": "Normal",
+  "ja": "普通",
+  "es": "Normal"
+ },
+ "困难": {
+  "en": "Hard",
+  "ja": "困難",
+  "es": "Difícil"
+ },
+ "噩梦": {
+  "en": "Nightmare",
+  "ja": "悪夢",
+  "es": "Pesadilla"
+ },
+ "克制": {
+  "en": "Counter",
+  "ja": "相克",
+  "es": "Contra"
+ },
+ "被克制": {
+  "en": "Countered",
+  "ja": "相克される",
+  "es": "Contado"
+ },
+ "中性": {
+  "en": "Neutral",
+  "ja": "中性",
+  "es": "Neutral"
+ },
+ "未知属性": {
+  "en": "Unknown trait",
+  "ja": "不明属性",
+  "es": "Rasgo desconocido"
+ },
+ "未知操作": {
+  "en": "Unknown op",
+  "ja": "不明操作",
+  "es": "Op. desconocida"
+ },
+ "未检测到钱包插件": {
+  "en": "No wallet extension detected",
+  "ja": "ウォレット拡張機能が見つかりません",
+  "es": "No se detectó extensión de wallet"
+ },
+ "请确认钱包已切换到 BSC 测试网": {
+  "en": "Switch wallet to BSC testnet",
+  "ja": "BSCテストネットに切り替えてください",
+  "es": "Cambia a BSC testnet"
+ },
+ "链 ID 与当前网络不一致": {
+  "en": "Chain ID mismatch",
+  "ja": "チェーンID不一致",
+  "es": "ID de cadena no coincide"
+ },
+ "钱包已连接：": {
+  "en": "Wallet connected: ",
+  "ja": "ウォレット接続済み：",
+  "es": "Wallet conectada: "
+ },
+ "连接钱包": {
+  "en": "Connect Wallet",
+  "ja": "ウォレット接続",
+  "es": "Conectar Wallet"
+ },
+ "请先连接钱包": {
+  "en": "Connect wallet first",
+  "ja": "先にウォレット接続してください",
+  "es": "Conecta la wallet primero"
+ },
+ "随机数预言机配置加载失败，使用默认值": {
+  "en": "Oracle config load failed, using defaults",
+  "ja": "乱数オラクル設定の読込失敗、デフォルトを使用",
+  "es": "Error al cargar la config del oráculo, se usan valores por defecto"
+ },
+ "BSC 测试网": {
+  "en": "BSC Testnet",
+  "ja": "BSC テストネット",
+  "es": "BSC Testnet"
+ },
+ "钱包链已切换，请重新连接": {
+  "en": "Chain switched, please reconnect",
+  "ja": "チェーン切替、再接続してください",
+  "es": "Cadena cambiada, reconecta"
+ },
+ "账户已断开": {
+  "en": "Account disconnected",
+  "ja": "アカウント切断",
+  "es": "Cuenta desconectada"
+ },
+ "账户已切换：": {
+  "en": "Account switched: ",
+  "ja": "アカウント切替：",
+  "es": "Cuenta cambiada: "
+ },
+ "账户切换失败，请手动连接": {
+  "en": "Account switch failed, connect manually",
+  "ja": "アカウント切替失敗、手動で接続",
+  "es": "Error al cambiar, conecta manualmente"
+ },
+ "用户取消交易": {
+  "en": "User cancelled",
+  "ja": "取引キャンセル",
+  "es": "Cancelado por el usuario"
+ },
+ "⏳ 太早了：还需等待若干区块": {
+  "en": "Too early: wait for blocks",
+  "ja": "⏳ 早すぎ：ブロック待ち",
+  "es": "⏳ Muy pronto: espera bloques"
+ },
+ "⌛ 太晚了：commit 已过期": {
+  "en": "Too late: commit expired",
+  "ja": "⌛ 遅すぎ：commit 有効期限切れ",
+  "es": "⌛ Muy tarde: commit expirado"
+ },
+ "🔐 secret/salt 与 commit 不匹配": {
+  "en": "Secret/salt mismatch",
+  "ja": "🔐 secret/salt が commit と不一致",
+  "es": "🔐 secret/salt no coincide con commit"
+ },
+ "✅ 已经揭示过了": {
+  "en": "Already revealed",
+  "ja": "✅ 公開済み",
+  "es": "✅ Ya revelado"
+ },
+ "❌ 不是本人 commit": {
+  "en": "Not your commit",
+  "ja": "❌ 自分の commit ではない",
+  "es": "❌ No es tu commit"
+ },
+ "❌ 不是本人的英雄/武器，或 pending 已被清理": {
+  "en": "Not your hero/weapon, or pending cleaned",
+  "ja": "❌ 自分の英雄/武器ではない、または pending はクリーン済み",
+  "es": "❌ No es tu héroe/arma, o pending fue limpiado"
+ },
+ "🚫 英雄数量已达上限(4)": {
+  "en": "Hero limit reached (4)",
+  "ja": "🚫 英雄上限(4)に到達",
+  "es": "🚫 Límite de héroes (4)"
+ },
+ "🔝 该武器强化已达上限": {
+  "en": "Weapon enhancement maxed",
+  "ja": "🔝 武器強化は上限到達",
+  "es": "🔝 Mejora de arma al máximo"
+ },
+ "🧪 该星级武器不可使用此阶精粹": {
+  "en": "Essence tier not usable here",
+  "ja": "🧪 この星級ではこの階級のエッセンスは不可",
+  "es": "🧪 Esencia no usable en esta estrella"
+ },
+ "⏰ 不在 BOSS 攻击窗口期内": {
+  "en": "Outside boss attack window",
+  "ja": "⏰ BOSS 攻撃ウィンドウ外",
+  "es": "⏰ Fuera de la ventana de ataque al jefe"
+ },
+ "💀 BOSS 已被击败": {
+  "en": "Boss defeated",
+  "ja": "💀 BOSS は倒された",
+  "es": "💀 Jefe derrotado"
+ },
+ "⏳ 待处理操作过多，请先揭示或等待清理": {
+  "en": "Too many pending ops, reveal or wait",
+  "ja": "⏳ 保留操作が多すぎ、公開またはクリーン待ち",
+  "es": "⏳ Demasiadas ops pendientes, revela o espera"
+ },
+ "⏳ BOSS 轮次尚未结束": {
+  "en": "Boss round not ended",
+  "ja": "⏳ BOSS ラウンドは未終了",
+  "es": "⏳ La ronda del jefe no ha terminado"
+ },
+ "✅ 本轮的奖励已结算过了": {
+  "en": "Round rewards settled",
+  "ja": "✅ 今ラウンドの報酬は精算済み",
+  "es": "✅ Recompensas de la ronda ya pagadas"
+ },
+ "⚡ 英雄体力不足": {
+  "en": "Not enough stamina",
+  "ja": "⚡ 英雄スタミナ不足",
+  "es": "⚡ Stamina insuficiente"
+ },
+ "⏳ BOSS 新一轮需等待 7 天冷却": {
+  "en": "New round needs 7-day cooldown",
+  "ja": "⏳ 新ラウンドは7日間クールダウン",
+  "es": "⏳ Nueva ronda requiere 7 días de espera"
+ },
+ "💰 余额或授权不足": {
+  "en": "Insufficient balance or allowance",
+  "ja": "💰 残高または承認不足",
+  "es": "💰 Saldo o aprobación insuficiente"
+ },
+ "🔧 ABI 不匹配，请 Ctrl+F5": {
+  "en": "ABI mismatch, hard refresh",
+  "ja": "🔧 ABI 不一致、Ctrl+F5",
+  "es": "🔧 ABI no coincide, Ctrl+F5"
+ },
+ "Gas 余额不足": {
+  "en": "Insufficient gas",
+  "ja": "Gas 残高不足",
+  "es": "Gas insuficiente"
+ },
+ "Nonce 冲突，请刷新": {
+  "en": "Nonce conflict, refresh",
+  "ja": "Nonce 競合、更新してください",
+  "es": "Conflicto de nonce, refresca"
+ },
+ "处理中…": {
+  "en": "Processing…",
+  "ja": "処理中…",
+  "es": "Procesando…"
+ },
+ "交易处理中…": {
+  "en": "Transaction processing…",
+  "ja": "取引処理中…",
+  "es": "Procesando transacción…"
+ },
+ "JS错误": {
+  "en": "JS Error",
+  "ja": "JSエラー",
+  "es": "Error JS"
+ },
+ "Promise 错误": {
+  "en": "Promise Error",
+  "ja": "Promiseエラー",
+  "es": "Error Promise"
+ },
+ "正在授权代币…": {
+  "en": "Approving token…",
+  "ja": "トークン承認中…",
+  "es": "Aprobando token…"
+ },
+ "授权成功": {
+  "en": "Approved",
+  "ja": "承認完了",
+  "es": "Aprobado"
+ },
+ "英雄 NFT": {
+  "en": "Hero NFT",
+  "ja": "英雄NFT",
+  "es": "NFT Héroe"
+ },
+ "武器 NFT": {
+  "en": "Weapon NFT",
+  "ja": "武器NFT",
+  "es": "NFT Arma"
+ },
+ "正在授权 NFT…": {
+  "en": "Approving NFT…",
+  "ja": "NFT承認中…",
+  "es": "Aprobando NFT…"
+ },
+ "✅ 已授权": {
+  "en": "Approved",
+  "ja": "承認済み",
+  "es": "Aprobado"
+ },
+ "正在取消授权…": {
+  "en": "Revoking…",
+  "ja": "解除中…",
+  "es": "Revocando…"
+ },
+ "已取消授权": {
+  "en": "Revoked",
+  "ja": "解除完了",
+  "es": "Revocado"
+ },
+ "ForgeShop（锻造厂）": {
+  "en": "ForgeShop",
+  "ja": "鍛造所",
+  "es": "ForjaShop"
+ },
+ "EnhanceShop（强化铺）": {
+  "en": "EnhanceShop",
+  "ja": "強化屋",
+  "es": "MejoraShop"
+ },
+ "未配置 ": {
+  "en": "Not configured ",
+  "ja": "未設定",
+  "es": "No configurado"
+ },
+ "英雄数量已达上限(4)": {
+  "en": "Hero limit reached (4)",
+  "ja": "英雄上限(4)に到達",
+  "es": "Límite de héroes (4)"
+ },
+ "代币余额不足": {
+  "en": "Insufficient token balance",
+  "ja": "トークン残高不足",
+  "es": "Saldo insuficiente"
+ },
+ "刷新": {
+  "en": "Refresh",
+  "ja": "更新",
+  "es": "Actualizar"
+ },
+ "怪物": {
+  "en": "Monster",
+  "ja": "モンスター",
+  "es": "Monstruo"
+ },
+ "请先选择英雄": {
+  "en": "Pick a hero first",
+  "ja": "英雄を選択してください",
+  "es": "Elige un héroe primero"
+ },
+ "请先选择武器": {
+  "en": "Pick a weapon first",
+  "ja": "武器を選択してください",
+  "es": "Elige un arma primero"
+ },
+ "请选择怪物": {
+  "en": "Pick a monster",
+  "ja": "モンスターを選択",
+  "es": "Elige un monstruo"
+ },
+ "预览失败": {
+  "en": "Preview failed",
+  "ja": "プレビュー失敗",
+  "es": "Vista previa falló"
+ },
+ "请选择英雄与怪物": {
+  "en": "Pick hero and monster",
+  "ja": "英雄とモンスターを選択",
+  "es": "Elige héroe y monstruo"
+ },
+ "请先持有一把武器": {
+  "en": "Hold at least one weapon",
+  "ja": "武器を1つ所持してください",
+  "es": "Ten al menos un arma"
+ },
+ "战斗结算中…": {
+  "en": "Battle settling…",
+  "ja": "戦闘精算中…",
+  "es": "Resolviendo batalla…"
+ },
+ "战斗已上链，等待确认…": {
+  "en": "Battle on-chain, waiting…",
+  "ja": "戦闘がチェーンに送信、確認待ち…",
+  "es": "Batalla en cadena, esperando…"
+ },
+ "战斗完成": {
+  "en": "Battle complete",
+  "ja": "戦闘完了",
+  "es": "Batalla completada"
+ },
+ "🗡️ 飞剑": {
+  "en": "Sword",
+  "ja": "🗡️ 飛剣",
+  "es": "🗡️ Espada voladora"
+ },
+ "冲击": {
+  "en": "Impact",
+  "ja": "衝撃",
+  "es": "Impacto"
+ },
+ "🌪️ 旋风斩": {
+  "en": "Whirlwind",
+  "ja": "🌪️ 旋風斬",
+  "es": "🌪️ Torbellino"
+ },
+ "✨ 星光弹": {
+  "en": "Star bolt",
+  "ja": "✨ 星光弾",
+  "es": "✨ Bólido estelar"
+ },
+ "👹 魔焰": {
+  "en": "Hellfire",
+  "ja": "👹 魔炎",
+  "es": "👹 Llama infernal"
+ },
+ "🦷 尖牙撕咬": {
+  "en": "Fang bite",
+  "ja": "🦷 牙咬",
+  "es": "🦷 Mordisco"
+ },
+ "💀 骨刺": {
+  "en": "Bone spike",
+  "ja": "💀 骨棘",
+  "es": "💀 Púa ósea"
+ },
+ "🌋 熔岩弹": {
+  "en": "Lava bolt",
+  "ja": "🌋 溶岩弾",
+  "es": "🌋 Bólido de lava"
+ },
+ "🎉 胜利！": {
+  "en": "Victory!",
+  "ja": "勝利！",
+  "es": "¡Victoria!"
+ },
+ "💀 战败…": {
+  "en": "Defeat…",
+  "ja": "敗北…",
+  "es": "Derrota…"
+ },
+ "继续冒险": {
+  "en": "Continue",
+  "ja": "冒険を続ける",
+  "es": "Continuar"
+ },
+ "再战一次": {
+  "en": "Fight again",
+  "ja": "再戦",
+  "es": "Luchar de nuevo"
+ },
+ "世界BOSS": {
+  "en": "World Boss",
+  "ja": "世界BOSS",
+  "es": "Jefe Mundial"
+ },
+ "✅ 已讨伐": {
+  "en": "Defeated",
+  "ja": "討伐済み",
+  "es": "Derrotado"
+ },
+ "⚔ 讨伐中": {
+  "en": "In battle",
+  "ja": "討伐中",
+  "es": "En batalla"
+ },
+ "本轮已讨伐": {
+  "en": "Defeated this round",
+  "ja": "今ラウンド討伐済み",
+  "es": "Derrotado esta ronda"
+ },
+ "发起攻击": {
+  "en": "Attack",
+  "ja": "攻撃",
+  "es": "Atacar"
+ },
+ "👤 我": {
+  "en": "Me",
+  "ja": "私",
+  "es": "Yo"
+ },
+ "需要英雄和武器": {
+  "en": "Need hero and weapon",
+  "ja": "英雄と武器が必要",
+  "es": "Necesitas héroe y arma"
+ },
+ "正在授权 USDT 保证金…": {
+  "en": "Approving USDT collateral…",
+  "ja": "USDT保証金承認中…",
+  "es": "Aprobando garantía USDT…"
+ },
+ "USDT 授权成功": {
+  "en": "USDT approved",
+  "ja": "USDT承認完了",
+  "es": "USDT aprobado"
+ },
+ "请先刷新": {
+  "en": "Refresh first",
+  "ja": "先に更新してください",
+  "es": "Actualiza primero"
+ },
+ "结算中…": {
+  "en": "Settling…",
+  "ja": "精算中…",
+  "es": "Resolviendo…"
+ },
+ "结算成功": {
+  "en": "Settled",
+  "ja": "精算完了",
+  "es": "Resuelto"
+ },
+ "开轮 / 奖池 / 攻击待处理配置": {
+  "en": "Round / pool / pending attack config",
+  "ja": "開ラウンド / 賞金プール / 攻撃pending設定",
+  "es": "Ronda / pozo / config de ataque pendiente"
+ },
+ "BOSS 轮次": {
+  "en": "Boss Round",
+  "ja": "BOSS ラウンド",
+  "es": "Ronda del jefe"
+ },
+ "当前轮次": {
+  "en": "Current Round",
+  "ja": "現在ラウンド",
+  "es": "Ronda actual"
+ },
+ "BOSS 血量": {
+  "en": "Boss HP",
+  "ja": "BOSS HP",
+  "es": "HP del jefe"
+ },
+ "进度": {
+  "en": "Progress",
+  "ja": "進捗",
+  "es": "Progreso"
+ },
+ "奖池": {
+  "en": "Prize Pool",
+  "ja": "賞金プール",
+  "es": "Pozo de premios"
+ },
+ "总伤害": {
+  "en": "Total Damage",
+  "ja": "総ダメージ",
+  "es": "Daño total"
+ },
+ "武器得主": {
+  "en": "Weapon Winner",
+  "ja": "武器獲得者",
+  "es": "Ganador del arma"
+ },
+ "本轮我的可领": {
+  "en": "My claim this round",
+  "ja": "今ラウンドの受領可能",
+  "es": "Mi reclamo esta ronda"
+ },
+ "开启新一轮": {
+  "en": "Start New Round",
+  "ja": "新ラウンド開始",
+  "es": "Iniciar nueva ronda"
+ },
+ "注入奖池": {
+  "en": "Top up pool",
+  "ja": "賞金注入",
+  "es": "Aportar al pozo"
+ },
+ "确认开启新一轮世界BOSS？": {
+  "en": "Start a new World Boss round?",
+  "ja": "新しい世界BOSSラウンドを開始しますか？",
+  "es": "¿Iniciar nueva ronda del jefe mundial?"
+ },
+ "开启新一轮 BOSS": {
+  "en": "Start New Boss Round",
+  "ja": "新ラウンドのBOSS開始",
+  "es": "Iniciar nueva ronda del jefe"
+ },
+ "BOSS 血量 HP（1000~10000000）": {
+  "en": "Boss HP (1000~10000000)",
+  "ja": "BOSS HP（1000~10000000）",
+  "es": "HP del jefe (1000~10000000)"
+ },
+ "开启 BOSS 轮次": {
+  "en": "Start Boss Round",
+  "ja": "BOSS ラウンド開始",
+  "es": "Iniciar ronda del jefe"
+ },
+ "注入 BOSS 奖池": {
+  "en": "Top up Boss Pool",
+  "ja": "BOSS 賞金プールに注入",
+  "es": "Aportar al pozo del jefe"
+ },
+ "注入数量": {
+  "en": "Amount",
+  "ja": "注入量",
+  "es": "Cantidad a aportar"
+ },
+ "如 5000": {
+  "en": "e.g. 5000",
+  "ja": "例: 5000",
+  "es": "ej. 5000"
+ },
+ "清理过期攻击": {
+  "en": "Clean Expired Attacks",
+  "ja": "期限切れ攻撃をクリーン",
+  "es": "Limpiar ataques vencidos"
+ },
+ "设置 BOSS 关联合约": {
+  "en": "Set Boss Linked Contracts",
+  "ja": "BOSS 連携コントラクト設定",
+  "es": "Configurar contratos del jefe"
+ },
+ "RandomOracle 地址": {
+  "en": "RandomOracle Address",
+  "ja": "RandomOracle アドレス",
+  "es": "Dirección RandomOracle"
+ },
+ "Vault 地址": {
+  "en": "Vault Address",
+  "ja": "Vault アドレス",
+  "es": "Dirección Vault"
+ },
+ "PriceOracle 地址": {
+  "en": "PriceOracle Address",
+  "ja": "PriceOracle アドレス",
+  "es": "Dirección PriceOracle"
+ },
+ "设置 BOSS 关联": {
+  "en": "Set Boss Links",
+  "ja": "BOSS 連携設定",
+  "es": "Configurar enlaces del jefe"
+ },
+ "攻击待处理配置": {
+  "en": "Pending Attack Config",
+  "ja": "攻撃pending設定",
+  "es": "Config de ataque pendiente"
+ },
+ "过期块数": {
+  "en": "Expiry Blocks",
+  "ja": "期限切れブロック数",
+  "es": "Bloques de expiración"
+ },
+ "每人上限": {
+  "en": "Max Per Player",
+  "ja": "一人あたり上限",
+  "es": "Máx. por jugador"
+ },
+ "修改过期块数": {
+  "en": "Edit Expiry Blocks",
+  "ja": "期限切れブロック数変更",
+  "es": "Editar bloques de expiración"
+ },
+ "修改每人上限": {
+  "en": "Edit Max Per Player",
+  "ja": "一人あたり上限変更",
+  "es": "Editar máx. por jugador"
+ },
+ "奖池管理": {
+  "en": "Pool Management",
+  "ja": "賞金プール管理",
+  "es": "Gestión del pozo"
+ },
+ "清理全部过期攻击": {
+  "en": "Clean All Expired Attacks",
+  "ja": "全期限切れ攻撃をクリーン",
+  "es": "Limpiar todos los ataques vencidos"
+ },
+ "英雄召唤成功": {
+  "en": "Hero summoned",
+  "ja": "英雄召喚成功",
+  "es": "Héroe invocado"
+ },
+ "合成完成": {
+  "en": "Composed",
+  "ja": "合成完了",
+  "es": "Compuesto"
+ },
+ "合成成功": {
+  "en": "Composed",
+  "ja": "合成成功",
+  "es": "Compuesto"
+ },
+ "请先勾选武器": {
+  "en": "Select weapons first",
+  "ja": "武器を選択してください",
+  "es": "Selecciona armas primero"
+ },
+ "熔炼中…": {
+  "en": "Smelting…",
+  "ja": "溶解中…",
+  "es": "Fundiendo…"
+ },
+ "熔炼完成": {
+  "en": "Smelted",
+  "ja": "溶解完了",
+  "es": "Fundido"
+ },
+ "合成中…": {
+  "en": "Composing…",
+  "ja": "合成中…",
+  "es": "Componiendo…"
+ },
+ "锻造": {
+  "en": "Forge",
+  "ja": "鍛造",
+  "es": "Forjar"
+ },
+ "锻造厂": {
+  "en": "Forge Shop",
+  "ja": "鍛造所",
+  "es": "Forja"
+ },
+ "强化铺": {
+  "en": "Enhance Shop",
+  "ja": "強化屋",
+  "es": "Mejora"
+ },
+ "召唤英雄": {
+  "en": "Summon Hero",
+  "ja": "英雄召喚",
+  "es": "Invocar Héroe"
+ },
+ "锻造武器": {
+  "en": "Forge Weapon",
+  "ja": "武器鍛造",
+  "es": "Forjar Arma"
+ },
+ "10连锻造": {
+  "en": "Forge x10",
+  "ja": "10連鍛造",
+  "es": "Forjar x10"
+ },
+ "100连锻造": {
+  "en": "Forge x100",
+  "ja": "100連鍛造",
+  "es": "Forjar x100"
+ },
+ "购买成功！": {
+  "en": "Purchased!",
+  "ja": "購入完了",
+  "es": "¡Comprado!"
+ },
+ "请填写完整": {
+  "en": "Fill in all fields",
+  "ja": "全て入力してください",
+  "es": "Completa todos los campos"
+ },
+ "请先授权": {
+  "en": "Approve first",
+  "ja": "先に承認してください",
+  "es": "Aprueba primero"
+ },
+ "上架中…": {
+  "en": "Listing…",
+  "ja": "出品中…",
+  "es": "Listando…"
+ },
+ "上架成功！": {
+  "en": "Listed!",
+  "ja": "出品完了",
+  "es": "¡Listado!"
+ },
+ "在售": {
+  "en": "On sale",
+  "ja": "販売中",
+  "es": "En venta"
+ },
+ "已售": {
+  "en": "Sold",
+  "ja": "売却済み",
+  "es": "Vendido"
+ },
+ "已取消": {
+  "en": "Cancelled",
+  "ja": "キャンセル済み",
+  "es": "Cancelado"
+ },
+ "市场": {
+  "en": "Market",
+  "ja": "マーケット",
+  "es": "Mercado"
+ },
+ "手续费 / 挂单过期 / 关联设置": {
+  "en": "Fees / expiry / links",
+  "ja": "手数料 / 出品期限 / 連携設定",
+  "es": "Comisión / expiración / enlaces"
+ },
+ "市场状态": {
+  "en": "Market Status",
+  "ja": "市場状態",
+  "es": "Estado del mercado"
+ },
+ "手续费率": {
+  "en": "Fee Rate",
+  "ja": "手数料率",
+  "es": "Tasa de comisión"
+ },
+ "挂单过期时间": {
+  "en": "Order Expiry",
+  "ja": "出品有効期限",
+  "es": "Expiración de órdenes"
+ },
+ "挂单总数": {
+  "en": "Total Orders",
+  "ja": "出品総数",
+  "es": "Total de órdenes"
+ },
+ "在售挂单": {
+  "en": "Active Orders",
+  "ja": "販売中出品",
+  "es": "Órdenes activas"
+ },
+ "分成金库": {
+  "en": "Fee Vault",
+  "ja": "手数料金庫",
+  "es": "Vault de comisiones"
+ },
+ "设置手续费": {
+  "en": "Set Fee",
+  "ja": "手数料設定",
+  "es": "Establecer comisión"
+ },
+ "设置挂单过期": {
+  "en": "Set Expiry",
+  "ja": "出品期限設定",
+  "es": "Establecer expiración"
+ },
+ "关联设置": {
+  "en": "Link Settings",
+  "ja": "連携設定",
+  "es": "Enlaces"
+ },
+ "设置金库": {
+  "en": "Set Vault",
+  "ja": "金庫設定",
+  "es": "Establecer vault"
+ },
+ "设置 NFT 合约": {
+  "en": "Set NFT Contracts",
+  "ja": "NFT コントラクト設定",
+  "es": "Establecer NFT"
+ },
+ "设置市场手续费": {
+  "en": "Set Market Fee",
+  "ja": "市場手数料設定",
+  "es": "Establecer comisión de mercado"
+ },
+ "手续费基点（0~1000，100=1%）": {
+  "en": "Fee basis points (0~1000, 100=1%)",
+  "ja": "手数料bp（0~1000、100=1%）",
+  "es": "Puntos base (0~1000, 100=1%)"
+ },
+ "设置挂单过期时间": {
+  "en": "Set Order Expiry",
+  "ja": "出品期限設定",
+  "es": "Establecer expiración"
+ },
+ "过期天数（默认 7）": {
+  "en": "Expiry days (default 7)",
+  "ja": "有効日数（デフォルト7）",
+  "es": "Días de expiración (por defecto 7)"
+ },
+ "设置市场 NFT 合约": {
+  "en": "Set Market NFT Contracts",
+  "ja": "市場NFTコントラクト設定",
+  "es": "Establecer NFT del mercado"
+ },
+ "Characters 地址": {
+  "en": "Characters Address",
+  "ja": "Characters アドレス",
+  "es": "Dirección Characters"
+ },
+ "Weapons 地址": {
+  "en": "Weapons Address",
+  "ja": "Weapons アドレス",
+  "es": "Dirección Weapons"
+ },
+ "Shards 地址": {
+  "en": "Shards Address",
+  "ja": "Shards アドレス",
+  "es": "Dirección Shards"
+ },
+ "Essence 地址": {
+  "en": "Essence Address",
+  "ja": "Essence アドレス",
+  "es": "Dirección Essence"
+ },
+ "USDT 模式": {
+  "en": "USDT mode",
+  "ja": "USDT モード",
+  "es": "Modo USDT"
+ },
+ "领取中…": {
+  "en": "Claiming…",
+  "ja": "受領中…",
+  "es": "Reclamando…"
+ },
+ "领取成功": {
+  "en": "Claimed",
+  "ja": "受領成功",
+  "es": "Reclamado"
+ },
+ "胜": {
+  "en": "W",
+  "ja": "勝",
+  "es": "V"
+ },
+ "负": {
+  "en": "L",
+  "ja": "負",
+  "es": "D"
+ },
+ "金库": {
+  "en": "Vault",
+  "ja": "金庫",
+  "es": "Vault"
+ },
+ "资金托管 / 奖励模式 / 授权游戏 / 存入": {
+  "en": "Custody / reward mode / games / deposit",
+  "ja": "資金保管 / 報酬モード / ゲーム承認 / 入金",
+  "es": "Custodia / modo / juegos / depósito"
+ },
+ "金库状态": {
+  "en": "Vault Status",
+  "ja": "金庫ステータス",
+  "es": "Estado del vault"
+ },
+ "奖励代币": {
+  "en": "Reward Token",
+  "ja": "報酬トークン",
+  "es": "Token de recompensa"
+ },
+ "奖励模式": {
+  "en": "Reward Mode",
+  "ja": "報酬モード",
+  "es": "Modo de recompensa"
+ },
+ "USDT 地址": {
+  "en": "USDT Address",
+  "ja": "USDT アドレス",
+  "es": "Dirección USDT"
+ },
+ "清理间隔": {
+  "en": "Cleanup Interval",
+  "ja": "クリーン間隔",
+  "es": "Intervalo de limpieza"
+ },
+ "金库余额": {
+  "en": "Vault Balance",
+  "ja": "金庫残高",
+  "es": "Saldo del vault"
+ },
+ "待发放总额(GAME)": {
+  "en": "Pending (GAME)",
+  "ja": "未払総額(GAME)",
+  "es": "Pendiente (GAME)"
+ },
+ "待发放总额(USDT)": {
+  "en": "Pending (USDT)",
+  "ja": "未払総額(USDT)",
+  "es": "Pendiente (USDT)"
+ },
+ "累计发放(GAME)": {
+  "en": "Paid (GAME)",
+  "ja": "累計支払(GAME)",
+  "es": "Pagado (GAME)"
+ },
+ "累计发放(USDT)": {
+  "en": "Paid (USDT)",
+  "ja": "累計支払(USDT)",
+  "es": "Pagado (USDT)"
+ },
+ "授权游戏数": {
+  "en": "Authorized Games",
+  "ja": "承認ゲーム数",
+  "es": "Juegos autorizados"
+ },
+ "我的待领取": {
+  "en": "My Claimable",
+  "ja": "私の受領可能",
+  "es": "Mi reclamo"
+ },
+ "设置奖励代币": {
+  "en": "Set Reward Token",
+  "ja": "報酬トークン設定",
+  "es": "Establecer token"
+ },
+ "切换奖励模式": {
+  "en": "Switch Reward Mode",
+  "ja": "報酬モード切替",
+  "es": "Cambiar modo"
+ },
+ "紧急切换模式": {
+  "en": "Emergency Switch",
+  "ja": "緊急モード切替",
+  "es": "Cambio de emergencia"
+ },
+ "设置清理间隔": {
+  "en": "Set Cleanup Interval",
+  "ja": "クリーン間隔設定",
+  "es": "Establecer intervalo"
+ },
+ "授权游戏（负责发放奖励）": {
+  "en": "Authorize Game (pays rewards)",
+  "ja": "ゲーム承認（報酬支払担当）",
+  "es": "Autorizar juego (paga)"
+ },
+ "添加/移除授权": {
+  "en": "Add/Remove Authorization",
+  "ja": "承認追加/削除",
+  "es": "Añadir/quitar autorización"
+ },
+ "存入资金": {
+  "en": "Deposit Funds",
+  "ja": "資金入金",
+  "es": "Depositar fondos"
+ },
+ "存入 GAME": {
+  "en": "Deposit GAME",
+  "ja": "GAME 入金",
+  "es": "Depositar GAME"
+ },
+ "存入 USDT": {
+  "en": "Deposit USDT",
+  "ja": "USDT 入金",
+  "es": "Depositar USDT"
+ },
+ "应急管理": {
+  "en": "Emergency",
+  "ja": "緊急管理",
+  "es": "Emergencia"
+ },
+ "清理玩家待领取": {
+  "en": "Clean Player Claims",
+  "ja": "プレイヤー未払をクリーン",
+  "es": "Limpiar reclamos"
+ },
+ "暂停控制": {
+  "en": "Pause Control",
+  "ja": "一時停止制御",
+  "es": "Control de pausa"
+ },
+ "设置金库奖励代币（仅一次）": {
+  "en": "Set Vault Reward Token (once)",
+  "ja": "金庫報酬トークン設定（一度のみ）",
+  "es": "Establecer token (una vez)"
+ },
+ "代币合约地址（GameToken）": {
+  "en": "Token Contract (GameToken)",
+  "ja": "トークン契約アドレス（GameToken）",
+  "es": "Contrato de token (GameToken)"
+ },
+ "切换金库奖励模式": {
+  "en": "Switch Vault Reward Mode",
+  "ja": "金庫報酬モード切替",
+  "es": "Cambiar modo del vault"
+ },
+ "GAME 代币模式": {
+  "en": "GAME Token Mode",
+  "ja": "GAME トークンモード",
+  "es": "Modo GAME"
+ },
+ "USDT 合约地址（模式=1 时必填）": {
+  "en": "USDT Address (required in mode 1)",
+  "ja": "USDT 契約アドレス（モード1で必須）",
+  "es": "Dirección USDT (requerida en modo 1)"
+ },
+ "USDT 模式需填写 USDT 合约地址": {
+  "en": "USDT address required in USDT mode",
+  "ja": "USDT モードではUSDT契約アドレスが必要",
+  "es": "Dirección USDT requerida en modo USDT"
+ },
+ "紧急切换模式会跳过“待发放资金需先转换”的检查，确定继续？": {
+  "en": "Emergency switch skips the convert-pending check. Continue?",
+  "ja": "緊急切替は「未払資金の変換」チェックをスキップします。続行しますか？",
+  "es": "El cambio de emergencia omite la verificación de conversión. ¿Continuar?"
+ },
+ "紧急切换奖励模式（跳过检查）": {
+  "en": "Emergency Switch (skip check)",
+  "ja": "緊急報酬モード切替（チェック省略）",
+  "es": "Cambio de emergencia (sin verificación)"
+ },
+ "设置应急清理间隔": {
+  "en": "Set Emergency Cleanup Interval",
+  "ja": "緊急クリーン間隔設定",
+  "es": "Establecer intervalo de emergencia"
+ },
+ "间隔天数（1~30）": {
+  "en": "Interval days (1~30)",
+  "ja": "間隔日数（1~30）",
+  "es": "Días de intervalo (1~30)"
+ },
+ "设置授权游戏": {
+  "en": "Authorize Game",
+  "ja": "ゲーム承認設定",
+  "es": "Autorizar juego"
+ },
+ "游戏合约地址": {
+  "en": "Game Contract Address",
+  "ja": "ゲーム契約アドレス",
+  "es": "Dirección del juego"
+ },
+ "授权": {
+  "en": "Authorize",
+  "ja": "承認",
+  "es": "Autorizar"
+ },
+ "移除授权": {
+  "en": "Remove",
+  "ja": "承認解除",
+  "es": "Quitar"
+ },
+ "添加授权游戏": {
+  "en": "Add Authorized Game",
+  "ja": "承認ゲーム追加",
+  "es": "Añadir juego"
+ },
+ "移除授权游戏": {
+  "en": "Remove Authorized Game",
+  "ja": "承認ゲーム削除",
+  "es": "Quitar juego"
+ },
+ "玩家地址": {
+  "en": "Player Address",
+  "ja": "プレイヤーアドレス",
+  "es": "Dirección del jugador"
+ },
+ "存入数量": {
+  "en": "Deposit Amount",
+  "ja": "入金額",
+  "es": "Cantidad a depositar"
+ },
+ "如 1000": {
+  "en": "e.g. 1000",
+  "ja": "例: 1000",
+  "es": "ej. 1000"
+ },
+ "金库奖励模式": {
+  "en": "Vault Reward Mode",
+  "ja": "金庫報酬モード",
+  "es": "Modo de recompensa del vault"
+ },
+ "GAME 模式": {
+  "en": "GAME Mode",
+  "ja": "GAME モード",
+  "es": "Modo GAME"
+ },
+ "已揭示过了": {
+  "en": "Already revealed",
+  "ja": "既に公開済み",
+  "es": "Ya revelado"
+ },
+ "揭示中": {
+  "en": "Revealing",
+  "ja": "公開中",
+  "es": "Revelando"
+ },
+ "立即揭示": {
+  "en": "Reveal now",
+  "ja": "今すぐ公開",
+  "es": "Revelar ahora"
+ },
+ "钱包未连接": {
+  "en": "Wallet not connected",
+  "ja": "ウォレット未接続",
+  "es": "Wallet no conectada"
+ },
+ "BOSS攻击": {
+  "en": "Boss Attack",
+  "ja": "BOSS攻撃",
+  "es": "Ataque al Jefe"
+ },
+ "精粹强化": {
+  "en": "Essence Enhance",
+  "ja": "エッセンス強化",
+  "es": "Mejora con Esencia"
+ },
+ "碎片合成": {
+  "en": "Shard Compose",
+  "ja": "破片合成",
+  "es": "Componer Fragmentos"
+ },
+ "提交中…": {
+  "en": "Submitting…",
+  "ja": "送信中…",
+  "es": "Enviando…"
+ },
+ "未能解析 commitId": {
+  "en": "Cannot parse commitId",
+  "ja": "commitIdを解析できません",
+  "es": "No se puede leer commitId"
+ },
+ "提交成功！": {
+  "en": "Submitted!",
+  "ja": "送信完了",
+  "es": "¡Enviado!"
+ },
+ "该记录已失效，已自动清理": {
+  "en": "Record expired, auto-cleaned",
+  "ja": "記録失効、自動クリーン済み",
+  "es": "Registro vencido, limpiado"
+ },
+ "清除": {
+  "en": "Clear",
+  "ja": "クリア",
+  "es": "Limpiar"
+ },
+ "待揭示": {
+  "en": "Pending Reveal",
+  "ja": "公開待ち",
+  "es": "Pendiente de revelar"
+ },
+ "待揭示操作": {
+  "en": "Pending Actions",
+  "ja": "公開待ち操作",
+  "es": "Acciones pendientes"
+ },
+ "概览": {
+  "en": "Overview",
+  "ja": "概要",
+  "es": "Resumen"
+ },
+ "全部合约状态与常用入口": {
+  "en": "All contract status & quick entries",
+  "ja": "全コントラクトの状態とクイック入口",
+  "es": "Estado de todos los contratos"
+ },
+ "价格预言机": {
+  "en": "Price Oracle",
+  "ja": "価格オラクル",
+  "es": "Oráculo de precios"
+ },
+ "游戏价格 / 代币报价 / TWAP / 阈值": {
+  "en": "Prices / quotes / TWAP / thresholds",
+  "ja": "ゲーム価格 / トークン価格 / TWAP / 閾値",
+  "es": "Precios / cotizaciones / TWAP / umbrales"
+ },
+ "核心玩法": {
+  "en": "Core Game",
+  "ja": "コアゲーム",
+  "es": "Juego principal"
+ },
+ "怪物配置 / commit 配置 / 关联合约": {
+  "en": "Monsters / commit / linked contracts",
+  "ja": "モンスター設定 / commit設定 / 連携契約",
+  "es": "Monstruos / commit / contratos"
+ },
+ "掉落概率 / 过期块数 / 清理": {
+  "en": "Drop odds / expiry / cleanup",
+  "ja": "ドロップ確率 / 期限ブロック / クリーン",
+  "es": "Probabilidades / expiración / limpieza"
+ },
+ "强化过期块数 / 清理": {
+  "en": "Enhance expiry / cleanup",
+  "ja": "強化期限ブロック / クリーン",
+  "es": "Expiración de mejora / limpieza"
+ },
+ "随机预言机": {
+  "en": "Random Oracle",
+  "ja": "乱数オラクル",
+  "es": "Oráculo aleatorio"
+ },
+ "commit 延迟区间": {
+  "en": "Commit delay range",
+  "ja": "commit 遅延範囲",
+  "es": "Rango de retraso de commit"
+ },
+ "NFT与代币": {
+  "en": "NFT & Tokens",
+  "ja": "NFT & トークン",
+  "es": "NFT y Tokens"
+ },
+ "铸造权限 / 关联 / 代币增发": {
+  "en": "Minting / links / token supply",
+  "ja": "鋳造権限 / 連携 / トークン発行",
+  "es": "Minting / enlaces / suministro"
+ },
+ "我的授权": {
+  "en": "My Allowances",
+  "ja": "私の承認",
+  "es": "Mis autorizaciones"
+ },
+ "NFT / 代币授权查看与撤销": {
+  "en": "View & revoke NFT/token allowances",
+  "ja": "NFT / トークン承認の確認と解除",
+  "es": "Ver/revocar autorizaciones"
+ },
+ "无管理权限": {
+  "en": "No admin permission",
+  "ja": "管理権限なし",
+  "es": "Sin permiso de admin"
+ },
+ "恢复运行": {
+  "en": "Resume",
+  "ja": "再開",
+  "es": "Reanudar"
+ },
+ "暂停合约": {
+  "en": "Pause Contract",
+  "ja": "コントラクト一時停止",
+  "es": "Pausar contrato"
+ },
+ "切换暂停状态": {
+  "en": "Toggle Pause",
+  "ja": "一時停止切替",
+  "es": "Alternar pausa"
+ },
+ "地址格式不正确": {
+  "en": "Invalid address format",
+  "ja": "アドレス形式が正しくありません",
+  "es": "Formato de dirección inválido"
+ },
+ "设置地址": {
+  "en": "Set Address",
+  "ja": "アドレス設定",
+  "es": "Establecer dirección"
+ },
+ "请输入数字": {
+  "en": "Enter a number",
+  "ja": "数字を入力してください",
+  "es": "Ingresa un número"
+ },
+ "设置数值": {
+  "en": "Set Value",
+  "ja": "数値設定",
+  "es": "Establecer valor"
+ },
+ "请输入有效数量": {
+  "en": "Enter a valid amount",
+  "ja": "有効な数量を入力してください",
+  "es": "Ingresa una cantidad válida"
+ },
+ "设置数量": {
+  "en": "Set Amount",
+  "ja": "数量設定",
+  "es": "Establecer cantidad"
+ },
+ "👑 管理员": {
+  "en": "Admin",
+  "ja": "👑 管理者",
+  "es": "👑 Admin"
+ },
+ "🔒 只读": {
+  "en": "Read-only",
+  "ja": "🔒 読み取り専用",
+  "es": "🔒 Solo lectura"
+ },
+ "市场费率": {
+  "en": "Market Fee",
+  "ja": "市場手数料率",
+  "es": "Comisión de mercado"
+ },
+ "英雄成本": {
+  "en": "Hero Cost",
+  "ja": "英雄コスト",
+  "es": "Costo del héroe"
+ },
+ "快捷管理": {
+  "en": "Quick Admin",
+  "ja": "クイック管理",
+  "es": "Admin rápido"
+ },
+ "合约 Owner 一览": {
+  "en": "Contract Owners",
+  "ja": "コントラクトOwner一覧",
+  "es": "Owners de contratos"
+ },
+ "角色制(DEFAULT_ADMIN)": {
+  "en": "Role-based (DEFAULT_ADMIN)",
+  "ja": "ロール制(DEFAULT_ADMIN)",
+  "es": "Por roles (DEFAULT_ADMIN)"
+ },
+ "未配置": {
+  "en": "Not configured",
+  "ja": "未設定",
+  "es": "No configurado"
+ },
+ "无 owner()": {
+  "en": "No owner()",
+  "ja": "owner() なし",
+  "es": "Sin owner()"
+ },
+ "读取失败": {
+  "en": "Read failed",
+  "ja": "読込失敗",
+  "es": "Lectura fallida"
+ },
+ "价格配置（USD）": {
+  "en": "Price Config (USD)",
+  "ja": "価格設定（USD）",
+  "es": "Config de precios (USD)"
+ },
+ "英雄价格": {
+  "en": "Hero Price",
+  "ja": "英雄価格",
+  "es": "Precio del héroe"
+ },
+ "武器价格": {
+  "en": "Weapon Price",
+  "ja": "武器価格",
+  "es": "Precio del arma"
+ },
+ "10连锻造价格": {
+  "en": "Forge x10 Price",
+  "ja": "10連鍛造価格",
+  "es": "Precio forja x10"
+ },
+ "100连锻造价格": {
+  "en": "Forge x100 Price",
+  "ja": "100連鍛造価格",
+  "es": "Precio forja x100"
+ },
+ "修改价格": {
+  "en": "Edit Prices",
+  "ja": "価格変更",
+  "es": "Editar precios"
+ },
+ "市场报价": {
+  "en": "Market Quotes",
+  "ja": "市場レート",
+  "es": "Cotizaciones"
+ },
+ "当前代币价": {
+  "en": "Token Price",
+  "ja": "現在トークン価格",
+  "es": "Precio actual del token"
+ },
+ "TWAP 价格": {
+  "en": "TWAP Price",
+  "ja": "TWAP 価格",
+  "es": "Precio TWAP"
+ },
+ "最近成交价": {
+  "en": "Last Price",
+  "ja": "直近取引価格",
+  "es": "Último precio"
+ },
+ "保底价": {
+  "en": "Floor Price",
+  "ja": "最低保証価格",
+  "es": "Precio mínimo"
+ },
+ "流动性 USD": {
+  "en": "Liquidity USD",
+  "ja": "流動性 USD",
+  "es": "Liquidez USD"
+ },
+ "价格有效性": {
+  "en": "Price Validity",
+  "ja": "価格の有効性",
+  "es": "Validez del precio"
+ },
+ "更新 TWAP": {
+  "en": "Update TWAP",
+  "ja": "TWAP 更新",
+  "es": "Actualizar TWAP"
+ },
+ "实际成本（按当前报价换算）": {
+  "en": "Actual cost (at current quote)",
+  "ja": "実際コスト（現在レート換算）",
+  "es": "Costo real (al precio actual)"
+ },
+ "风控阈值": {
+  "en": "Risk Thresholds",
+  "ja": "リスク閾値",
+  "es": "Umbrales de riesgo"
+ },
+ "最低流动性门槛": {
+  "en": "Min Liquidity",
+  "ja": "最低流動性",
+  "es": "Liquidez mínima"
+ },
+ "报价过期阈值（秒）": {
+  "en": "Quote Expiry (sec)",
+  "ja": "レート有効期限（秒）",
+  "es": "Expiración de cotización (seg)"
+ },
+ "修改阈值": {
+  "en": "Edit Thresholds",
+  "ja": "閾値変更",
+  "es": "Editar umbrales"
+ },
+ "修改保底价": {
+  "en": "Edit Floor",
+  "ja": "最低保証価格変更",
+  "es": "Editar mínimo"
+ },
+ "交易对（Pancake）": {
+  "en": "Pairs (Pancake)",
+  "ja": "ペア（Pancake）",
+  "es": "Pares (Pancake)"
+ },
+ "在管理账户下配置。": {
+  "en": "Configured under admin account.",
+  "ja": "管理アカウントで設定します。",
+  "es": "Se configura en la cuenta admin."
+ },
+ "设置交易对": {
+  "en": "Set Pairs",
+  "ja": "ペア設定",
+  "es": "Establecer pares"
+ },
+ "设置游戏价格（USD）": {
+  "en": "Set Game Prices (USD)",
+  "ja": "ゲーム価格設定（USD）",
+  "es": "Establecer precios (USD)"
+ },
+ "英雄价格（USD）": {
+  "en": "Hero Price (USD)",
+  "ja": "英雄価格（USD）",
+  "es": "Precio héroe (USD)"
+ },
+ "武器价格（USD）": {
+  "en": "Weapon Price (USD)",
+  "ja": "武器価格（USD）",
+  "es": "Precio arma (USD)"
+ },
+ "10连锻造价格（USD）": {
+  "en": "Forge x10 (USD)",
+  "ja": "10連鍛造価格（USD）",
+  "es": "Forja x10 (USD)"
+ },
+ "100连锻造价格（USD）": {
+  "en": "Forge x100 (USD)",
+  "ja": "100連鍛造価格（USD）",
+  "es": "Forja x100 (USD)"
+ },
+ "设置游戏价格": {
+  "en": "Set Game Prices",
+  "ja": "ゲーム価格設定",
+  "es": "Establecer precios"
+ },
+ "设置预言机风控阈值": {
+  "en": "Set Oracle Risk Thresholds",
+  "ja": "オラクルリスク閾値設定",
+  "es": "Establecer umbrales"
+ },
+ "最低流动性 USD（如 1000）": {
+  "en": "Min liquidity USD (e.g. 1000)",
+  "ja": "最低流動性USD（例: 1000）",
+  "es": "Liquidez mínima USD (ej. 1000)"
+ },
+ "报价过期阈值（秒，60~3600）": {
+  "en": "Quote expiry sec (60~3600)",
+  "ja": "レート有効期限（秒、60~3600）",
+  "es": "Expiración (seg, 60~3600)"
+ },
+ "设置风控阈值": {
+  "en": "Set Risk Thresholds",
+  "ja": "リスク閾値設定",
+  "es": "Establecer umbrales"
+ },
+ "设置保底代币价（USD）": {
+  "en": "Set Floor Price (USD)",
+  "ja": "最低保証トークン価格設定（USD）",
+  "es": "Establecer precio mínimo (USD)"
+ },
+ "保底价（USD，如 0.0001）": {
+  "en": "Floor (USD, e.g. 0.0001)",
+  "ja": "最低保証価格（USD、例: 0.0001）",
+  "es": "Mínimo (USD, ej. 0.0001)"
+ },
+ "设置保底价": {
+  "en": "Set Floor",
+  "ja": "最低保証価格設定",
+  "es": "Establecer mínimo"
+ },
+ "设置 Pancake 交易对": {
+  "en": "Set Pancake Pairs",
+  "ja": "Pancake ペア設定",
+  "es": "Establecer pares Pancake"
+ },
+ "代币/USDT 交易对地址": {
+  "en": "Token/USDT Pair",
+  "ja": "トークン/USDT ペアアドレス",
+  "es": "Par Token/USDT"
+ },
+ "代币/WBNB 交易对地址": {
+  "en": "Token/WBNB Pair",
+  "ja": "トークン/WBNB ペアアドレス",
+  "es": "Par Token/WBNB"
+ },
+ "WBNB/USDT 交易对地址": {
+  "en": "WBNB/USDT Pair",
+  "ja": "WBNB/USDT ペアアドレス",
+  "es": "Par WBNB/USDT"
+ },
+ "体力恢复间隔": {
+  "en": "Stamina Regen Interval",
+  "ja": "スタミナ回復間隔",
+  "es": "Intervalo de recuperación"
+ },
+ " 点": {
+  "en": " points",
+  "ja": " 点",
+  "es": " points"
+ },
+ "体力上限": {
+  "en": "Max Stamina",
+  "ja": "スタミナ上限",
+  "es": "Stamina máxima"
+ },
+ "设置恢复间隔": {
+  "en": "Set Regen Interval",
+  "ja": "回復間隔設定",
+  "es": "Establecer intervalo"
+ },
+ "设置体力上限": {
+  "en": "Set Max Stamina",
+  "ja": "スタミナ上限設定",
+  "es": "Establecer stamina máx."
+ },
+ "英雄体力系统": {
+  "en": "Hero Stamina System",
+  "ja": "英雄スタミナシステム",
+  "es": "Sistema de stamina"
+ },
+ "注册玩家数": {
+  "en": "Registered Players",
+  "ja": "登録プレイヤー数",
+  "es": "Jugadores registrados"
+ },
+ "commit 配置": {
+  "en": "Commit Config",
+  "ja": "commit 設定",
+  "es": "Config de commit"
+ },
+ "每人待处理上限": {
+  "en": "Max Pending Per Player",
+  "ja": "一人あたりpending上限",
+  "es": "Máx. pending por jugador"
+ },
+ "清理单个过期": {
+  "en": "Clean One Expired",
+  "ja": "単一期限切れをクリーン",
+  "es": "Limpiar uno vencido"
+ },
+ "怪物图鉴（": {
+  "en": "Monster Bestiary (",
+  "ja": "モンスター図鑑（",
+  "es": "Bestiario ("
+ },
+ "添加怪物": {
+  "en": "Add Monster",
+  "ja": "モンスター追加",
+  "es": "Añadir monstruo"
+ },
+ "更新怪物": {
+  "en": "Update Monster",
+  "ja": "モンスター更新",
+  "es": "Actualizar monstruo"
+ },
+ "排除注册地址": {
+  "en": "Excluded Addresses",
+  "ja": "除外アドレス",
+  "es": "Direcciones excluidas"
+ },
+ "怪物名称": {
+  "en": "Monster Name",
+  "ja": "モンスター名",
+  "es": "Nombre del monstruo"
+ },
+ "如 火焰巨魔": {
+  "en": "e.g. Flame Troll",
+  "ja": "例: フレイムトロール",
+  "es": "ej. Troll de fuego"
+ },
+ "战力（≤1000000）": {
+  "en": "Power (<=1000000)",
+  "ja": "戦力（≤1000000）",
+  "es": "Poder (<=1000000)"
+ },
+ "奖励基数（≤10000，×0.01=基础ELEM）": {
+  "en": "Reward base (<=10000, x0.01=ELEM)",
+  "ja": "報酬基数（≤10000、×0.01=基礎ELEM）",
+  "es": "Base de recompensa (<=10000, x0.01=ELEM)"
+ },
+ "经验（≤10000）": {
+  "en": "EXP (<=10000)",
+  "ja": "経験値（≤10000）",
+  "es": "EXP (<=10000)"
+ },
+ "暂无怪物可更新": {
+  "en": "No monster to update",
+  "ja": "更新できるモンスターなし",
+  "es": "Sin monstruo que actualizar"
+ },
+ "更新怪物（先填 ID）": {
+  "en": "Update Monster (fill ID)",
+  "ja": "モンスター更新（ID入力）",
+  "es": "Actualizar monstruo (rellena ID)"
+ },
+ "怪物 ID（0~": {
+  "en": "Monster ID (0~",
+  "ja": "モンスターID（0~",
+  "es": "ID del monstruo (0~"
+ },
+ "设置核心玩法关联合约": {
+  "en": "Set Core Game Links",
+  "ja": "コアゲーム連携契約設定",
+  "es": "Configurar contratos del juego"
+ },
+ "GameToken 地址": {
+  "en": "GameToken Address",
+  "ja": "GameToken アドレス",
+  "es": "Dirección GameToken"
+ },
+ "Boss 地址": {
+  "en": "Boss Address",
+  "ja": "Boss アドレス",
+  "es": "Dirección Boss"
+ },
+ "Registry 地址（可为 0x0）": {
+  "en": "Registry Address (0x0 ok)",
+  "ja": "Registry アドレス（0x0可）",
+  "es": "Dirección Registry (0x0 ok)"
+ },
+ "设置核心关联": {
+  "en": "Set Core Links",
+  "ja": "コア連携設定",
+  "es": "Establecer enlaces"
+ },
+ "设置排除注册地址": {
+  "en": "Set Excluded Addresses",
+  "ja": "除外アドレス設定",
+  "es": "Establecer exclusiones"
+ },
+ "排除": {
+  "en": "Exclude",
+  "ja": "除外",
+  "es": "Excluir"
+ },
+ "取消排除": {
+  "en": "Un-exclude",
+  "ja": "除外解除",
+  "es": "Quitar exclusión"
+ },
+ "设置排除地址": {
+  "en": "Set Excluded Address",
+  "ja": "除外アドレス設定",
+  "es": "Establecer dirección excluida"
+ },
+ "锻造掉落概率（累计千分比 BP）": {
+  "en": "Forge Drop Odds (cumulative BP)",
+  "ja": "鍛造ドロップ確率（累計BP）",
+  "es": "Probabilidad de forja (BP acum.)"
+ },
+ "修改掉落概率": {
+  "en": "Edit Drop Odds",
+  "ja": "ドロップ確率変更",
+  "es": "Editar probabilidades"
+ },
+ "过期清理": {
+  "en": "Expiry Cleanup",
+  "ja": "期限切れクリーン",
+  "es": "Limpieza de expirados"
+ },
+ "清理全部锻造": {
+  "en": "Clean All Forge",
+  "ja": "全鍛造をクリーン",
+  "es": "Limpiar toda la forja"
+ },
+ "清理全部合成": {
+  "en": "Clean All Composes",
+  "ja": "全合成をクリーン",
+  "es": "Limpiar todas las composiciones"
+ },
+ "清理单个": {
+  "en": "Clean One",
+  "ja": "単一クリーン",
+  "es": "Limpiar uno"
+ },
+ "设置锻造掉落概率（累计 BP，0~10000，逐级递增）": {
+  "en": "Set Forge Odds (cumulative BP, 0~10000, ascending)",
+  "ja": "鍛造ドロップ確率設定（累計BP、0~10000、昇順）",
+  "es": "Establecer probabilidades (BP, 0~10000, ascendente)"
+ },
+ "★1 武器 累计": {
+  "en": "★1 Weapon cum.",
+  "ja": "★1 武器 累計",
+  "es": "★1 Arma acum."
+ },
+ "★2 武器 累计": {
+  "en": "★2 Weapon cum.",
+  "ja": "★2 武器 累計",
+  "es": "★2 Arma acum."
+ },
+ "★3 武器 累计": {
+  "en": "★3 Weapon cum.",
+  "ja": "★3 武器 累計",
+  "es": "★3 Arma acum."
+ },
+ "★4 武器 累计": {
+  "en": "★4 Weapon cum.",
+  "ja": "★4 武器 累計",
+  "es": "★4 Arma acum."
+ },
+ "★5 武器 累计": {
+  "en": "★5 Weapon cum.",
+  "ja": "★5 武器 累計",
+  "es": "★5 Arma acum."
+ },
+ "碎片1 累计": {
+  "en": "Shard1 cum.",
+  "ja": "破片1 累計",
+  "es": "Fragmento1 acum."
+ },
+ "碎片2 累计": {
+  "en": "Shard2 cum.",
+  "ja": "破片2 累計",
+  "es": "Fragmento2 acum."
+ },
+ "碎片3 累计": {
+  "en": "Shard3 cum.",
+  "ja": "破片3 累計",
+  "es": "Fragmento3 acum."
+ },
+ "碎片4 累计": {
+  "en": "Shard4 cum.",
+  "ja": "破片4 累計",
+  "es": "Fragmento4 acum."
+ },
+ "碎片5 累计": {
+  "en": "Shard5 cum.",
+  "ja": "破片5 累計",
+  "es": "Fragmento5 acum."
+ },
+ "设置掉落概率": {
+  "en": "Set Drop Odds",
+  "ja": "ドロップ確率設定",
+  "es": "Establecer probabilidades"
+ },
+ "清理过期锻造": {
+  "en": "Clean Expired Forge",
+  "ja": "期限切れ鍛造をクリーン",
+  "es": "Limpiar forja vencida"
+ },
+ "清理过期合成": {
+  "en": "Clean Expired Composes",
+  "ja": "期限切れ合成をクリーン",
+  "es": "Limpiar composiciones vencidas"
+ },
+ "设置锻造厂关联合约": {
+  "en": "Set Forge Shop Links",
+  "ja": "鍛造所連携契約設定",
+  "es": "Configurar contratos de la forja"
+ },
+ "设置锻造关联": {
+  "en": "Set Forge Links",
+  "ja": "鍛造連携設定",
+  "es": "Establecer enlaces de forja"
+ },
+ "强化 commit 配置": {
+  "en": "Enhance Commit Config",
+  "ja": "強化 commit 設定",
+  "es": "Config de commit de mejora"
+ },
+ "精粹强化手续费": {
+  "en": "Essence Enhance Fee",
+  "ja": "エッセンス強化手数料",
+  "es": "Comisión de mejora con esencia"
+ },
+ "1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 GAME·次": {
+  "en": "T1 2 / T2 10 / T3 30 / T4 80 GAME·per",
+  "ja": "1階 2 / 2階 10 / 3階 30 / 4階 80 GAME·回",
+  "es": "T1 2 / T2 10 / T3 30 / T4 80 GAME·por"
+ },
+ "高阶精粹合成": {
+  "en": "High-tier Essence Compose",
+  "ja": "高階エッセンス合成",
+  "es": "Componer esencia alta"
+ },
+ "3阶→4阶：500 GAME·次": {
+  "en": "T3→T4: 500 GAME·per",
+  "ja": "3階→4階：500 GAME·回",
+  "es": "T3→T4: 500 GAME·por"
+ },
+ "清理全部": {
+  "en": "Clean All",
+  "ja": "全クリーン",
+  "es": "Limpiar todo"
+ },
+ "清理过期强化": {
+  "en": "Clean Expired Enhances",
+  "ja": "期限切れ強化をクリーン",
+  "es": "Limpiar mejoras vencidas"
+ },
+ "设置强化铺关联合约": {
+  "en": "Set Enhance Shop Links",
+  "ja": "強化屋連携契約設定",
+  "es": "Configurar contratos de mejora"
+ },
+ "设置强化关联": {
+  "en": "Set Enhance Links",
+  "ja": "強化連携設定",
+  "es": "Establecer enlaces de mejora"
+ },
+ "设置英雄体力恢复间隔": {
+  "en": "Set Hero Stamina Regen",
+  "ja": "英雄スタミナ回復間隔設定",
+  "es": "Establecer intervalo de recuperación"
+ },
+ "恢复间隔（分钟，1 ~ 10080 = 7天）": {
+  "en": "Regen interval (min, 1 ~ 10080 = 7d)",
+  "ja": "回復間隔（分、1 ~ 10080 = 7日）",
+  "es": "Intervalo (min, 1 ~ 10080 = 7d)"
+ },
+ "设置体力恢复间隔": {
+  "en": "Set Regen Interval",
+  "ja": "スタミナ回復間隔設定",
+  "es": "Establecer intervalo"
+ },
+ "设置英雄体力上限": {
+  "en": "Set Hero Max Stamina",
+  "ja": "英雄スタミナ上限設定",
+  "es": "Establecer stamina máx. del héroe"
+ },
+ "体力上限（1 ~ 20）": {
+  "en": "Max stamina (1 ~ 20)",
+  "ja": "スタミナ上限（1 ~ 20）",
+  "es": "Stamina máx. (1 ~ 20)"
+ },
+ "最小延迟（块）": {
+  "en": "Min Delay (blocks)",
+  "ja": "最小遅延（ブロック）",
+  "es": "Retraso mín. (bloques)"
+ },
+ "最大延迟（块）": {
+  "en": "Max Delay (blocks)",
+  "ja": "最大遅延（ブロック）",
+  "es": "Retraso máx. (bloques)"
+ },
+ "已提交总数": {
+  "en": "Total Commits",
+  "ja": "コミット総数",
+  "es": "Total de commits"
+ },
+ "约束范围": {
+  "en": "Constraint Range",
+  "ja": "制約範囲",
+  "es": "Rango de restricción"
+ },
+ "修改延迟区间": {
+  "en": "Edit Delay Range",
+  "ja": "遅延範囲変更",
+  "es": "Editar rango"
+ },
+ "设置 commit 延迟区间（块）": {
+  "en": "Set Commit Delay Range (blocks)",
+  "ja": "commit 遅延範囲設定（ブロック）",
+  "es": "Establecer rango de retraso (bloques)"
+ },
+ "最小延迟（3~500）": {
+  "en": "Min delay (3~500)",
+  "ja": "最小遅延（3~500）",
+  "es": "Retraso mín. (3~500)"
+ },
+ "最大延迟（≤500）": {
+  "en": "Max delay (<=500)",
+  "ja": "最大遅延（≤500）",
+  "es": "Retraso máx. (<=500)"
+ },
+ "设置延迟区间": {
+  "en": "Set Delay Range",
+  "ja": "遅延範囲設定",
+  "es": "Establecer rango"
+ },
+ "我是否铸造者": {
+  "en": "Am I Minter",
+  "ja": "私は鋳造者か",
+  "es": "¿Soy minter?"
+ },
+ "设为铸造者": {
+  "en": "Set Minter",
+  "ja": "鋳造者に設定",
+  "es": "Establecer minter"
+ },
+ "取消铸造者": {
+  "en": "Remove Minter",
+  "ja": "鋳造者解除",
+  "es": "Quitar minter"
+ },
+ "🪙 GameToken（游戏代币）": {
+  "en": "GameToken",
+  "ja": "🪙 GameToken（ゲームトークン）",
+  "es": "🪙 GameToken"
+ },
+ "设置 game": {
+  "en": "Set Game",
+  "ja": "game 設定",
+  "es": "Establecer game"
+ },
+ "设置 registry": {
+  "en": "Set Registry",
+  "ja": "registry 設定",
+  "es": "Establecer registry"
+ },
+ "设置 blacksmith": {
+  "en": "Set Blacksmith",
+  "ja": "blacksmith 設定",
+  "es": "Establecer blacksmith"
+ },
+ "总供应": {
+  "en": "Total Supply",
+  "ja": "総供給",
+  "es": "Suministro total"
+ },
+ "铸造代币": {
+  "en": "Mint Tokens",
+  "ja": "トークン鋳造",
+  "es": "Acuñar tokens"
+ },
+ "销毁我的代币": {
+  "en": "Burn My Tokens",
+  "ja": "自分のトークン焼却",
+  "es": "Quemar mis tokens"
+ },
+ "铸造给（地址）": {
+  "en": "Mint to (address)",
+  "ja": "鋳造先（アドレス）",
+  "es": "Acuñar a (dirección)"
+ },
+ "如 10000": {
+  "en": "e.g. 10000",
+  "ja": "例: 10000",
+  "es": "ej. 10000"
+ },
+ "销毁数量（仅销毁您本人持有的代币）": {
+  "en": "Burn amount (only your own)",
+  "ja": "焼却数（自分が保有するトークンのみ）",
+  "es": "Cantidad a quemar (solo los tuyos)"
+ },
+ "如 100": {
+  "en": "e.g. 100",
+  "ja": "例: 100",
+  "es": "ej. 100"
+ },
+ "？此操作不可逆。": {
+  "en": "? This cannot be undone.",
+  "ja": "？この操作は元に戻せません。",
+  "es": "¿? Esto no se puede deshacer."
+ },
+ "销毁代币": {
+  "en": "Burn Tokens",
+  "ja": "トークン焼却",
+  "es": "Quemar tokens"
+ },
+ "已授权": {
+  "en": "Approved",
+  "ja": "承認済み",
+  "es": "Aprobado"
+ },
+ "未授权": {
+  "en": "Not Approved",
+  "ja": "未承認",
+  "es": "No aprobado"
+ },
+ "NFT 授权": {
+  "en": "NFT Allowances",
+  "ja": "NFT 承認",
+  "es": "Autorizaciones NFT"
+ },
+ "代币授权（": {
+  "en": "Token Allowances (",
+  "ja": "トークン承認（",
+  "es": "Autorizaciones de token ("
+ },
+ "取消 NFT 授权": {
+  "en": "Revoke NFT Allowance",
+  "ja": "NFT 承認解除",
+  "es": "Revocar NFT"
+ },
+ "撤销代币授权": {
+  "en": "Revoke Token Allowance",
+  "ja": "トークン承認解除",
+  "es": "Revocar token"
+ },
+ "撤销全部代币授权": {
+  "en": "Revoke All Token Allowances",
+  "ja": "全トークン承認解除",
+  "es": "Revocar todos los tokens"
+ },
+ "取消全部 NFT 授权": {
+  "en": "Revoke All NFT Allowances",
+  "ja": "全NFT承認解除",
+  "es": "Revocar todos los NFT"
+ },
+ "确认取消对 Marketplace / ForgeShop / EnhanceShop 的所有 NFT 授权？": {
+  "en": "Revoke ALL NFT allowances for Marketplace / ForgeShop / EnhanceShop?",
+  "ja": "Marketplace / ForgeShop / EnhanceShop の全NFT承認を解除しますか？",
+  "es": "¿Revocar TODAS las autorizaciones NFT de Marketplace / ForgeShop / EnhanceShop?"
+ },
+ "确认撤销对全部合约的代币授权？": {
+  "en": "Revoke token allowances for ALL contracts?",
+  "ja": "全コントラクトのトークン承認を解除しますか？",
+  "es": "¿Revocar tokens de TODOS los contratos?"
+ },
+ "设置关联": {
+  "en": "Set Links",
+  "ja": "連携設定",
+  "es": "Establecer enlaces"
+ },
+ "向 BOSS 合约注入奖励代币（按当前金库模式）。": {
+  "en": "Inject reward tokens into Boss (per vault mode).",
+  "ja": "BOSS契約に報酬トークンを注入（現在の金庫モードに従う）。",
+  "es": "Inyectar recompensas al jefe (según modo)."
+ },
+ "暂停后金库存入/领取全部冻结。": {
+  "en": "Deposits & claims frozen while paused.",
+  "ja": "一時停止中は金庫への入金/受領が全て凍結されます。",
+  "es": "Depósitos y reclamos congelados al pausar."
+ },
+ "金库用于接收交易手续费分成；四个 NFT 合约用于校验挂单。": {
+  "en": "Vault receives fee share; 4 NFT contracts verify orders.",
+  "ja": "金庫は取引手数料を受け取り、4つのNFT契約が出品を検証します。",
+  "es": "El vault recibe comisiones; 4 NFT verifican órdenes."
+ },
+ "交易对更新后需重新调用 updateTwap 生效。": {
+  "en": "Call updateTwap after changing pairs.",
+  "ja": "ペア更新後は updateTwap を再実行してください。",
+  "es": "Llama a updateTwap tras cambiar pares."
+ },
+ "BOSS 尚未开启": {
+  "en": "Boss not started",
+  "ja": "BOSS 未開始",
+  "es": "El jefe no ha comenzado"
+ },
+ "每日自动领取": {
+  "en": "Auto-claim daily",
+  "ja": "毎日自動受領",
+  "es": "Reclamo automático diario"
+ },
+ "熔炼": {
+  "en": "Smelt",
+  "ja": "溶解",
+  "es": "Fundir"
+ },
+ "合成": {
+  "en": "Compose",
+  "ja": "合成",
+  "es": "Componer"
+ },
+ "战斗": {
+  "en": "Fight",
+  "ja": "戦闘",
+  "es": "Luchar"
+ },
+ "排行": {
+  "en": "Ranking",
+  "ja": "ランキング",
+  "es": "Ranking"
+ },
+ "图鉴": {
+  "en": "Bestiary",
+  "ja": "図鑑",
+  "es": "Bestiario"
+ },
+ "管理": {
+  "en": "Admin",
+  "ja": "管理",
+  "es": "Admin"
+ },
+ "我的英雄": {
+  "en": "My Heroes",
+  "ja": "私の英雄",
+  "es": "Mis Héroes"
+ },
+ "最多持有": {
+  "en": "Hold up to ",
+  "ja": "最大所持",
+  "es": "Máximo de "
+ },
+ "个英雄。commit 后自动揭示。": {
+  "en": " heroes. Auto-revealed after commit.",
+  "ja": "体の英雄。commit後に自動公開されます。",
+  "es": " héroes. Se revelan tras el commit."
+ },
+ "我的武器": {
+  "en": "My Weapons",
+  "ja": "私の武器",
+  "es": "Mis Armas"
+ },
+ "铁匠铺 · 锻造": {
+  "en": "Forge · Blacksmith",
+  "ja": "鍛冶屋 · 鍛造",
+  "es": "Forja · Herrería"
+ },
+ "单抽": {
+  "en": "Single",
+  "ja": "単発",
+  "es": "Individual"
+ },
+ "· 十连": {
+  "en": " · x10",
+  "ja": "· 10連",
+  "es": "· x10"
+ },
+ "· 百连": {
+  "en": " · x100",
+  "ja": "· 100連",
+  "es": "· x100"
+ },
+ "（另需 commit 押金 5%）。": {
+  "en": "(5% commit deposit required).",
+  "ja": "（別途 commit 保証金 5% が必要）。",
+  "es": "(se requiere 5% de depósito)."
+ },
+ "🪙 单抽锻造": {
+  "en": "Forge x1",
+  "ja": "🪙 単発鍛造",
+  "es": "🪙 Forjar x1"
+ },
+ "随机获得 1 件结果": {
+  "en": "Randomly get 1 result",
+  "ja": "ランダムに1件獲得",
+  "es": "Obtén 1 resultado aleatorio"
+ },
+ "🔥 十连锻造": {
+  "en": "Forge x10",
+  "ja": "🔥 10連鍛造",
+  "es": "🔥 Forjar x10"
+ },
+ "逐张展示 10 件结果": {
+  "en": "Reveal 10 results one by one",
+  "ja": "10件を1枚ずつ公開",
+  "es": "Revela 10 resultados uno a uno"
+ },
+ "十连": {
+  "en": "x10",
+  "ja": "10連",
+  "es": "x10"
+ },
+ "💎 百连锻造": {
+  "en": "Forge x100",
+  "ja": "💎 100連鍛造",
+  "es": "💎 Forjar x100"
+ },
+ "一次 100 件结果": {
+  "en": "100 results at once",
+  "ja": "一度に100件",
+  "es": "100 resultados a la vez"
+ },
+ "百连": {
+  "en": "x100",
+  "ja": "100連",
+  "es": "x100"
+ },
+ "🌿 碎片合成武器": {
+  "en": "Compose Weapon from Shards",
+  "ja": "🌿 破片で武器合成",
+  "es": "🌿 Componer arma con fragmentos"
+ },
+ "目标星级": {
+  "en": "Target Star",
+  "ja": "目標星",
+  "es": "Estrella objetivo"
+ },
+ "1 星（需碎片 1 × 10）": {
+  "en": "1★ (10× shard 1)",
+  "ja": "1星（破片1 × 10）",
+  "es": "1★ (10× fragmento 1)"
+ },
+ "2 星（需碎片 2 × 10）": {
+  "en": "2★ (10× shard 2)",
+  "ja": "2星（破片2 × 10）",
+  "es": "2★ (10× fragmento 2)"
+ },
+ "3 星（需碎片 3 × 10）": {
+  "en": "3★ (10× shard 3)",
+  "ja": "3星（破片3 × 10）",
+  "es": "3★ (10× fragmento 3)"
+ },
+ "4 星（需碎片 4 × 10）": {
+  "en": "4★ (10× shard 4)",
+  "ja": "4星（破片4 × 10）",
+  "es": "4★ (10× fragmento 4)"
+ },
+ "5 星（需碎片 5 × 10）": {
+  "en": "5★ (10× shard 5)",
+  "ja": "5星（破片5 × 10）",
+  "es": "5★ (10× fragmento 5)"
+ },
+ "合成武器": {
+  "en": "Compose Weapon",
+  "ja": "武器合成",
+  "es": "Componer Arma"
+ },
+ "熔炼武器 → 精粹": {
+  "en": "Smelt Weapon → Essence",
+  "ja": "武器溶解 → エッセンス",
+  "es": "Fundir Arma → Esencia"
+ },
+ "熔炼所选 (": {
+  "en": "Smelt selected (",
+  "ja": "選択を溶解 (",
+  "es": "Fundir selección ("
+ },
+ "选择要熔炼的武器": {
+  "en": "Select weapons to smelt",
+  "ja": "溶解する武器を選択",
+  "es": "Selecciona armas a fundir"
+ },
+ "精粹合成（50 合 1）": {
+  "en": "Essence Compose (50:1)",
+  "ja": "エッセンス合成（50→1）",
+  "es": "Componer esencia (50:1)"
+ },
+ "🧪 合成配方": {
+  "en": "Compose Recipe",
+  "ja": "🧪 合成レシピ",
+  "es": "🧪 Receta"
+ },
+ "消耗低阶精粹": {
+  "en": "Consume lower essence",
+  "ja": "低階エッセンス消費",
+  "es": "Consume esencia baja"
+ },
+ "获得高阶精粹": {
+  "en": "Get higher essence",
+  "ja": "高階エッセンス獲得",
+  "es": "Obtén esencia alta"
+ },
+ "合成次数（每次消耗 50 个低阶）": {
+  "en": "Times (50 lower each)",
+  "ja": "合成回数（毎回50個消費）",
+  "es": "Veces (50 bajas cada vez)"
+ },
+ "执行合成": {
+  "en": "Compose",
+  "ja": "合成実行",
+  "es": "Componer"
+ },
+ "野外战斗": {
+  "en": "Field Battle",
+  "ja": "野外戦闘",
+  "es": "Batalla de campo"
+ },
+ "出战英雄": {
+  "en": "Hero",
+  "ja": "出撃英雄",
+  "es": "Héroe"
+ },
+ "出战武器": {
+  "en": "Weapon",
+  "ja": "出撃武器",
+  "es": "Arma"
+ },
+ "选择怪物": {
+  "en": "Pick Monster",
+  "ja": "モンスター選択",
+  "es": "Elegir Monstruo"
+ },
+ "点击选择挑战目标": {
+  "en": "Click to pick a target",
+  "ja": "クリックで挑戦対象を選択",
+  "es": "Elige un objetivo"
+ },
+ "战前分析": {
+  "en": "Pre-battle Analysis",
+  "ja": "戦前分析",
+  "es": "Análisis previo"
+ },
+ "选择英雄、武器与怪物后自动分析": {
+  "en": "Auto analysis after picking all",
+  "ja": "英雄・武器・モンスター選択後に自動分析",
+  "es": "Análisis automático tras elegir todo"
+ },
+ "开始战斗": {
+  "en": "Start Battle",
+  "ja": "戦闘開始",
+  "es": "Comenzar Batalla"
+ },
+ "预估胜率": {
+  "en": "Win Rate",
+  "ja": "予想勝率",
+  "es": "% de victoria estimado"
+ },
+ "选择英雄、武器与怪物后开战": {
+  "en": "Fight after picking all",
+  "ja": "英雄・武器・モンスター選択後に開戦",
+  "es": "Luchar tras elegir todo"
+ },
+ "开战": {
+  "en": "Fight",
+  "ja": "開戦",
+  "es": "Luchar"
+ },
+ "世界 BOSS": {
+  "en": "World Boss",
+  "ja": "世界BOSS",
+  "es": "Jefe Mundial"
+ },
+ "结算奖励": {
+  "en": "Claim Rewards",
+  "ja": "報酬受領",
+  "es": "Reclamar"
+ },
+ "在售列表": {
+  "en": "On Sale",
+  "ja": "販売中",
+  "es": "En venta"
+ },
+ "上架": {
+  "en": "List",
+  "ja": "出品",
+  "es": "Listar"
+ },
+ "我的上架": {
+  "en": "My Listings",
+  "ja": "出品中",
+  "es": "Mis listados"
+ },
+ "手续费": {
+  "en": "Fee",
+  "ja": "手数料",
+  "es": "Comisión"
+ },
+ "🏷️ 上架出售": {
+  "en": "List for Sale",
+  "ja": "出品",
+  "es": "Vender"
+ },
+ "NFT 类型": {
+  "en": "NFT Type",
+  "ja": "NFTタイプ",
+  "es": "Tipo NFT"
+ },
+ "选择资产": {
+  "en": "Select Asset",
+  "ja": "資産選択",
+  "es": "Selecciona activo"
+ },
+ "价格（GameToken）": {
+  "en": "Price (GameToken)",
+  "ja": "価格（GameToken）",
+  "es": "Precio (GameToken)"
+ },
+ "第 1 步：授权 NFT": {
+  "en": "Step 1: Approve NFT",
+  "ja": "ステップ1：NFT承認",
+  "es": "Paso 1: Aprobar NFT"
+ },
+ "授权 NFT": {
+  "en": "Approve NFT",
+  "ja": "NFT承認",
+  "es": "Aprobar NFT"
+ },
+ "第 2 步：确认上架": {
+  "en": "Step 2: Confirm Listing",
+  "ja": "ステップ2：出品確認",
+  "es": "Paso 2: Confirmar"
+ },
+ "待领取奖励": {
+  "en": "Claimable Rewards",
+  "ja": "受領可能報酬",
+  "es": "Recompensas"
+ },
+ "领取": {
+  "en": "Claim",
+  "ja": "受領",
+  "es": "Reclamar"
+ },
+ "排行榜": {
+  "en": "Leaderboard",
+  "ja": "ランキング",
+  "es": "Clasificación"
+ },
+ "玩家": {
+  "en": "Player",
+  "ja": "プレイヤー",
+  "es": "Jugador"
+ },
+ "胜利": {
+  "en": "Wins",
+  "ja": "勝利",
+  "es": "Victorias"
+ },
+ "场次": {
+  "en": "Matches",
+  "ja": "試合数",
+  "es": "Partidas"
+ },
+ "胜率": {
+  "en": "Win Rate",
+  "ja": "勝率",
+  "es": "% de victorias"
+ },
+ "总战力": {
+  "en": "Total Power",
+  "ja": "総戦力",
+  "es": "Poder total"
+ },
+ "我的战斗记录": {
+  "en": "My Battle Records",
+  "ja": "戦闘履歴",
+  "es": "Mis batallas"
+ },
+ "角色 & 怪物": {
+  "en": "Heroes & Monsters",
+  "ja": "キャラ & モンスター",
+  "es": "Héroes y Monstruos"
+ },
+ "五行英雄与链上怪物的图鉴资料，点击战斗页可直接选择对应怪物挑战。": {
+  "en": "Bestiary of heroes & on-chain monsters; pick a monster directly in Fight.",
+  "ja": "五行英雄とオンチェーンモンスターの図鑑。戦闘ページで直接モンスターを選択できます。",
+  "es": "Bestiario de héroes y monstruos; elige uno directamente en Luchar."
+ },
+ "管理后台": {
+  "en": "Admin Panel",
+  "ja": "管理パネル",
+  "es": "Panel Admin"
+ },
+ "自动检测当前账户对各合约的 owner 权限。": {
+  "en": "Auto-detect owner permissions across contracts.",
+  "ja": "各コントラクトのowner権限を自動検出します。",
+  "es": "Detecta permisos de owner en todos los contratos."
+ },
+ "元素英雄": {
+  "en": "Element Heroes",
+  "ja": "エレメントヒーローズ",
+  "es": "Element Heroes"
+ }
+}

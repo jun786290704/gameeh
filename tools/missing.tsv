@@ -1,0 +1,353 @@
+随机数预言机配置加载失败，使用默认值	Oracle config load failed, using defaults
+BSC 测试网	BSC Testnet
+⏳ 太早了：还需等待若干区块	Too early: wait for blocks
+⌛ 太晚了：commit 已过期	Too late: commit expired
+🔐 secret/salt 与 commit 不匹配	Secret/salt mismatch
+✅ 已经揭示过了	Already revealed
+❌ 不是本人 commit	Not your commit
+❌ 不是本人的英雄/武器，或 pending 已被清理	Not your hero/weapon, or pending cleaned
+🚫 英雄数量已达上限(4)	Hero limit reached (4)
+🔝 该武器强化已达上限	Weapon enhancement maxed
+🧪 该星级武器不可使用此阶精粹	Essence tier not usable here
+⏰ 不在 BOSS 攻击窗口期内	Outside boss attack window
+💀 BOSS 已被击败	Boss defeated
+⏳ 待处理操作过多，请先揭示或等待清理	Too many pending ops, reveal or wait
+⏳ BOSS 轮次尚未结束	Boss round not ended
+✅ 本轮的奖励已结算过了	Round rewards settled
+⚡ 英雄体力不足	Not enough stamina
+⏳ BOSS 新一轮需等待 7 天冷却	New round needs 7-day cooldown
+💰 余额或授权不足	Insufficient balance or allowance
+🔧 ABI 不匹配，请 Ctrl+F5	ABI mismatch, hard refresh
+Gas 余额不足	Insufficient gas
+Nonce 冲突，请刷新	Nonce conflict, refresh
+未配置 	Not configured 
+🗡️ 飞剑	Sword
+冲击	Impact
+🌪️ 旋风斩	Whirlwind
+✨ 星光弹	Star bolt
+👹 魔焰	Hellfire
+🦷 尖牙撕咬	Fang bite
+💀 骨刺	Bone spike
+🌋 熔岩弹	Lava bolt
+开轮 / 奖池 / 攻击待处理配置	Round / pool / pending attack config
+BOSS 轮次	Boss Round
+当前轮次	Current Round
+BOSS 血量	Boss HP
+进度	Progress
+奖池	Prize Pool
+总伤害	Total Damage
+武器得主	Weapon Winner
+本轮我的可领	My claim this round
+开启新一轮	Start New Round
+注入奖池	Top up pool
+确认开启新一轮世界BOSS？	Start a new World Boss round?
+开启新一轮 BOSS	Start New Boss Round
+BOSS 血量 HP（1000~10000000）	Boss HP (1000~10000000)
+开启 BOSS 轮次	Start Boss Round
+注入 BOSS 奖池	Top up Boss Pool
+注入数量	Amount
+如 5000	e.g. 5000
+清理过期攻击	Clean Expired Attacks
+设置 BOSS 关联合约	Set Boss Linked Contracts
+RandomOracle 地址	RandomOracle Address
+Vault 地址	Vault Address
+PriceOracle 地址	PriceOracle Address
+设置 BOSS 关联	Set Boss Links
+攻击待处理配置	Pending Attack Config
+过期块数	Expiry Blocks
+每人上限	Max Per Player
+修改过期块数	Edit Expiry Blocks
+修改每人上限	Edit Max Per Player
+奖池管理	Pool Management
+清理全部过期攻击	Clean All Expired Attacks
+英雄召唤成功	Hero summoned
+合成完成	Composed
+合成成功	Composed
+请先勾选武器	Select weapons first
+熔炼中…	Smelting…
+熔炼完成	Smelted
+合成中…	Composing…
+锻造	Forge
+锻造厂	Forge Shop
+强化铺	Enhance Shop
+市场	Market
+手续费 / 挂单过期 / 关联设置	Fees / expiry / links
+市场状态	Market Status
+手续费率	Fee Rate
+挂单过期时间	Order Expiry
+挂单总数	Total Orders
+在售挂单	Active Orders
+分成金库	Fee Vault
+设置手续费	Set Fee
+设置挂单过期	Set Expiry
+关联设置	Link Settings
+设置金库	Set Vault
+设置 NFT 合约	Set NFT Contracts
+设置市场手续费	Set Market Fee
+手续费基点（0~1000，100=1%）	Fee basis points (0~1000, 100=1%)
+设置挂单过期时间	Set Order Expiry
+过期天数（默认 7）	Expiry days (default 7)
+设置市场 NFT 合约	Set Market NFT Contracts
+Characters 地址	Characters Address
+Weapons 地址	Weapons Address
+Shards 地址	Shards Address
+Essence 地址	Essence Address
+USDT 模式	USDT mode
+领取中…	Claiming…
+领取成功	Claimed
+胜	W
+负	L
+金库	Vault
+资金托管 / 奖励模式 / 授权游戏 / 存入	Custody / reward mode / games / deposit
+金库状态	Vault Status
+奖励代币	Reward Token
+奖励模式	Reward Mode
+USDT 地址	USDT Address
+清理间隔	Cleanup Interval
+金库余额	Vault Balance
+待发放总额(GAME)	Pending (GAME)
+待发放总额(USDT)	Pending (USDT)
+累计发放(GAME)	Paid (GAME)
+累计发放(USDT)	Paid (USDT)
+授权游戏数	Authorized Games
+我的待领取	My Claimable
+设置奖励代币	Set Reward Token
+切换奖励模式	Switch Reward Mode
+紧急切换模式	Emergency Switch
+设置清理间隔	Set Cleanup Interval
+授权游戏（负责发放奖励）	Authorize Game (pays rewards)
+添加/移除授权	Add/Remove Authorization
+存入资金	Deposit Funds
+存入 GAME	Deposit GAME
+存入 USDT	Deposit USDT
+应急管理	Emergency
+清理玩家待领取	Clean Player Claims
+暂停控制	Pause Control
+设置金库奖励代币（仅一次）	Set Vault Reward Token (once)
+代币合约地址（GameToken）	Token Contract (GameToken)
+切换金库奖励模式	Switch Vault Reward Mode
+GAME 代币模式	GAME Token Mode
+USDT 合约地址（模式=1 时必填）	USDT Address (required in mode 1)
+USDT 模式需填写 USDT 合约地址	USDT address required in USDT mode
+紧急切换模式会跳过“待发放资金需先转换”的检查，确定继续？	Emergency switch skips the convert-pending check. Continue?
+紧急切换奖励模式（跳过检查）	Emergency Switch (skip check)
+设置应急清理间隔	Set Emergency Cleanup Interval
+间隔天数（1~30）	Interval days (1~30)
+设置授权游戏	Authorize Game
+游戏合约地址	Game Contract Address
+授权	Authorize
+移除授权	Remove
+添加授权游戏	Add Authorized Game
+移除授权游戏	Remove Authorized Game
+玩家地址	Player Address
+存入数量	Deposit Amount
+如 1000	e.g. 1000
+金库奖励模式	Vault Reward Mode
+GAME 模式	GAME Mode
+概览	Overview
+全部合约状态与常用入口	All contract status & quick entries
+价格预言机	Price Oracle
+游戏价格 / 代币报价 / TWAP / 阈值	Prices / quotes / TWAP / thresholds
+核心玩法	Core Game
+怪物配置 / commit 配置 / 关联合约	Monsters / commit / linked contracts
+掉落概率 / 过期块数 / 清理	Drop odds / expiry / cleanup
+强化过期块数 / 清理	Enhance expiry / cleanup
+随机预言机	Random Oracle
+commit 延迟区间	Commit delay range
+NFT与代币	NFT & Tokens
+铸造权限 / 关联 / 代币增发	Minting / links / token supply
+我的授权	My Allowances
+NFT / 代币授权查看与撤销	View & revoke NFT/token allowances
+无管理权限	No admin permission
+恢复运行	Resume
+暂停合约	Pause Contract
+切换暂停状态	Toggle Pause
+地址格式不正确	Invalid address format
+设置地址	Set Address
+请输入数字	Enter a number
+设置数值	Set Value
+请输入有效数量	Enter a valid amount
+设置数量	Set Amount
+👑 管理员	Admin
+🔒 只读	Read-only
+市场费率	Market Fee
+英雄成本	Hero Cost
+快捷管理	Quick Admin
+合约 Owner 一览	Contract Owners
+角色制(DEFAULT_ADMIN)	Role-based (DEFAULT_ADMIN)
+未配置	Not configured
+无 owner()	No owner()
+读取失败	Read failed
+价格配置（USD）	Price Config (USD)
+英雄价格	Hero Price
+武器价格	Weapon Price
+10连锻造价格	Forge x10 Price
+100连锻造价格	Forge x100 Price
+修改价格	Edit Prices
+市场报价	Market Quotes
+当前代币价	Token Price
+TWAP 价格	TWAP Price
+最近成交价	Last Price
+保底价	Floor Price
+流动性 USD	Liquidity USD
+价格有效性	Price Validity
+更新 TWAP	Update TWAP
+实际成本（按当前报价换算）	Actual cost (at current quote)
+风控阈值	Risk Thresholds
+最低流动性门槛	Min Liquidity
+报价过期阈值（秒）	Quote Expiry (sec)
+修改阈值	Edit Thresholds
+修改保底价	Edit Floor
+交易对（Pancake）	Pairs (Pancake)
+在管理账户下配置。	Configured under admin account.
+设置交易对	Set Pairs
+设置游戏价格（USD）	Set Game Prices (USD)
+英雄价格（USD）	Hero Price (USD)
+武器价格（USD）	Weapon Price (USD)
+10连锻造价格（USD）	Forge x10 (USD)
+100连锻造价格（USD）	Forge x100 (USD)
+设置游戏价格	Set Game Prices
+设置预言机风控阈值	Set Oracle Risk Thresholds
+最低流动性 USD（如 1000）	Min liquidity USD (e.g. 1000)
+报价过期阈值（秒，60~3600）	Quote expiry sec (60~3600)
+设置风控阈值	Set Risk Thresholds
+设置保底代币价（USD）	Set Floor Price (USD)
+保底价（USD，如 0.0001）	Floor (USD, e.g. 0.0001)
+设置保底价	Set Floor
+设置 Pancake 交易对	Set Pancake Pairs
+代币/USDT 交易对地址	Token/USDT Pair
+代币/WBNB 交易对地址	Token/WBNB Pair
+WBNB/USDT 交易对地址	WBNB/USDT Pair
+体力恢复间隔	Stamina Regen Interval
+ 点	 points
+体力上限	Max Stamina
+设置恢复间隔	Set Regen Interval
+设置体力上限	Set Max Stamina
+英雄体力系统	Hero Stamina System
+注册玩家数	Registered Players
+commit 配置	Commit Config
+每人待处理上限	Max Pending Per Player
+清理单个过期	Clean One Expired
+怪物图鉴（	Monster Bestiary (
+添加怪物	Add Monster
+更新怪物	Update Monster
+排除注册地址	Excluded Addresses
+怪物名称	Monster Name
+如 火焰巨魔	e.g. Flame Troll
+战力（≤1000000）	Power (<=1000000)
+奖励基数（≤10000，×0.01=基础ELEM）	Reward base (<=10000, x0.01=ELEM)
+经验（≤10000）	EXP (<=10000)
+暂无怪物可更新	No monster to update
+更新怪物（先填 ID）	Update Monster (fill ID)
+怪物 ID（0~	Monster ID (0~
+设置核心玩法关联合约	Set Core Game Links
+GameToken 地址	GameToken Address
+Boss 地址	Boss Address
+Registry 地址（可为 0x0）	Registry Address (0x0 ok)
+设置核心关联	Set Core Links
+设置排除注册地址	Set Excluded Addresses
+排除	Exclude
+取消排除	Un-exclude
+设置排除地址	Set Excluded Address
+锻造掉落概率（累计千分比 BP）	Forge Drop Odds (cumulative BP)
+修改掉落概率	Edit Drop Odds
+过期清理	Expiry Cleanup
+清理全部锻造	Clean All Forge
+清理全部合成	Clean All Composes
+清理单个	Clean One
+设置锻造掉落概率（累计 BP，0~10000，逐级递增）	Set Forge Odds (cumulative BP, 0~10000, ascending)
+★1 武器 累计	★1 Weapon cum.
+★2 武器 累计	★2 Weapon cum.
+★3 武器 累计	★3 Weapon cum.
+★4 武器 累计	★4 Weapon cum.
+★5 武器 累计	★5 Weapon cum.
+碎片1 累计	Shard1 cum.
+碎片2 累计	Shard2 cum.
+碎片3 累计	Shard3 cum.
+碎片4 累计	Shard4 cum.
+碎片5 累计	Shard5 cum.
+设置掉落概率	Set Drop Odds
+清理过期锻造	Clean Expired Forge
+清理过期合成	Clean Expired Composes
+设置锻造厂关联合约	Set Forge Shop Links
+设置锻造关联	Set Forge Links
+强化 commit 配置	Enhance Commit Config
+精粹强化手续费	Essence Enhance Fee
+1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 GAME·次	T1 2 / T2 10 / T3 30 / T4 80 GAME·per
+高阶精粹合成	High-tier Essence Compose
+3阶→4阶：500 GAME·次	T3→T4: 500 GAME·per
+清理全部	Clean All
+清理过期强化	Clean Expired Enhances
+设置强化铺关联合约	Set Enhance Shop Links
+设置强化关联	Set Enhance Links
+设置英雄体力恢复间隔	Set Hero Stamina Regen
+恢复间隔（分钟，1 ~ 10080 = 7天）	Regen interval (min, 1 ~ 10080 = 7d)
+设置体力恢复间隔	Set Regen Interval
+设置英雄体力上限	Set Hero Max Stamina
+体力上限（1 ~ 20）	Max stamina (1 ~ 20)
+最小延迟（块）	Min Delay (blocks)
+最大延迟（块）	Max Delay (blocks)
+已提交总数	Total Commits
+约束范围	Constraint Range
+修改延迟区间	Edit Delay Range
+设置 commit 延迟区间（块）	Set Commit Delay Range (blocks)
+最小延迟（3~500）	Min delay (3~500)
+最大延迟（≤500）	Max delay (<=500)
+设置延迟区间	Set Delay Range
+我是否铸造者	Am I Minter
+设为铸造者	Set Minter
+取消铸造者	Remove Minter
+🪙 GameToken（游戏代币）	GameToken
+设置 game	Set Game
+设置 registry	Set Registry
+设置 blacksmith	Set Blacksmith
+总供应	Total Supply
+铸造代币	Mint Tokens
+销毁我的代币	Burn My Tokens
+铸造给（地址）	Mint to (address)
+如 10000	e.g. 10000
+销毁数量（仅销毁您本人持有的代币）	Burn amount (only your own)
+如 100	e.g. 100
+？此操作不可逆。	? This cannot be undone.
+销毁代币	Burn Tokens
+已授权	Approved
+未授权	Not Approved
+NFT 授权	NFT Allowances
+代币授权（	Token Allowances (
+取消 NFT 授权	Revoke NFT Allowance
+撤销代币授权	Revoke Token Allowance
+撤销全部代币授权	Revoke All Token Allowances
+取消全部 NFT 授权	Revoke All NFT Allowances
+确认取消对 Marketplace / ForgeShop / EnhanceShop 的所有 NFT 授权？	Revoke ALL NFT allowances for Marketplace / ForgeShop / EnhanceShop?
+确认撤销对全部合约的代币授权？	Revoke token allowances for ALL contracts?
+设置关联	Set Links
+向 BOSS 合约注入奖励代币（按当前金库模式）。	Inject reward tokens into Boss (per vault mode).
+暂停后金库存入/领取全部冻结。	Deposits & claims frozen while paused.
+金库用于接收交易手续费分成；四个 NFT 合约用于校验挂单。	Vault receives fee share; 4 NFT contracts verify orders.
+交易对更新后需重新调用 updateTwap 生效。	Call updateTwap after changing pairs.
+BOSS 尚未开启	Boss not started
+每日自动领取	Auto-claim daily
+· 十连	 · x10
+· 百连	 · x100
+（另需 commit 押金 5%）。	(5% commit deposit required).
+🪙 单抽锻造	Forge x1
+随机获得 1 件结果	Randomly get 1 result
+🔥 十连锻造	Forge x10
+逐张展示 10 件结果	Reveal 10 results one by one
+💎 百连锻造	Forge x100
+一次 100 件结果	100 results at once
+🌿 碎片合成武器	Compose Weapon from Shards
+1 星（需碎片 1 × 10）	1★ (10× shard 1)
+2 星（需碎片 2 × 10）	2★ (10× shard 2)
+3 星（需碎片 3 × 10）	3★ (10× shard 3)
+4 星（需碎片 4 × 10）	4★ (10× shard 4)
+5 星（需碎片 5 × 10）	5★ (10× shard 5)
+熔炼所选 (	Smelt selected (
+选择要熔炼的武器	Select weapons to smelt
+精粹合成（50 合 1）	Essence Compose (50:1)
+🧪 合成配方	Compose Recipe
+消耗低阶精粹	Consume lower essence
+获得高阶精粹	Get higher essence
+合成次数（每次消耗 50 个低阶）	Times (50 lower each)
+选择英雄、武器与怪物后自动分析	Auto analysis after picking all
+选择英雄、武器与怪物后开战	Fight after picking all

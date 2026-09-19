@@ -1,0 +1,122 @@
+badge	BSC 测试网 · 链上真合约	BSC Testnet · On-chain Contracts
+tagline	召唤五行英雄，锻造神器武器，讨伐远古怪物与世界 BOSS —— 每一场战斗都真实发生在链上。	Summon five-element heroes, forge legendary weapons, and hunt ancient monsters and world bosses — every battle truly happens on-chain.
+cta-start	开始游戏	Start Playing
+cta-learn	了解玩法	How to Play
+meta-heroes	5 行英雄	5 Heroes
+meta-mons	10 种怪物	10 Monsters
+meta-boss	世界 BOSS 轮次	World Boss Rounds
+meta-elem	斩获 ELEM 奖励	Earn ELEM Rewards
+scroll	向下滚动	Scroll down
+t-gameplay	核心玩法	Core Gameplay
+s-gameplay	从召唤第一只英雄开始，踏上链上冒险的完整循环	From summoning your first hero, embark on a full on-chain adventure loop
+p1-t	召唤英雄	Summon Heroes
+p1-d	消耗代币召唤五行英雄，金木土水火五种元素各有命途。每位英雄拥有等级、经验、战力与体力，体力随时间自动恢复。	Spend tokens to summon five-element heroes. Each hero has level, EXP, power and stamina; stamina regenerates over time.
+p2-t	锻造武器	Forge Weapons
+p2-d	在锻造厂消耗材料锻造武器，武器带 1~5 星品质与五行属性，星级越高强化加成越强。	Forge weapons with materials. Each weapon has 1-5 star rarity and an element; higher stars mean stronger bonuses.
+p3-t	强化战力	Boost Power
+p3-d	用精粹强化武器提升战力加成，经验升级英雄等级，合理搭配元素克制关系打出更高伤害。	Enhance weapons with essence, level up heroes with EXP, and exploit elemental counters for higher damage.
+p4-t	挑战怪物	Fight Monsters
+p4-d	在战斗页面挑选出战英雄与武器，对战 10 种元素怪物。胜利可获得 ELEM 奖励与经验，奖励进入金库待领取。	Pick your hero and weapon, then fight 10 elemental monsters. Victory grants ELEM rewards and EXP, stored in your vault.
+p5-t	讨伐世界 BOSS	World Boss
+p5-d	参与世界 BOSS 轮次，按伤害占比瓜分奖池。排行榜实时更新，击破 BOSS 后结算奖励，人人有份。	Join world boss rounds and share the prize pool by damage dealt. Live rankings refresh; claim rewards after each kill.
+p6-t	领取奖励	Claim Rewards
+p6-d	战斗奖励存入金库，一键领取到钱包；也可以在市场交易武器与碎片，让战利品流动起来。	Battle rewards go to your vault — claim them in one click, or trade weapons and shards on the market.
+el-gold	金	Metal
+el-wood	木	Wood
+el-earth	土	Earth
+el-water	水	Water
+el-fire	火	Fire
+el-gold-s	锐利 · 高爆发	Sharp · Burst
+el-wood-s	生生不息	Evergreen
+el-earth-s	厚重 · 防御	Sturdy · Guard
+el-water-s	灵动 · 续航	Agile · Sustain
+el-fire-s	狂暴 · 范围	Fury · AoE
+t-heroes	五行英雄	Five Element Heroes
+s-heroes	五种元素的守护者，选择与你命格相合的英雄出战	Guardians of five elements — pick the hero that matches your destiny
+h0-n	金甲圣骑士	Golden Paladin
+h0-r	锐金之躯 · 攻守兼备的先锋	Blade of metal · vanguard
+h0-s	金属性 · 高爆发	Metal · high burst
+h1-n	精灵游侠	Elf Ranger
+h1-r	森林的守望者 · 灵巧射手	Guardian of the forest · archer
+h1-s	木属性 · 生生不息	Wood · evergreen
+h2-n	岩石守护者	Stone Sentinel
+h2-r	大地之盾 · 坚不可摧的壁垒	Shield of earth · unbreakable
+h2-s	土属性 · 厚重防御	Earth · tough guard
+h3-n	水灵法师	Aqua Mage
+h3-r	冰晶秘术师 · 掌控战场节奏	Crystal sorcerer · battlefield control
+h3-s	水属性 · 灵动续航	Water · agile sustain
+h4-n	烈焰斗士	Blaze Brawler
+h4-r	燃烧之魂 · 吞噬一切的怒火	Burning soul · all-consuming rage
+h4-s	火属性 · 狂暴范围	Fire · fury AoE
+t-weapons	神器武器	Legendary Weapons
+s-weapons	锻造 · 强化 · 熔炼 —— 打造你的专属神器	Forge · Enhance · Smelt — craft your signature weapon
+w-t	一把好武器，是英雄的第三只手	A good weapon is a hero's third hand
+w-d1	在锻造厂使用碎片与材料锻造武器，每把武器随机获得 1~5 星品质与五行属性。星级决定基础潜力，元素决定克制走向，强化加成直接提升战力百分比。	Forge weapons from shards and materials. Each weapon randomly rolls 1-5 star rarity and an element. Stars set the potential, elements decide the counter, and enhancement bonus directly raises your power percent.
+w-d2	用精粹可以对武器进行多阶强化，战力加成层层攀升；不合心意的武器可以熔炼回收，材料循环再利用。	Enhance weapons through multiple stages with essence — bonuses climb higher. Smelt unwanted weapons to recycle materials.
+w-f1	随机品质	Random rarity
+w-f2	克制搭配	Element counters
+w-f3	精粹提升	Essence boost
+w-f4	循环利用	Recycle
+w1-n	炎魔之刃	Inferno Blade
+w1-r	五星 · 火属性 · 锻造示例	5★ · Fire · forge sample
+w2-n	雷鸟之枪	Thunder Lance
+w2-r	四星 · 金属性 · 强化示例	4★ · Metal · enhance sample
+st-1	一星	1★
+st-2	二星	2★
+st-3	三星	3★
+st-4	四星	4★
+st-5	五星	5★
+t-monsters	怪物图鉴	Monster Bestiary
+s-monsters	从软萌史莱姆到远古巨龙，10 种怪物按奖励基数分档：简单 · 普通 · 困难 · 噩梦	From slimes to the ancient dragon — 10 monsters tiered by base reward: Easy · Normal · Hard · Nightmare
+diff-easy	简单	Easy
+diff-norm	普通	Normal
+diff-hard	困难	Hard
+diff-night	噩梦	Nightmare
+m0-n	史莱姆	Slime
+m0-s	水 · 入门之敌	Water · first foe
+m1-n	野狼	Wolf
+m1-s	木 · 森林猎手	Wood · forest hunter
+m2-n	骷髅兵	Skeleton
+m2-s	土 · 亡灵哨卫	Earth · undead sentry
+m3-n	暗影刺客	Shadow Assassin
+m3-s	水 · 暗夜杀手	Water · night killer
+m4-n	石头人	Golem
+m4-s	土 · 熔岩巨像	Earth · lava colossus
+m5-n	炎魔	Infernal
+m5-s	火 · 地狱守门人	Fire · hell gatekeeper
+m6-n	雷鸟	Thunderbird
+m6-s	金 · 雷暴之翼	Metal · thunder wing
+m7-n	水龙	Water Dragon
+m7-s	水 · 深渊霸主	Water · abyss lord
+m8-n	混沌骑士	Chaos Knight
+m8-s	土 · 亡灵领主	Earth · undead lord
+m9-n	远古巨龙	Ancient Dragon
+m9-s	火 · 万兽之巅	Fire · apex predator
+t-boss	世界 BOSS	World Boss
+s-boss	全服英雄共讨远古巨龙，伤害换奖池份额	All heroes join to slay the ancient dragon — damage turns into prize pool share
+boss-n	远古巨龙	Ancient Dragon
+boss-tag	WORLD BOSS · 轮次制	WORLD BOSS · Round-based
+boss-r	挑战规则	Battle Rules
+boss-d	BOSS 每轮拥有海量 HP，玩家选择英雄与武器发起攻击，造成真实伤害。击破后按伤害占比瓜分奖池，人人有份。	Each round the boss holds massive HP. Pick your hero and weapon and deal real damage. After the kill, the pool is split by damage share.
+boss-li1	每轮 BOSS 血量庞大，需全服合力讨伐	Massive HP — requires the whole server
+boss-li2	伤害排行 TOP5 实时刷新，金色高亮你的排名	Top-5 damage ranking, your rank highlighted in gold
+boss-li3	击破后按伤害占比瓜分奖池，一键结算领取	Prize pool split by damage share, claim in one click
+boss-li4	战斗中实时预估可分奖励，收益心中有数	Real-time estimated reward during battle
+cta-t	准备好迎接你的英雄了吗？	Ready to meet your hero?
+cta-d	连接钱包，召唤第一位五行英雄，立刻开始链上冒险。	Connect your wallet, summon your first hero and start your on-chain adventure now.
+t-comm	官方社区与支持	Community & Support
+s-comm	加入官方社区，第一时间获取游戏动态、空投与活动资讯	Join official communities for game updates, airdrops and events
+c0-n	蝴蝶平台	Butterfly
+c0-d	BNB 链生态 Launchpad，项目发行与上币支持平台。	BNB Chain launchpad supporting project issuance.
+c0-g	访问平台	Visit
+c1-n	币安	Binance
+c1-d	全球领先的交易平台，GameFi 生态与流动性支持。	World-leading exchange with GameFi ecosystem support.
+c1-g	访问平台	Visit
+c2-n	官方推特 X	Official X
+c2-d	每日动态、开发进度与社区活动公告。	Daily updates, dev progress and community events.
+c2-g	关注我们	Follow
+c3-n	官方电报	Telegram
+c3-d	玩家交流社区与官方客服支持，实时答疑。	Player community and official support, live Q&A.
+c3-g	加入社区	Join
+foot	五行英雄 Element Heroes · 链上五行 RPG · BSC 测试网	Element Heroes · On-chain Five Element RPG · BSC Testnet
+foot-enter	进入游戏	Enter Game
