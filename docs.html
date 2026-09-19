@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元素英雄 Docs · 链上五行 RPG 文档</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y1='1'%3E%3Cstop offset='0' stop-color='%23fbbf24'/%3E%3Cstop offset='1' stop-color='%23f97316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%23070c18'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='url(%23g)' stroke-width='5'/%3E%3Cpath d='M32 16 L38 30 L53 30 L41 39 L46 53 L32 44 L18 53 L23 39 L11 30 L26 30 Z' fill='url(%23g)'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{
+  --bg:#070c18; --bg2:#0b1220; --panel:#0d1526; --panel2:#111a2e;
+  --line:#1c2a44; --line2:#24304a;
+  --gold:#fbbf24; --gold2:#f59e0b; --text:#e8eef7; --muted:#8ea0bd;
+  --el-gold:#f59e0b; --el-wood:#22c55e; --el-earth:#b45309; --el-water:#38bdf8; --el-fire:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.75;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(900px 420px at 78% -8%,rgba(251,191,36,.07),transparent 60%),radial-gradient(700px 420px at 8% 12%,rgba(56,189,248,.05),transparent 60%)}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{font-family:'Noto Serif SC','Noto Sans SC',serif;letter-spacing:.02em}
+
+/* ===== 顶栏 ===== */
+.top{position:sticky;top:0;z-index:60;background:rgba(7,12,24,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1240px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:16px;color:#fff}
+.brand .logo{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,#fde68a,#f59e0b)}
+.brand small{color:var(--muted);font-weight:500;font-size:12px;margin-left:4px;letter-spacing:.14em}
+.top-links{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tlink{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;border:1px solid var(--line2);color:var(--text);font-size:13px;font-weight:600;background:rgba(13,21,38,.6)}
+.tlink:hover{border-color:rgba(251,191,36,.5);color:var(--gold);text-decoration:none}
+.tlink.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;border-color:transparent}
+.tlink.primary:hover{color:#1a1305;filter:brightness(1.06)}
+
+/* ===== 布局 ===== */
+.layout{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 22px;display:grid;grid-template-columns:240px 1fr;gap:38px;align-items:start}
+.side{position:sticky;top:74px;padding:30px 0 60px;max-height:calc(100vh - 74px);overflow-y:auto}
+.side h4{font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:12px;font-family:'Noto Sans SC',sans-serif}
+.side a{display:block;padding:7px 12px;border-left:2px solid var(--line);color:var(--muted);font-size:13.5px;font-weight:500;transition:all .16s}
+.side a:hover{color:var(--text);border-left-color:var(--gold);background:rgba(251,191,36,.06);text-decoration:none}
+.side a.on{color:var(--gold);border-left-color:var(--gold);background:rgba(251,191,36,.09);font-weight:700}
+.main{padding:30px 0 90px;min-width:0}
+
+/* ===== 内容块 ===== */
+.doc-hero{padding:26px 0 34px;border-bottom:1px solid var(--line);margin-bottom:38px}
+.doc-hero .eyebrow{display:inline-block;padding:4px 12px;border-radius:999px;border:1px solid rgba(251,191,36,.4);background:rgba(251,191,36,.08);color:var(--gold);font-size:12px;letter-spacing:.14em;margin-bottom:16px}
+.doc-hero h1{font-size:clamp(30px,5vw,46px);font-weight:900;line-height:1.2;margin-bottom:12px}
+.doc-hero h1 .t{background:linear-gradient(120deg,var(--gold),#fff7d6 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.doc-hero p{color:var(--muted);max-width:720px;font-size:15px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.chip{padding:6px 13px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.chip b{color:var(--gold)}
+
+section{scroll-margin-top:84px;margin-bottom:52px}
+section h2{font-size:clamp(22px,3vw,28px);font-weight:900;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+section h2 .n{font-size:12px;color:var(--gold);font-family:ui-monospace,monospace;border:1px solid var(--line2);border-radius:6px;padding:2px 7px;letter-spacing:.06em}
+section .lead{color:var(--muted);font-size:14.5px;margin-bottom:22px}
+section h3{font-size:17px;font-weight:800;margin:26px 0 10px;color:#fff}
+section p{font-size:14.5px;color:#c6d3e6;margin-bottom:12px}
+section ul{margin:0 0 14px 0;padding-left:20px}
+section li{font-size:14.5px;color:#c6d3e6;margin-bottom:7px}
+section li b{color:var(--gold)}
+code{background:rgba(148,163,184,.14);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;color:#fbbf24}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.card h4{font-size:15px;margin-bottom:8px;color:#fff;font-family:'Noto Sans SC',sans-serif;font-weight:800}
+.card p{font-size:13.5px;color:var(--muted);margin:0}
+.card .ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:17px}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0 16px;display:block;overflow-x:auto;white-space:nowrap}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:700;font-size:12px;letter-spacing:.06em;background:rgba(148,163,184,.06)}
+td{color:#c6d3e6}
+td b{color:var(--gold)}
+tr:last-child td{border-bottom:0}
+
+.note{border-left:3px solid var(--gold);background:rgba(251,191,36,.07);border-radius:0 12px 12px 0;padding:13px 16px;font-size:13.5px;color:#dbe4f2;margin:14px 0}
+.note b{color:var(--gold)}
+.warn{border-left-color:#f87171;background:rgba(248,113,113,.08)}
+.warn b{color:#f87171}
+
+.el-row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+.el{display:flex;align-items:center;gap:8px;padding:9px 15px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:13.5px;font-weight:700}
+.el i{font-style:normal;font-size:15px}
+
+.steps{counter-reset:s;margin:6px 0 0;padding:0;list-style:none}
+.steps li{position:relative;padding-left:42px;margin-bottom:14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:1px;width:26px;height:26px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,monospace}
+
+.faq{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.faq details{border-bottom:1px solid var(--line)}
+.faq details:last-child{border-bottom:0}
+.faq summary{cursor:pointer;padding:15px 18px;font-weight:700;font-size:14.5px;color:#fff;list-style:none;display:flex;align-items:center;gap:10px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'\f107';font-family:'Font Awesome 6 Free';font-weight:900;margin-left:auto;color:var(--muted);transition:transform .18s}
+.faq details[open] summary::after{transform:rotate(180deg)}
+.faq .body{padding:0 18px 16px;color:var(--muted);font-size:14px}
+
+footer{border-top:1px solid var(--line);padding:26px 0 40px;text-align:center;color:var(--muted);font-size:13px;position:relative;z-index:1}
+footer .fl{color:var(--gold);margin:0 8px}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;gap:0}
+  .side{position:static;max-height:none;padding:18px 0 0;border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;white-space:nowrap}
+  .side h4{display:none}
+  .side a{border-left:0;border-bottom:2px solid transparent;padding:8px 12px;border-radius:8px}
+  .side a.on{border-bottom-color:var(--gold)}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="logo">⚔️</span>元素英雄 Docs<small>ELEMENT HEROES</small></div>
+    <nav class="top-links">
+      <a class="tlink" href="./index.html"><i class="fa-solid fa-globe"></i>官网</a>
+      <a class="tlink primary" href="./game.html"><i class="fa-solid fa-play"></i>进入游戏</a>
+      <a class="tlink" href="https://t.me/bscehgame" target="_blank" rel="noopener"><i class="fa-brands fa-telegram"></i>电报</a>
+      <a class="tlink" href="https://x.com/bscgamebuild" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter"></i>推特 X</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side" id="toc">
+    <h4>文档目录</h4>
+    <a href="#overview">01 · 项目简介</a>
+    <a href="#start">02 · 快速开始</a>
+    <a href="#elements">03 · 五行与克制</a>
+    <a href="#heroes">04 · 英雄系统</a>
+    <a href="#weapons">05 · 武器 · 锻造 · 熔炼</a>
+    <a href="#enhance">06 · 精粹与强化</a>
+    <a href="#battle">07 · 战斗与奖励</a>
+    <a href="#boss">08 · 世界 BOSS</a>
+    <a href="#market">09 · 市场交易</a>
+    <a href="#vault">10 · 金库与领取</a>
+    <a href="#rank">11 · 排行与图鉴</a>
+    <a href="#token">12 · 代币与经济</a>
+    <a href="#contracts">13 · 合约与网络</a>
+    <a href="#faq">14 · 常见问题</a>
+    <a href="#community">15 · 社群与链接</a>
+  </aside>
+
+  <main class="main">
+    <div class="doc-hero">
+      <span class="eyebrow">ELEMENT HEROES · DOCUMENTATION</span>
+      <h1><span class="t">元素英雄 Docs</span></h1>
+      <p>一份把链上规则讲清楚的说明书：五行克制、英雄与武器、锻造熔炼、战斗结算、世界 BOSS、市场与金库，以及当前部署的合约地址。所有数值均取自合约与前端实现，随链上配置变动时以游戏内实时显示为准。</p>
+      <div class="chips">
+        <span class="chip">网络 <b>BSC 测试网（chainId 97）</b></span>
+        <span class="chip">游戏内代币 <b>EH</b></span>
+        <span class="chip">官网计价 <b>USDT</b></span>
+        <span class="chip">结算方式 <b>commit-reveal 链上随机</b></span>
+      </div>
+    </div>
+
+    <!-- 01 -->
+    <section id="overview">
+      <h2><span class="n">01</span>项目简介</h2>
+      <p class="lead">元素英雄是一款全流程上链的五行题材 RPG：英雄、武器、材料都是链上资产，战斗结果由链上随机数决定，奖励直接进入金库。</p>
+      <p>游戏围绕「召唤英雄 → 锻造/强化武器 → 挑战怪物与世界 BOSS → 领取奖励 → 市场流通」构成完整循环。英雄和武器是 ERC-721，碎片与精粹是 ERC-1155，所有产出与消耗都写在合约里，前端只做展示与交互。</p>
+      <div class="grid g3">
+        <div class="card"><div class="ic" style="background:rgba(245,158,11,.14);color:var(--el-gold)">🦸</div><h4>5 行英雄</h4><p>金木土水火五种元素，各有命途与外观，最多同时持有 4 位。</p></div>
+        <div class="card"><div class="ic" style="background:rgba(34,197,94,.14);color:var(--el-wood)">🗡️</div><h4>1~5★ 武器</h4><p>锻造随机产出品质与元素，星级越高，奖励与强化收益越强。</p></div>
+        <div class="card"><div class="ic" style="background:rgba(56,189,248,.14);color:var(--el-water)">👾</div><h4>10 种怪物</h4><p>按战力分简单 / 普通 / 困难 / 噩梦四档，奖励基数依次递增。</p></div>
+        <div class="card"><div class="ic" style="background:rgba(239,68,68,.14);color:var(--el-fire)">🐉</div><h4>世界 BOSS</h4><p>7 天一轮，全服合力讨伐，按伤害占比瓜分奖池。</p></div>
+        <div class="card"><div class="ic" style="background:rgba(251,191,36,.14);color:var(--gold)">🏦</div><h4>金库结算</h4><p>战斗与 BOSS 奖励先入金库，玩家主动 claim 到钱包。</p></div>
+        <div class="card"><div class="ic" style="background:rgba(148,163,184,.14);color:#cbd5e1">🎲</div><h4>链上随机</h4><p>召唤、锻造、合成、强化、BOSS 攻击均为 commit-reveal 两段式。</p></div>
+      </div>
+      <div class="note"><b>关于随机：</b>所有产出类操作先发起 commit 交易（含少量押金），等待若干区块后再发起 reveal 交易，随机数取自未来的区块数据，任何人无法提前预知或篡改。超过有效期未揭示的记录可由他人代为清理并取回押金。</div>
+    </section>
+
+    <!-- 02 -->
+    <section id="start">
+      <h2><span class="n">02</span>快速开始</h2>
+      <p class="lead">三分钟从零到第一次出战。</p>
+      <ol class="steps">
+        <li><b>准备钱包。</b>在浏览器安装 MetaMask（或兼容的 EVM 钱包）并创建/导入账户。</li>
+        <li><b>切换到 BSC 测试网。</b>网络参数：链 ID <code>97</code>，RPC <code>https://data-seed-prebsc-1-s1.bnbchain.org:8545</code>，币种 BNB。游戏连接钱包时会提示自动切换，未成功请手动确认。</li>
+        <li><b>领取测试币。</b>到 BSC 测试网水龙头领取测试 BNB 用于支付 gas（游戏内交易已固定 0.12 gwei gasPrice）。</li>
+        <li><b>获取 EH。</b>战斗与 BOSS 奖励会产出代币；也可由管理端向金库注入奖励池。召唤英雄与锻造武器需要消耗 EH。</li>
+        <li><b>召唤第一位英雄。</b>进入游戏 →「英雄」页 → 召唤英雄，等待若干区块后自动揭示，得到随机元素与基础战力。</li>
+        <li><b>锻造并出战。</b>「锻造」页拿到武器 →「战斗」页选择英雄 + 武器 + 怪物 → 开打，胜利奖励进金库，去「金库」页领取。</li>
+      </ol>
+      <div class="note warn"><b>注意：</b>当前部署在 BSC 测试网，所有资产均为测试资产，不具备真实价值；合约参数（召唤/锻造价格、奖池、怪物数值等）可由管理员调整，实际数值请以游戏内实时显示为准。</div>
+    </section>
+
+    <!-- 03 -->
+    <section id="elements">
+      <h2><span class="n">03</span>五行与克制</h2>
+      <p class="lead">金 · 木 · 土 · 水 · 火，相生相克，决定战斗中的元素乘数。</p>
+      <div class="el-row">
+        <span class="el" style="color:var(--el-gold)"><i>🟡</i>金 · 锐利高爆发</span>
+        <span class="el" style="color:var(--el-wood)"><i>🟢</i>木 · 生生不息</span>
+        <span class="el" style="color:var(--el-earth)"><i>🟤</i>土 · 厚重防御</span>
+        <span class="el" style="color:var(--el-water)"><i>🔵</i>水 · 灵动续航</span>
+        <span class="el" style="color:var(--el-fire)"><i>🔴</i>火 · 狂暴范围</span>
+      </div>
+      <p>克制顺序为 <b>金 → 木 → 土 → 水 → 火 → 金</b>（箭头指向被克制的一方）。战斗时，武器元素对怪物元素生效：</p>
+      <table>
+        <thead><tr><th>关系</th><th>判定</th><th>有效战力乘数</th></tr></thead>
+        <tbody>
+          <tr><td><b>克制</b></td><td class="mono">(攻方元素 + 1) % 5 == 守方元素</td><td><b>×1.30</b></td></tr>
+          <tr><td><b>被克制</b></td><td class="mono">(守方元素 + 1) % 5 == 攻方元素</td><td><b>×0.75</b></td></tr>
+          <tr><td>中性</td><td>其余情况</td><td>×1.00</td></tr>
+          <tr><td>英雄同调加成</td><td class="mono">(英雄元素 + 1) % 5 == 怪物元素</td><td>额外 <b>×1.10</b></td></tr>
+        </tbody>
+      </table>
+      <div class="note"><b>搭配建议：</b>英雄元素克制怪物、且武器与英雄同元素时收益最高。武器与英雄同元素本身还有 <b>×1.10</b> 的战力加成，因此「英雄元素克制怪物 + 同元素武器」是理论最优解。</div>
+    </section>
+
+    <!-- 04 -->
+    <section id="heroes">
+      <h2><span class="n">04</span>英雄系统</h2>
+      <p class="lead">等级、经验、战力、体力四位一体，体力决定你的出战节奏。</p>
+      <table>
+        <thead><tr><th>英雄</th><th>元素</th><th>定位</th></tr></thead>
+        <tbody>
+          <tr><td><b>金甲圣骑士</b></td><td style="color:var(--el-gold)">金</td><td>锐金之躯 · 攻守兼备的先锋</td></tr>
+          <tr><td><b>精灵游侠</b></td><td style="color:var(--el-wood)">木</td><td>森林的守望者 · 灵巧射手</td></tr>
+          <tr><td><b>岩石守护者</b></td><td style="color:var(--el-earth)">土</td><td>大地之盾 · 坚不可摧的壁垒</td></tr>
+          <tr><td><b>水灵法师</b></td><td style="color:var(--el-water)">水</td><td>冰晶秘术师 · 掌控战场节奏</td></tr>
+          <tr><td><b>烈焰斗士</b></td><td style="color:var(--el-fire)">火</td><td>燃烧之魂 · 吞噬一切的怒火</td></tr>
+        </tbody>
+      </table>
+      <h3>核心属性</h3>
+      <ul>
+        <li><b>基础战力：</b>召唤时随机生成（区间约 300~500），是后续一切加成的基数。</li>
+        <li><b>等级与经验：</b>战斗胜利获得经验（失败也有 1/4 经验），经验累积提升等级。</li>
+        <li><b>等级加成：</b>每满 10 级为一个档位，奖励加成 +5%，最高 +25%（50 级以上）。</li>
+        <li><b>体力：</b>默认上限 5 点，默认每 5 分钟恢复 1 点（链上可配置）。<b>每场战斗消耗 1 点体力</b>，体力为 0 时无法出战。</li>
+        <li><b>持有上限：</b>每个地址最多持有 <b>4 位英雄</b>。</li>
+      </ul>
+      <h3>召唤规则</h3>
+      <ul>
+        <li>召唤费用来自价格预言机（合约默认 10000 EH，可由管理员调整），游戏内实时显示。</li>
+        <li>采用 commit-reveal：发起时冻结 <b>费用 × 105%</b>（含 5% 押金），揭示时按实际费用结算、押金退回。</li>
+        <li>元素在揭示时由链上随机数决定，召唤结果可在「待揭示」气泡中跟踪。</li>
+      </ul>
+    </section>
+
+    <!-- 05 -->
+    <section id="weapons">
+      <h2><span class="n">05</span>武器 · 锻造 · 熔炼</h2>
+      <p class="lead">锻造随机产出 1~5★ 与五行属性，不合心意的武器可以熔炼回收。</p>
+      <h3>锻造</h3>
+      <ul>
+        <li>三种档位：<b>单抽 / 十连 / 百连</b>，价格分别由预言机的 <code>getWeaponCost</code>、<code>getWeapon10Cost</code>、<code>getWeapon100Cost</code> 给出。</li>
+        <li>发起时冻结「费用 + 5% 押金 + 10% 缓冲」，揭示后按实际结算。</li>
+        <li>产出结果包含武器（1~5★ + 元素 + 强化加成 bonusBp）与碎片掉落，也有「空手而归」的可能。</li>
+      </ul>
+      <h3>碎片合成武器</h3>
+      <p>集齐 <b>10 个同星级碎片</b> 可直接合成该星级武器，需支付手续费：</p>
+      <table>
+        <thead><tr><th>目标星级</th><th>碎片消耗</th><th>手续费</th></tr></thead>
+        <tbody>
+          <tr><td>1★</td><td>碎片 1 × 10</td><td><b>50 EH</b></td></tr>
+          <tr><td>2★</td><td>碎片 2 × 10</td><td><b>100 EH</b></td></tr>
+          <tr><td>3★</td><td>碎片 3 × 10</td><td><b>200 EH</b></td></tr>
+          <tr><td>4★</td><td>碎片 4 × 10</td><td><b>500 EH</b></td></tr>
+          <tr><td>5★</td><td>碎片 5 × 10</td><td><b>1000 EH</b></td></tr>
+        </tbody>
+      </table>
+      <h3>熔炼回收</h3>
+      <ul>
+        <li>武器可单件或批量熔炼，按星级返还对应阶位的<b>精粹</b>，材料循环再利用。</li>
+        <li>熔炼不可逆，请先确认该武器不再需要（尤其是已强化的高星武器）。</li>
+      </ul>
+      <h3>星级对奖励的影响</h3>
+      <table>
+        <thead><tr><th>武器星级</th><th>1★</th><th>2★</th><th>3★</th><th>4★</th><th>5★</th></tr></thead>
+        <tbody><tr><td>奖励加成</td><td>×1.00</td><td>×1.00</td><td><b>×1.10</b></td><td><b>×1.25</b></td><td><b>×1.50</b></td></tr></tbody>
+      </table>
+    </section>
+
+    <!-- 06 -->
+    <section id="enhance">
+      <h2><span class="n">06</span>精粹与强化</h2>
+      <p class="lead">精粹既能合成升阶，也能给武器叠加强化加成。</p>
+      <h3>精粹合成（低阶 → 高阶）</h3>
+      <p>每 <b>50 个低阶精粹</b> 合成 1 个高阶精粹，按次收取手续费：</p>
+      <table>
+        <thead><tr><th>合成</th><th>消耗</th><th>手续费</th></tr></thead>
+        <tbody>
+          <tr><td>精粹 1 阶 → 2 阶</td><td>50 个</td><td><b>20 EH / 次</b></td></tr>
+          <tr><td>精粹 2 阶 → 3 阶</td><td>50 个</td><td><b>100 EH / 次</b></td></tr>
+          <tr><td>精粹 3 阶 → 4 阶</td><td>50 个</td><td><b>500 EH / 次</b></td></tr>
+        </tbody>
+      </table>
+      <h3>武器强化</h3>
+      <p>消耗精粹对武器进行 1~4 阶强化，每阶提升战力加成百分比（bonusBp），手续费按阶位递增：</p>
+      <table>
+        <thead><tr><th>强化阶位</th><th>1 阶</th><th>2 阶</th><th>3 阶</th><th>4 阶</th></tr></thead>
+        <tbody><tr><td>手续费</td><td><b>2 EH / 次</b></td><td><b>10 EH / 次</b></td><td><b>30 EH / 次</b></td><td><b>80 EH / 次</b></td></tr></tbody>
+      </table>
+      <div class="note">强化同样走 commit-reveal：提交后等待若干个区块自动揭示，结果可在顶部「待揭示」气泡查看。</div>
+    </section>
+
+    <!-- 07 -->
+    <section id="battle">
+      <h2><span class="n">07</span>战斗与奖励</h2>
+      <p class="lead">战力决定胜率，元素决定乘数，星级与等级决定收益。</p>
+      <h3>出战流程</h3>
+      <ol class="steps">
+        <li>在「战斗」页选择英雄、武器与怪物；英雄需有至少 1 点体力。</li>
+        <li>系统实时计算有效战力、元素关系与<b>预估胜率</b>。</li>
+        <li>发起战斗，链上随机判定胜负；<b>消耗 1 点体力</b>。</li>
+        <li>胜利获得经验与奖励，奖励进入金库；失败仅获得 1/4 经验。</li>
+      </ol>
+      <h3>战力与胜率</h3>
+      <ul>
+        <li><b>英雄战力：</b>基础战力随等级与经验成长。</li>
+        <li><b>出战战力：</b><code>英雄战力 × (1 + 武器加成)</code>；武器与英雄同元素再 <b>×1.10</b>。</li>
+        <li><b>有效战力：</b>出战战力 × 元素克制乘数（1.30 / 0.75 / 1.00），英雄克制怪物再 ×1.10。</li>
+        <li><b>胜率：</b><code>有效战力 / (有效战力 + 怪物战力)</code>，并限制在 <b>10% ~ 95%</b> 之间。</li>
+        <li><b>动态难度：</b>英雄每满 10 级，怪物战力提升 15%，保持长期挑战性。</li>
+      </ul>
+      <h3>怪物与奖励基数</h3>
+      <p>奖励以美元计价：<b>基础奖励 = 奖励基数 × 0.01 × (1 + 0.15 × 等级档位)</b>，再乘星级加成与等级加成。官网按 USDT 展示，游戏内按金库模式发放（EH 或 USDT）。</p>
+      <table>
+        <thead><tr><th>怪物</th><th>元素</th><th>难度</th><th>基础奖励</th></tr></thead>
+        <tbody>
+          <tr><td>史莱姆</td><td>水</td><td>简单</td><td><b>0.12</b></td></tr>
+          <tr><td>野狼</td><td>木</td><td>简单</td><td><b>0.2</b></td></tr>
+          <tr><td>骷髅兵</td><td>土</td><td>简单</td><td><b>0.3</b></td></tr>
+          <tr><td>暗影刺客</td><td>水</td><td>普通</td><td><b>0.45</b></td></tr>
+          <tr><td>石头人</td><td>土</td><td>普通</td><td><b>1.2</b></td></tr>
+          <tr><td>炎魔</td><td>火</td><td>困难</td><td><b>1.8</b></td></tr>
+          <tr><td>雷鸟</td><td>金</td><td>困难</td><td><b>2.6</b></td></tr>
+          <tr><td>水龙</td><td>水</td><td>困难</td><td><b>3.8</b></td></tr>
+          <tr><td>混沌骑士</td><td>土</td><td>噩梦</td><td><b>5.5</b></td></tr>
+          <tr><td>远古巨龙</td><td>火</td><td>噩梦</td><td><b>8</b></td></tr>
+        </tbody>
+      </table>
+      <p>难度分档依据怪物战力：&lt; 500 简单，&lt; 2000 普通，&lt; 8000 困难，其余为噩梦。</p>
+    </section>
+
+    <!-- 08 -->
+    <section id="boss">
+      <h2><span class="n">08</span>世界 BOSS</h2>
+      <p class="lead">7 天一轮，全服合力讨伐远古巨龙，伤害换奖池份额。</p>
+      <ul>
+        <li><b>轮次：</b>每轮间隔 <b>7 天</b>，BOSS 血量在 1,000 ~ 10,000,000 之间由管理员设定。</li>
+        <li><b>攻击：</b>选择英雄与武器发起攻击，同样为 commit-reveal 两段式；需按<b>奖池的 5%</b> 缴纳保证金（奖池为 0 时免押金），揭示时全额退还。</li>
+        <li><b>伤害：</b>基于出战战力与链上随机，累计个人伤害与全服总伤害。</li>
+        <li><b>结算：</b>BOSS 被击破时按伤害占比分配 <b>100% 奖池</b>；轮次结束仍未击破，则按 <b>50% 奖池</b> 结算。给予最后一击的玩家额外获得武器奖励。</li>
+        <li><b>排行：</b>伤害排行 TOP5 实时刷新，你的名次会金色高亮。</li>
+      </ul>
+      <div class="note"><b>小技巧：</b>攻击前在页面可以看到「预估可分奖励」，据此判断继续加攻是否划算。</div>
+    </section>
+
+    <!-- 09 -->
+    <section id="market">
+      <h2><span class="n">09</span>市场交易</h2>
+      <p class="lead">英雄、武器、碎片、精粹都可以挂单出售。</p>
+      <ul>
+        <li><b>可交易品类：</b>英雄（ERC-721）、武器（ERC-721）、碎片（ERC-1155）、精粹（ERC-1155）。</li>
+        <li><b>上架：</b>选择品类与数量、设定 EH 价格，授权后挂单；随时可以取消上架。</li>
+        <li><b>购买：</b>用 EH 直接购买他人挂单，成交后资产与代币同步结算。</li>
+        <li><b>手续费：</b>由链上配置（默认 200 bp = 2%），页面会实时显示当前费率。</li>
+      </ul>
+    </section>
+
+    <!-- 10 -->
+    <section id="vault">
+      <h2><span class="n">10</span>金库与领取</h2>
+      <p class="lead">所有战斗与 BOSS 奖励先入金库，由你主动领取。</p>
+      <ul>
+        <li><b>累积：</b>战斗胜利与 BOSS 结算的奖励写入金库待领取余额，不自动打款，避免频繁小额转账。</li>
+        <li><b>领取：</b>在「金库」页一键 claim，奖励直接进入你的钱包。</li>
+        <li><b>奖励模式：</b>模式 0 为<b>代币模式</b>，按预言机价格把美元计价折算成 EH 发放；模式 1 为 <b>USDT 模式</b>，直接发放 USDT。模式由管理员配置，页面会显示当前模式。</li>
+      </ul>
+      <div class="note"><b>为什么官网写 USDT、游戏里显示 EH？</b>奖励以美元计价，官网按 USDT 展示；链上按金库当前模式发放，代币模式下折算为 EH，因此游戏内余额与奖励以 EH 显示。两者是同一套数值的不同呈现。</div>
+    </section>
+
+    <!-- 11 -->
+    <section id="rank">
+      <h2><span class="n">11</span>排行与图鉴</h2>
+      <p class="lead">看看自己排在什么位置，也看看对手长什么样。</p>
+      <ul>
+        <li><b>排行榜：</b>统计全部玩家的对战场次、胜场、胜率与总战力，分页查看。</li>
+        <li><b>我的战斗记录：</b>最近的出战详情，含双方战力、胜率与奖励。</li>
+        <li><b>图鉴：</b>英雄、武器与 10 种怪物的资料总览；在战斗页可直接跳转到图鉴挑选怪物。</li>
+      </ul>
+    </section>
+
+    <!-- 12 -->
+    <section id="token">
+      <h2><span class="n">12</span>代币与经济</h2>
+      <p class="lead">EH 是游戏内的通用消耗与结算单位。</p>
+      <h3>EH 的主要用途</h3>
+      <ul>
+        <li>召唤英雄（预言机定价）</li>
+        <li>锻造武器（单抽 / 十连 / 百连）</li>
+        <li>碎片合成武器（50 ~ 1000 EH / 次）</li>
+        <li>精粹合成（20 / 100 / 500 EH / 次）与武器强化（2 / 10 / 30 / 80 EH / 次）</li>
+        <li>市场挂单与购买</li>
+        <li>世界 BOSS 攻击保证金（奖池 5%，揭示时退还）</li>
+      </ul>
+      <h3>EH 的获取方式</h3>
+      <ul>
+        <li>战斗胜利奖励（代币模式下按预言机折算发放）</li>
+        <li>世界 BOSS 奖池按伤害占比分配</li>
+        <li>在市场上出售英雄、武器、碎片与精粹</li>
+      </ul>
+      <h3>价值流转</h3>
+      <p>玩家消耗 EH 召唤与锻造 → 产出 NFT 与材料 → 出战获取奖励回流 EH → 剩余资产在市场流通给新玩家，形成闭环。所有消耗项都是链上真实销毁或转入金库/市场合约，可在区块浏览器上核对。</p>
+    </section>
+
+    <!-- 13 -->
+    <section id="contracts">
+      <h2><span class="n">13</span>合约与网络</h2>
+      <p class="lead">当前部署在 BSC 测试网（chainId 97），以下为主力合约地址。</p>
+      <table>
+        <thead><tr><th>合约</th><th>说明</th><th>地址</th></tr></thead>
+        <tbody>
+          <tr><td>GameToken</td><td>游戏代币 EH</td><td class="mono">0xF3Aa1d13Ca2307d462506d9EB88B273166E145A8</td></tr>
+          <tr><td>Characters</td><td>英雄 NFT + 体力</td><td class="mono">0xfE567116A40A5CB37801d15047F619e187f0C3D6</td></tr>
+          <tr><td>Weapons</td><td>武器 NFT</td><td class="mono">0xcE1CEac63127A5f526E0C497Ab91B838F899bfbB</td></tr>
+          <tr><td>Shards</td><td>碎片 ERC-1155</td><td class="mono">0x64d731f84323CFd7a0E44f5bfdee8D5175be38ba</td></tr>
+          <tr><td>Essence</td><td>精粹 ERC-1155</td><td class="mono">0x60c101926f8000691a17E27d19AF7a54C5745B2A</td></tr>
+          <tr><td>ElementHeroesV3</td><td>核心玩法（召唤/战斗）</td><td class="mono">0x1E66133b8d32a54bA12C7064f9085Cd3FB0029d8</td></tr>
+          <tr><td>ForgeShop</td><td>锻造 / 熔炼 / 合成</td><td class="mono">0x66C3C273a359473845D5DBa852E171a01C0cd00b</td></tr>
+          <tr><td>EnhanceShop</td><td>武器强化</td><td class="mono">0x2C84Ba6ffdbF16952eFbece29d83093837B4147D</td></tr>
+          <tr><td>RandomOracleV2</td><td>链上随机数预言机</td><td class="mono">0x4D999B99397AB696AAddA032B8A1F3af2BFc8F06</td></tr>
+          <tr><td>PriceOracle</td><td>价格预言机（定价）</td><td class="mono">0xB1AD6B80FbFAFbA4C884a943e50652183Aa45E2A</td></tr>
+          <tr><td>Vault</td><td>金库（奖励发放）</td><td class="mono">0xbdeC90ED2e839261538AC72078026D73b8dA2E1A</td></tr>
+          <tr><td>Marketplace</td><td>市场</td><td class="mono">0x686E3cE4d0aa25C7CFd6D4Bbbc670b8B35d5370A</td></tr>
+          <tr><td>WorldBossV2</td><td>世界 BOSS</td><td class="mono">0x21316E9C757314e62d33A836b5D66A58E937e0c3</td></tr>
+        </tbody>
+      </table>
+      <h3>网络参数</h3>
+      <table>
+        <thead><tr><th>项</th><th>值</th></tr></thead>
+        <tbody>
+          <tr><td>链名称</td><td>BSC 测试网</td></tr>
+          <tr><td>Chain ID</td><td class="mono">97 (0x61)</td></tr>
+          <tr><td>RPC</td><td class="mono">https://data-seed-prebsc-1-s1.bnbchain.org:8545</td></tr>
+          <tr><td>交易 gasPrice</td><td class="mono">0.12 gwei（前端固定）</td></tr>
+          <tr><td>确认数</td><td>3 个区块</td></tr>
+          <tr><td>随机延迟</td><td>3 ~ 450 个区块（可配置）</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 14 -->
+    <section id="faq">
+      <h2><span class="n">14</span>常见问题</h2>
+      <p class="lead">新手最容易卡住的几件事。</p>
+      <div class="faq">
+        <details open><summary>为什么提示链 ID 不一致？</summary><div class="body">钱包当前不在 BSC 测试网。点击连接钱包时前端会自动发起切换请求，若被拒绝请在钱包中手动添加/切换到 chainId 97 的网络。</div></details>
+        <details><summary>提交交易后为什么还要再确认一次？</summary><div class="body">召唤、锻造、合成、强化、BOSS 攻击都采用 commit-reveal：第一笔提交承诺与押金，等待若干区块后前端自动发起第二笔揭示交易，随机数在揭示时生成。顶部「待揭示」气泡会显示进度。</div></details>
+        <details><summary>体力多久恢复一点？</summary><div class="body">默认上限 5 点、每 5 分钟恢复 1 点，参数可由合约调整。英雄卡片上会显示距离下一点的倒计时。</div></details>
+        <details><summary>奖励为什么没直接到账？</summary><div class="body">奖励统一写入金库，需要到「金库」页主动 claim。这样可以把多次小额奖励合并成一笔转账，节省 gas。</div></details>
+        <details><summary>官网写 USDT，游戏里显示 EH，哪个是对的？</summary><div class="body">都对。奖励以美元计价，官网按 USDT 展示；链上按金库模式发放——代币模式折算成 EH，USDT 模式直接发 USDT。游戏内显示的是实际到账的代币。</div></details>
+        <details><summary>锻造/召唤的价格会变吗？</summary><div class="body">会。价格来自链上价格预言机，管理员可调整。游戏内各页面显示的金额即为当前实时价格。</div></details>
+        <details><summary>交易一直失败或卡住怎么办？</summary><div class="body">先确认钱包在 BSC 测试网且有足够测试 BNB；若某条待揭示记录已过期，可在「待揭示」面板手动揭示或清理，系统也会自动扫描失效记录。</div></details>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section id="community">
+      <h2><span class="n">15</span>社群与链接</h2>
+      <p class="lead">有问题来社群，公告与进度在推特。</p>
+      <div class="grid g3">
+        <a class="card" href="https://t.me/bscehgame" target="_blank" rel="noopener" style="text-decoration:none"><div class="ic" style="background:rgba(34,197,94,.14);color:#34d399"><i class="fa-brands fa-telegram"></i></div><h4>电报 Telegram</h4><p>玩家交流社区与官方客服支持，实时答疑。</p></a>
+        <a class="card" href="https://x.com/bscgamebuild" target="_blank" rel="noopener" style="text-decoration:none"><div class="ic" style="background:rgba(56,189,248,.14);color:#38bdf8"><i class="fa-brands fa-x-twitter"></i></div><h4>推特 X</h4><p>每日动态、开发进度与社区活动公告。</p></a>
+        <a class="card" href="./index.html" style="text-decoration:none"><div class="ic" style="background:rgba(251,191,36,.14);color:var(--gold)"><i class="fa-solid fa-globe"></i></div><h4>官方网站</h4><p>项目介绍、玩法总览与入口。</p></a>
+        <a class="card" href="./game.html" style="text-decoration:none"><div class="ic" style="background:rgba(148,163,184,.14);color:#cbd5e1"><i class="fa-solid fa-play"></i></div><h4>进入游戏</h4><p>连接钱包，立刻开始链上冒险。</p></a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  元素英雄 Element Heroes · Docs &nbsp;·&nbsp;
+  <a class="fl" href="./index.html">官网</a>
+  <a class="fl" href="./game.html">进入游戏</a>
+  <a class="fl" href="https://t.me/bscehgame" target="_blank" rel="noopener">电报</a>
+  <a class="fl" href="https://x.com/bscgamebuild" target="_blank" rel="noopener">推特 X</a>
+  <div style="margin-top:8px">当前版本部署于 BSC 测试网，文档数值以链上实时配置为准。</div>
+</footer>
+
+<script>
+(function(){
+  var links = [].slice.call(document.querySelectorAll('#toc a'));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  if(!('IntersectionObserver' in window) || !secs.length) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      links.forEach(function(a){ a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
+    });
+  }, { rootMargin: '-84px 0px -70% 0px', threshold: 0 });
+  secs.forEach(function(s){ io.observe(s); });
+})();
+</script>
+</body>
+</html>
