@@ -469,7 +469,10 @@ function buildRoads(){
     if(n.r < 1) return;
     var w = n.ring >= 3 ? 12 : (n.ring === 1 ? 9 : 7);
     var startDist = 38;                       // 从中央圣殿外围起步
-    var t0 = Math.min(0.4, startDist / len);
+    var len = Math.hypot(n.x, n.z) - startDist;   // 实际需要铺路的长度
+    if(len <= 4) return;                      // 太近就不铺
+    var count = Math.max(2, Math.round(len / 16));
+    var t0 = startDist / (startDist + len);   // 起点在整段路径上的比例
     var ang = Math.atan2(n.z, n.x);
     var arr = buckets[n.color] || (buckets[n.color] = []);
     for(var i=0;i<count;i++){
