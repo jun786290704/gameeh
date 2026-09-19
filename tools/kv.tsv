@@ -206,9 +206,9 @@
 205	USDT 地址	USDT Address
 206	清理间隔	Cleanup Interval
 207	金库余额	Vault Balance
-208	待发放总额(GAME)	Pending (GAME)
+208	待发放总额(EH)	Pending (EH)
 209	待发放总额(USDT)	Pending (USDT)
-210	累计发放(GAME)	Paid (GAME)
+210	累计发放(EH)	Paid (EH)
 211	累计发放(USDT)	Paid (USDT)
 212	授权游戏数	Authorized Games
 213	我的待领取	My Claimable
@@ -219,7 +219,7 @@
 218	授权游戏（负责发放奖励）	Authorize Game (pays rewards)
 219	添加/移除授权	Add/Remove Authorization
 220	存入资金	Deposit Funds
-221	存入 GAME	Deposit GAME
+221	存入 EH	Deposit EH
 222	存入 USDT	Deposit USDT
 223	应急管理	Emergency
 224	清理玩家待领取	Clean Player Claims
@@ -227,7 +227,7 @@
 226	设置金库奖励代币（仅一次）	Set Vault Reward Token (once)
 227	代币合约地址（GameToken）	Token Contract (GameToken)
 228	切换金库奖励模式	Switch Vault Reward Mode
-229	GAME 代币模式	GAME Token Mode
+229	EH 代币模式	EH Token Mode
 230	USDT 合约地址（模式=1 时必填）	USDT Address (required in mode 1)
 231	USDT 模式需填写 USDT 合约地址	USDT address required in USDT mode
 232	紧急切换模式会跳过“待发放资金需先转换”的检查，确定继续？	Emergency switch skips the convert-pending check. Continue?
@@ -244,7 +244,7 @@
 243	存入数量	Deposit Amount
 244	如 1000	e.g. 1000
 245	金库奖励模式	Vault Reward Mode
-246	GAME 模式	GAME Mode
+246	EH 模式	EH Mode
 247	已揭示过了	Already revealed
 248	揭示中	Revealing
 249	立即揭示	Reveal now
@@ -350,7 +350,7 @@
 349	怪物名称	Monster Name
 350	如 火焰巨魔	e.g. Flame Troll
 351	战力（≤1000000）	Power (<=1000000)
-352	奖励基数（≤10000，×0.01=基础ELEM）	Reward base (<=10000, x0.01=ELEM)
+352	奖励基数（≤10000，×0.01=基础EH）	Reward base (<=10000, x0.01=EH)
 353	经验（≤10000）	EXP (<=10000)
 354	暂无怪物可更新	No monster to update
 355	更新怪物（先填 ID）	Update Monster (fill ID)
@@ -388,9 +388,9 @@
 387	设置锻造关联	Set Forge Links
 388	强化 commit 配置	Enhance Commit Config
 389	精粹强化手续费	Essence Enhance Fee
-390	1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 GAME·次	T1 2 / T2 10 / T3 30 / T4 80 GAME·per
+390	1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 EH·次	T1 2 / T2 10 / T3 30 / T4 80 EH·per
 391	高阶精粹合成	High-tier Essence Compose
-392	3阶→4阶：500 GAME·次	T3→T4: 500 GAME·per
+392	3阶→4阶：500 EH·次	T3→T4: 500 EH·per
 393	清理全部	Clean All
 394	清理过期强化	Clean Expired Enhances
 395	设置强化铺关联合约	Set Enhance Shop Links
@@ -516,7 +516,7 @@
 515	总战力	Total Power
 516	我的战斗记录	My Battle Records
 517	角色 & 怪物	Heroes & Monsters
-518	五行英雄与链上怪物的图鉴资料，点击战斗页可直接选择对应怪物挑战。	Bestiary of heroes & on-chain monsters; pick a monster directly in Fight.
+518	元素英雄与链上怪物的图鉴资料，点击战斗页可直接选择对应怪物挑战。	Bestiary of heroes & on-chain monsters; pick a monster directly in Fight.
 519	管理后台	Admin Panel
 520	自动检测当前账户对各合约的 owner 权限。	Auto-detect owner permissions across contracts.
 521	元素英雄	Element Heroes

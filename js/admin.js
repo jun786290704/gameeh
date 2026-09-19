@@ -317,7 +317,7 @@ async function secOverview(el, isOwner){
   ]);
   const chips = [
     {t:'市场费率', v: fee!==null ? (Number(fee)/100).toFixed(2)+'%' : '-'},
-    {t:'金库奖励模式', v: mode!==null ? (Number(mode)===1?'USDT':'GAME') : '-'},
+    {t:'金库奖励模式', v: mode!==null ? (Number(mode)===1?'USDT':'EH') : '-'},
     {t:'英雄成本', v: heroCost!==null ? fmtUnits(heroCost, S.tokenDecimals, 2) : '-'},
     {t:'BOSS 轮次', v: bossRounds!==null ? String(bossRounds) : '-'}
   ];
@@ -461,13 +461,13 @@ async function secVault(el, isOwner){
     authRows.push(`<div class="flex items-center justify-between px-3 py-1.5 bg-[#0d1526] rounded-lg border border-[#24304a]"><span class="text-[12px] num-mono">${shortAddr(a)}（${g}）</span><span class="text-[12px] font-bold ${ok?'text-green-400':'text-red-400'}">${ok?'✓ 已授权':'✗ 未授权'}</span></div>`);
   }
   const tokFmt = x => x!==null ? fmtUnits(x,18,2) : '-';
-  const modeTxt = mode!==null ? (Number(mode)===1?'USDT 模式':'GAME 模式') : '-';
+  const modeTxt = mode!==null ? (Number(mode)===1?'USDT 模式':'EH 模式') : '-';
   const body = aCard('金库状态','fa-vault',
     aRow('奖励代币', tk?shortAddr(tk):'-') + aRow('奖励模式', modeTxt) +
     aRow('USDT 地址', usdt?shortAddr(usdt):'-') + aRow('清理间隔', delay!==null?(Number(delay)/86400).toFixed(1)+' 天':'-') +
     aRow('金库余额', bal!==null?(Number(mode)===1?tokFmt(bal)+' USDT':tokFmt(bal)+' '+S.tokenSymbol):'-') +
-    aRow('待发放总额(GAME)', tokFmt(tp)) + aRow('待发放总额(USDT)', tokFmt(tpu)) +
-    aRow('累计发放(GAME)', tokFmt(td)) + aRow('累计发放(USDT)', tokFmt(tdu)) +
+    aRow('待发放总额(EH)', tokFmt(tp)) + aRow('待发放总额(USDT)', tokFmt(tpu)) +
+    aRow('累计发放(EH)', tokFmt(td)) + aRow('累计发放(USDT)', tokFmt(tdu)) +
     aRow('授权游戏数', cnt!==null?String(cnt):'-') +
     aRow('我的待领取', mine!==null?(Number(mode)===1?tokFmt(mine)+' USDT':tokFmt(mine)+' '+S.tokenSymbol):'-'),
     isOwner ? aAct('设置奖励代币', 'adminOpenSetToken()', 'fa-pen') + aAct('切换奖励模式', 'adminOpenSetVaultMode()', 'fa-repeat') +
@@ -476,7 +476,7 @@ async function secVault(el, isOwner){
       isOwner ? aAct('添加/移除授权', 'adminOpenSetAuthorizedGame()', 'fa-pen') : '')
     + aCard('存入资金','fa-circle-plus',
       `<div class="text-[12px] text-muted">向金库注入 ${S.tokenSymbol} / USDT 作为奖励池。</div>`,
-      isOwner ? aAct('存入 GAME', 'adminOpenDeposit()', 'fa-circle-plus') + aAct('存入 USDT', 'adminOpenDepositUSDT()', 'fa-circle-plus') : '')
+      isOwner ? aAct('存入 EH', 'adminOpenDeposit()', 'fa-circle-plus') + aAct('存入 USDT', 'adminOpenDepositUSDT()', 'fa-circle-plus') : '')
     + aCard('应急管理','fa-toolbox',
       `<div class="text-[12px] text-muted">清理玩家待领取记录（每 ${delay!==null?(Number(delay)/86400).toFixed(1):'-'} 天限一次）。</div>`,
       isOwner ? aAct('清理玩家待领取', 'adminOpenClearPlayer()', 'fa-broom') : '')
@@ -499,7 +499,7 @@ async function adminOpenSetVaultMode(){
   const vt = adminCt('vault');
   const [mode, usdt] = await Promise.all([vt.rewardMode().catch(()=>0n), vt.usdt().catch(()=>null)]);
   adminFormModal('切换金库奖励模式',[
-    {label:'奖励模式', type:'select', options:[{v:'0',t:'GAME 代币模式'},{v:'1',t:'USDT 模式'}], value: String(Number(mode))},
+    {label:'奖励模式', type:'select', options:[{v:'0',t:'EH 代币模式'},{v:'1',t:'USDT 模式'}], value: String(Number(mode))},
     {label:'USDT 合约地址（模式=1 时必填）', value: usdt||''}
   ], 'adminDoSetVaultMode()');
 }
@@ -520,7 +520,7 @@ async function adminOpenEmergencyMode(){
   const vt = adminCt('vault');
   const [mode, usdt] = await Promise.all([vt.rewardMode().catch(()=>0n), vt.usdt().catch(()=>null)]);
   adminFormModal('紧急切换奖励模式（跳过检查）',[
-    {label:'奖励模式', type:'select', options:[{v:'0',t:'GAME 代币模式'},{v:'1',t:'USDT 模式'}], value: String(Number(mode))},
+    {label:'奖励模式', type:'select', options:[{v:'0',t:'EH 代币模式'},{v:'1',t:'USDT 模式'}], value: String(Number(mode))},
     {label:'USDT 合约地址（模式=1 时必填）', value: usdt||''}
   ], 'adminDoEmergencyMode()');
 }
@@ -769,7 +769,7 @@ async function secV3(el, isOwner){
         <img src="${monImg(i)}" alt="${escapeHtml(m.name)}" class="w-8 h-8 rounded-md object-cover shrink-0">
         <span class="text-[13px] font-bold flex-1">${escapeHtml(m.name)} ${elBadge(Number(m.element))}</span>
         <span class="text-[11px] num-mono text-red-400">战力 ${fmt(Number(m.power),0)}</span>
-        <span class="text-[11px] num-mono text-gold" title="奖励基数 ×0.01 = 基础 ELEM（≈${(Number(m.reward)*0.01).toFixed(2)} ELEM，英雄加成后更高）">奖励基数 ${fmt(Number(m.reward),0)}</span>
+        <span class="text-[11px] num-mono text-gold" title="奖励基数 ×0.01 = 基础 EH（≈${(Number(m.reward)*0.01).toFixed(2)} EH，英雄加成后更高）">奖励基数 ${fmt(Number(m.reward),0)}</span>
         <span class="text-[11px] num-mono text-green-400">经验 ${fmt(Number(m.xp),0)}</span>
       </div>` : '').join('');
   } else { monRows = '<div class="text-[12px] text-muted">暂无怪物</div>'; }
@@ -804,7 +804,7 @@ async function adminOpenAddMonster(){
     {label:'怪物名称', placeholder:'如 火焰巨魔'},
     {label:'元素', type:'select', options:[0,1,2,3,4].map(i=>({v:String(i), t:ELEMENTS[i].icon+' '+ELEMENTS[i].name})), value:'0'},
     {label:'战力（≤1000000）', placeholder:'100'},
-    {label:'奖励基数（≤10000，×0.01=基础ELEM）', placeholder:'10'},
+    {label:'奖励基数（≤10000，×0.01=基础EH）', placeholder:'10'},
     {label:'经验（≤10000）', placeholder:'5'}
   ], 'adminDoAddMonster()');
 }
@@ -976,8 +976,8 @@ async function secEnhance(el, isOwner){
   ]);
   const body = aCard('强化 commit 配置','fa-wand-magic-sparkles',
     aRow('过期块数', exp!==null?String(exp):'-') + aRow('每人待处理上限', maxp!==null?String(maxp):'-') +
-    aRow('精粹强化手续费', '1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 GAME·次') +
-    aRow('高阶精粹合成', '3阶→4阶：500 GAME·次'),
+    aRow('精粹强化手续费', '1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 EH·次') +
+    aRow('高阶精粹合成', '3阶→4阶：500 EH·次'),
     isOwner ? aAct('修改过期块数', 'adminPromptUint(\'enhanceShop\',\'setCommitExpiryBlocks\',\'过期块数：\',{min:100,max:1000})', 'fa-pen') +
              aAct('修改每人上限', 'adminPromptUint(\'enhanceShop\',\'setMaxPendingPerPlayer\',\'每人待处理上限：\',{min:1,max:10})', 'fa-pen') : '')
     + aCard('过期清理','fa-broom',

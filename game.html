@@ -1,284 +1,284 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<html lang="zh-CN" data-page-node-id="XAA20Um5DfCKYT59092JMX">
+<head data-page-node-id="qbdhfjGN8ZQooTQAd2dVDj">
+<meta charset="UTF-8" data-page-node-id="bjs0rLANQCg7AfS5TvfDU9">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" data-page-node-id="xFOFYn4Y3vj8OjABC6v5s6">
 <title>元素英雄 · RPG</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" data-page-node-id="NPgwuOLXe4TdfMaSjqEADx">
+<link rel="stylesheet" href="./styles.css" data-page-node-id="qA8u54aM0w37ERSMbqRxOS">
 </head>
-<body class="bg-grid">
+<body class="bg-grid" data-page-node-id="x3xvJLeGCHXfYx1Wp430qJ">
 
-<header class="sticky top-0 z-[110] backdrop-blur-xl bg-[#0b1220]/85 border-b border-[#24304a]">
-  <div class="max-w-7xl mx-auto px-3 sm:px-5 py-2.5 flex items-center gap-2 flex-wrap">
-    <div class="flex items-center gap-2.5 mr-auto">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xl anim-glow" style="background:linear-gradient(135deg,#fde68a,#f59e0b)">⚔️</div>
-      <div class="leading-tight">
-        <div class="font-black text-[15px] sm:text-base tracking-wide">元素英雄<span class="text-[10px] text-green-400 ml-1"></span></div>
-        <div class="text-[10px] text-muted -mt-0.5 hidden sm:block">Element Heroes</div>
+<header class="sticky top-0 z-[110] backdrop-blur-xl bg-[#0b1220]/85 border-b border-[#24304a]" data-page-node-id="bHCBUEYLI5K4zewDDktEk4">
+  <div class="max-w-7xl mx-auto px-3 sm:px-5 py-2.5 flex items-center gap-2 flex-wrap" data-page-node-id="KjaXDZDJndCrQ81ddzdAl3">
+    <div class="flex items-center gap-2.5 mr-auto" data-page-node-id="QYxnooxBmMQnCTRId2L7ej">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xl anim-glow" style="background:linear-gradient(135deg,#fde68a,#f59e0b)" data-page-node-id="NqEii8AwI4aytzAoFTnBhE">⚔️</div>
+      <div class="leading-tight" data-page-node-id="eLqlRO5lc9fHMjGvseScaq">
+        <div class="font-black text-[15px] sm:text-base tracking-wide" data-page-node-id="azEAueIAk53shbLj6ua51t">元素英雄<span class="text-[10px] text-green-400 ml-1" data-page-node-id="zrMkuMpvxCQwGoeVFaDy9P"></span></div>
+        <div class="text-[10px] text-muted -mt-0.5 hidden sm:block" data-page-node-id="z5mlOkUUbyNg5AcHrfzaai">Element Heroes</div>
       </div>
     </div>
-    <button id="pendingPillBtn" onclick="togglePendingPanel()" class="btn btn-sm btn-gold hidden" title="待揭示操作"><i class="fa-solid fa-hourglass-half"></i><span id="pendingCount">0</span></button>
-    <button id="connectBtn" onclick="connectWallet()" class="btn btn-sm btn-gold"><i class="fa-solid fa-wallet"></i><span id="connectTxt">连接钱包</span></button>
+    <button id="pendingPillBtn" onclick="togglePendingPanel()" class="btn btn-sm btn-gold hidden" title="待揭示操作" data-page-node-id="BBsa2SmbyzqEDiqrSdrUc1"><i class="fa-solid fa-hourglass-half" data-page-node-id="PkT5S31RjdFOAGkaSnQLkv"></i><span id="pendingCount" data-page-node-id="8ntsTitIaYP74GNcMTuLsx">0</span></button>
+    <button id="connectBtn" onclick="connectWallet()" class="btn btn-sm btn-gold" data-page-node-id="8Vhhs1QBOzAvVvV8nJk0yL"><i class="fa-solid fa-wallet" data-page-node-id="GCNFoKDIvweCpLHURfuaB1"></i><span id="connectTxt" data-page-node-id="8JEkwPiiNkKDKqJAwtBcm6">连接钱包</span></button>
   </div>
-  <div id="chainWarn" class="hidden border-t border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-[12px] text-amber-200 text-center">
-    <i class="fa-solid fa-triangle-exclamation mr-1"></i><span id="chainWarnTxt"></span>
+  <div id="chainWarn" class="hidden border-t border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-[12px] text-amber-200 text-center" data-page-node-id="XCR5Wel0rXHl3dgHAK7LiH">
+    <i class="fa-solid fa-triangle-exclamation mr-1" data-page-node-id="ruHqYw8bXcUw7VuI7InjeR"></i><span id="chainWarnTxt" data-page-node-id="Nz4P8mpxt0rt4xtIqa8j7R"></span>
   </div>
 </header>
 
-<nav id="tabBar" class="sticky top-[64px] z-[105] flex gap-1.5 overflow-x-auto px-3 py-2 backdrop-blur-xl bg-[#0b1220]/80 border-b border-[#24304a]">
-  <button class="tab-btn active" data-tab="heroes" onclick="switchTab('heroes')"><i class="fa-solid fa-user-ninja"></i>英雄</button>
-  <button class="tab-btn" data-tab="weapons" onclick="switchTab('weapons')"><i class="fa-solid fa-khanda"></i>武器</button>
-  <button class="tab-btn" data-tab="forge" onclick="switchTab('forge')"><i class="fa-solid fa-hammer"></i>锻造</button>
-  <button class="tab-btn" data-tab="melt" onclick="switchTab('melt')"><i class="fa-solid fa-fire-flame-curved"></i>熔炼</button>
-  <button class="tab-btn" data-tab="compose" onclick="switchTab('compose')"><i class="fa-solid fa-flask-vial"></i>合成</button>
-  <button class="tab-btn" data-tab="fight" onclick="switchTab('fight')"><i class="fa-solid fa-crosshairs"></i>战斗</button>
-  <button class="tab-btn" data-tab="boss" onclick="switchTab('boss')"><i class="fa-solid fa-dragon"></i>世界BOSS</button>
-  <button class="tab-btn" data-tab="market" onclick="switchTab('market')"><i class="fa-solid fa-store"></i>市场</button>
-  <button class="tab-btn" data-tab="vault" onclick="switchTab('vault')"><i class="fa-solid fa-vault"></i>金库</button>
-  <button class="tab-btn" data-tab="rank" onclick="switchTab('rank')"><i class="fa-solid fa-ranking-star"></i>排行</button>
-  <button class="tab-btn" data-tab="gallery" onclick="switchTab('gallery')"><i class="fa-solid fa-book-open"></i>图鉴</button>
-  <button class="tab-btn" data-tab="admin" onclick="switchTab('admin')"><i class="fa-solid fa-shield-halved"></i>管理</button>
+<nav id="tabBar" class="sticky top-[64px] z-[105] flex gap-1.5 overflow-x-auto px-3 py-2 backdrop-blur-xl bg-[#0b1220]/80 border-b border-[#24304a]" data-page-node-id="FpzNW5kDzWKyFC0NCDeVGd">
+  <button class="tab-btn active" data-tab="heroes" onclick="switchTab('heroes')" data-page-node-id="DAknaIH2DgQ6aYZfMr0HQi"><i class="fa-solid fa-user-ninja" data-page-node-id="ELi4268p4ISKmGgfok4VHU"></i>英雄</button>
+  <button class="tab-btn" data-tab="weapons" onclick="switchTab('weapons')" data-page-node-id="GBYpJLXvaN7isbsKLj9f31"><i class="fa-solid fa-khanda" data-page-node-id="x89yGsCpgeRon24ctRvhCL"></i>武器</button>
+  <button class="tab-btn" data-tab="forge" onclick="switchTab('forge')" data-page-node-id="Y8zp3rXjyPGuTvEhwFnUGA"><i class="fa-solid fa-hammer" data-page-node-id="nQd71kWlqPgtyS8wEhqoBK"></i>锻造</button>
+  <button class="tab-btn" data-tab="melt" onclick="switchTab('melt')" data-page-node-id="EH3Y5cNWsk86o8UlMgBnWt"><i class="fa-solid fa-fire-flame-curved" data-page-node-id="Xq620fCK4r4oluE9JnxV9d"></i>熔炼</button>
+  <button class="tab-btn" data-tab="compose" onclick="switchTab('compose')" data-page-node-id="7XXEJLa68EjZP52jZUWlVh"><i class="fa-solid fa-flask-vial" data-page-node-id="yAKoO2OYIBmafyZNBUPkmI"></i>合成</button>
+  <button class="tab-btn" data-tab="fight" onclick="switchTab('fight')" data-page-node-id="g8Hq45zZ6bXBGtml7X7p1l"><i class="fa-solid fa-crosshairs" data-page-node-id="fVSAaGpZhUr9fJ4Lklw4Nt"></i>战斗</button>
+  <button class="tab-btn" data-tab="boss" onclick="switchTab('boss')" data-page-node-id="Rnme4jz1QlQ2dkibpqznQ5"><i class="fa-solid fa-dragon" data-page-node-id="DTPCLPlK0aRylxt2XQL7wm"></i>世界BOSS</button>
+  <button class="tab-btn" data-tab="market" onclick="switchTab('market')" data-page-node-id="tSTdbTsCuDDER12Qjk9A7U"><i class="fa-solid fa-store" data-page-node-id="YrYtC5Y9fPrBPWVkCDyd6o"></i>市场</button>
+  <button class="tab-btn" data-tab="vault" onclick="switchTab('vault')" data-page-node-id="Bz1WakjSaDNVgXF7CopxAA"><i class="fa-solid fa-vault" data-page-node-id="QEXiiGUjZCEWHk8GGcRlE7"></i>金库</button>
+  <button class="tab-btn" data-tab="rank" onclick="switchTab('rank')" data-page-node-id="FFcuy0Bu8ScCweiheWfVy1"><i class="fa-solid fa-ranking-star" data-page-node-id="c7OmgUTSz9R2qiYSREZqZz"></i>排行</button>
+  <button class="tab-btn" data-tab="gallery" onclick="switchTab('gallery')" data-page-node-id="8stwbKBb92U2NWiyFeIIKC"><i class="fa-solid fa-book-open" data-page-node-id="zbaoSAejvmA0RN7s5k2sOw"></i>图鉴</button>
+  <button class="tab-btn" data-tab="admin" onclick="switchTab('admin')" data-page-node-id="pPvFYQzuUFtSoejMzLoPqG"><i class="fa-solid fa-shield-halved" data-page-node-id="NhCdg1Cj4kXFeCB50k1IKI"></i>管理</button>
 </nav>
 
-<main class="max-w-7xl mx-auto px-3 sm:px-5 py-4 space-y-4" id="mainArea">
-  <section id="panel-heroes" class="panel p-4 sm:p-5">
-    <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
-      <h2 class="text-lg font-black flex items-center gap-2"><i class="fa-solid fa-user-ninja text-gold"></i>我的英雄 <span id="heroCount" class="badge bg-[#1a2740] text-muted"></span></h2>
-      <div class="flex gap-2 flex-wrap">
-        <button onclick="refreshHeroes()" class="btn btn-sm btn-ghost"><i class="fa-solid fa-rotate"></i>刷新</button>
-        <button id="mintHeroBtn" onclick="mintHeroFlow()" class="btn btn-sm btn-gold"><i class="fa-solid fa-sparkles"></i>召唤英雄</button>
+<main class="max-w-7xl mx-auto px-3 sm:px-5 py-4 space-y-4" id="mainArea" data-page-node-id="kWgBM8aJBvTvUra2J6X63F">
+  <section id="panel-heroes" class="panel p-4 sm:p-5" data-page-node-id="m5DC80S1LUMaFSE25oP0oA">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-4" data-page-node-id="gs93svDzGDEXyVvKDP50b0">
+      <h2 class="text-lg font-black flex items-center gap-2" data-page-node-id="M4oA8GmVe7bB0pEdfZWV80"><i class="fa-solid fa-user-ninja text-gold" data-page-node-id="nHLce71MKXowcPPHQjgC5V"></i>我的英雄 <span id="heroCount" class="badge bg-[#1a2740] text-muted" data-page-node-id="jPJPRn9dZwnlnsCjLS5BRp"></span></h2>
+      <div class="flex gap-2 flex-wrap" data-page-node-id="7hrEGX5hnDDO0uFgJbReBA">
+        <button onclick="refreshHeroes()" class="btn btn-sm btn-ghost" data-page-node-id="Q7Iq67ElYuEGKblRPmr3BI"><i class="fa-solid fa-rotate" data-page-node-id="igPaOtFFDJlOAmkTepErLD"></i>刷新</button>
+        <button id="mintHeroBtn" onclick="mintHeroFlow()" class="btn btn-sm btn-gold" data-page-node-id="ykZSZSgavxvKA4h78Mboua"><i class="fa-solid fa-sparkles" data-page-node-id="wQonRSDh2dE6bPuCMtgCyV"></i>召唤英雄</button>
       </div>
     </div>
-    <div class="text-[12px] text-muted mb-3"><i class="fa-solid fa-circle-info text-info mr-1"></i>最多持有 <b class="text-gold">4</b> 个英雄。commit 后自动揭示。</div>
-    <div id="heroGrid" class="grid grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    <div class="text-[12px] text-muted mb-3" data-page-node-id="bB6vFg7cPFnySrNCYCORK0"><i class="fa-solid fa-circle-info text-info mr-1" data-page-node-id="JTjeAjThmVwEdHXx4vxNDX"></i>最多持有 <b class="text-gold" data-page-node-id="GnSzyDizSUM5AFd6A8FlpC">4</b> 个英雄。commit 后自动揭示。</div>
+    <div id="heroGrid" class="grid grid-cols-2 lg:grid-cols-3 gap-3" data-page-node-id="7eai7aSTHMYLtFPJ28ErcE"></div>
   </section>
 
-  <section id="panel-weapons" class="panel p-4 sm:p-5 hidden">
-    <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
-      <h2 class="text-lg font-black flex items-center gap-2"><i class="fa-solid fa-khanda text-gold"></i>我的武器</h2>
-      <button onclick="refreshWeapons()" class="btn btn-sm btn-ghost"><i class="fa-solid fa-rotate"></i>刷新</button>
+  <section id="panel-weapons" class="panel p-4 sm:p-5 hidden" data-page-node-id="h0cQ4Md1zJ1a0TUORb8Ps8">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-4" data-page-node-id="U2JWnREguHfEQpFdLHTVLb">
+      <h2 class="text-lg font-black flex items-center gap-2" data-page-node-id="hDTh4s9pQGNWnMSR3EjU9n"><i class="fa-solid fa-khanda text-gold" data-page-node-id="N21EslrzIovC6jbnygcX1A"></i>我的武器</h2>
+      <button onclick="refreshWeapons()" class="btn btn-sm btn-ghost" data-page-node-id="yn3MuRLrGLYb3TGhMUAMzM"><i class="fa-solid fa-rotate" data-page-node-id="UwFIiEe4PQF2rDJHfrmMWN"></i>刷新</button>
     </div>
-    <div id="weaponFilterBar" class="flex items-center gap-2 flex-wrap mb-3"></div>
-    <div id="weaponGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+    <div id="weaponFilterBar" class="flex items-center gap-2 flex-wrap mb-3" data-page-node-id="tQaq6IuBYvTi2SOxznrk8P"></div>
+    <div id="weaponGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3" data-page-node-id="Jb6ykuBNZ9UuwS4o8a6nAT"></div>
   </section>
 
-  <section id="panel-forge" class="panel p-4 sm:p-5 hidden">
-    <h2 class="text-lg font-black flex items-center gap-2 mb-1"><i class="fa-solid fa-hammer text-gold"></i>铁匠铺 · 锻造</h2>
-    <div class="text-[12px] text-muted mb-4">单抽 <b id="forgeCostTxt" class="text-gold">--</b> · 十连 <b id="forge10CostTxt" class="text-gold">--</b> · 百连 <b id="forge100CostTxt" class="text-gold">--</b>（另需 commit 押金 5%）。</div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="game-card p-4 elbg-0"><div class="font-bold mb-1">🪙 单抽锻造</div><div class="text-[12px] text-muted mb-3">随机获得 1 件结果</div><button onclick="forgeFlow(1)" id="forge1Btn" class="btn btn-gold w-full"><i class="fa-solid fa-hammer"></i>单抽</button></div>
-      <div class="game-card p-4 elbg-4"><div class="font-bold mb-1">🔥 十连锻造</div><div class="text-[12px] text-muted mb-3">逐张展示 10 件结果</div><button onclick="forgeFlow(10)" id="forge10Btn" class="btn btn-blue w-full"><i class="fa-solid fa-bolt"></i>十连</button></div>
-      <div class="game-card p-4 elbg-3"><div class="font-bold mb-1">💎 百连锻造</div><div class="text-[12px] text-muted mb-3">一次 100 件结果</div><button onclick="forgeFlow(100)" id="forge100Btn" class="btn btn-blue w-full"><i class="fa-solid fa-gem"></i>百连</button></div>
-      <div class="game-card p-4 elbg-1"><div class="font-bold mb-1">🌿 碎片合成武器</div>
-        <div class="lbl mt-2">目标星级</div>
-        <select id="synthStarSel" class="input mb-2">
-          <option value="1">1 星（需碎片 1 × 10）</option>
-          <option value="2">2 星（需碎片 2 × 10）</option>
-          <option value="3">3 星（需碎片 3 × 10）</option>
-          <option value="4">4 星（需碎片 4 × 10）</option>
-          <option value="5">5 星（需碎片 5 × 10）</option>
+  <section id="panel-forge" class="panel p-4 sm:p-5 hidden" data-page-node-id="kxlAwZRBs7jMN2yAApBhBa">
+    <h2 class="text-lg font-black flex items-center gap-2 mb-1" data-page-node-id="4s8diLkZ4suJFtIKHs70vb"><i class="fa-solid fa-hammer text-gold" data-page-node-id="8iNdNxZP3Qy5GhYlHSeqEN"></i>铁匠铺 · 锻造</h2>
+    <div class="text-[12px] text-muted mb-4" data-page-node-id="Yodm2t6ayD3xqLkj7hmSDA">单抽 <b id="forgeCostTxt" class="text-gold" data-page-node-id="1n97PElE3vv4nYNrSTOVnF">--</b> · 十连 <b id="forge10CostTxt" class="text-gold" data-page-node-id="ehERGDU6RCHf1J7Mt2Etmy">--</b> · 百连 <b id="forge100CostTxt" class="text-gold" data-page-node-id="jA92YBzWArT9HxTDYRP83Q">--</b>（另需 commit 押金 5%）。</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-page-node-id="2bBhzmhJikcG1JZuGUXVT8">
+      <div class="game-card p-4 elbg-0" data-page-node-id="uSsbjAPqrr60a6URHVXRqm"><div class="font-bold mb-1" data-page-node-id="41ckNWGYY8cIlGpLebDEBh">🪙 单抽锻造</div><div class="text-[12px] text-muted mb-3" data-page-node-id="rwpC4saUYFOKlj0aoqAWHe">随机获得 1 件结果</div><button onclick="forgeFlow(1)" id="forge1Btn" class="btn btn-gold w-full" data-page-node-id="jf585u6nqBwcxtYIohceaj"><i class="fa-solid fa-hammer" data-page-node-id="Btl6QFiWF7lsDRg4VFy2lU"></i>单抽</button></div>
+      <div class="game-card p-4 elbg-4" data-page-node-id="baWBv6H3jYe92WSMny6rQn"><div class="font-bold mb-1" data-page-node-id="6UDqobQsMdckO6vBKuVSoH">🔥 十连锻造</div><div class="text-[12px] text-muted mb-3" data-page-node-id="rC1gwl4hJFBhnB3OY9BdMq">逐张展示 10 件结果</div><button onclick="forgeFlow(10)" id="forge10Btn" class="btn btn-blue w-full" data-page-node-id="PxUE0mvvGxbKWRq1NQ0ORw"><i class="fa-solid fa-bolt" data-page-node-id="zIKpHNKqiXETe2k2juAZma"></i>十连</button></div>
+      <div class="game-card p-4 elbg-3" data-page-node-id="BNOmNPOP3stvSWruZjMCNC"><div class="font-bold mb-1" data-page-node-id="TIURwcfuKo0oyh3qTK5lbW">💎 百连锻造</div><div class="text-[12px] text-muted mb-3" data-page-node-id="o5lfSwVnj9ILqaH7SsvyM4">一次 100 件结果</div><button onclick="forgeFlow(100)" id="forge100Btn" class="btn btn-blue w-full" data-page-node-id="EikUO9yhqfuoZuGvH1nGak"><i class="fa-solid fa-gem" data-page-node-id="SHxdaLXvXmyKBCIBMnaiCI"></i>百连</button></div>
+      <div class="game-card p-4 elbg-1" data-page-node-id="Hn8LfVxRUz1GwgF8ibCpi1"><div class="font-bold mb-1" data-page-node-id="Xvs1gLZlUjZo1i2RVHoFAq">🌿 碎片合成武器</div>
+        <div class="lbl mt-2" data-page-node-id="sC8Mixa6UBFssebtCkGnzb">目标星级</div>
+        <select id="synthStarSel" class="input mb-2" data-page-node-id="wyFVgZ0N0YLH17ehmpCAGd">
+          <option value="1" data-page-node-id="K8pL7oq07AIHQatIWI4zSX">1 星（需碎片 1 × 10）</option>
+          <option value="2" data-page-node-id="mzsa78XG7PbCL7FAMkr0Cd">2 星（需碎片 2 × 10）</option>
+          <option value="3" data-page-node-id="kP0p1KIQPnlrzK0rXYBQhJ">3 星（需碎片 3 × 10）</option>
+          <option value="4" data-page-node-id="N1FoiowipqzbAbjrf4U0N0">4 星（需碎片 4 × 10）</option>
+          <option value="5" data-page-node-id="YacqMPUekisJRtNMyEbRea">5 星（需碎片 5 × 10）</option>
         </select>
-        <button onclick="synthesizeFlow()" class="btn btn-gold w-full"><i class="fa-solid fa-wand-magic-sparkles"></i>合成武器</button>
+        <button onclick="synthesizeFlow()" class="btn btn-gold w-full" data-page-node-id="ZtmbbmuiJ7rl9mnODSQazI"><i class="fa-solid fa-wand-magic-sparkles" data-page-node-id="dnTyh76lfyZfL1Ou0GEVPn"></i>合成武器</button>
       </div>
     </div>
-    <div id="forgeStage" class="mt-5 min-h-[130px] rounded-xl border border-dashed border-[#2c3a57] flex flex-wrap items-center justify-center gap-3 p-4" style="background:radial-gradient(600px 200px at 50% 0%,rgba(251,191,36,.05),transparent 70%)"></div>
+    <div id="forgeStage" class="mt-5 min-h-[130px] rounded-xl border border-dashed border-[#2c3a57] flex flex-wrap items-center justify-center gap-3 p-4" style="background:radial-gradient(600px 200px at 50% 0%,rgba(251,191,36,.05),transparent 70%)" data-page-node-id="hr4nlDNI61qpQX3QO60E8Z"></div>
   </section>
 
-  <section id="panel-melt" class="panel p-4 sm:p-5 hidden">
-    <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-      <h2 class="text-lg font-black flex items-center gap-2"><i class="fa-solid fa-fire-flame-curved text-gold"></i>熔炼武器 → 精粹</h2>
-      <div class="flex gap-2">
-        <button onclick="refreshBalances()" class="btn btn-sm btn-ghost"><i class="fa-solid fa-rotate"></i>刷新</button>
-        <button id="meltBtn" onclick="meltFlow()" class="btn btn-sm btn-danger"><i class="fa-solid fa-fire"></i>熔炼所选 (<span id="meltSelCount">0</span>)</button>
+  <section id="panel-melt" class="panel p-4 sm:p-5 hidden" data-page-node-id="gN5LFaFghKHtMwu8Em3v3c">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-3" data-page-node-id="TGVjLQKLH3pDTs2zs7KyCa">
+      <h2 class="text-lg font-black flex items-center gap-2" data-page-node-id="aOEJMSG85QKOxLMqfVhAy2"><i class="fa-solid fa-fire-flame-curved text-gold" data-page-node-id="E4JH0Jprqwu2FtfkltE3FZ"></i>熔炼武器 → 精粹</h2>
+      <div class="flex gap-2" data-page-node-id="HgmJSpbI5E7c3KY5qxaKq0">
+        <button onclick="refreshBalances()" class="btn btn-sm btn-ghost" data-page-node-id="N5EI5sIQTBVXDUVC2E0VnC"><i class="fa-solid fa-rotate" data-page-node-id="z8fOT7ikyPZCYorGYmQxqL"></i>刷新</button>
+        <button id="meltBtn" onclick="meltFlow()" class="btn btn-sm btn-danger" data-page-node-id="SnYFUCyb1HBBrbensD0Wie"><i class="fa-solid fa-fire" data-page-node-id="wr14o4eHw6oF5wBRBSjCXY"></i>熔炼所选 (<span id="meltSelCount" data-page-node-id="FMXKdQmBRLkkdCfw2SfHxt">0</span>)</button>
       </div>
     </div>
-    <div id="mintBalances" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4"></div>
-    <div class="text-[13px] font-bold mb-2">选择要熔炼的武器</div>
-    <div id="meltWeaponGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+    <div id="mintBalances" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4" data-page-node-id="x4jKclzp42rrvLg9KuwsJK"></div>
+    <div class="text-[13px] font-bold mb-2" data-page-node-id="ojboYlQB4L6amnngnhiUam">选择要熔炼的武器</div>
+    <div id="meltWeaponGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3" data-page-node-id="SbS5UjFWGNXvQvS3xY5a7K"></div>
   </section>
 
-  <section id="panel-compose" class="panel p-4 sm:p-5 hidden">
-    <h2 class="text-lg font-black flex items-center gap-2 mb-1"><i class="fa-solid fa-flask-vial text-gold"></i>精粹合成（50 合 1）</h2>
-    <div id="composeBalances" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 my-4"></div>
-    <div class="game-card p-4 max-w-xl elbg-2">
-      <div class="font-bold mb-3">🧪 合成配方</div>
-      <div class="flex items-end gap-3 flex-wrap">
-        <div class="flex-1 min-w-[160px]"><div class="lbl">消耗低阶精粹</div><select id="composeLowSel" class="input" onchange="syncCompose()"></select></div>
-        <div class="text-center text-gold font-black text-2xl pb-2">→</div>
-        <div class="flex-1 min-w-[160px]"><div class="lbl">获得高阶精粹</div><div id="composeHighShow" class="input !bg-[#1a2740] flex items-center gap-2"></div></div>
+  <section id="panel-compose" class="panel p-4 sm:p-5 hidden" data-page-node-id="Z0A0usLZjgJlKdjLz7kA4v">
+    <h2 class="text-lg font-black flex items-center gap-2 mb-1" data-page-node-id="d4r37IDujaa2krtFrNmFOZ"><i class="fa-solid fa-flask-vial text-gold" data-page-node-id="MG71iG1Iw9RU0LdZODrRFx"></i>精粹合成（50 合 1）</h2>
+    <div id="composeBalances" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 my-4" data-page-node-id="hkfIxh2hL01I0RgTFMMj5B"></div>
+    <div class="game-card p-4 max-w-xl elbg-2" data-page-node-id="COccL0hpT0gCVnZrGlup0Y">
+      <div class="font-bold mb-3" data-page-node-id="UQfX7PEEz3JZAO9VN135DM">🧪 合成配方</div>
+      <div class="flex items-end gap-3 flex-wrap" data-page-node-id="Af8BbY0VrYPN0IQ9PJTubr">
+        <div class="flex-1 min-w-[160px]" data-page-node-id="U23OIe9DQ89ImVso8sOxWG"><div class="lbl" data-page-node-id="3CQMkt6EG77ZICpK7ca3Cc">消耗低阶精粹</div><select id="composeLowSel" class="input" onchange="syncCompose()" data-page-node-id="xBQyFKPW86OQOsuznQG8uW"></select></div>
+        <div class="text-center text-gold font-black text-2xl pb-2" data-page-node-id="6XL0xT0WuI6blJUL2gP6nZ">→</div>
+        <div class="flex-1 min-w-[160px]" data-page-node-id="MeRg6NciTwtUDyroGEzZcS"><div class="lbl" data-page-node-id="DQ9ozkPYeNqG1V44E5j5FM">获得高阶精粹</div><div id="composeHighShow" class="input !bg-[#1a2740] flex items-center gap-2" data-page-node-id="ffguJOputpj5OBOkVVDttX"></div></div>
       </div>
-      <div class="mt-3"><div class="lbl">合成次数（每次消耗 50 个低阶）</div><input id="composeTimesInp" type="number" min="1" step="1" value="1" class="input" onchange="syncCompose()"></div>
-      <div id="composeNeedTxt" class="text-[12px] text-muted mt-3"></div>
-      <button onclick="composeFlow()" id="composeBtn" class="btn btn-gold w-full mt-3"><i class="fa-solid fa-flask"></i>执行合成</button>
-    </div>
-  </section>
-
-  <section id="panel-fight" class="panel p-3 sm:p-5 hidden">
-    <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-      <h2 class="text-lg font-black flex items-center gap-2"><i class="fa-solid fa-crosshairs text-gold"></i>野外战斗</h2>
-      <button onclick="refreshFight()" class="btn btn-sm btn-ghost"><i class="fa-solid fa-rotate"></i>刷新</button>
-    </div>
-    <div class="lg:grid lg:grid-cols-5 lg:gap-4">
-      <div class="lg:col-span-3 space-y-3 lg:space-y-4 min-w-0">
-        <div class="game-card p-3 sm:p-4">
-          <div class="flex items-center justify-between mb-2">
-            <div class="font-bold text-[13px] sm:text-sm flex items-center gap-2"><i class="fa-solid fa-user-ninja text-gold"></i>出战英雄</div>
-            <div id="fightHeroCount" class="text-[11px] text-muted"></div>
-          </div>
-          <div id="fightHeroSel" class="pick-row"></div>
-        </div>
-        <div class="game-card p-3 sm:p-4">
-          <div class="flex items-center justify-between mb-2">
-            <div class="font-bold text-[13px] sm:text-sm flex items-center gap-2"><i class="fa-solid fa-khanda text-gold"></i>出战武器</div>
-            <div id="fightWeaponCount" class="text-[11px] text-muted"></div>
-          </div>
-          <div id="fightWeaponFilterBar" class="flex flex-wrap items-center gap-1.5 mb-2 hidden"></div>
-          <div id="fightWeaponSel" class="pick-row"></div>
-        </div>
-        <div class="game-card p-3 sm:p-4">
-          <div class="flex items-center justify-between mb-2">
-            <div class="font-bold text-[13px] sm:text-sm flex items-center gap-2"><i class="fa-solid fa-skull text-red-400"></i>选择怪物</div>
-            <div class="text-[11px] text-muted">点击选择挑战目标</div>
-          </div>
-          <div id="monsterGrid" class="pick-row monster-row"></div>
-        </div>
-      </div>
-      <div class="lg:col-span-2 min-w-0">
-        <div id="fightPreview" class="game-card p-4 mt-3 lg:mt-0 lg:sticky lg:top-[130px]">
-          <div class="font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-binoculars text-info"></i>战前分析</div>
-          <div id="previewBody" class="text-muted text-[13px] text-center py-6">
-            <i class="fa-solid fa-hand-pointer text-3xl mb-2 block opacity-40"></i>选择英雄、武器与怪物后自动分析
-          </div>
-          <div class="mt-4 flex gap-2">
-            <button id="fightBtn" onclick="fightFlow()" class="btn btn-gold flex-1 text-base py-3"><i class="fa-solid fa-crosshairs"></i>开始战斗</button>
-          </div>
-          <div id="fightHint" class="mt-2 text-[11px] text-muted text-center"></div>
-        </div>
-      </div>
-    </div>
-    <div id="fightActionBar" class="lg:hidden sticky bottom-[76px] z-[95] mt-3">
-      <div class="panel p-3 flex items-center gap-3">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between text-[11px] mb-1">
-            <span class="text-muted">预估胜率</span>
-            <span id="fightBarWin" class="font-black num-mono text-gold">--</span>
-          </div>
-          <div id="fightBarSummary" class="text-[10px] text-muted truncate">选择英雄、武器与怪物后开战</div>
-        </div>
-        <button id="fightBtnBar" onclick="fightFlow()" class="btn btn-gold text-base py-3 px-6" disabled><i class="fa-solid fa-crosshairs"></i>开战</button>
-      </div>
+      <div class="mt-3" data-page-node-id="ZNFKezg3FF49iuAHHpQ8DZ"><div class="lbl" data-page-node-id="bKwwcpuN6Do4gtqswCRyJo">合成次数（每次消耗 50 个低阶）</div><input id="composeTimesInp" type="number" min="1" step="1" value="1" class="input" onchange="syncCompose()" data-page-node-id="Eddg0WZg8ZOejU0ocgmyF0"></div>
+      <div id="composeNeedTxt" class="text-[12px] text-muted mt-3" data-page-node-id="VeNEjwk354zmpCGad8om1g"></div>
+      <button onclick="composeFlow()" id="composeBtn" class="btn btn-gold w-full mt-3" data-page-node-id="4mKABacloufBms6iTxn4k4"><i class="fa-solid fa-flask" data-page-node-id="QqwoiPy23Hy69fWEBOSnIK"></i>执行合成</button>
     </div>
   </section>
 
-  <section id="panel-boss" class="panel p-4 sm:p-5 hidden">
-    <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-      <h2 class="text-lg font-black flex items-center gap-2"><i class="fa-solid fa-dragon text-gold"></i>世界 BOSS</h2>
-      <div class="flex gap-2">
-        <button onclick="refreshBoss()" class="btn btn-sm btn-ghost"><i class="fa-solid fa-rotate"></i>刷新</button>
-        <button id="settleBtn" onclick="settleBoss()" class="btn btn-sm btn-blue"><i class="fa-solid fa-sack-dollar"></i>结算奖励</button>
+  <section id="panel-fight" class="panel p-3 sm:p-5 hidden" data-page-node-id="3Rwkcj36BGqw999lQ9W2xj">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-3" data-page-node-id="6J9wiV3lqLgvFolzJMdP8A">
+      <h2 class="text-lg font-black flex items-center gap-2" data-page-node-id="KIVx6e58GV0peCeMgAry1O"><i class="fa-solid fa-crosshairs text-gold" data-page-node-id="5E2V5go8v72bHbpHxssJLG"></i>野外战斗</h2>
+      <button onclick="refreshFight()" class="btn btn-sm btn-ghost" data-page-node-id="4dQ9HFBM6O97PvwSaxv9VX"><i class="fa-solid fa-rotate" data-page-node-id="4SGk689Itx9BWUpmpCvTBE"></i>刷新</button>
+    </div>
+    <div class="lg:grid lg:grid-cols-5 lg:gap-4" data-page-node-id="XS45EtFMCD02lpb8wNuWT0">
+      <div class="lg:col-span-3 space-y-3 lg:space-y-4 min-w-0" data-page-node-id="M57GEhsuvRz1a2DjcvmjBd">
+        <div class="game-card p-3 sm:p-4" data-page-node-id="dqtF9EZ3oh7wxRTZy5fG2k">
+          <div class="flex items-center justify-between mb-2" data-page-node-id="8rLmmbmErcA6RNg1ulXgl2">
+            <div class="font-bold text-[13px] sm:text-sm flex items-center gap-2" data-page-node-id="bBdOUn5UQ6i6sUm7dZ5AUU"><i class="fa-solid fa-user-ninja text-gold" data-page-node-id="dEbK3voUoq4ZFYGgls9Bw1"></i>出战英雄</div>
+            <div id="fightHeroCount" class="text-[11px] text-muted" data-page-node-id="NH4FOdTHuLX7zsw4T75EEh"></div>
+          </div>
+          <div id="fightHeroSel" class="pick-row" data-page-node-id="MS1keK86JdeHcJExBhVBhb"></div>
+        </div>
+        <div class="game-card p-3 sm:p-4" data-page-node-id="UkrzAQySbrYkmDdomwmLYn">
+          <div class="flex items-center justify-between mb-2" data-page-node-id="tbU6On7wF8psZ9SpKpKL05">
+            <div class="font-bold text-[13px] sm:text-sm flex items-center gap-2" data-page-node-id="6Q4QfnJNzzTiXqU5QPH8S3"><i class="fa-solid fa-khanda text-gold" data-page-node-id="4enDmJCGJPGy3D76FwUOk0"></i>出战武器</div>
+            <div id="fightWeaponCount" class="text-[11px] text-muted" data-page-node-id="1kfI2v8myyrDRBKQzDAEPk"></div>
+          </div>
+          <div id="fightWeaponFilterBar" class="flex flex-wrap items-center gap-1.5 mb-2 hidden" data-page-node-id="ihmMp0h35T788BJK3DcHnh"></div>
+          <div id="fightWeaponSel" class="pick-row" data-page-node-id="WjOAq46svcvMr18ievC4up"></div>
+        </div>
+        <div class="game-card p-3 sm:p-4" data-page-node-id="atHKAfZzBFaOJFYFlJt9BB">
+          <div class="flex items-center justify-between mb-2" data-page-node-id="sh0kOJHT42hgenjpubltbE">
+            <div class="font-bold text-[13px] sm:text-sm flex items-center gap-2" data-page-node-id="75ypW7tJ8XYJ1rvVVAz3v1"><i class="fa-solid fa-skull text-red-400" data-page-node-id="SoHaSKCWhGv8cA5C65teCw"></i>选择怪物</div>
+            <div class="text-[11px] text-muted" data-page-node-id="EVf41KA3PzYuNAd3lHNSsu">点击选择挑战目标</div>
+          </div>
+          <div id="monsterGrid" class="pick-row monster-row" data-page-node-id="u9C3ozvOv3d2LOG7JnnD70"></div>
+        </div>
+      </div>
+      <div class="lg:col-span-2 min-w-0" data-page-node-id="ZKtI2yXluYQ8D4CBtPzVmg">
+        <div id="fightPreview" class="game-card p-4 mt-3 lg:mt-0 lg:sticky lg:top-[130px]" data-page-node-id="DwIMc4yG1oBhYdmAiDdCJX">
+          <div class="font-bold mb-3 flex items-center gap-2" data-page-node-id="PjQZs4TqliLTfDB4MKvaUA"><i class="fa-solid fa-binoculars text-info" data-page-node-id="7sOXe6sQHGl2nDGxE6mnh2"></i>战前分析</div>
+          <div id="previewBody" class="text-muted text-[13px] text-center py-6" data-page-node-id="wBEyMdostvAAxCGYwvdEIu">
+            <i class="fa-solid fa-hand-pointer text-3xl mb-2 block opacity-40" data-page-node-id="xfe8rLD82GWnBflMtMxZgp"></i>选择英雄、武器与怪物后自动分析
+          </div>
+          <div class="mt-4 flex gap-2" data-page-node-id="at5zYC4GWN0YFFYKQLK8iQ">
+            <button id="fightBtn" onclick="fightFlow()" class="btn btn-gold flex-1 text-base py-3" data-page-node-id="eI2VVF0AgPiCogvREY8FZ5"><i class="fa-solid fa-crosshairs" data-page-node-id="MB3iYF0zIOOBew0tE6M00H"></i>开始战斗</button>
+          </div>
+          <div id="fightHint" class="mt-2 text-[11px] text-muted text-center" data-page-node-id="lk27zqN5v2X1ZDQCnKwk6K"></div>
+        </div>
       </div>
     </div>
-    <div id="bossBody" class="grid grid-cols-1 lg:grid-cols-3 gap-4"></div>
+    <div id="fightActionBar" class="lg:hidden sticky bottom-[76px] z-[95] mt-3" data-page-node-id="EwBfKUB5siDmxpFEiXGNus">
+      <div class="panel p-3 flex items-center gap-3" data-page-node-id="lCU9YhdYgBY4hrNlyeJGGi">
+        <div class="flex-1 min-w-0" data-page-node-id="F5f8PWH2J5MvHyVkiX1k0r">
+          <div class="flex items-center justify-between text-[11px] mb-1" data-page-node-id="a1kj0s6D7Btz0MC3MFikj8">
+            <span class="text-muted" data-page-node-id="SnslvbNbFb0sXrP66NM3QG">预估胜率</span>
+            <span id="fightBarWin" class="font-black num-mono text-gold" data-page-node-id="yFeBUllB9ImhSWsbQsi9uy">--</span>
+          </div>
+          <div id="fightBarSummary" class="text-[10px] text-muted truncate" data-page-node-id="8NAtrxNVIq8ZzPwEuwLRgE">选择英雄、武器与怪物后开战</div>
+        </div>
+        <button id="fightBtnBar" onclick="fightFlow()" class="btn btn-gold text-base py-3 px-6" disabled data-page-node-id="V4LAUbWmmJVSTcvo62qIGQ"><i class="fa-solid fa-crosshairs" data-page-node-id="01nTk34sPnyDLrCEg5kQOV"></i>开战</button>
+      </div>
+    </div>
   </section>
 
-  <section id="panel-market" class="panel p-4 sm:p-5 hidden">
-    <h2 class="text-lg font-black flex items-center gap-2 mb-3"><i class="fa-solid fa-store text-gold"></i>市场</h2>
-    <div class="flex gap-2 mb-4 flex-wrap">
-      <button class="market-tab active" data-mtab="list" onclick="switchMarketTab('list')"><i class="fa-solid fa-shop mr-1"></i>在售列表</button>
-      <button class="market-tab" data-mtab="sell" onclick="switchMarketTab('sell')"><i class="fa-solid fa-tag mr-1"></i>上架</button>
-      <button class="market-tab" data-mtab="mine" onclick="switchMarketTab('mine')"><i class="fa-solid fa-boxes-stacked mr-1"></i>我的上架</button>
-    </div>
-    <div id="mtab-list">
-      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <div class="text-[13px] text-muted">手续费 <b id="feeTxt" class="text-gold">--</b></div>
-        <button onclick="loadActiveListings()" class="btn btn-sm btn-ghost"><i class="fa-solid fa-rotate"></i>刷新</button>
+  <section id="panel-boss" class="panel p-4 sm:p-5 hidden" data-page-node-id="fA8jwAJwzRVEDUs7pOyknb">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-3" data-page-node-id="cYkQNFC6If2moQgLg2DVGl">
+      <h2 class="text-lg font-black flex items-center gap-2" data-page-node-id="Pj3rUionnbOoOFhVv2xx8B"><i class="fa-solid fa-dragon text-gold" data-page-node-id="yrH4TQMb0DrgJ82OeHAJiK"></i>世界 BOSS</h2>
+      <div class="flex gap-2" data-page-node-id="9viNjrM3MLsG98CfjKFMWY">
+        <button onclick="refreshBoss()" class="btn btn-sm btn-ghost" data-page-node-id="1KZjEh8rFoIRe9dXX1O175"><i class="fa-solid fa-rotate" data-page-node-id="pM8489LxMn0KKMB9r4X8Pr"></i>刷新</button>
+        <button id="settleBtn" onclick="settleBoss()" class="btn btn-sm btn-blue" data-page-node-id="6r4CtvL0axXnoKpt8zBbvt"><i class="fa-solid fa-sack-dollar" data-page-node-id="WcoefIC3Q0T9d4FE4TxCbr"></i>结算奖励</button>
       </div>
-      <div id="marketFilterBar" class="flex items-center gap-2 flex-wrap mb-3"></div>
-      <div id="listGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
-      <div id="listPager" class="flex items-center justify-center gap-3 mt-4"></div>
     </div>
-    <div id="mtab-sell" class="hidden">
-      <div class="game-card p-4 max-w-2xl elbg-3">
-        <div class="font-bold mb-3">🏷️ 上架出售</div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><div class="lbl">NFT 类型</div>
-            <select id="sellTypeSel" class="input" onchange="onSellTypeChange()">
-              <option value="0">英雄</option><option value="1">武器</option>
-              <option value="2">碎片</option><option value="3">精粹</option>
+    <div id="bossBody" class="grid grid-cols-1 lg:grid-cols-3 gap-4" data-page-node-id="5d6PjX6f9gX1SXRFeEupAY"></div>
+  </section>
+
+  <section id="panel-market" class="panel p-4 sm:p-5 hidden" data-page-node-id="EgYgMGrTWaIPJVlUcJn98T">
+    <h2 class="text-lg font-black flex items-center gap-2 mb-3" data-page-node-id="8I7SWWQhCwahBHiq99zwMp"><i class="fa-solid fa-store text-gold" data-page-node-id="lArBSa8hc0JXewey9T7ox4"></i>市场</h2>
+    <div class="flex gap-2 mb-4 flex-wrap" data-page-node-id="34vMUSlgwOtBoHAi0ECpQ0">
+      <button class="market-tab active" data-mtab="list" onclick="switchMarketTab('list')" data-page-node-id="coGCLABHdRhdXHpgarECCC"><i class="fa-solid fa-shop mr-1" data-page-node-id="noivYWclnbZE4TfH2yGWGK"></i>在售列表</button>
+      <button class="market-tab" data-mtab="sell" onclick="switchMarketTab('sell')" data-page-node-id="4Lne1ZEQo7UJt3m1yv7jvh"><i class="fa-solid fa-tag mr-1" data-page-node-id="CoYcRaa76sNA1md3hANfyE"></i>上架</button>
+      <button class="market-tab" data-mtab="mine" onclick="switchMarketTab('mine')" data-page-node-id="c6P4c2e0ktYmpabmqLt7nc"><i class="fa-solid fa-boxes-stacked mr-1" data-page-node-id="IFmsiNKQVEZnsFPCFcQPDq"></i>我的上架</button>
+    </div>
+    <div id="mtab-list" data-page-node-id="zyd2HQ0aUiaMCHUsYnKjeW">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2" data-page-node-id="M2PKcEORMV1u73Dyqc7yda">
+        <div class="text-[13px] text-muted" data-page-node-id="BFdcsc6IKNMe4IbC9wuL1C">手续费 <b id="feeTxt" class="text-gold" data-page-node-id="hZdgIepNQOxtZ6zYdZGrlW">--</b></div>
+        <button onclick="loadActiveListings()" class="btn btn-sm btn-ghost" data-page-node-id="r6SduTIW5OoOExrRgZwOc1"><i class="fa-solid fa-rotate" data-page-node-id="RShyffg7FqsWpiIrSCEvuO"></i>刷新</button>
+      </div>
+      <div id="marketFilterBar" class="flex items-center gap-2 flex-wrap mb-3" data-page-node-id="DITNHiL5mx0O08c7T0A6vz"></div>
+      <div id="listGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3" data-page-node-id="spxgdPKMGV1eLCsF8E6JsU"></div>
+      <div id="listPager" class="flex items-center justify-center gap-3 mt-4" data-page-node-id="OMWzUM4C6TCNNu5qDVIKLZ"></div>
+    </div>
+    <div id="mtab-sell" class="hidden" data-page-node-id="smpBUcYcH9YgUp9nRnvYIv">
+      <div class="game-card p-4 max-w-2xl elbg-3" data-page-node-id="fIQ5kFyoq8UeykH024SA1c">
+        <div class="font-bold mb-3" data-page-node-id="Ye0LITDuPd9L8pKggMwD51">🏷️ 上架出售</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" data-page-node-id="DKgBtCjBfmSMLaxSaCeBlR">
+          <div data-page-node-id="jvcnl8D469wbprbTUMPyG6"><div class="lbl" data-page-node-id="NH0XQT0IL3zNfzHwI4LLZS">NFT 类型</div>
+            <select id="sellTypeSel" class="input" onchange="onSellTypeChange()" data-page-node-id="351E0S8gTBWmvIcktDR8n7">
+              <option value="0" data-page-node-id="bM8CqSqxPHKKrxOkTkfEKQ">英雄</option><option value="1" data-page-node-id="kMW9IgmTr6JHHMHYjsf4ri">武器</option>
+              <option value="2" data-page-node-id="D4Py4Mruzaeuebbn6T6DLt">碎片</option><option value="3" data-page-node-id="UdW0aVyydQKBkr2cW4gTgB">精粹</option>
             </select>
           </div>
-          <div><div class="lbl">选择资产</div><select id="sellTokenSel" class="input" onchange="onSellAssetChange()"></select></div>
-          <div id="sellAmountWrap" class="hidden"><div class="lbl">数量</div><input id="sellAmountInp" type="number" min="1" step="1" value="1" class="input"></div>
-          <div><div class="lbl">价格（GameToken）</div><input id="sellPriceInp" type="number" min="0" step="0.01" class="input" placeholder="如 100"></div>
+          <div data-page-node-id="2p1HejGvZMgzDF1k5gL9rn"><div class="lbl" data-page-node-id="XoaERy0FL9nAAZHeUhGtSe">选择资产</div><select id="sellTokenSel" class="input" onchange="onSellAssetChange()" data-page-node-id="pxjQa8yVP98EF1NEkrOqW7"></select></div>
+          <div id="sellAmountWrap" class="hidden" data-page-node-id="FBYVWDG9G1V7PBJvG6o2c6"><div class="lbl" data-page-node-id="2Sc1SzdE3FQh0sO4NUrFj9">数量</div><input id="sellAmountInp" type="number" min="1" step="1" value="1" class="input" data-page-node-id="JXFVBrbhb89HLkBdm3KNau"></div>
+          <div data-page-node-id="3db7Rl3DHbc8SrEhSfUiV9"><div class="lbl" data-page-node-id="bC2AlIImlGCIYjGJeyZDmk">价格（GameToken）</div><input id="sellPriceInp" type="number" min="0" step="0.01" class="input" placeholder="如 100" data-page-node-id="tHzLCyR3mvX3i2lzmaqyEK"></div>
         </div>
-        <div class="mt-3 flex items-center justify-between gap-2 flex-wrap bg-[#0d1526] rounded-xl p-3 border border-[#24304a]">
-          <div class="text-[13px]"><i class="fa-solid fa-shield-halved text-info mr-1"></i>第 1 步：授权 NFT</div>
-          <button id="approveNftBtn" onclick="approveNftForSell()" class="btn btn-sm btn-ghost">授权 NFT</button>
+        <div class="mt-3 flex items-center justify-between gap-2 flex-wrap bg-[#0d1526] rounded-xl p-3 border border-[#24304a]" data-page-node-id="nuvcID3VHAAgviwOtCZQgg">
+          <div class="text-[13px]" data-page-node-id="TsWL3soMXG7ZEU0rDoDoii"><i class="fa-solid fa-shield-halved text-info mr-1" data-page-node-id="GPo9Jn9O9Ld2UfpnGg1PEW"></i>第 1 步：授权 NFT</div>
+          <button id="approveNftBtn" onclick="approveNftForSell()" class="btn btn-sm btn-ghost" data-page-node-id="IwaA9sXGkCq2S4X7nfUcJt">授权 NFT</button>
         </div>
-        <button id="listItemBtn" onclick="listItemFlow()" class="btn btn-gold w-full mt-3" disabled><i class="fa-solid fa-tag"></i>第 2 步：确认上架</button>
+        <button id="listItemBtn" onclick="listItemFlow()" class="btn btn-gold w-full mt-3" disabled data-page-node-id="Cd7GF0qPg6iWxY1HmLP04k"><i class="fa-solid fa-tag" data-page-node-id="MWXXXRbHZB1b4MDhTLEjLu"></i>第 2 步：确认上架</button>
       </div>
     </div>
-    <div id="mtab-mine" class="hidden">
-      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <div class="text-[13px] text-muted">我的上架</div>
-        <button onclick="loadMyListings()" class="btn btn-sm btn-ghost"><i class="fa-solid fa-rotate"></i>刷新</button>
+    <div id="mtab-mine" class="hidden" data-page-node-id="8YesRUJrbCRyV6I5wypGm3">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2" data-page-node-id="MR6omsPgMOOhT4HtwljfJP">
+        <div class="text-[13px] text-muted" data-page-node-id="w8yxAohjYNEI46ovc0Pqz7">我的上架</div>
+        <button onclick="loadMyListings()" class="btn btn-sm btn-ghost" data-page-node-id="kBUSi4aR05hbhJx24Cz7aC"><i class="fa-solid fa-rotate" data-page-node-id="QQe0cqblf0w8APRBCEBvxh"></i>刷新</button>
       </div>
-      <div id="myListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      <div id="myListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" data-page-node-id="yAxK5ACVIPSj2LdxNsIBim"></div>
     </div>
   </section>
 
-  <section id="panel-vault" class="panel p-4 sm:p-5 hidden">
-    <h2 class="text-lg font-black flex items-center gap-2 mb-3"><i class="fa-solid fa-vault text-gold"></i>金库</h2>
-    <div class="game-card p-5 max-w-xl elbg-0">
-      <div class="text-muted text-[13px] mb-2">待领取奖励 <span id="vaultModeTag" class="badge bg-[#1a2740] text-muted ml-2">--</span></div>
-      <div id="vaultReward" class="text-3xl font-black text-gold num-mono mb-4">--</div>
-      <button id="claimBtn" onclick="claimVault()" class="btn btn-gold w-full sm:w-auto"><i class="fa-solid fa-hand-holding-dollar"></i>领取</button>
+  <section id="panel-vault" class="panel p-4 sm:p-5 hidden" data-page-node-id="HPU5uBO9nMYbcJYSfEcsVp">
+    <h2 class="text-lg font-black flex items-center gap-2 mb-3" data-page-node-id="4NWzTHUaxXysgu5IQWxkor"><i class="fa-solid fa-vault text-gold" data-page-node-id="F8lCZHXSLuEFpgBOF4CjGY"></i>金库</h2>
+    <div class="game-card p-5 max-w-xl elbg-0" data-page-node-id="mY0gt2y0KqA9DzEA2QxROx">
+      <div class="text-muted text-[13px] mb-2" data-page-node-id="8bsBf0H2RBfPAvkF5xzKXa">待领取奖励 <span id="vaultModeTag" class="badge bg-[#1a2740] text-muted ml-2" data-page-node-id="VBnPOS6UwBzOdBjvWDHof8">--</span></div>
+      <div id="vaultReward" class="text-3xl font-black text-gold num-mono mb-4" data-page-node-id="UVoOymqJlWbMvzkfZeSfV2">--</div>
+      <button id="claimBtn" onclick="claimVault()" class="btn btn-gold w-full sm:w-auto" data-page-node-id="jEcwJwabYZBCEFYGZfb7i1"><i class="fa-solid fa-hand-holding-dollar" data-page-node-id="dfujHDCFrMZ7pdHnxIraDr"></i>领取</button>
     </div>
   </section>
 
-  <section id="panel-rank" class="panel p-4 sm:p-5 hidden">
-    <h2 class="text-lg font-black flex items-center gap-2 mb-1"><i class="fa-solid fa-ranking-star text-gold"></i>排行榜</h2>
-    <div id="rankTableWrap" class="overflow-x-auto rounded-xl border border-[#24304a]">
-      <table class="w-full text-[13px] min-w-[560px]">
-        <thead><tr class="bg-[#182338] text-muted">
-          <th class="px-3 py-2.5 text-left">#</th><th class="px-3 py-2.5 text-left">玩家</th>
-          <th class="px-3 py-2.5 text-right">胜利</th><th class="px-3 py-2.5 text-right">场次</th>
-          <th class="px-3 py-2.5 text-right">胜率</th><th class="px-3 py-2.5 text-right">总战力</th>
+  <section id="panel-rank" class="panel p-4 sm:p-5 hidden" data-page-node-id="BIDxnI7LBBTv9jQd1a5SJG">
+    <h2 class="text-lg font-black flex items-center gap-2 mb-1" data-page-node-id="nBHHE4Wh2pmaOmLxz1ArCK"><i class="fa-solid fa-ranking-star text-gold" data-page-node-id="cfRA2r9NiMy3uxXzEojlSt"></i>排行榜</h2>
+    <div id="rankTableWrap" class="overflow-x-auto rounded-xl border border-[#24304a]" data-page-node-id="Zgk1prvpz7NtBNrxCPwuZR">
+      <table class="w-full text-[13px] min-w-[560px]" data-page-node-id="rkYv7JTMNXvDbdwfn7nJEY">
+        <thead data-page-node-id="59yXqTmF2TDSBeVMKhVoqI"><tr class="bg-[#182338] text-muted" data-page-node-id="QaEX2X0CjWasqEuzC1mqRf">
+          <th class="px-3 py-2.5 text-left" data-page-node-id="Ik230KATTku3SyfQfCWkTH">#</th><th class="px-3 py-2.5 text-left" data-page-node-id="2IRBPk1lAO2v36A1wraCw9">玩家</th>
+          <th class="px-3 py-2.5 text-right" data-page-node-id="HMw5Y6YvMBBg7EwmaqM0l0">胜利</th><th class="px-3 py-2.5 text-right" data-page-node-id="uymfWZjPYovM9Wv1XBNcG2">场次</th>
+          <th class="px-3 py-2.5 text-right" data-page-node-id="UtEkweNSPnRiFpBJL4h6GQ">胜率</th><th class="px-3 py-2.5 text-right" data-page-node-id="NTTVvoJD2Prd7GC8XgSL7f">总战力</th>
         </tr></thead>
-        <tbody id="rankBody"></tbody>
+        <tbody id="rankBody" data-page-node-id="nXS5N1wXHwpYRjGDO3zN9i"></tbody>
       </table>
     </div>
-    <div id="rankPager" class="flex items-center justify-center gap-3 mt-3"></div>
-    <h2 class="text-lg font-black flex items-center gap-2 mt-8 mb-1"><i class="fa-solid fa-scroll text-gold"></i>我的战斗记录</h2>
-    <div id="battleLog" class="space-y-2"></div>
+    <div id="rankPager" class="flex items-center justify-center gap-3 mt-3" data-page-node-id="t2Xx9peyczip1ChDoREfK6"></div>
+    <h2 class="text-lg font-black flex items-center gap-2 mt-8 mb-1" data-page-node-id="ANomL8DwgUhx9kdFdLpgRX"><i class="fa-solid fa-scroll text-gold" data-page-node-id="kD78T3MlMeSI2XniZwkXmQ"></i>我的战斗记录</h2>
+    <div id="battleLog" class="space-y-2" data-page-node-id="9Nu4pTEjruEvUjkNW0SKhx"></div>
   </section>
 
-  <section id="panel-gallery" class="panel p-4 sm:p-5 hidden">
-    <h2 class="text-lg font-black flex items-center gap-2 mb-3"><i class="fa-solid fa-book-open text-gold"></i>图鉴 <span class="badge bg-[#1a2740] text-muted">角色 &amp; 怪物</span></h2>
-    <div class="text-[12px] text-muted mb-4"><i class="fa-solid fa-circle-info text-info mr-1"></i>元素英雄与链上怪物的图鉴资料，点击战斗页可直接选择对应怪物挑战。</div>
-    <div id="galleryGrid"></div>
+  <section id="panel-gallery" class="panel p-4 sm:p-5 hidden" data-page-node-id="r62y1CqKqMc57zYqjYXr09">
+    <h2 class="text-lg font-black flex items-center gap-2 mb-3" data-page-node-id="4T3DDJHYfwGbX9llbxbNaT"><i class="fa-solid fa-book-open text-gold" data-page-node-id="exLSSHdnOedSeTSjw6ur2X"></i>图鉴 <span class="badge bg-[#1a2740] text-muted" data-page-node-id="zPO8rdYwBCxOj0yxXjEcd9">角色 &amp; 怪物</span></h2>
+    <div class="text-[12px] text-muted mb-4" data-page-node-id="VMqDqxJAFgGkNBeplI2glB"><i class="fa-solid fa-circle-info text-info mr-1" data-page-node-id="PO5bzbWa3Gq17og4967HvB"></i>元素英雄与链上怪物的图鉴资料，点击战斗页可直接选择对应怪物挑战。</div>
+    <div id="galleryGrid" data-page-node-id="oThrZ0zuX63KFABc3kLMmT"></div>
   </section>
 
-  <section id="panel-admin" class="panel p-4 sm:p-5 hidden">
-    <h2 class="text-lg font-black flex items-center gap-2 mb-1"><i class="fa-solid fa-shield-halved text-gold"></i>管理后台 <span id="adminBadge" class="badge bg-[#1a2740] text-muted"></span></h2>
-    <div class="text-[12px] text-muted mb-3">自动检测当前账户对各合约的 owner 权限。</div>
-    <div id="adminBody"></div>
+  <section id="panel-admin" class="panel p-4 sm:p-5 hidden" data-page-node-id="Ni4aZrzoqvHLfMUFBkjKM6">
+    <h2 class="text-lg font-black flex items-center gap-2 mb-1" data-page-node-id="xpqWTou7jra4kz8XqxT4T5"><i class="fa-solid fa-shield-halved text-gold" data-page-node-id="ppzLyFfulflhsacIQJHoQt"></i>管理后台 <span id="adminBadge" class="badge bg-[#1a2740] text-muted" data-page-node-id="Il6kftEiyBKitCZlk5YcQt"></span></h2>
+    <div class="text-[12px] text-muted mb-3" data-page-node-id="xO7rF1YGXbtsJ3gpKU7OK0">自动检测当前账户对各合约的 owner 权限。</div>
+    <div id="adminBody" data-page-node-id="LLqE8Qn9KEsqmFFR2Ln12u"></div>
   </section>
 </main>
 
-<div id="pendingPanel" class="fixed right-3 bottom-[74px] z-[130] w-[min(94vw,360px)] hidden">
-  <div class="panel p-3 shadow-2xl">
-    <div class="font-bold text-[13px] mb-2 flex items-center gap-2"><i class="fa-solid fa-hourglass-half text-gold"></i>待揭示操作 <span class="text-muted font-normal" id="pendingHint"></span></div>
-    <div id="pendingList" class="space-y-2 max-h-[46vh] overflow-y-auto"></div>
+<div id="pendingPanel" class="fixed right-3 bottom-[74px] z-[130] w-[min(94vw,360px)] hidden" data-page-node-id="Q3ar0sB6NAOLAtjijiMv95">
+  <div class="panel p-3 shadow-2xl" data-page-node-id="8LO9b6a7Fv9WuwyvoAEfX6">
+    <div class="font-bold text-[13px] mb-2 flex items-center gap-2" data-page-node-id="4B8LXOBxoJrxGUEuqulIK4"><i class="fa-solid fa-hourglass-half text-gold" data-page-node-id="THCdKFl49V8R9SZUBqERwg"></i>待揭示操作 <span class="text-muted font-normal" id="pendingHint" data-page-node-id="jLNNCvpPGHkwgwkqHaIh8I"></span></div>
+    <div id="pendingList" class="space-y-2 max-h-[46vh] overflow-y-auto" data-page-node-id="SXLThdcEbz0yD2HH48cyUE"></div>
   </div>
 </div>
 
-<div id="toastStack" aria-live="polite" aria-atomic="true"></div>
-<div id="modalRoot"></div>
-<div id="errBadge" class="fixed bottom-2 left-2 z-[210] hidden max-w-[60vw] text-[10px] text-red-300 bg-red-950/80 border border-red-500/40 rounded-lg px-2 py-1 break-all"></div>
+<div id="toastStack" aria-live="polite" aria-atomic="true" data-page-node-id="chVP0H2OWusBlN4lK1xxxa"></div>
+<div id="modalRoot" data-page-node-id="2rIPT8pqrnOEZRllgtvKPx"></div>
+<div id="errBadge" class="fixed bottom-2 left-2 z-[210] hidden max-w-[60vw] text-[10px] text-red-300 bg-red-950/80 border border-red-500/40 rounded-lg px-2 py-1 break-all" data-page-node-id="GxrdODUrHleH6t9CL4adr1"></div>
 
 <!-- i18n: 多语言（最先加载，覆盖式翻译，不侵入业务 JS） -->
 <script src="./js/i18n_dict.js" defer></script>

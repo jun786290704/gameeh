@@ -95,7 +95,7 @@ async function renderFight(){
       <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${monImg(m.id)}" alt="${m.name}"></span>
       <span class="pick-body">
         <span class="pick-title"><b style="${active?`color:${e.color};`:''}">${m.name}</b><em class="pick-tag" style="color:${difficulty.color};">${difficulty.label}</em></span>
-        <span class="pick-sub"><b class="text-red-400">⚔${fmt(m.power,0)}</b><i class="text-gold" title="胜利奖励 ≈ ${fmt(m.reward*0.01,2)} ELEM（按英雄星级/等级加成，存入金库待领取）">💰${fmt(m.reward*0.01,2)}</i></span>
+        <span class="pick-sub"><b class="text-red-400">⚔${fmt(m.power,0)}</b><i class="text-gold" title="胜利奖励 ≈ ${fmt(m.reward*0.01,2)} EH（按英雄星级/等级加成，存入金库待领取）">💰${fmt(m.reward*0.01,2)}</i></span>
       </span>
       <span class="pick-radio ${active?'pick-radio-on':''}">${active?'✓':''}</span>
     </button>`;
@@ -169,7 +169,7 @@ async function autoPreviewFight(){
     const elAdvantage = elMult > 10000 ? '克制' : elMult < 10000 ? '被克制' : '中性';
     const elAdvColor = elMult > 10000 ? '#22c55e' : elMult < 10000 ? '#ef4444' : '#8b92a5';
     /* 预计奖励（与链上 _calcReward 同口径） */
-    let estReward = null, estDec = S.tokenDecimals, estSym = S.tokenSymbol||'ELEM';
+    let estReward = null, estDec = S.tokenDecimals, estSym = S.tokenSymbol||TOKEN_SYMBOL;
     try{
       const monTier = Math.floor(heroLv / 10);
       const monMult = 100 + 15 * monTier;
@@ -328,7 +328,7 @@ async function playBattleAnimation(rec2){
           <span>判定 <b>${rec2.roll}/100</b></span>
         </div>
         ${win?`<div class="battle-reward">
-          <div class="battle-reward-item gold"><i class="fa-solid fa-coins"></i>+${fmtUnits(BigInt(rec2.reward), S.tokenDecimals, 2)} ${S.tokenSymbol||'ELEM'}</div>
+          <div class="battle-reward-item gold"><i class="fa-solid fa-coins"></i>+${fmtUnits(BigInt(rec2.reward), S.tokenDecimals, 2)} ${S.tokenSymbol||TOKEN_SYMBOL}</div>
           </div>
           <div class="battle-reward-note"><i class="fa-solid fa-vault mr-1"></i>奖励已存入金库，可前往「金库」页领取</div>
           <div class="battle-reward-item xp"><i class="fa-solid fa-star"></i>+${rec2.xp} XP</div>

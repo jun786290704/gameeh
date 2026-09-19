@@ -1,22 +1,21 @@
-badge	BSC 测试网 · 链上真合约	BSC Testnet · On-chain Contracts
-tagline	召唤五行英雄，锻造神器武器，讨伐远古怪物与世界 BOSS —— 每一场战斗都真实发生在链上。	Summon five-element heroes, forge legendary weapons, and hunt ancient monsters and world bosses — every battle truly happens on-chain.
+tagline	召唤元素英雄，锻造神器武器，讨伐远古怪物与世界 BOSS —— 每一场战斗都真实发生在链上。	Summon five-element heroes, forge legendary weapons, and hunt ancient monsters and world bosses — every battle truly happens on-chain.
 cta-start	开始游戏	Start Playing
 cta-learn	了解玩法	How to Play
 meta-heroes	5 行英雄	5 Heroes
 meta-mons	10 种怪物	10 Monsters
 meta-boss	世界 BOSS 轮次	World Boss Rounds
-meta-elem	斩获 ELEM 奖励	Earn ELEM Rewards
+meta-elem	斩获 USDT 奖励	Earn USDT Rewards
 scroll	向下滚动	Scroll down
 t-gameplay	核心玩法	Core Gameplay
 s-gameplay	从召唤第一只英雄开始，踏上链上冒险的完整循环	From summoning your first hero, embark on a full on-chain adventure loop
 p1-t	召唤英雄	Summon Heroes
-p1-d	消耗代币召唤五行英雄，金木土水火五种元素各有命途。每位英雄拥有等级、经验、战力与体力，体力随时间自动恢复。	Spend tokens to summon five-element heroes. Each hero has level, EXP, power and stamina; stamina regenerates over time.
+p1-d	消耗代币召唤元素英雄，金木土水火五种元素各有命途。每位英雄拥有等级、经验、战力与体力，体力随时间自动恢复。	Spend tokens to summon five-element heroes. Each hero has level, EXP, power and stamina; stamina regenerates over time.
 p2-t	锻造武器	Forge Weapons
 p2-d	在锻造厂消耗材料锻造武器，武器带 1~5 星品质与五行属性，星级越高强化加成越强。	Forge weapons with materials. Each weapon has 1-5 star rarity and an element; higher stars mean stronger bonuses.
 p3-t	强化战力	Boost Power
 p3-d	用精粹强化武器提升战力加成，经验升级英雄等级，合理搭配元素克制关系打出更高伤害。	Enhance weapons with essence, level up heroes with EXP, and exploit elemental counters for higher damage.
 p4-t	挑战怪物	Fight Monsters
-p4-d	在战斗页面挑选出战英雄与武器，对战 10 种元素怪物。胜利可获得 ELEM 奖励与经验，奖励进入金库待领取。	Pick your hero and weapon, then fight 10 elemental monsters. Victory grants ELEM rewards and EXP, stored in your vault.
+p4-d	在战斗页面挑选出战英雄与武器，对战 10 种元素怪物。胜利可获得 USDT 奖励与经验，奖励进入金库待领取。	Pick your hero and weapon, then fight 10 elemental monsters. Victory grants USDT rewards and EXP, stored in your vault.
 p5-t	讨伐世界 BOSS	World Boss
 p5-d	参与世界 BOSS 轮次，按伤害占比瓜分奖池。排行榜实时更新，击破 BOSS 后结算奖励，人人有份。	Join world boss rounds and share the prize pool by damage dealt. Live rankings refresh; claim rewards after each kill.
 p6-t	领取奖励	Claim Rewards
@@ -31,7 +30,7 @@ el-wood-s	生生不息	Evergreen
 el-earth-s	厚重 · 防御	Sturdy · Guard
 el-water-s	灵动 · 续航	Agile · Sustain
 el-fire-s	狂暴 · 范围	Fury · AoE
-t-heroes	五行英雄	Five Element Heroes
+t-heroes	元素英雄	Five Element Heroes
 s-heroes	五种元素的守护者，选择与你命格相合的英雄出战	Guardians of five elements — pick the hero that matches your destiny
 h0-n	金甲圣骑士	Golden Paladin
 h0-r	锐金之躯 · 攻守兼备的先锋	Blade of metal · vanguard
@@ -103,7 +102,7 @@ boss-li2	伤害排行 TOP5 实时刷新，金色高亮你的排名	Top-5 damage 
 boss-li3	击破后按伤害占比瓜分奖池，一键结算领取	Prize pool split by damage share, claim in one click
 boss-li4	战斗中实时预估可分奖励，收益心中有数	Real-time estimated reward during battle
 cta-t	准备好迎接你的英雄了吗？	Ready to meet your hero?
-cta-d	连接钱包，召唤第一位五行英雄，立刻开始链上冒险。	Connect your wallet, summon your first hero and start your on-chain adventure now.
+cta-d	连接钱包，召唤第一位元素英雄，立刻开始链上冒险。	Connect your wallet, summon your first hero and start your on-chain adventure now.
 t-comm	官方社区与支持	Community & Support
 s-comm	加入官方社区，第一时间获取游戏动态、空投与活动资讯	Join official communities for game updates, airdrops and events
 c0-n	蝴蝶平台	Butterfly
@@ -118,5 +117,5 @@ c2-g	关注我们	Follow
 c3-n	官方电报	Telegram
 c3-d	玩家交流社区与官方客服支持，实时答疑。	Player community and official support, live Q&A.
 c3-g	加入社区	Join
-foot	五行英雄 Element Heroes · 链上五行 RPG · BSC 测试网	Element Heroes · On-chain Five Element RPG · BSC Testnet
+foot	元素英雄 Element Heroes 	Element Heroes 
 foot-enter	进入游戏	Enter Game

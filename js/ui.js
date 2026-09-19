@@ -32,7 +32,7 @@ async function loadTokenInfo(){
   try{
     const tk = mustC('gameToken');
     S.tokenDecimals = Number(await tk.decimals());
-    S.tokenSymbol = await tk.symbol();
+    S.tokenSymbol = TOKEN_SYMBOL; // 统一展示 EH，不采用合约 symbol
     if(S.account){ S.tokenBal = await tk.balanceOf(S.account); }
     renderTokenChip();
   }catch(e){ console.warn('token',e); }

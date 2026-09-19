@@ -217,7 +217,7 @@ function syncCompose(){
   const fee = feeEth * BigInt(times);
   $('#composeHighShow').innerHTML = `<span>精粹 ${high} 阶</span><span class="ml-auto">${ELEMENTS[Math.min(4,high)].icon}</span>`;
   const bal = S.essenceBal[low]||0;
-  $('#composeNeedTxt').innerHTML = `当前持有精粹 ${low} 阶 <b class="text-gold">${bal}</b> 个，本次消耗 <b class="text-gold">${times*50}</b> 个，可合成 <b class="text-gold">${Math.floor(bal/50)}</b> 个精粹 ${high} 阶。手续费 <b class="text-gold">${fmt(feeEth,0)} GAME/次</b>（共 ${fmt(fee,0)}）。`;
+  $('#composeNeedTxt').innerHTML = `当前持有精粹 ${low} 阶 <b class="text-gold">${bal}</b> 个，本次消耗 <b class="text-gold">${times*50}</b> 个，可合成 <b class="text-gold">${Math.floor(bal/50)}</b> 个精粹 ${high} 阶。手续费 <b class="text-gold">${fmt(feeEth,0)} EH/次</b>（共 ${fmt(fee,0)}）。`;
 }
 const COMPOSE_FEE_ETHER = { 1:20n, 2:100n, 3:500n };
 async function composeFlow(){

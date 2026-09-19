@@ -134,6 +134,9 @@ const REVEAL_ABI = {
 };
 const ACTION_PROXY = { mintHero:'v3', forge:'forgeShop', synthesize:'forgeShop', enhance:'enhanceShop', bossAttack:'boss' };
 
+/* ============ 代币展示符号（固定为 EH，忽略合约返回的 symbol） ============ */
+const TOKEN_SYMBOL = 'EH';
+
 /* ============ 状态 ============ */
 const S = {
   mode:'readonly',
@@ -141,8 +144,8 @@ const S = {
   tab:'heroes',
   pending:[],
   heroes:[], weapons:[], monsters:[],
-  shardsBal:{}, essenceBal:{}, tokenBal:0n, tokenDecimals:18, tokenSymbol:'GAME',
-  vaultReward:0n, vaultMode:0, vaultSym:'GAME', vaultDec:18,
+  shardsBal:{}, essenceBal:{}, tokenBal:0n, tokenDecimals:18, tokenSymbol:TOKEN_SYMBOL,
+  vaultReward:0n, vaultMode:0, vaultSym:TOKEN_SYMBOL, vaultDec:18,
   marketList:[], marketPage:0, marketPageSize:8, marketTab:'list', marketFeeBp:200,
   collapsedGroups:{}, weaponsFilterEl:null, weaponsFilterStar:null, weaponsSort:'bonus', weaponSearch:'', marketFilterEl:null,
   rankPage:0, rankSize:10,

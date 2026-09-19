@@ -1039,20 +1039,20 @@
   "ja": "金庫残高",
   "es": "Saldo del vault"
  },
- "待发放总额(GAME)": {
-  "en": "Pending (GAME)",
-  "ja": "未払総額(GAME)",
-  "es": "Pendiente (GAME)"
+ "待发放总额(EH)": {
+  "en": "Pending (EH)",
+  "ja": "未払総額(EH)",
+  "es": "Pendiente (EH)"
  },
  "待发放总额(USDT)": {
   "en": "Pending (USDT)",
   "ja": "未払総額(USDT)",
   "es": "Pendiente (USDT)"
  },
- "累计发放(GAME)": {
-  "en": "Paid (GAME)",
-  "ja": "累計支払(GAME)",
-  "es": "Pagado (GAME)"
+ "累计发放(EH)": {
+  "en": "Paid (EH)",
+  "ja": "累計支払(EH)",
+  "es": "Pagado (EH)"
  },
  "累计发放(USDT)": {
   "en": "Paid (USDT)",
@@ -1104,10 +1104,10 @@
   "ja": "資金入金",
   "es": "Depositar fondos"
  },
- "存入 GAME": {
-  "en": "Deposit GAME",
-  "ja": "GAME 入金",
-  "es": "Depositar GAME"
+ "存入 EH": {
+  "en": "Deposit EH",
+  "ja": "EH 入金",
+  "es": "Depositar EH"
  },
  "存入 USDT": {
   "en": "Deposit USDT",
@@ -1144,10 +1144,10 @@
   "ja": "金庫報酬モード切替",
   "es": "Cambiar modo del vault"
  },
- "GAME 代币模式": {
-  "en": "GAME Token Mode",
-  "ja": "GAME トークンモード",
-  "es": "Modo GAME"
+ "EH 代币模式": {
+  "en": "EH Token Mode",
+  "ja": "EH トークンモード",
+  "es": "Modo EH"
  },
  "USDT 合约地址（模式=1 时必填）": {
   "en": "USDT Address (required in mode 1)",
@@ -1229,10 +1229,10 @@
   "ja": "金庫報酬モード",
   "es": "Modo de recompensa del vault"
  },
- "GAME 模式": {
-  "en": "GAME Mode",
-  "ja": "GAME モード",
-  "es": "Modo GAME"
+ "EH 模式": {
+  "en": "EH Mode",
+  "ja": "EH モード",
+  "es": "Modo EH"
  },
  "已揭示过了": {
   "en": "Already revealed",
@@ -1759,10 +1759,10 @@
   "ja": "戦力（≤1000000）",
   "es": "Poder (<=1000000)"
  },
- "奖励基数（≤10000，×0.01=基础ELEM）": {
-  "en": "Reward base (<=10000, x0.01=ELEM)",
-  "ja": "報酬基数（≤10000、×0.01=基礎ELEM）",
-  "es": "Base de recompensa (<=10000, x0.01=ELEM)"
+ "奖励基数（≤10000，×0.01=基础EH）": {
+  "en": "Reward base (<=10000, x0.01=EH)",
+  "ja": "報酬基数（≤10000、×0.01=基礎EH）",
+  "es": "Base de recompensa (<=10000, x0.01=EH)"
  },
  "经验（≤10000）": {
   "en": "EXP (<=10000)",
@@ -1949,20 +1949,20 @@
   "ja": "エッセンス強化手数料",
   "es": "Comisión de mejora con esencia"
  },
- "1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 GAME·次": {
-  "en": "T1 2 / T2 10 / T3 30 / T4 80 GAME·per",
-  "ja": "1階 2 / 2階 10 / 3階 30 / 4階 80 GAME·回",
-  "es": "T1 2 / T2 10 / T3 30 / T4 80 GAME·por"
+ "1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 EH·次": {
+  "en": "T1 2 / T2 10 / T3 30 / T4 80 EH·per",
+  "ja": "1階 2 / 2階 10 / 3階 30 / 4階 80 EH·回",
+  "es": "T1 2 / T2 10 / T3 30 / T4 80 EH·por"
  },
  "高阶精粹合成": {
   "en": "High-tier Essence Compose",
   "ja": "高階エッセンス合成",
   "es": "Componer esencia alta"
  },
- "3阶→4阶：500 GAME·次": {
-  "en": "T3→T4: 500 GAME·per",
-  "ja": "3階→4階：500 GAME·回",
-  "es": "T3→T4: 500 GAME·por"
+ "3阶→4阶：500 EH·次": {
+  "en": "T3→T4: 500 EH·per",
+  "ja": "3階→4階：500 EH·回",
+  "es": "T3→T4: 500 EH·por"
  },
  "清理全部": {
   "en": "Clean All",

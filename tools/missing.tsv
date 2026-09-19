@@ -105,9 +105,9 @@ USDT 模式	USDT mode
 USDT 地址	USDT Address
 清理间隔	Cleanup Interval
 金库余额	Vault Balance
-待发放总额(GAME)	Pending (GAME)
+待发放总额(EH)	Pending (EH)
 待发放总额(USDT)	Pending (USDT)
-累计发放(GAME)	Paid (GAME)
+累计发放(EH)	Paid (EH)
 累计发放(USDT)	Paid (USDT)
 授权游戏数	Authorized Games
 我的待领取	My Claimable
@@ -118,7 +118,7 @@ USDT 地址	USDT Address
 授权游戏（负责发放奖励）	Authorize Game (pays rewards)
 添加/移除授权	Add/Remove Authorization
 存入资金	Deposit Funds
-存入 GAME	Deposit GAME
+存入 EH	Deposit EH
 存入 USDT	Deposit USDT
 应急管理	Emergency
 清理玩家待领取	Clean Player Claims
@@ -126,7 +126,7 @@ USDT 地址	USDT Address
 设置金库奖励代币（仅一次）	Set Vault Reward Token (once)
 代币合约地址（GameToken）	Token Contract (GameToken)
 切换金库奖励模式	Switch Vault Reward Mode
-GAME 代币模式	GAME Token Mode
+EH 代币模式	EH Token Mode
 USDT 合约地址（模式=1 时必填）	USDT Address (required in mode 1)
 USDT 模式需填写 USDT 合约地址	USDT address required in USDT mode
 紧急切换模式会跳过“待发放资金需先转换”的检查，确定继续？	Emergency switch skips the convert-pending check. Continue?
@@ -143,7 +143,7 @@ USDT 模式需填写 USDT 合约地址	USDT address required in USDT mode
 存入数量	Deposit Amount
 如 1000	e.g. 1000
 金库奖励模式	Vault Reward Mode
-GAME 模式	GAME Mode
+EH 模式	EH Mode
 概览	Overview
 全部合约状态与常用入口	All contract status & quick entries
 价格预言机	Price Oracle
@@ -235,7 +235,7 @@ commit 配置	Commit Config
 怪物名称	Monster Name
 如 火焰巨魔	e.g. Flame Troll
 战力（≤1000000）	Power (<=1000000)
-奖励基数（≤10000，×0.01=基础ELEM）	Reward base (<=10000, x0.01=ELEM)
+奖励基数（≤10000，×0.01=基础EH）	Reward base (<=10000, x0.01=EH)
 经验（≤10000）	EXP (<=10000)
 暂无怪物可更新	No monster to update
 更新怪物（先填 ID）	Update Monster (fill ID)
@@ -273,9 +273,9 @@ Registry 地址（可为 0x0）	Registry Address (0x0 ok)
 设置锻造关联	Set Forge Links
 强化 commit 配置	Enhance Commit Config
 精粹强化手续费	Essence Enhance Fee
-1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 GAME·次	T1 2 / T2 10 / T3 30 / T4 80 GAME·per
+1阶 2 / 2阶 10 / 3阶 30 / 4阶 80 EH·次	T1 2 / T2 10 / T3 30 / T4 80 EH·per
 高阶精粹合成	High-tier Essence Compose
-3阶→4阶：500 GAME·次	T3→T4: 500 GAME·per
+3阶→4阶：500 EH·次	T3→T4: 500 EH·per
 清理全部	Clean All
 清理过期强化	Clean Expired Enhances
 设置强化铺关联合约	Set Enhance Shop Links
