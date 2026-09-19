@@ -4,13 +4,14 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 
-// 抓出 I18N 对象字面量（从 "const I18N = {" 到其后第一个独立行 "};"）
+// 抓出 I18N 对象字面量（从 "const I18N = {" 到其后第一个独立行 "};"，兼容 LF / CRLF）
 const start = html.indexOf('const I18N = {');
 if (start < 0) throw new Error('I18N not found');
-const endMarker = '\n};\n';
-const end = html.indexOf(endMarker, start);
-if (end < 0) throw new Error('I18N end not found');
-const src = html.slice(start + 'const '.length, end + 3); // 到 "};" 结束
+const endRe = /[\r\n]+\};[\r\n]+/g;
+endRe.lastIndex = start;
+const endMatch = endRe.exec(html);
+if (!endMatch) throw new Error('I18N end not found');
+const src = html.slice(start + 'const '.length, endMatch.index + endMatch[0].length).replace(/\s+$/, '');
 const I18N = eval('(' + src.slice('I18N = '.length, src.length - 1) + ')');
 
 const langs = Object.keys(I18N);

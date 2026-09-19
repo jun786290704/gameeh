@@ -20,6 +20,7 @@
         <div class="text-[10px] text-muted -mt-0.5 hidden sm:block" data-page-node-id="z5mlOkUUbyNg5AcHrfzaai">Element Heroes</div>
       </div>
     </div>
+    <a href="./map.html" class="btn btn-sm btn-ghost" title="3D 世界地图" data-page-node-id="mapEntryBtn"><i class="fa-solid fa-map-location-dot"></i><span class="hidden sm:inline">地图</span></a>
     <button id="pendingPillBtn" onclick="togglePendingPanel()" class="btn btn-sm btn-gold hidden" title="待揭示操作" data-page-node-id="BBsa2SmbyzqEDiqrSdrUc1"><i class="fa-solid fa-hourglass-half" data-page-node-id="PkT5S31RjdFOAGkaSnQLkv"></i><span id="pendingCount" data-page-node-id="8ntsTitIaYP74GNcMTuLsx">0</span></button>
     <div id="walletWrap" class="wallet-drop">
       <button id="connectBtn" onclick="onWalletClick()" class="btn btn-sm btn-gold" data-page-node-id="8Vhhs1QBOzAvVvV8nJk0yL"><i class="fa-solid fa-wallet" data-page-node-id="GCNFoKDIvweCpLHURfuaB1"></i><span id="connectTxt" data-page-node-id="8JEkwPiiNkKDKqJAwtBcm6">连接钱包</span><span class="wallet-caret" data-page-node-id="wCrt001"></span></button>
@@ -317,5 +318,17 @@
 <script src="./js/gallery.js" defer></script>
 <script src="./js/admin.js" defer></script>
 <script src="./js/init.js" defer></script>
+<!-- 锚点直达页签：game.html#boss（来自 3D 世界地图等入口） -->
+<script>
+window.addEventListener('DOMContentLoaded', function(){
+  var h = (location.hash || '').replace(/^#/, '');
+  if(!h || !/^[a-zA-Z]+$/.test(h)) return;
+  setTimeout(function(){
+    try{
+      if(typeof switchTab === 'function' && document.querySelector('.tab-btn[data-tab="' + h + '"]')) switchTab(h);
+    }catch(e){}
+  }, 60);
+});
+</script>
 </body>
 </html>

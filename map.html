@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>元素英雄 · 3D 世界地图</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070c18'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23fbbf24' stroke-width='5'/%3E%3Cpath d='M32 16 L38 30 L53 30 L41 39 L46 53 L32 44 L18 53 L23 39 L11 30 L26 30 Z' fill='%23fbbf24'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<style>
+:root{
+  --bg:#070c18; --panel:#0d1526; --panel2:#111a2e;
+  --line:#1c2a44; --line2:#24304a;
+  --gold:#fbbf24; --gold2:#f59e0b; --text:#e8eef7; --muted:#8ea0bd;
+  --el-metal:#f59e0b; --el-wood:#22c55e; --el-water:#38bdf8; --el-fire:#ef4444; --el-earth:#c2703a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none}
+
+/* ===== 顶栏 ===== */
+.top{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(7,12,24,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1400px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:15px;color:#fff}
+.brand .logo{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;background:linear-gradient(135deg,#fde68a,#f59e0b)}
+.brand small{color:var(--muted);font-weight:500;font-size:11px;letter-spacing:.14em;margin-left:2px}
+.top-links{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.tlink{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;border:1px solid var(--line2);color:var(--text);font-size:12.5px;font-weight:600;background:rgba(13,21,38,.6);white-space:nowrap}
+.tlink:hover{border-color:rgba(251,191,36,.5);color:var(--gold);text-decoration:none}
+.tlink.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;border-color:transparent}
+.tlink.primary:hover{color:#1a1305;filter:brightness(1.06)}
+
+/* ===== 舞台 ===== */
+#stage{position:fixed;inset:0;top:53px;overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#cv.grabbing{cursor:grabbing}
+#cv.pick{cursor:pointer}
+#labels{position:absolute;inset:0;pointer-events:none}
+.mlabel{position:absolute;left:0;top:0;transform:translate(-50%,-100%);display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:999px;background:rgba(7,12,24,.72);border:1px solid rgba(148,163,184,.28);
+  font-size:12px;font-weight:700;color:#dbe4f2;white-space:nowrap;backdrop-filter:blur(4px);transition:border-color .16s,color .16s,background .16s}
+.mlabel .mi{font-size:13px}
+.mlabel.on{border-color:var(--gold);color:#fff;background:rgba(251,191,36,.16);box-shadow:0 0 18px rgba(251,191,36,.28)}
+.mlabel.dim{opacity:.5}
+
+/* ===== HUD ===== */
+.hud-tl{position:absolute;left:18px;top:16px;max-width:min(46vw,420px);pointer-events:none}
+.hud-tl .eyebrow{display:inline-block;padding:3px 11px;border-radius:999px;border:1px solid rgba(251,191,36,.4);background:rgba(251,191,36,.08);color:var(--gold);font-size:11px;letter-spacing:.16em;margin-bottom:9px}
+.hud-tl h1{font-size:clamp(20px,3vw,30px);font-weight:900;line-height:1.2;margin-bottom:6px;background:linear-gradient(120deg,var(--gold),#fff7d6 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hud-tl p{font-size:12.5px;color:var(--muted);line-height:1.6}
+
+.legend{position:absolute;left:18px;bottom:16px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.legend .lt{font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:2px}
+.legend .row{display:flex;gap:6px;flex-wrap:wrap;max-width:230px}
+.lg{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:rgba(13,21,38,.72);border:1px solid var(--line);font-size:11px;color:#c6d3e6}
+.lg i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.hint{position:absolute;left:18px;bottom:0;font-size:11px;color:#5f7290}
+
+.tools{position:absolute;right:18px;bottom:16px;display:flex;flex-direction:column;gap:7px}
+.tool{width:38px;height:38px;border-radius:12px;border:1px solid var(--line2);background:rgba(13,21,38,.82);color:#c6d3e6;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(6px)}
+.tool:hover{border-color:var(--gold);color:var(--gold)}
+.tool.on{background:rgba(251,191,36,.16);border-color:var(--gold);color:var(--gold)}
+
+/* ===== 详情面板 ===== */
+#info{position:absolute;right:18px;top:16px;width:296px;background:rgba(11,18,32,.9);border:1px solid var(--line2);border-radius:16px;padding:16px;backdrop-filter:blur(14px);box-shadow:0 18px 50px rgba(0,0,0,.5);display:none}
+#info.show{display:block}
+#info .close{position:absolute;right:10px;top:10px;color:var(--muted);cursor:pointer;font-size:13px;padding:4px}
+#info .close:hover{color:#fff}
+.inf-ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:11px;border:1px solid var(--line2)}
+.inf-tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.08em;margin-bottom:8px;border:1px solid}
+.inf-h{font-size:17px;font-weight:900;margin-bottom:7px;color:#fff}
+.inf-d{font-size:12.8px;color:var(--muted);line-height:1.72;margin-bottom:13px}
+.inf-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
+.inf-meta span{padding:3px 9px;border-radius:8px;background:rgba(148,163,184,.1);border:1px solid var(--line);font-size:11px;color:#a8b8d0}
+.go{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;border-radius:12px;font-size:13.5px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;border:0;cursor:pointer}
+.go:hover{filter:brightness(1.07)}
+#info .empty{font-size:12.5px;color:var(--muted);line-height:1.7}
+
+/* ===== 加载 / 降级 ===== */
+#loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg);z-index:20}
+.spin{width:38px;height:38px;border-radius:50%;border:3px solid rgba(251,191,36,.22);border-top-color:var(--gold);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loading p{font-size:12.5px;color:var(--muted)}
+#loading .err{color:#f87171;max-width:320px;text-align:center;line-height:1.7}
+
+#fallback{position:fixed;inset:0;top:53px;overflow-y:auto;padding:22px;display:none}
+#fallback.show{display:block}
+.fb-note{max-width:1180px;margin:0 auto 18px;padding:13px 16px;border-left:3px solid var(--gold);background:rgba(251,191,36,.07);border-radius:0 12px 12px 0;font-size:13px;color:#dbe4f2}
+.fb-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;padding-bottom:40px}
+.fb-card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px;transition:.16s;border-left:3px solid var(--line2)}
+.fb-card:hover{border-color:var(--gold);transform:translateY(-2px);text-decoration:none}
+.fb-card .t{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:800;color:#fff;margin-bottom:7px}
+.fb-card .d{font-size:12.5px;color:var(--muted);line-height:1.65}
+.fb-card .m{margin-top:10px;font-size:11.5px;font-weight:700}
+
+@media(max-width:900px){
+  #info{left:12px;right:12px;top:auto;bottom:12px;width:auto;max-height:52vh;overflow-y:auto}
+  .hud-tl{max-width:70vw}
+  .hud-tl p{display:none}
+  .legend{bottom:auto;top:96px;left:12px}
+  .legend .row{max-width:180px}
+  .hint{display:none}
+  .tools{right:12px;bottom:12px;flex-direction:row}
+  .top-in{padding:8px 12px;gap:8px}
+  .brand small{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="logo">🗺️</span>世界地图<small>ELEMENT HEROES</small></div>
+    <nav class="top-links">
+      <a class="tlink" href="./index.html"><i class="fa-solid fa-globe"></i>官网</a>
+      <a class="tlink" href="./docs.html"><i class="fa-solid fa-book"></i>Docs</a>
+      <a class="tlink" href="https://t.me/bscehgame" target="_blank" rel="noopener"><i class="fa-brands fa-telegram"></i>电报</a>
+      <a class="tlink" href="https://x.com/bscgamebuild" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter"></i>推特 X</a>
+      <a class="tlink primary" href="./game.html"><i class="fa-solid fa-play"></i>进入游戏</a>
+    </nav>
+  </div>
+</header>
+
+<div id="stage">
+  <canvas id="cv"></canvas>
+  <div id="labels"></div>
+
+  <div class="hud-tl">
+    <span class="eyebrow">ELEMENT HEROES · WORLD MAP</span>
+    <h1>悬浮大陆 · 十二圣所</h1>
+    <p>拖拽旋转视角，滚轮缩放，点击建筑查看详情并直接进入对应玩法。</p>
+  </div>
+
+  <div class="legend">
+    <span class="lt">五行 · 元素领域</span>
+    <div class="row" id="legendRow"></div>
+  </div>
+
+  <div class="tools">
+    <div class="tool on" id="tRotate" title="自动旋转"><i class="fa-solid fa-rotate"></i></div>
+    <div class="tool" id="tTop" title="俯视视角"><i class="fa-solid fa-chess-board"></i></div>
+    <div class="tool" id="tReset" title="重置视角"><i class="fa-solid fa-house"></i></div>
+  </div>
+
+  <aside id="info">
+    <div class="close" onclick="closeInfo()"><i class="fa-solid fa-xmark"></i></div>
+    <div id="infoBody"></div>
+  </aside>
+
+  <div id="loading">
+    <div class="spin"></div>
+    <p id="loadTxt">正在载入 3D 引擎…</p>
+  </div>
+</div>
+
+<div id="fallback">
+  <div class="fb-note"><b>3D 引擎加载失败</b>（可能是网络无法访问 CDN）。已自动切换为平面地图，点击任意地点仍可进入对应玩法。</div>
+  <div class="fb-grid" id="fbGrid"></div>
+</div>
+
+<script>
+/* ==================== 数据 ==================== */
+var EL = {
+  metal:{n:'金',c:'#f59e0b'}, wood:{n:'木',c:'#22c55e'}, water:{n:'水',c:'#38bdf8'},
+  fire:{n:'火',c:'#ef4444'}, earth:{n:'土',c:'#c2703a'}, none:{n:'中立',c:'#fbbf24'}
+};
+
+var NODES = [
+  {k:'heroes', tab:'heroes', name:'英雄圣殿', icon:'🏛️', el:'none', ring:0, a:0,   r:0,    h:6.4, type:'tower',
+   d:'大陆的心脏。在这里召唤、查看与升级你的英雄 NFT，管理等级、体力与出战阵容。',
+   m:['召唤英雄','等级提升','最多持有 4 名']},
+
+  {k:'forge',  tab:'forge',  name:'锻造工坊', icon:'⚒️', el:'metal', ring:1, a:-90, r:6.4, h:4.2, type:'shrine',
+   d:'金之神殿。消耗武器碎片与 EH 合成新武器，稀有度越高基础属性与追加属性越强。',
+   m:['碎片合成武器','手续费 50→1000 EH','可产出高稀有度']},
+
+  {k:'melt',   tab:'melt',   name:'熔炼火山', icon:'🔥', el:'fire', ring:1, a:-18, r:6.4, h:4.2, type:'volcano',
+   d:'火之神殿。把多余或低阶武器投入熔炉，回收碎片与精粹，变废为宝。',
+   m:['批量熔炼','回收碎片/精粹','不可逆转']},
+
+  {k:'compose',tab:'compose',name:'合成祭坛', icon:'🧪', el:'wood', ring:1, a:54,  r:6.4, h:4.2, type:'shrine',
+   d:'木之神殿。将碎片熔炼铸成精粹，为武器强化与进阶提供材料来源。',
+   m:['碎片→精粹','手续费 20/100/500 EH','强化必备']},
+
+  {k:'market', tab:'market', name:'水上市集', icon:'🏪', el:'water', ring:1, a:126, r:6.4, h:4.2, type:'tent',
+   d:'水之神殿。链上挂单买卖英雄与武器，价格自定，随时撤单，成交自动结算。',
+   m:['挂单 / 撤单','购买英雄与武器','链上撮合']},
+
+  {k:'gallery',tab:'gallery',name:'图鉴石碑', icon:'📖', el:'earth', ring:1, a:198, r:6.4, h:4.2, type:'obelisk',
+   d:'土之神殿。记载全部英雄、武器与怪物资料，含元素克制表与战力算法说明。',
+   m:['全图鉴查阅','克制表','怪物资料']},
+
+  {k:'fight',  tab:'fight',  name:'试炼竞技场', icon:'🏟️', el:'none', ring:2, a:18,  r:11.5, h:3.6, type:'arena',
+   d:'挑战五行怪物，胜利可赢取 EH 奖励与英雄经验。每次出战消耗 1 点体力。',
+   m:['PVE 战斗','胜率 = 战力占比','消耗体力 1 点']},
+
+  {k:'weapons',tab:'weapons',name:'兵器库',   icon:'⚔️', el:'none', ring:2, a:90,  r:11.5, h:3.6, type:'forge',
+   d:'存放并检视你的全部武器，查看强化等级、附加属性与元素归属。',
+   m:['武器总览','强化等级','元素属性']},
+
+  {k:'rank',   tab:'rank',   name:'英雄纪念碑', icon:'🏆', el:'none', ring:2, a:162, r:11.5, h:4.6, type:'obelisk',
+   d:'镌刻全服战绩：伤害榜、财富榜与各元素最强英雄，赛季数据实时更新。',
+   m:['全服排行','伤害榜','财富榜']},
+
+  {k:'admin',  tab:'admin',  name:'议会塔',   icon:'🛡️', el:'none', ring:2, a:234, r:11.5, h:5.0, type:'tower',
+   d:'合约参数与管理工具中枢，供管理员调整配置、查看合约状态与权限。',
+   m:['合约管理','参数配置','仅管理员']},
+
+  {k:'vault',  tab:'vault',  name:'金库',     icon:'🏦', el:'none', ring:2, a:306, r:11.5, h:3.6, type:'vault',
+   d:'领取战斗与世界 BOSS 奖励。按金库模式发放：代币模式折算 EH，USDT 模式直接发放 USDT。',
+   m:['领取奖励','EH / USDT 双模式','实时余额']},
+
+  {k:'boss',   tab:'boss',   name:'巨龙巢穴', icon:'🐉', el:'fire', ring:3, a:-100, r:15.5, h:6.0, type:'dragon',
+   d:'7 天一轮的世界 BOSS。全服合力攻击，击破分走 100% 奖池，未击破按伤害占比分 50%。攻击需押奖池 5% 的保证金，揭示后退还。',
+   m:['7 天一轮','押金 = 奖池 5%','按伤害占比分奖']}
+];
+
+NODES.forEach(function(n){
+  var a = n.a * Math.PI / 180;
+  n.x = Math.cos(a) * n.r;
+  n.z = Math.sin(a) * n.r;
+  n.color = EL[n.el].c;
+});
+
+/* ==================== 降级地图 ==================== */
+function renderFallback(msg){
+  document.getElementById('stage').style.display='none';
+  var fb=document.getElementById('fallback'); fb.classList.add('show');
+  syncStageTop();
+  if(msg){ fb.querySelector('.fb-note').innerHTML='<b>3D 引擎加载失败</b>（'+msg+'）。已自动切换为平面地图，点击任意地点仍可进入对应玩法。'; }
+  document.getElementById('fbGrid').innerHTML = NODES.map(function(n){
+    return '<a class="fb-card" style="border-left-color:'+n.color+'" href="game.html#'+n.tab+'">'
+      + '<div class="t"><span>'+n.icon+'</span>'+n.name+'<span style="margin-left:auto;font-size:11px;color:'+n.color+'">'+EL[n.el].n+'</span></div>'
+      + '<div class="d">'+n.d+'</div>'
+      + '<div class="m" style="color:'+n.color+'">进入 '+n.name+' →</div></a>';
+  }).join('');
+}
+document.getElementById('legendRow').innerHTML = ['metal','wood','water','fire','earth'].map(function(k){
+  return '<span class="lg"><i style="background:'+EL[k].c+'"></i>'+EL[k].n+'</span>';
+}).join('');
+
+/* ==================== 引擎加载 ==================== */
+var CDNS = [
+  'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',
+  'https://unpkg.com/three@0.128.0/build/three.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.128.0/three.min.js'
+];
+function loadThree(i){
+  if(i >= CDNS.length){ renderFallback('无法访问任何 CDN'); return; }
+  var s = document.createElement('script');
+  s.src = CDNS[i];
+  s.onload = function(){ if(window.THREE) boot(); else loadThree(i+1); };
+  s.onerror = function(){ document.getElementById('loadTxt').textContent='换用备用节点…'; loadThree(i+1); };
+  document.head.appendChild(s);
+}
+
+/* ==================== 3D 场景 ==================== */
+var renderer, scene, camera, raycaster, clock;
+var cam = {theta:-0.7, phi:0.92, dist:42, tTheta:-0.7, tPhi:0.92, tDist:42, tx:0, ty:0, tz:0, cx:0, cy:0, cz:0};
+var autoRotate = true, lastInteract = 0;
+var pickables = [], nodeObjs = [], labels = {};
+var hoverKey = null, selKey = null;
+var W = 0, H = 0;
+
+function tex_circle(){
+  var c = document.createElement('canvas'); c.width = c.height = 64;
+  var g = c.getContext('2d');
+  var grd = g.createRadialGradient(32,32,0,32,32,32);
+  grd.addColorStop(0,'rgba(255,255,255,1)');
+  grd.addColorStop(0.35,'rgba(255,255,255,.55)');
+  grd.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0,0,64,64);
+  return new THREE.CanvasTexture(c);
+}
+
+function tex_glow(){
+  var c = document.createElement('canvas'); c.width = c.height = 128;
+  var g = c.getContext('2d');
+  var grd = g.createRadialGradient(64,64,4,64,64,64);
+  grd.addColorStop(0,'rgba(255,255,255,.95)');
+  grd.addColorStop(0.25,'rgba(255,255,255,.35)');
+  grd.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0,0,128,128);
+  return new THREE.CanvasTexture(c);
+}
+
+function syncStageTop(){
+  var hd = document.querySelector('.top');
+  var st = document.getElementById('stage');
+  var fb = document.getElementById('fallback');
+  if(!hd || !st) return;
+  var h = hd.offsetHeight;
+  st.style.top = h + 'px';
+  if(fb) fb.style.top = h + 'px';
+}
+
+function boot(){
+  try{ bootInner(); }catch(e){
+    window.__bootErr = (e && e.message) || String(e);
+    renderFallback('3D 初始化异常：' + window.__bootErr);
+  }
+}
+
+function bootInner(){
+  var cv = document.getElementById('cv');
+  var stage = document.getElementById('stage');
+  syncStageTop();
+  W = stage.clientWidth; H = stage.clientHeight;
+
+  renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:false});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  renderer.setSize(W, H, false);
+  if(THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x070c18);
+  scene.fog = new THREE.FogExp2(0x070c18, 0.0125);
+
+  camera = new THREE.PerspectiveCamera(48, W/H, 0.1, 900);
+  clock = new THREE.Clock();
+  raycaster = new THREE.Raycaster();
+
+  buildLights();
+  buildStars();
+  buildIsland();
+  buildRoads();
+  NODES.forEach(function(n){ nodeObjs.push(buildNode(n)); });
+  buildMotes();
+  buildLabels();
+
+  document.getElementById('loading').style.display = 'none';
+  window.__booted = true;
+  bindControls();
+  animate();
+}
+
+/* 兜底：引擎加载后仍未成功启动（例如 WebGL 不可用 / API 异常）时切平面地图 */
+window.addEventListener('error', function(e){
+  if(!window.__booted && window.THREE) renderFallback('3D 场景启动失败：' + ((e && e.message) || '未知错误'));
+});
+
+function buildLights(){
+  scene.add(new THREE.HemisphereLight(0x4a6da8, 0x080e1c, 0.62));
+  var d1 = new THREE.DirectionalLight(0xffe6bd, 0.85); d1.position.set(16,26,10); scene.add(d1);
+  var d2 = new THREE.DirectionalLight(0x4aa8ff, 0.3);  d2.position.set(-18,10,-14); scene.add(d2);
+  var core = new THREE.PointLight(0xfbbf24, 1.7, 34); core.position.set(0,7,0); scene.add(core);
+}
+
+function buildStars(){
+  var N = 1400, pos = new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var r = 160 + Math.random()*260;
+    var th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1);
+    pos[i*3]   = r*Math.sin(ph)*Math.cos(th);
+    pos[i*3+1] = Math.abs(r*Math.cos(ph))*0.7 - 30;
+    pos[i*3+2] = r*Math.sin(ph)*Math.sin(th);
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  var m = new THREE.PointsMaterial({size:1.5, map:tex_circle(), transparent:true, opacity:.5, depthWrite:false, blending:THREE.AdditiveBlending, fog:false});
+  scene.add(new THREE.Points(g,m));
+}
+
+/* 悬浮大陆 */
+function nearBuilding(x, z, pad){
+  for(var i=0;i<NODES.length;i++){
+    var n = NODES[i];
+    var rr = pad + (n.ring===0 ? 2.9 : (n.ring>=3 ? 3.2 : 2.0));
+    if(Math.hypot(x-n.x, z-n.z) < rr) return true;
+  }
+  return false;
+}
+
+function buildIsland(){
+  var g = new THREE.Group();
+
+  // 顶面（低多边形起伏）
+  var top = new THREE.CylinderGeometry(19.6, 18.9, 1.9, 56, 1);
+  jitterRing(top, 1.3, 1.9);
+  var topM = new THREE.Mesh(top, new THREE.MeshStandardMaterial({color:0x1b2a49, roughness:.96, metalness:.04, flatShading:true}));
+  topM.position.y = 0.95; g.add(topM);
+
+  // 草皮层
+  var grass = new THREE.CylinderGeometry(18.8, 18.8, 0.35, 56, 1);
+  jitterRing(grass, 0.8, 0.35);
+  var gm = new THREE.Mesh(grass, new THREE.MeshStandardMaterial({color:0x22406b, roughness:.9, metalness:.05, flatShading:true}));
+  gm.position.y = 1.98; g.add(gm);
+
+  // 岛底（倒锥）
+  var bot = new THREE.ConeGeometry(18.9, 16, 44, 3);
+  var pv = bot.attributes.position;
+  for(var i=0;i<pv.count;i++){
+    var x=pv.getX(i), y=pv.getY(i), z=pv.getZ(i);
+    var s = 1 + (Math.sin(x*0.7)+Math.cos(z*0.6))*0.05;
+    pv.setX(i, x*s); pv.setZ(i, z*s);
+    pv.setY(i, y + Math.sin(x*0.5)*Math.cos(z*0.5)*0.9);
+  }
+  bot.computeVertexNormals();
+  var bm = new THREE.Mesh(bot, new THREE.MeshStandardMaterial({color:0x131d33, roughness:1, metalness:0, flatShading:true}));
+  bm.rotation.x = Math.PI; bm.position.y = -7.9; g.add(bm);
+
+  // 边缘光环
+  var ring = new THREE.Mesh(
+    new THREE.TorusGeometry(19.5, 0.16, 8, 120),
+    new THREE.MeshBasicMaterial({color:0xfbbf24, transparent:true, opacity:.55, blending:THREE.AdditiveBlending, depthWrite:false})
+  );
+  ring.rotation.x = -Math.PI/2; ring.position.y = 2.05; g.add(ring);
+
+  var glow = new THREE.Mesh(
+    new THREE.RingGeometry(17.5, 22.6, 96),
+    new THREE.MeshBasicMaterial({color:0x2a4a7a, transparent:true, opacity:.16, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
+  );
+  glow.rotation.x = -Math.PI/2; glow.position.y = 1.7; g.add(glow);
+
+  // 岩石与水晶装饰
+  var rockM = new THREE.MeshStandardMaterial({color:0x24355c, roughness:1, flatShading:true});
+  for(var r=0;r<34;r++){
+    var ang = Math.random()*Math.PI*2, rad = 6.5 + Math.random()*11.5;
+    var px = Math.cos(ang)*rad, pz = Math.sin(ang)*rad;
+    if(nearBuilding(px, pz, 1.2)) continue;
+    var s = 0.35 + Math.random()*0.75;
+    var rock = new THREE.Mesh(new THREE.IcosahedronGeometry(s, 0), rockM);
+    rock.position.set(px, 2.05 + s*0.35, pz);
+    rock.rotation.set(Math.random(),Math.random(),Math.random());
+    g.add(rock);
+  }
+  var treeM = new THREE.MeshStandardMaterial({color:0x2f7a4f, roughness:.85, flatShading:true});
+  var trunkM = new THREE.MeshStandardMaterial({color:0x4a3524, roughness:1, flatShading:true});
+  for(var t=0;t<30;t++){
+    var a2 = Math.random()*Math.PI*2, r2 = 7.5 + Math.random()*10.5;
+    var tx = Math.cos(a2)*r2, tz = Math.sin(a2)*r2;
+    if(nearBuilding(tx, tz, 1.4)) continue;
+    var grp = new THREE.Group();
+    var tr = new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.15,0.9,6), trunkM); tr.position.y=0.45; grp.add(tr);
+    var cr = new THREE.Mesh(new THREE.ConeGeometry(0.62, 1.5, 7), treeM); cr.position.y=1.45; grp.add(cr);
+    grp.position.set(tx, 2.12, tz);
+    grp.scale.setScalar(0.8 + Math.random()*0.7);
+    g.add(grp);
+  }
+  scene.add(g);
+}
+
+function jitterRing(geo, amp, h){
+  var p = geo.attributes.position;
+  for(var i=0;i<p.count;i++){
+    var x=p.getX(i), y=p.getY(i), z=p.getZ(i);
+    var d = Math.hypot(x,z);
+    if(d < 0.5) continue;
+    var s = 1 + (Math.sin(Math.atan2(z,x)*5.3)*0.5 + Math.cos(Math.atan2(z,x)*3.1)*0.5) * (amp*0.035);
+    p.setX(i, x*s); p.setZ(i, z*s);
+    if(Math.abs(y - h/2) < 0.01 || Math.abs(y + h/2) < 0.01){}
+  }
+  geo.computeVertexNormals();
+}
+
+/* 道路 */
+function road(ax,az,bx,bz,color,w,op){
+  var dx=bx-ax, dz=bz-az, len=Math.hypot(dx,dz);
+  if(len < 0.1) return null;
+  var geo = new THREE.PlaneGeometry(len, w);
+  var mat = new THREE.MeshBasicMaterial({color:color, transparent:true, opacity:op||0.34, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false});
+  var grp = new THREE.Group();
+  var m = new THREE.Mesh(geo, mat);
+  m.rotation.x = -Math.PI/2;
+  grp.add(m);
+  grp.position.set((ax+bx)/2, 2.16, (az+bz)/2);
+  grp.rotation.y = -Math.atan2(dz, dx);
+  return grp;
+}
+
+function buildRoads(){
+  var g = new THREE.Group();
+  NODES.forEach(function(n){
+    if(n.r < 0.5) return;
+    var c = new THREE.Color(n.color);
+    var r1 = road(0,0,n.x,n.z, c.getHex(), n.ring>=3?1.5:1.15, n.ring>=3?0.34:0.26);
+    if(r1) g.add(r1);
+  });
+  // 内环 + 外环
+  [6.4, 11.5].forEach(function(rr, i){
+    var ring = new THREE.Mesh(
+      new THREE.TorusGeometry(rr, 0.07, 6, 128),
+      new THREE.MeshBasicMaterial({color:0x6b7fa8, transparent:true, opacity:.3, blending:THREE.AdditiveBlending, depthWrite:false})
+    );
+    ring.rotation.x = -Math.PI/2; ring.position.y = 2.16; g.add(ring);
+  });
+  scene.add(g);
+}
+
+/* 单个建筑 */
+function buildNode(n){
+  var col = new THREE.Color(n.color);
+  var grp = new THREE.Group();
+  grp.position.set(n.x, 2.15, n.z);
+
+  var stone = new THREE.MeshStandardMaterial({color:0x1a2743, roughness:.92, metalness:.06, flatShading:true});
+  var stoneL = new THREE.MeshStandardMaterial({color:0x25355a, roughness:.88, metalness:.08, flatShading:true});
+  var emis = new THREE.MeshStandardMaterial({color:col, emissive:col, emissiveIntensity:.75, roughness:.4, metalness:.25, flatShading:true});
+
+  var baseR = n.ring===0 ? 2.9 : (n.ring>=3 ? 3.3 : (n.ring===1 ? 2.0 : 1.85));
+
+  // 基座
+  var base = new THREE.Mesh(new THREE.CylinderGeometry(baseR, baseR*1.1, 0.55, 6), stone);
+  base.position.y = 0.27; grp.add(base);
+  var base2 = new THREE.Mesh(new THREE.CylinderGeometry(baseR*0.82, baseR*0.9, 0.4, 6), stoneL);
+  base2.position.y = 0.72; grp.add(base2);
+
+  var topY = 0.9;
+
+  if(n.type === 'tower'){
+    var body = new THREE.Mesh(new THREE.CylinderGeometry(baseR*0.5, baseR*0.66, n.h*0.62, 8), stoneL);
+    body.position.y = 0.9 + n.h*0.31; grp.add(body);
+    var mid = new THREE.Mesh(new THREE.CylinderGeometry(baseR*0.72, baseR*0.72, 0.28, 8), stone);
+    mid.position.y = 0.9 + n.h*0.62; grp.add(mid);
+    var up = new THREE.Mesh(new THREE.CylinderGeometry(baseR*0.34, baseR*0.46, n.h*0.3, 8), stoneL);
+    up.position.y = 0.9 + n.h*0.62 + n.h*0.15; grp.add(up);
+    var roof = new THREE.Mesh(new THREE.ConeGeometry(baseR*0.62, n.h*0.26, 8), emis);
+    roof.position.y = 0.9 + n.h*0.77 + n.h*0.13; grp.add(roof);
+    topY = 0.9 + n.h*0.77 + n.h*0.13 + n.h*0.13;
+  } else if(n.type === 'shrine'){
+    for(var i=0;i<4;i++){
+      var a = i*Math.PI/2 + Math.PI/4;
+      var px = Math.cos(a)*baseR*0.5, pz = Math.sin(a)*baseR*0.5;
+      var pil = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.19, n.h*0.55, 6), stoneL);
+      pil.position.set(px, 0.9 + n.h*0.275, pz); grp.add(pil);
+    }
+    var roof2 = new THREE.Mesh(new THREE.ConeGeometry(baseR*0.95, n.h*0.42, 6), emis);
+    roof2.position.y = 0.9 + n.h*0.55 + n.h*0.21; grp.add(roof2);
+    var core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 0), emis);
+    core.position.y = 0.9 + n.h*0.3; grp.add(core);
+    n.rune = core;
+    topY = 0.9 + n.h*0.55 + n.h*0.42;
+  } else if(n.type === 'volcano'){
+    var cone = new THREE.Mesh(new THREE.ConeGeometry(baseR*1.05, n.h*0.85, 9), new THREE.MeshStandardMaterial({color:0x2a1f2c, roughness:1, flatShading:true}));
+    cone.position.y = 0.9 + n.h*0.42; grp.add(cone);
+    var lava = new THREE.Mesh(new THREE.SphereGeometry(0.5, 14, 12), new THREE.MeshBasicMaterial({color:0xff7a1a}));
+    lava.position.y = 0.9 + n.h*0.85; grp.add(lava);
+    var halo2 = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xff6a1a, transparent:true, opacity:.85, blending:THREE.AdditiveBlending, depthWrite:false}));
+    halo2.scale.setScalar(3.4); halo2.position.y = 0.9 + n.h*0.85; grp.add(halo2);
+    n.pulse = lava;
+    topY = 0.9 + n.h*0.85 + 0.6;
+  } else if(n.type === 'tent'){
+    var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1, n.h*0.7, 6), stoneL);
+    pole.position.y = 0.9 + n.h*0.35; grp.add(pole);
+    var tent = new THREE.Mesh(new THREE.ConeGeometry(baseR*0.95, n.h*0.55, 8), emis);
+    tent.position.y = 0.9 + n.h*0.32; grp.add(tent);
+    var stall = new THREE.Mesh(new THREE.BoxGeometry(baseR*1.5, 0.5, 0.7), stone);
+    stall.position.y = 1.15; grp.add(stall);
+    topY = 0.9 + n.h*0.32 + n.h*0.28;
+  } else if(n.type === 'obelisk'){
+    var ob = new THREE.Mesh(new THREE.CylinderGeometry(0.15, baseR*0.55, n.h, 4), stoneL);
+    ob.position.y = 0.9 + n.h*0.5; ob.rotation.y = Math.PI/4; grp.add(ob);
+    var tip = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.7, 4), emis);
+    tip.position.y = 0.9 + n.h + 0.3; grp.add(tip);
+    topY = 0.9 + n.h + 0.7;
+  } else if(n.type === 'arena'){
+    var plat = new THREE.Mesh(new THREE.CylinderGeometry(baseR*0.95, baseR*1.0, 0.3, 16), stoneL);
+    plat.position.y = 1.05; grp.add(plat);
+    var wall = new THREE.Mesh(new THREE.CylinderGeometry(baseR*0.95, baseR*0.95, n.h*0.4, 16, 1, true), stone);
+    wall.position.y = 1.2 + n.h*0.2; grp.add(wall);
+    for(var q=0;q<6;q++){
+      var aq = q*Math.PI/3;
+      var pil2 = new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13, n.h*0.55, 6), stoneL);
+      pil2.position.set(Math.cos(aq)*baseR*0.92, 1.2 + n.h*0.275, Math.sin(aq)*baseR*0.92); grp.add(pil2);
+    }
+    var flag = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 10), emis);
+    flag.position.y = 1.2 + n.h*0.75; grp.add(flag);
+    n.rune = flag;
+    topY = 1.2 + n.h*0.75 + 0.6;
+  } else if(n.type === 'forge'){
+    var anvil = new THREE.Mesh(new THREE.BoxGeometry(baseR*1.25, 0.7, baseR*0.85), stone);
+    anvil.position.y = 1.25; grp.add(anvil);
+    var chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.42, n.h*0.9, 6), stoneL);
+    chimney.position.set(baseR*0.5, 1.6 + n.h*0.45, -baseR*0.35); grp.add(chimney);
+    var blade = new THREE.Mesh(new THREE.OctahedronGeometry(0.55, 0), emis);
+    blade.position.y = 2.5; blade.scale.set(0.55, 1.5, 0.28); grp.add(blade);
+    n.rune = blade;
+    topY = 2.5 + 1.4;
+  } else if(n.type === 'vault'){
+    var box = new THREE.Mesh(new THREE.BoxGeometry(baseR*1.5, n.h*0.5, baseR*1.2), stone);
+    box.position.y = 0.9 + n.h*0.25; grp.add(box);
+    var door = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.16, 20), emis);
+    door.rotation.x = Math.PI/2; door.position.set(0, 0.9 + n.h*0.25, baseR*0.61); grp.add(door);
+    var coin = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.14, 20), emis);
+    coin.rotation.x = Math.PI/2; coin.position.y = 0.9 + n.h*0.5 + 0.85; grp.add(coin);
+    n.rune = coin;
+    topY = 0.9 + n.h*0.5 + 1.5;
+  } else if(n.type === 'dragon'){
+    var mount = new THREE.Mesh(new THREE.ConeGeometry(baseR*1.15, n.h*0.8, 8), new THREE.MeshStandardMaterial({color:0x241a26, roughness:1, flatShading:true}));
+    mount.position.y = 0.9 + n.h*0.4; grp.add(mount);
+    var crater = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.3, 0.5, 10), new THREE.MeshBasicMaterial({color:0xff4d1a}));
+    crater.position.y = 0.9 + n.h*0.8 - 0.1; grp.add(crater);
+    var eye = new THREE.Mesh(new THREE.IcosahedronGeometry(0.95, 1), new THREE.MeshStandardMaterial({color:0x7f1d1d, emissive:0xff3b1a, emissiveIntensity:.9, roughness:.35, flatShading:true}));
+    eye.position.y = 0.9 + n.h*0.8 + 1.5; grp.add(eye);
+    n.rune = eye;
+    for(var w=0;w<5;w++){
+      var aw = w*Math.PI*2/5 + 0.4;
+      var sh = new THREE.Mesh(new THREE.TetrahedronGeometry(0.42, 0), new THREE.MeshStandardMaterial({color:0x3a1c22, roughness:1, flatShading:true}));
+      sh.position.set(Math.cos(aw)*2.1, 0.9 + n.h*0.8 + 0.7 + Math.sin(w)*0.3, Math.sin(aw)*2.1);
+      sh.rotation.set(w, w*1.3, w*0.7);
+      grp.add(sh); n['sh'+w] = sh;
+    }
+    var halo3 = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xff3b1a, transparent:true, opacity:.7, blending:THREE.AdditiveBlending, depthWrite:false}));
+    halo3.scale.setScalar(6.5); halo3.position.y = 0.9 + n.h*0.8 + 1.4; grp.add(halo3);
+    topY = 0.9 + n.h*0.8 + 2.8;
+  }
+
+  // 顶部符文（通用）
+  if(!n.rune && n.type !== 'volcano' && n.type !== 'dragon'){
+    var rn = new THREE.Mesh(new THREE.OctahedronGeometry(0.5, 0), emis);
+    rn.position.y = topY + 0.35; grp.add(rn); n.rune = rn;
+    topY += 0.9;
+  }
+
+  // 光柱
+  var pillar = new THREE.Mesh(
+    new THREE.CylinderGeometry(baseR*0.5, baseR*0.72, n.h+3.2, 10, 1, true),
+    new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.13, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
+  );
+  pillar.position.y = (n.h+3.2)/2; grp.add(pillar);
+  n.pillar = pillar;
+
+  // 地面光圈
+  var disc = new THREE.Mesh(
+    new THREE.RingGeometry(baseR*1.05, baseR*1.45, 40),
+    new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.28, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
+  );
+  disc.rotation.x = -Math.PI/2; disc.position.y = 0.06; grp.add(disc);
+  n.disc = disc;
+
+  // 光晕
+  var halo = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:col, transparent:true, opacity:.5, blending:THREE.AdditiveBlending, depthWrite:false}));
+  halo.scale.setScalar(baseR*2.6); halo.position.y = n.h*0.6; grp.add(halo);
+  n.halo = halo;
+
+  // 元素点光
+  if(n.ring <= 2){
+    var pl = new THREE.PointLight(col, n.ring===0?1.1:0.65, n.ring===0?20:11);
+    pl.position.y = n.h*0.8; grp.add(pl);
+  }
+  if(n.ring === 3){
+    var pl3 = new THREE.PointLight(0xff4d1a, 1.6, 26); pl3.position.y = n.h*0.9; grp.add(pl3);
+  }
+
+  // 拾取盒
+  var hit = new THREE.Mesh(
+    new THREE.CylinderGeometry(baseR*1.5, baseR*1.5, n.h+4, 8),
+    new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false})
+  );
+  hit.position.y = (n.h+4)/2;
+  hit.userData.k = n.k;
+  grp.add(hit);
+  pickables.push(hit);
+
+  // 假阴影
+  var sh2 = new THREE.Mesh(
+    new THREE.CircleGeometry(baseR*1.15, 24),
+    new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.3, depthWrite:false})
+  );
+  sh2.rotation.x = -Math.PI/2; sh2.position.y = 0.03; grp.add(sh2);
+
+  n.group = grp;
+  n.topY = topY;
+  n.baseScale = 1;
+  scene.add(grp);
+  return n;
+}
+
+/* 漂浮光点 */
+var motes;
+function buildMotes(){
+  var N = 240, pos = new Float32Array(N*3), spd = new Float32Array(N);
+  for(var i=0;i<N;i++){
+    var a = Math.random()*Math.PI*2, r = Math.sqrt(Math.random())*18.5;
+    pos[i*3] = Math.cos(a)*r;
+    pos[i*3+1] = 2 + Math.random()*14;
+    pos[i*3+2] = Math.sin(a)*r;
+    spd[i] = 0.25 + Math.random()*0.7;
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  var m = new THREE.PointsMaterial({size:0.42, map:tex_circle(), color:0xffe0a3, transparent:true, opacity:.65, depthWrite:false, blending:THREE.AdditiveBlending, fog:false});
+  motes = new THREE.Points(g,m);
+  motes.userData.spd = spd;
+  scene.add(motes);
+}
+
+/* HTML 标签 */
+function buildLabels(){
+  var box = document.getElementById('labels');
+  NODES.forEach(function(n){
+    var d = document.createElement('div');
+    d.className = 'mlabel';
+    d.innerHTML = '<span class="mi">'+n.icon+'</span><span>'+n.name+'</span>';
+    d.onclick = function(){ selectNode(n.k, true); };
+    d.style.pointerEvents = 'auto';
+    box.appendChild(d);
+    labels[n.k] = d;
+  });
+}
+
+/* ==================== 交互 ==================== */
+function bindControls(){
+  var cv = document.getElementById('cv');
+  var pts = {}, down = false, moved = 0, lastX = 0, lastY = 0, pinch = null;
+
+  cv.addEventListener('pointerdown', function(e){
+    cv.setPointerCapture && cv.setPointerCapture(e.pointerId);
+    pts[e.pointerId] = {x:e.clientX, y:e.clientY};
+    lastX = e.clientX; lastY = e.clientY; down = true; moved = 0;
+    cv.classList.add('grabbing');
+    lastInteract = performance.now();
+  });
+  cv.addEventListener('pointermove', function(e){
+    if(!(e.pointerId in pts)){ onHover(e); return; }
+    pts[e.pointerId] = {x:e.clientX, y:e.clientY};
+    var ids = Object.keys(pts);
+    if(ids.length >= 2){
+      var a = pts[ids[0]], b = pts[ids[1]];
+      var d = Math.hypot(a.x-b.x, a.y-b.y);
+      if(pinch){ cam.tDist = clamp(cam.tDist * (pinch/d), 14, 92); }
+      pinch = d;
+      lastInteract = performance.now();
+      return;
+    }
+    var dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    moved += Math.abs(dx) + Math.abs(dy);
+    cam.tTheta -= dx * 0.0052;
+    cam.tPhi = clamp(cam.tPhi - dy * 0.0042, 0.16, 1.36);
+    lastInteract = performance.now();
+  });
+  function up(e){
+    if(!down) return;
+    down = false; pinch = null;
+    cv.classList.remove('grabbing');
+    delete pts[e.pointerId];
+    if(moved < 7){ onClick(e); }
+    lastInteract = performance.now();
+  }
+  cv.addEventListener('pointerup', up);
+  cv.addEventListener('pointercancel', up);
+  cv.addEventListener('pointerleave', function(e){ delete pts[e.pointerId]; });
+  cv.addEventListener('wheel', function(e){
+    e.preventDefault();
+    cam.tDist = clamp(cam.tDist * (1 + e.deltaY * 0.0012), 14, 92);
+    lastInteract = performance.now();
+  }, {passive:false});
+
+  window.addEventListener('resize', onResize);
+  window.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeInfo(); });
+
+  document.getElementById('tRotate').onclick = function(){
+    autoRotate = !autoRotate; this.classList.toggle('on', autoRotate);
+  };
+  document.getElementById('tTop').onclick = function(){
+    cam.tPhi = 0.22; cam.tDist = 52; cam.tx = 0; cam.tz = 0; lastInteract = performance.now();
+  };
+  document.getElementById('tReset').onclick = function(){
+    cam.tTheta = -0.7; cam.tPhi = 0.92; cam.tDist = 42; cam.tx = 0; cam.ty = 0; cam.tz = 0;
+    selKey = null; closeInfo(); lastInteract = performance.now();
+  };
+}
+
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function lerp(a,b,t){ return a + (b-a)*t; }
+
+function ndc(e){
+  var r = document.getElementById('cv').getBoundingClientRect();
+  return new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
+}
+function pick(e){
+  raycaster.setFromCamera(ndc(e), camera);
+  var hits = raycaster.intersectObjects(pickables, false);
+  return hits.length ? hits[0].object.userData.k : null;
+}
+function onHover(e){
+  var k = pick(e);
+  if(k !== hoverKey){
+    hoverKey = k;
+    document.getElementById('cv').classList.toggle('pick', !!k);
+    Object.keys(labels).forEach(function(kk){ labels[kk].classList.toggle('on', kk === k || kk === selKey); });
+  }
+}
+function onClick(e){
+  var k = pick(e);
+  if(k){ selectNode(k, false); }
+  else { selKey = null; closeInfo(); }
+}
+
+function nodeByKey(k){ for(var i=0;i<NODES.length;i++) if(NODES[i].k===k) return NODES[i]; return null; }
+
+function selectNode(k, fromLabel){
+  var n = nodeByKey(k); if(!n) return;
+  if(selKey === k && fromLabel){ enterNode(n); return; }
+  selKey = k;
+  cam.tx = n.x * 0.55; cam.tz = n.z * 0.55; cam.ty = 1.6;
+  Object.keys(labels).forEach(function(kk){ labels[kk].classList.toggle('on', kk === k); });
+
+  var c = n.color;
+  document.getElementById('infoBody').innerHTML =
+    '<div class="inf-ic" style="background:'+c+'1f;border-color:'+c+'66">'+n.icon+'</div>'
+    + '<span class="inf-tag" style="color:'+c+';border-color:'+c+'66;background:'+c+'14">'+EL[n.el].n+'元素 · '+(n.ring===0?'中央':(n.ring===3?'远境':'外环'))+'</span>'
+    + '<div class="inf-h">'+n.name+'</div>'
+    + '<div class="inf-d">'+n.d+'</div>'
+    + '<div class="inf-meta">'+n.m.map(function(x){ return '<span>'+x+'</span>'; }).join('')+'</div>'
+    + '<button class="go" onclick="enterNodeByKey(\''+n.k+'\')">进入 '+n.name+' <i class="fa-solid fa-arrow-right"></i></button>';
+  document.getElementById('info').classList.add('show');
+  lastInteract = performance.now();
+}
+
+function closeInfo(){
+  selKey = null;
+  document.getElementById('info').classList.remove('show');
+  Object.keys(labels).forEach(function(kk){ labels[kk].classList.remove('on'); });
+}
+function enterNodeByKey(k){ var n = nodeByKey(k); if(n) enterNode(n); }
+function enterNode(n){ location.href = 'game.html#' + n.tab; }
+
+function onResize(){
+  var stage = document.getElementById('stage');
+  syncStageTop();
+  W = stage.clientWidth; H = stage.clientHeight;
+  camera.aspect = W/H; camera.updateProjectionMatrix();
+  renderer.setSize(W, H, false);
+}
+
+/* ==================== 主循环 ==================== */
+function animate(){
+  requestAnimationFrame(animate);
+  var dt = Math.min(clock.getDelta(), 0.05);
+  var t = clock.elapsedTime;
+
+  if(autoRotate && performance.now() - lastInteract > 2600){ cam.tTheta += dt * 0.055; }
+
+  cam.theta = lerp(cam.theta, cam.tTheta, 0.09);
+  cam.phi   = lerp(cam.phi,   cam.tPhi,   0.09);
+  cam.dist  = lerp(cam.dist,  cam.tDist,  0.09);
+  cam.cx = lerp(cam.cx, cam.tx, 0.06);
+  cam.cy = lerp(cam.cy, cam.ty, 0.06);
+  cam.cz = lerp(cam.cz, cam.tz, 0.06);
+
+  var sp = Math.sin(cam.phi), cp = Math.cos(cam.phi);
+  camera.position.set(
+    cam.cx + cam.dist * sp * Math.cos(cam.theta),
+    cam.cy + cam.dist * cp + 4,
+    cam.cz + cam.dist * sp * Math.sin(cam.theta)
+  );
+  camera.lookAt(cam.cx, cam.cy + 1.5, cam.cz);
+
+  // 节点动画
+  for(var i=0;i<NODES.length;i++){
+    var n = NODES[i], g = n.group; if(!g) continue;
+    var active = (n.k === hoverKey || n.k === selKey);
+    var tgt = active ? 1.09 : 1;
+    var s = lerp(g.scale.x, tgt, 0.14);
+    g.scale.setScalar(s);
+
+    if(n.rune){
+      n.rune.rotation.y += dt * (active ? 1.5 : 0.6);
+      n.rune.rotation.x += dt * 0.25;
+      n.rune.position.y = (n.rune.userData.y0 !== undefined ? n.rune.userData.y0 : (n.rune.userData.y0 = n.rune.position.y))
+        + Math.sin(t * 1.5 + i) * 0.16;
+    }
+    if(n.pillar) n.pillar.material.opacity = (active ? 0.24 : 0.11) + Math.sin(t*1.7 + i*1.3)*0.035;
+    if(n.disc)   n.disc.material.opacity   = (active ? 0.5 : 0.24) + Math.sin(t*1.9 + i)*0.05;
+    if(n.halo)   n.halo.material.opacity   = (active ? 0.8 : 0.42) + Math.sin(t*1.3 + i)*0.07;
+    if(n.pulse)  n.pulse.scale.setScalar(1 + Math.sin(t*2.4 + i)*0.09);
+    for(var w=0;w<5;w++){ if(n['sh'+w]) n['sh'+w].rotation.y += dt*0.5; }
+  }
+
+  // 漂浮光点
+  if(motes){
+    var p = motes.geometry.attributes.position, spd = motes.userData.spd;
+    for(var m=0;m<spd.length;m++){
+      var y = p.getY(m) + spd[m]*dt;
+      if(y > 17) y = 2;
+      p.setY(m, y);
+    }
+    p.needsUpdate = true;
+  }
+
+  // 标签定位
+  updateLabels();
+  renderer.render(scene, camera);
+}
+
+var _v = null;
+function updateLabels(){
+  if(!_v) _v = new THREE.Vector3();
+  for(var i=0;i<NODES.length;i++){
+    var n = NODES[i], el = labels[n.k]; if(!el) continue;
+    _v.set(n.x, 2.15 + n.topY + 0.6, n.z).project(camera);
+    if(_v.z > 1){ el.style.display = 'none'; continue; }
+    el.style.display = 'flex';
+    var sx = (_v.x*0.5+0.5)*W, sy = (-_v.y*0.5+0.5)*H;
+    var d = camera.position.distanceTo(new THREE.Vector3(n.x, 2.15, n.z));
+    var sc = clamp(1.1 - d/160, 0.72, 1.05);
+    el.style.transform = 'translate(-50%,-100%) translate(' + sx.toFixed(1) + 'px,' + sy.toFixed(1) + 'px) scale(' + sc.toFixed(2) + ')';
+    el.classList.toggle('dim', !(n.k === hoverKey || n.k === selKey) && d > 44);
+  }
+}
+
+/* ==================== 启动 ==================== */
+if(location.hash){
+  var hk = location.hash.replace('#','');
+  var hn = nodeByKey(hk);
+  if(hn){ /* 延迟到场景就绪后选中 */ window.__pendingSelect = hk; }
+}
+loadThree(0);
+window.addEventListener('load', function(){
+  if(window.__pendingSelect){ setTimeout(function(){ selectNode(window.__pendingSelect, false); }, 400); }
+});
+</script>
+</body>
+</html>
