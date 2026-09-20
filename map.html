@@ -810,6 +810,11 @@ var W = 0, H = 0;
 /* 碰撞障碍物（建筑 / 树 / 岩石）与物理世界句柄；见 buildPhysics() */
 var OBSTACLES = [];
 var PHYS = null;
+/* 可站立面：TIERS = 建筑分层锥台（既是碰撞体也是站立面 —— 半径与高度同源插值，
+   见 tierRadius / syncTierColliders，两者天然自洽、不会互相顶死）；
+   PLATFORMS = 台地广场铺面。二者配合 standHeightAt() 让角色沿台基斜面走上建筑。 */
+var PLATFORMS = [];
+var TIERS = [];
 
 /* ---------- 触控判定 ----------
    优先用「主指针为粗指针」判定；再退化为任意一次真实触摸事件。
@@ -1498,6 +1503,9 @@ function addStairs(grp, R, mat, ang, steps, topY){
     m.rotation.y = -ang;
     grp.add(m); shade(m);
   }
+  /* 台阶只作视觉引导。真正的可站立面是台基锥台（见 standHeightAt）——
+     若让台阶斜坡独立提供高度，它的高度-距离曲线与锥台的半径-高度曲线不一致，
+     会出现「斜坡把角色送进去、锥台立刻把他推出来」的死锁，永远登不了顶。 */
 }
 /* 石柱：柱础 + 柱身 + 柱头 */
 function addColumn(grp, r, hh, matBody, matCap, x, z, y0){
@@ -1658,8 +1666,7 @@ function buildNode(n){
   var grp = new THREE.Group();
   grp.position.set(n.x, n.baseY, n.z);
   var R = n.R, h = n.h;
-  /* 碰撞体：把建筑当成竖直圆柱（半径略小于视觉台基，玩家可站在台地上靠近） */
-  OBSTACLES.push({cx:n.x, cz:n.z, r:R * 0.95});
+  /* 建筑碰撞体 = 分层锥台，在三层台基生成之后注册（见下方 top 计算处） */
 
   var stone  = matOf('stone',  Math.max(3, Math.round(R*0.62)), Math.max(2, Math.round(h*0.20)));
   var stoneD = matOf('stoneD', Math.max(3, Math.round(R*0.55)), 2);
@@ -1692,6 +1699,21 @@ function buildNode(n){
     ty += t[2];
   }
   var top = ty;                                     // ≈ 4.1
+  /* 三层台基「只提供站立面、不注册碰撞体」：斜面由 standHeightAt 把角色托住，
+     脚底恒在表面上，既不会陷入也不会穿模。
+     若再叠一层圆柱碰撞，就会与站立面互相顶死 —— 角色向内走被斜面挡回，
+     而向内走恰恰是升高的前提，结果永远卡在台地高度上不去。 */
+  var tierDef = [[R*1.18, R*1.06, 0, 1.5], [R*1.04, R*0.93, 1.5, 2.9], [R*0.90, R*0.80, 2.9, 4.1]];
+  for(var qi=0; qi<tierDef.length; qi++){
+    var td = tierDef[qi];
+    TIERS.push({cx:n.x, cz:n.z, rBot:td[0], rTop:td[1],
+                yBot:n.baseY + td[2], yTop:n.baseY + td[3]});
+  }
+  /* 建筑主体（塔身 / 亭柱 / 龙巢）：纯阻挡、不提供站立面，
+     避免角色站上三层顶面后径直走进建筑内部造成穿模。 */
+  OBSTACLES.push({cx:n.x, cz:n.z, r:R*0.66});
+  /* 台地广场：始终可站立，外沿 2.6m 渐变，避免从起伏地形被瞬间抬起 */
+  PLATFORMS.push({cx:n.x, cz:n.z, r:plazaR, y:n.baseY + 0.62, edge:2.6});
   /* 地基柱：向下延伸填平地形 */
   var footing = new THREE.Mesh(new THREE.CylinderGeometry(R*1.02, R*1.16, 15, segs), stoneD);
   footing.position.y = -7.2; grp.add(footing);
@@ -3040,18 +3062,36 @@ function onResize(){
 }
 
 /* ==================== 角色移动 ==================== */
+/* 可站立高度 = max(地形, 台基锥台表面, 台地广场)。
+   锥台表面与 tierRadius() 用的是同一组参数，所以「站立高度」与「碰撞半径」天然自洽：
+   角色沿斜面向上走 → 脚下变高 → 该层半径随之收窄 → 允许他继续向内，不会互相顶死。 */
+function standHeightAt(x, z){
+  var h = heightAt(x, z), i, dx, dz, dd, y;
+  for(i=0;i<TIERS.length;i++){
+    var c = TIERS[i];
+    dx = x - c.cx; dz = z - c.cz;
+    dd = Math.sqrt(dx*dx + dz*dz);
+    if(dd <= c.rTop) y = c.yTop;                                   // 已在该层顶面
+    else if(dd < c.rBot) y = c.yBot + (c.rBot - dd) / (c.rBot - c.rTop) * (c.yTop - c.yBot);
+    else continue;                                                 // 在该层之外
+    if(y > h) h = y;
+  }
+  for(i=0;i<PLATFORMS.length;i++){
+    var p = PLATFORMS[i];
+    dx = x - p.cx; dz = z - p.cz;
+    dd = Math.sqrt(dx*dx + dz*dz);
+    if(dd <= p.r) y = p.y;
+    else if(p.edge && dd < p.r + p.edge) y = h + (p.y - h) * (1 - (dd - p.r) / p.edge);
+    else continue;
+    if(y > h) h = y;
+  }
+  return h;
+}
+
 function tryMove(nx, nz){
   nx = clamp(nx, -LIMIT, LIMIT);
   nz = clamp(nz, -LIMIT, LIMIT);
-  for(var i=0;i<NODES.length;i++){
-    var n = NODES[i], rr = n.R * 0.92 + 1.2;
-    if(Math.hypot(nx - n.x, nz - n.z) < rr){
-      if(Math.hypot(hero.x, nz) >= rr) nx = hero.x;
-      else if(Math.hypot(nx, hero.z) >= rr) nz = hero.z;
-      else { nx = hero.x; nz = hero.z; }
-    }
-  }
-  // 树 / 岩石（兜底：物理引擎未加载时仍防穿模）
+  // 树 / 岩石 / 建筑主体（垂直墙面）—— 兜底路径：物理引擎未加载时仍防穿模
   for(var j=0;j<OBSTACLES.length;j++){
     var o = OBSTACLES[j], cr = o.r + 0.85;
     if(Math.hypot(nx - o.cx, nz - o.cz) < cr){
@@ -3135,13 +3175,15 @@ function updateHero(dt){
   }
   hero.speed = lerp(hero.speed, sp, 0.2);
 
-  // 跳跃与重力
-  var groundY = heightAt(hero.x, hero.z);
+  // 跳跃与重力（地面 = 可站立面：地形 / 台阶 / 平台）
+  var groundY = standHeightAt(hero.x, hero.z);
   if(keys[' '] && !hero.air && !locked){ hero.vy = JUMP; hero.air = true; }
   if(hero.air){
     hero.vy -= GRAV * dt;
     hero.y += hero.vy * dt;
     if(hero.y <= groundY){ hero.y = groundY; hero.vy = 0; hero.air = false; }
+  } else if(hero.y - groundY > 1.6){
+    hero.air = true; hero.vy = 0;               // 走出高台边缘 → 转自由落体
   } else {
     hero.y = lerp(hero.y, groundY, Math.min(1, dt*14));
   }

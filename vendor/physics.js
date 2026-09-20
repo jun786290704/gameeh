@@ -1,8 +1,10 @@
 /* ============================================================================
  *  Element Heroes — 轻量物理引擎（本地内置，离线可用）
  *  用途：角色与建筑 / 树木 / 岩石之间的碰撞解算，杜绝「穿模」。
- *  设计：动态刚体（角色，球体） + 静态障碍物（竖直圆柱，仅做 XZ 平面圆-圆碰撞，
- *  因为建筑 / 树 / 岩石都足够高，角色无法跳过，故无需处理高度方向穿透）。
+ *  设计：动态刚体（角色，球体） + 静态障碍物（竖直圆柱，仅做 XZ 平面圆-圆碰撞）。
+ *  碰撞体只用于「垂直墙面」类障碍：树、岩石、以及建筑主体（站上顶面后挡住内部）。
+ *  建筑的台基是缓斜面，不注册碰撞体 —— 由地图的 standHeightAt() 直接把角色托在斜面上，
+ *  脚底恒在表面，既不会陷入，也不会出现「碰撞把人挡在斜面外、因而永远走不上去」的死锁。
  *  重力在此场景由地形高度函数 heightAt 处理，故世界重力设为 0，仅做碰撞响应。
  *  暴露全局：window.PHYSICS = { World, Body, clamp }
  * ========================================================================== */
@@ -76,14 +78,16 @@
     else if (d.shape.type === 'sphere' && o.shape.type === 'sphere') sphereSphere(d, o);
   }
 
-  // 球体（角色）vs 竖直圆柱（建筑/树/岩石，仅 XZ）
+  // 球体（角色）vs 竖直圆柱（树 / 岩石 / 建筑主体，仅 XZ）
   function sphereCyl(d, o) {
     var dx = d.pos.x - o.shape.cx, dz = d.pos.z - o.shape.cz;
     var rr = d.shape.r + o.shape.r;
     var d2 = dx * dx + dz * dz;
     if (d2 >= rr * rr) return;
-    var dist = Math.sqrt(d2) || 1e-4;
-    var nx = dx / dist, nz = dz / dist;
+    var dist = Math.sqrt(d2);
+    var nx, nz;
+    if (dist < 1e-4) { nx = 1; nz = 0; dist = 1e-4; }   // 正落在圆心时方向退化，任选一个方向推出
+    else { nx = dx / dist; nz = dz / dist; }
     var pen = rr - dist;
     d.pos.x += nx * pen;
     d.pos.z += nz * pen;
