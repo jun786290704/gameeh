@@ -639,6 +639,8 @@ if(!window.ethers){
   document.head.appendChild(_e);
 }
 </script>
+<!-- 本地物理引擎（碰撞 / 防穿模），离线可用；缺失也不影响页面其它功能 -->
+<script src="./vendor/physics.js" onerror="window.__physicsFailed=true"></script>
 <script src="./js/core.js" defer></script>
 <script src="./js/utils.js" defer></script>
 <script src="./js/wallet.js" defer></script>
@@ -805,6 +807,9 @@ function loadThree(i){
 var renderer, scene, camera, clock, raycaster;
 var terrainMesh, heroObj, heroParts = {}, pickables = [], labels = {};
 var W = 0, H = 0;
+/* 碰撞障碍物（建筑 / 树 / 岩石）与物理世界句柄；见 buildPhysics() */
+var OBSTACLES = [];
+var PHYS = null;
 
 /* ---------- 触控判定 ----------
    优先用「主指针为粗指针」判定；再退化为任意一次真实触摸事件。
@@ -857,6 +862,17 @@ function tex_glow(){
   g.fillStyle = grd; g.fillRect(0,0,128,128);
   _glowTex = new THREE.CanvasTexture(c);
   return _glowTex;
+}
+
+/* 真实 3D 自发光网格（替代原来的相机朝向 Sprite「贴膜」光晕）。
+   用低面数二十面体 + 加法混合，从任意角度都是实体发光球，而不是一张永远朝脸的贴片。 */
+function glowMesh(colHex, r, op){
+  if(r == null) r = 1;
+  if(op == null) op = 0.6;
+  return new THREE.Mesh(
+    new THREE.IcosahedronGeometry(r, 1),
+    new THREE.MeshBasicMaterial({color:colHex, transparent:true, opacity:op, blending:THREE.AdditiveBlending, depthWrite:false, fog:false})
+  );
 }
 
 /* ==================== 程序化贴图 ====================
@@ -1165,6 +1181,8 @@ function bootInner(){
   buildMotes();
   NPCS.forEach(buildNpc);
 
+  buildPhysics();   // 物理世界（碰撞 / 防穿模）
+
   hero.y = heightAt(hero.x, hero.z);
 
   document.getElementById('loading').style.display = 'none';
@@ -1401,6 +1419,12 @@ function buildProps(){
     grass.push({x:x, y:y, z:z, s:0.6 + Math.random()*0.8, r:Math.random()*6.2832});
   }
 
+  /* 碰撞体：树（针叶 / 阔叶）与岩石按位置登记，角色不再能穿过去 */
+  pine.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:0.9 * p.s}); });
+  broad.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:0.9 * p.s}); });
+  rockA.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:1.5 * p.s}); });
+  rockB.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:1.3 * p.s}); });
+
   var woodM      = matOf('wood', 1, 2);
   var pineCrown  = matC(0x2f7a4f, .92, .02, 0x0c2418, .28, true);
   var broadCrown = matC(0x3f8f52, .92, .02, 0x0e2a18, .26, true);
@@ -1496,8 +1520,7 @@ function addLantern(grp, x, z, y0, colHex){
   put(g, box, 0, 2.98, 0);
   var cap = new THREE.Mesh(new THREE.ConeGeometry(0.92, 0.52, 4), matOf('roof', 1, 1));
   cap.rotation.y = Math.PI/4; put(g, cap, 0, 3.68, 0); shade(cap);
-  var sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:colHex, transparent:true, opacity:.62, blending:THREE.AdditiveBlending, depthWrite:false}));
-  sp.scale.setScalar(3.6); put(g, sp, 0, 2.98, 0);
+  var sp = glowMesh(colHex, 1.8, .62); put(g, sp, 0, 2.98, 0);
   FLAMES.push({sp:sp, base:.55, amp:.22, spd:1.9, ph:Math.random()*6.28});
   grp.add(g);
   return g;
@@ -1514,8 +1537,7 @@ function addBrazier(grp, x, z, y0, colHex, sc){
   put(g, coal, 0, 2.05*sc, 0);
   var fire = new THREE.Mesh(new THREE.ConeGeometry(0.66*sc, 1.6*sc, 7), matC(colHex, .4, 0, colHex, 1.5));
   put(g, fire, 0, 2.7*sc, 0);
-  var sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:colHex, transparent:true, opacity:.75, blending:THREE.AdditiveBlending, depthWrite:false}));
-  sp.scale.setScalar(5.2*sc); put(g, sp, 0, 2.6*sc, 0);
+  var sp = glowMesh(colHex, 2.6*sc, .75); put(g, sp, 0, 2.6*sc, 0);
   FLAMES.push({sp:sp, mesh:fire, base:.62, amp:.3, spd:2.7, ph:Math.random()*6.28});
   grp.add(g);
   return g;
@@ -1525,7 +1547,7 @@ function addBanner(grp, x, z, y0, colHex, hh, ry){
   var g = new THREE.Group(); g.position.set(x, y0, z);
   var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, hh, 6), matOf('wood', 1, 2));
   put(g, pole, 0, hh/2, 0); shade(pole);
-  var geo = new THREE.PlaneGeometry(2.0, hh*0.5, 8, 4);
+  var geo = new THREE.BoxGeometry(2.0, hh*0.5, 0.08, 8, 4, 1);
   var flag = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
     map:texOf('cloth', 1, 1), color:colHex, side:THREE.DoubleSide, roughness:.95, metalness:.02
   }));
@@ -1636,6 +1658,8 @@ function buildNode(n){
   var grp = new THREE.Group();
   grp.position.set(n.x, n.baseY, n.z);
   var R = n.R, h = n.h;
+  /* 碰撞体：把建筑当成竖直圆柱（半径略小于视觉台基，玩家可站在台地上靠近） */
+  OBSTACLES.push({cx:n.x, cz:n.z, r:R * 0.95});
 
   var stone  = matOf('stone',  Math.max(3, Math.round(R*0.62)), Math.max(2, Math.round(h*0.20)));
   var stoneD = matOf('stoneD', Math.max(3, Math.round(R*0.55)), 2);
@@ -1764,8 +1788,7 @@ function buildNode(n){
     var lava = new THREE.Mesh(new THREE.CircleGeometry(R*0.27, 16), matC(0xff7a1a, .4, 0, 0xff5c10, 1.8));
     lava.rotation.x = -Math.PI/2; lava.position.y = top + h*0.8 + 0.28; grp.add(lava);
     n.pulse = lava;
-    var hl = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xff6a1a, transparent:true, opacity:.8, blending:THREE.AdditiveBlending, depthWrite:false}));
-    hl.scale.setScalar(R*1.9); put(grp, hl, 0, top + h*0.8 + 1.2, 0);
+    var hl = glowMesh(0xff6a1a, R*0.95, .8); put(grp, hl, 0, top + h*0.8 + 1.2, 0);
     FLAMES.push({sp:hl, base:.7, amp:.25, spd:1.6, ph:Math.random()*6.28});
     addSmoke(grp, 0, top + h*0.85, 0, 0xff7a2a, IS_TOUCH ? 20 : 46, R*0.22, 52, 14);
     addRubble(grp, R*1.3, R*0.4, IS_TOUCH?3:7, R*0.5, matOf('stoneD', 1, 1));
@@ -1781,7 +1804,7 @@ function buildNode(n){
     skirt.position.y = top + h*0.27; grp.add(skirt); shade(skirt);
     var flagP = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 3.4, 6), wood);
     flagP.position.y = top + h*0.75 + 1.4; grp.add(flagP);
-    var topFlag = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.0, 6, 3), new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:colHex, side:THREE.DoubleSide, roughness:.95}));
+    var topFlag = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1.0, 0.07, 6, 3, 1), new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:colHex, side:THREE.DoubleSide, roughness:.95}));
     topFlag.position.set(0.85, top + h*0.75 + 2.6, 0); grp.add(topFlag);
     BANNERS.push({mesh:topFlag, base:Float32Array.from(topFlag.geometry.attributes.position.array), ph:Math.random()*6.28});
     for(var st2=0; st2<3; st2++){
@@ -1813,8 +1836,7 @@ function buildNode(n){
       var lx = Math.cos(lan/6*6.2832)*R*1.5, lz = Math.sin(lan/6*6.2832)*R*1.5;
       var lamp = new THREE.Mesh(new THREE.SphereGeometry(0.42, 8, 6), matC(0xfbbf24, .3, .1, 0xffb020, 1.8));
       put(grp, lamp, lx, top + 3.6 + Math.sin(lan)*0.3, lz);
-      var lsp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xffc257, transparent:true, opacity:.55, blending:THREE.AdditiveBlending, depthWrite:false}));
-      lsp.scale.setScalar(2.6); put(grp, lsp, lx, top + 3.6 + Math.sin(lan)*0.3, lz);
+      var lsp = glowMesh(0xffc257, 1.3, .55); put(grp, lsp, lx, top + 3.6 + Math.sin(lan)*0.3, lz);
       FLAMES.push({sp:lsp, base:.45, amp:.18, spd:1.3, ph:lan});
     }
     addCrate(grp, R*0.9, top, -R*1.1, 1.0, 0.4);
@@ -1948,8 +1970,7 @@ function buildNode(n){
     var lake = new THREE.Mesh(new THREE.CircleGeometry(R*0.42, 24), matC(0xff4d1a, .4, 0, 0xff2a08, 1.9));
     lake.rotation.x = -Math.PI/2; lake.position.y = top + h*0.79; grp.add(lake);
     n.pulse = lake;
-    var lakeGlow = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xff3b1a, transparent:true, opacity:.75, blending:THREE.AdditiveBlending, depthWrite:false}));
-    lakeGlow.scale.setScalar(R*1.9); put(grp, lakeGlow, 0, top + h*0.85, 0);
+    var lakeGlow = glowMesh(0xff3b1a, R*0.95, .75); put(grp, lakeGlow, 0, top + h*0.85, 0);
     FLAMES.push({sp:lakeGlow, base:.68, amp:.22, spd:1.4, ph:1.2});
     addSmoke(grp, 0, top + h*0.9, 0, 0xff5a2a, IS_TOUCH ? 22 : 52, R*0.3, 62, 16);
     /* 肋骨拱 */
@@ -2007,8 +2028,7 @@ function buildNode(n){
   disc.rotation.x = -Math.PI/2; disc.position.y = 4.35; grp.add(disc);
   n.disc = disc;
 
-  var halo = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:col, transparent:true, opacity:.45, blending:THREE.AdditiveBlending, depthWrite:false}));
-  halo.scale.setScalar(R*2.4); halo.position.y = h*0.55; grp.add(halo);
+  var halo = glowMesh(col, R*1.2, .45); halo.position.y = h*0.55; grp.add(halo);
   n.halo = halo;
 
   var pl = new THREE.PointLight(n.ring === 3 ? 0xff4d1a : col, n.ring === 0 ? 2.0 : 1.15, n.ring === 0 ? 220 : 110);
@@ -2089,7 +2109,7 @@ function buildHero(){
   var e2 = e1.clone(); e2.position.x = 0.088; body.add(e2);
 
   /* 披风（分段，可飘动） */
-  var capeGeo = new THREE.PlaneGeometry(0.86, 1.3, 5, 6);
+  var capeGeo = new THREE.BoxGeometry(0.86, 1.3, 0.08, 5, 6, 1);
   var cape = new THREE.Mesh(capeGeo, new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:0x8f1d2d, side:THREE.DoubleSide, roughness:.95}));
   cape.position.set(0, 1.42, -0.34); body.add(cape);
   var capeTrim = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.06), gold);
@@ -2387,8 +2407,7 @@ function buildNpc(q){
     var eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.042, 8, 6), matC(0xff5a3a, .3, 0, 0xff3a18, 1.8));
     eyeL.position.set(-0.075, 1.87*tall, 0.17); body.add(eyeL);
     var eyeR = eyeL.clone(); eyeR.position.x = 0.075; body.add(eyeR);
-    var aura = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0x8a1a2a, transparent:true, opacity:.32, blending:THREE.AdditiveBlending, depthWrite:false}));
-    aura.scale.setScalar(3.4); aura.position.y = 1.2; g.add(aura);
+    var aura = glowMesh(0x8a1a2a, 1.7, .32); aura.position.y = 1.2; g.add(aura);
     FLAMES.push({sp:aura, base:.26, amp:.1, spd:.9, ph:Math.random()*6.28});
   } else if(look === 'smith'){
     var band = new THREE.Mesh(new THREE.TorusGeometry(0.205, 0.03, 6, 14), trimM);
@@ -2400,7 +2419,7 @@ function buildNpc(q){
     hood.position.y = 1.88*tall; body.add(hood); shade(hood);
     var feather = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.42, 4), trimM);
     feather.position.set(0.14, 2.12*tall, -0.05); feather.rotation.z = -0.5; body.add(feather);
-    var cloak = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 1.0, 4, 5), new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:dk.getHex(), side:THREE.DoubleSide, roughness:.95}));
+    var cloak = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.0, 0.07, 4, 5, 1), new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:dk.getHex(), side:THREE.DoubleSide, roughness:.95}));
     cloak.position.set(0, 1.15*tall, -0.28); body.add(cloak);
     q.cloak = cloak;
   } else if(look === 'trader'){
@@ -2457,8 +2476,7 @@ function buildNpc(q){
     staff.position.set(0, -0.5, 0.14); staff.rotation.x = 0.12; armR.lower.add(staff); shade(staff);
     var gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), matC(colHex, .3, .3, colHex, 1.5));
     gem.position.set(0, -1.42, 0.24); armR.lower.add(gem);
-    var gglow = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:colHex, transparent:true, opacity:.55, blending:THREE.AdditiveBlending, depthWrite:false}));
-    gglow.scale.setScalar(1.5); gglow.position.set(0, -1.42, 0.24); armR.lower.add(gglow);
+    var gglow = glowMesh(colHex, 0.75, .55); gglow.position.set(0, -1.42, 0.24); armR.lower.add(gglow);
     FLAMES.push({sp:gglow, base:.48, amp:.16, spd:1.5, ph:Math.random()*6.28});
     q.gem = gem;
   }
@@ -2466,8 +2484,7 @@ function buildNpc(q){
   /* 头顶待谈标记 */
   var mark = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), new THREE.MeshBasicMaterial({color:0xfbbf24}));
   mark.position.y = 2.72; g.add(mark);
-  var mglow = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xfbbf24, transparent:true, opacity:.6, blending:THREE.AdditiveBlending, depthWrite:false}));
-  mglow.scale.setScalar(1.7); mglow.position.y = 2.72; g.add(mglow);
+  var mglow = glowMesh(0xfbbf24, 0.85, .6); mglow.position.y = 2.72; g.add(mglow);
   q.mark = mark; q.mglow = mglow;
   if(q.talked){ mark.visible = false; mglow.material.opacity = 0.18; }
 
@@ -3034,7 +3051,35 @@ function tryMove(nx, nz){
       else { nx = hero.x; nz = hero.z; }
     }
   }
+  // 树 / 岩石（兜底：物理引擎未加载时仍防穿模）
+  for(var j=0;j<OBSTACLES.length;j++){
+    var o = OBSTACLES[j], cr = o.r + 0.85;
+    if(Math.hypot(nx - o.cx, nz - o.cz) < cr){
+      var ddx = nx - o.cx, ddz = nz - o.cz, dd = Math.hypot(ddx, ddz) || 1e-4;
+      nx = o.cx + ddx/dd * cr; nz = o.cz + ddz/dd * cr;
+    }
+  }
   hero.x = nx; hero.z = nz;
+}
+
+/* 构建物理世界：建筑 / 树 / 岩石为静态圆柱，角色为动态球体。
+   竖直方向由 heightAt 驱动，物理只解算 XZ 碰撞，彻底杜绝穿模。 */
+function buildPhysics(){
+  if(!window.PHYSICS){ console.warn('[physics] 引擎未加载，使用半径兜底碰撞'); return; }
+  try{
+    var w = new PHYSICS.World({gravity:0, iterations:4});
+    for(var i=0;i<OBSTACLES.length;i++){
+      var o = OBSTACLES[i];
+      w.addBody(PHYSICS.Body({mass:0, shape:{type:'cylinder', cx:o.cx, cz:o.cz, r:o.r}}));
+    }
+    var body = PHYSICS.Body({mass:1, x:hero.x, y:hero.y + 0.85, z:hero.z, shape:{type:'sphere', r:0.85}});
+    w.addBody(body);
+    PHYS = {world:w, body:body, ready:true};
+    window.__physicsReady = true;
+  }catch(e){
+    console.warn('[physics] 初始化失败，回退半径碰撞：', e);
+    PHYS = null;
+  }
 }
 
 function updateHero(dt){
@@ -3072,8 +3117,18 @@ function updateHero(dt){
   var sp = 0;
   if(mx || mz){
     sp = (keys['shift'] ? RUN : WALK);
-    var step = sp * dt;
-    tryMove(hero.x + mx*step, hero.z + mz*step);
+    if(PHYS && PHYS.ready){
+      // 物理引擎接管水平移动：设速度 -> 步进 -> 读回，碰撞自动解算
+      PHYS.body.velocity.x = mx * sp;
+      PHYS.body.velocity.z = mz * sp;
+      PHYS.body.velocity.y = 0;
+      PHYS.world.step(dt);
+      hero.x = clamp(PHYS.body.pos.x, -LIMIT, LIMIT);
+      hero.z = clamp(PHYS.body.pos.z, -LIMIT, LIMIT);
+    } else {
+      var step = sp * dt;
+      tryMove(hero.x + mx*step, hero.z + mz*step);
+    }
     var want = Math.atan2(mx, mz);
     var diff = Math.atan2(Math.sin(want - hero.yaw), Math.cos(want - hero.yaw));
     hero.yaw += diff * Math.min(1, dt*11);
@@ -3090,6 +3145,9 @@ function updateHero(dt){
   } else {
     hero.y = lerp(hero.y, groundY, Math.min(1, dt*14));
   }
+
+  // 物理体竖直方向跟随地形（kinematic），保证与角色同步
+  if(PHYS && PHYS.ready){ PHYS.body.pos.y = hero.y + 0.85; PHYS.body.velocity.y = 0; }
 
   /* 动画：走 / 跑 / 跳 / 待机呼吸 */
   hero.walk += hero.speed * dt * 0.62;
