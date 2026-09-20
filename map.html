@@ -12,12 +12,15 @@
   --gold:#fbbf24; --gold2:#f59e0b; --text:#e8eef7; --muted:#8ea0bd;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{position:fixed;inset:0;width:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,select{user-select:text;-webkit-user-select:text}
 a{color:var(--gold);text-decoration:none}
 
 /* 顶栏 */
-.top{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(7,12,24,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(7,12,24,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+  padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 .top-in{max-width:1400px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:10px}
 .brand{display:flex;align-items:center;gap:8px;font-weight:900;font-size:15px;color:#fff}
 .brand .logo{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;background:linear-gradient(135deg,#fde68a,#f59e0b)}
@@ -114,16 +117,7 @@ a{color:var(--gold);text-decoration:none}
 .fb-card .lore{font-size:11.8px;color:#d8c79b;line-height:1.6;margin-bottom:8px;padding-left:9px;border-left:2px solid rgba(251,191,36,.45)}
 .fb-card .m{margin-top:10px;font-size:11.5px;font-weight:700}
 
-@media(max-width:820px){
-  .bag-detail{display:none}
-  .chr{flex-direction:column;overflow-y:auto}
-  .chr-l{width:100%}
-  .bag-side{width:98px;padding:8px}
-  .bag-tab{font-size:11.5px;padding:8px 7px}
-  .ov-box{height:min(780px,92vh)}
-  .ov{padding:8px}
-  .hud-bl{left:10px;bottom:150px}
-}
+/* 移动端布局 / 触控样式统一放在文件末尾（媒体查询需晚于组件规则才能覆盖） */
 
 /* ================= 游戏交互层 ================= */
 /* 钱包 */
@@ -144,13 +138,13 @@ a{color:var(--gold);text-decoration:none}
 .btn-wallet{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:0;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap}
 
 /* 左下角色条 */
-.hud-bl{position:absolute;left:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:12;max-width:min(60vw,520px)}
-.pcard{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:14px;background:rgba(11,18,32,.9);border:1px solid var(--line2);backdrop-filter:blur(10px)}
+.hud-bl{position:absolute;left:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:12;max-width:min(60vw,520px);pointer-events:none}
+.pcard{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:14px;background:rgba(11,18,32,.9);border:1px solid var(--line2);backdrop-filter:blur(10px);pointer-events:auto}
 .pcard .av{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;background:radial-gradient(circle at 50% 30%,rgba(251,191,36,.2),#0d1526);flex-shrink:0}
 .pcard .av img{width:100%;height:100%;object-fit:cover;border-radius:11px;object-position:center 20%}
 .pcard .nm{font-size:12.5px;font-weight:800;color:#fff}
 .pcard .sb{font-size:11px;color:var(--muted)}
-.acts{display:flex;gap:7px;flex-wrap:wrap}
+.acts{display:flex;gap:7px;flex-wrap:wrap;pointer-events:auto}
 .act{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:12px;border:1px solid var(--line2);background:rgba(13,21,38,.88);color:#dbe4f2;font-size:12.5px;font-weight:700;cursor:pointer;backdrop-filter:blur(8px)}
 .act:hover{border-color:var(--gold);color:var(--gold)}
 .act .k{font-family:ui-monospace,monospace;font-size:10px;color:var(--gold);border:1px solid rgba(251,191,36,.4);border-radius:5px;padding:1px 4px}
@@ -236,6 +230,165 @@ a{color:var(--gold);text-decoration:none}
 @keyframes sp2{to{transform:rotate(360deg)}}
 #pendingPanel{position:absolute;right:16px;top:60px;width:292px;background:rgba(11,18,32,.96);border:1px solid var(--line2);border-radius:14px;padding:12px;z-index:40;display:none;max-height:calc(100% - 220px);overflow-y:auto}
 #pendingPanel.show{display:block}
+
+/* ================= NPC ================= */
+.mlabel.npc{border-color:rgba(56,189,248,.34);background:rgba(7,12,24,.7);color:#cfe6ff}
+.mlabel.npc.on{border-color:#38bdf8;background:rgba(56,189,248,.2);box-shadow:0 0 16px rgba(56,189,248,.3);color:#fff}
+.mlabel.npc .mi{font-size:12px}
+.mlabel.npc.talked{opacity:.72}
+.mlabel.npc.talked .mi{filter:grayscale(.4)}
+
+/* 跳跃（触控） */
+#jumpBtn{position:absolute;right:16px;bottom:206px;width:58px;height:58px;border-radius:50%;display:none;align-items:center;justify-content:center;
+  border:1px solid rgba(251,191,36,.5);background:rgba(13,21,38,.82);color:var(--gold);font-size:20px;z-index:6;touch-action:none;
+  backdrop-filter:blur(6px);box-shadow:0 10px 26px rgba(0,0,0,.45)}
+#jumpBtn:active{background:rgba(251,191,36,.26);transform:scale(.95)}
+body.touch #jumpBtn.on{display:flex}
+
+/* 触控操作提示 */
+.touch-hint{display:none;margin-top:7px;font-size:11.5px;color:#a8b8d0;line-height:1.7}
+.touch-hint b{color:var(--gold);font-weight:700}
+body.touch .keys{display:none}
+body.touch .touch-hint{display:block}
+
+/* ================= 对话浮层 ================= */
+#dlg{position:fixed;left:0;right:0;bottom:0;z-index:140;display:none;justify-content:center;padding:0 16px calc(18px + env(safe-area-inset-bottom))}
+#dlg.show{display:flex}
+.dlg-card{position:relative;width:min(760px,96vw);display:flex;gap:14px;padding:16px 18px;border-radius:18px;
+  background:linear-gradient(180deg,rgba(15,24,42,.98),rgba(9,15,28,.98));border:1px solid var(--line2);box-shadow:0 24px 64px rgba(0,0,0,.66);
+  animation:dlgIn .18s ease-out}
+@keyframes dlgIn{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+.dlg-av{width:76px;height:76px;flex-shrink:0;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:34px;
+  border:1px solid var(--line2);background:radial-gradient(circle at 50% 30%,rgba(251,191,36,.16),#0d1526 82%)}
+.dlg-main{flex:1;min-width:0}
+.dlg-name{font-size:15.5px;font-weight:900;color:#fff;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-right:30px}
+.dlg-role{font-size:10.5px;padding:2px 8px;border-radius:999px;border:1px solid rgba(251,191,36,.45);color:var(--gold);background:rgba(251,191,36,.09);font-weight:700}
+.dlg-txt{margin-top:8px;font-size:13.5px;line-height:1.85;color:#dbe4f2;min-height:50px}
+.dlg-prog{font-size:10.5px;color:var(--muted);margin-top:7px;letter-spacing:.06em}
+.dlg-acts{display:none;gap:7px;margin-top:10px;flex-wrap:wrap}
+.dlg-acts.show{display:flex}
+.dlg-acts .btn-o{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.dlg-acts a.btn-o{color:#dbe4f2}
+.dlg-acts a.btn-o:hover{color:var(--gold)}
+.dt-x{display:none}
+.dlg-foot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:11px;flex-wrap:wrap}
+.dlg-x{position:absolute;right:11px;top:11px;width:28px;height:28px;border-radius:9px;border:1px solid var(--line2);color:var(--muted);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(11,18,32,.7)}
+.dlg-x:hover{color:#fff;border-color:var(--gold)}
+
+/* 降级地图 · NPC 名录 */
+.fb-h{max-width:1180px;margin:6px auto 12px;font-size:15px;font-weight:900;color:#fff;display:flex;align-items:center;gap:8px}
+.fb-h small{font-size:11.5px;font-weight:600;color:var(--muted)}
+.fb-card .say{font-size:11.8px;color:#a9c7e6;line-height:1.65;margin-top:8px;padding-left:9px;border-left:2px solid rgba(56,189,248,.45)}
+.npc-card{cursor:default}
+.npc-card:hover{border-color:var(--line);transform:none}
+
+/* ==================== 移动端 / 触控布局 ==================== */
+@media(max-width:820px){
+  /* 顶栏：只留品牌 + 钱包（其余入口已在钱包菜单内） */
+  .top-in{padding:7px 10px;gap:8px}
+  .brand{font-size:13.5px;gap:6px}
+  .brand .logo{width:24px;height:24px;font-size:13px;border-radius:8px}
+  .brand small{display:none}
+  /* 顶栏：隐藏外链社群（已在钱包菜单内），保留官网 / Docs 导航 */
+  .top-links a[href^="https"]{display:none}
+  .top-links{gap:5px}
+  .top-links .tlink{padding:5px 9px;font-size:11.5px}
+  .btn-wallet{padding:6px 11px;font-size:12px}
+  .wallet-menu{width:min(272px,84vw)}
+
+  /* 左上信息：精简为标题一行 */
+  .hud-tl{left:10px;top:8px;max-width:64vw}
+  .hud-tl .eyebrow{font-size:9.5px;padding:2px 8px;margin-bottom:4px;letter-spacing:.1em}
+  .hud-tl h1{font-size:16px}
+  .hud-tl p,.hud-tl .world-link{display:none}
+
+  /* 交互提示：居中偏下，避开摇杆与动作条 */
+  #nearBar{bottom:216px;max-width:62vw;padding:8px 12px;gap:8px}
+  #nearBar .ic{font-size:17px}
+  #nearBar .tx{font-size:12.5px;white-space:normal;line-height:1.4}
+  #nearBar .sub{display:none}
+  #nearBar .en{padding:6px 10px;font-size:11.5px}
+  /* 提示条下移到小地图之下，避免遮挡 */
+  #toastStack{top:158px;width:min(88vw,340px)}
+
+  /* 摇杆 / 跳跃 / 小地图 */
+  #stick{left:14px;bottom:104px;width:108px;height:108px}
+  #stick .knob{width:46px;height:46px;margin:-23px 0 0 -23px}
+  #jumpBtn{right:10px;bottom:148px;width:56px;height:56px;font-size:19px}
+  #miniWrap{right:10px;top:10px;bottom:auto;width:96px;height:96px;border-radius:13px}
+  #miniWrap .cap{display:none}
+
+  /* 工具按钮：底部横排 */
+  .tools{right:10px;left:auto;top:auto;bottom:104px;flex-direction:row;gap:6px}
+  .tool{width:34px;height:34px;border-radius:10px;font-size:13px}
+
+  /* 信息 / 待揭示：底部抽屉 */
+  #info{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:56%;border-radius:15px}
+  #pendingPanel{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:56%}
+
+  /* 底部动作条 */
+  .hud-bl{left:0;right:0;bottom:0;max-width:none;gap:0;z-index:16;
+    background:linear-gradient(180deg,rgba(7,12,24,0),rgba(7,12,24,.9) 46%);
+    padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .pcard{border-radius:0;border-left:0;border-right:0;border-bottom:0;padding:6px 12px;gap:8px}
+  .pcard .av{width:28px;height:28px;font-size:14px;border-radius:9px}
+  .pcard .nm{font-size:12px}
+  .pcard .sb{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .acts{flex-wrap:nowrap;overflow-x:auto;padding:7px 10px 8px;gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .acts::-webkit-scrollbar{display:none}
+  .act{padding:9px 12px;font-size:12px;flex-shrink:0}
+  .act .k{display:none}
+
+  /* 浮层：底部整屏弹层 */
+  .ov{padding:0;align-items:flex-end}
+  .ov-box{width:100%;height:92vh;border-radius:18px 18px 0 0;border-bottom:0}
+  .ov-bd{flex-direction:column;position:relative}
+  /* 背包：侧栏转为横向页签，详情改可滑出的底部抽屉 */
+  .bag-side{width:100%;flex-direction:row;border-right:0;border-bottom:1px solid var(--line);padding:8px;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .bag-side::-webkit-scrollbar{display:none}
+  .bag-tab{padding:8px 11px;font-size:12px;flex-shrink:0}
+  .bag-tab .n{margin-left:6px}
+  .bag-main{padding:10px}
+  .bag-grid{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+  .bag-detail{position:absolute;left:0;right:0;bottom:0;width:auto;height:58%;transform:translateY(101%);transition:transform .22s ease;
+    border-left:0;border-top:1px solid var(--line2);border-radius:16px 16px 0 0;background:#0b1220;z-index:6;
+    box-shadow:0 -16px 44px rgba(0,0,0,.62);padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+  .bag-detail.show{transform:none}
+  .dt-x{position:absolute;right:11px;top:11px;width:28px;height:28px;border-radius:9px;border:1px solid var(--line2);color:var(--muted);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(11,18,32,.8)}
+  /* 角色 */
+  .chr{flex-direction:column;overflow-y:auto;padding:12px;gap:12px;-webkit-overflow-scrolling:touch}
+  .chr-l{width:100%}
+  .chr-art{height:190px}
+  .chr-r{width:100%}
+
+  /* 对话：贴底整屏宽 */
+  #dlg{padding:0 8px calc(8px + env(safe-area-inset-bottom))}
+  .dlg-card{padding:13px;gap:11px;border-radius:16px;width:100%}
+  .dlg-av{width:56px;height:56px;font-size:26px;border-radius:13px}
+  .dlg-name{font-size:14.5px}
+  .dlg-txt{font-size:13px;min-height:42px}
+  .dlg-acts .btn-o{flex:1;min-width:calc(50% - 4px)}
+}
+
+/* 触屏但屏幕较宽（平板）：把摇杆抬到左下动作条之上，避免压住按钮 */
+@media(min-width:821px){
+  body.touch #stick{left:20px;bottom:122px}
+}
+
+/* 横屏手机 / 矮屏 */
+@media(max-height:520px) and (pointer:coarse){
+  .hud-tl h1{display:none}
+  .pcard{display:none}
+  #stick{width:92px;height:92px;bottom:88px}
+  #jumpBtn{width:48px;height:48px;bottom:128px;font-size:17px}
+  #miniWrap{width:84px;height:84px}
+  .tools{bottom:88px}
+  .tool{width:30px;height:30px;font-size:12px}
+  #nearBar{bottom:186px;max-width:46vw}
+  .ov-box{height:96vh}
+}
 </style>
 </head>
 <body>
@@ -263,6 +416,7 @@ a{color:var(--gold);text-decoration:none}
             <a class="wm-link" href="https://x.com/bscgamebuild" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter"></i><span>推特 X</span></a>
             <a class="wm-link" href="./index.html"><i class="fa-solid fa-globe"></i><span>官网</span></a>
             <a class="wm-link" href="./docs.html"><i class="fa-solid fa-book"></i><span>Docs</span></a>
+            <a class="wm-link" href="./docs.html#world"><i class="fa-solid fa-scroll"></i><span>世界志</span></a>
           </div>
         </div>
       </div>
@@ -290,6 +444,7 @@ a{color:var(--gold);text-decoration:none}
       <span class="kk"><b>C</b>角色</span>
       <span class="kk"><b>Tab</b>俯瞰全局</span>
     </div>
+    <div class="touch-hint"><b>左摇杆</b>移动 · <b>拖屏</b>转视角 · <b>双指</b>缩放 · <b>走近建筑点一下</b>进入 · <b>点 NPC</b>对话</div>
   </div>
 
   <div class="tools">
@@ -310,6 +465,8 @@ a{color:var(--gold);text-decoration:none}
   </div>
 
   <div id="stick"><div class="knob" id="knob"></div></div>
+
+  <div id="jumpBtn" onpointerdown="event.preventDefault(); doJump();"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
 
   <div class="hud-bl">
     <div class="pcard">
@@ -397,6 +554,24 @@ a{color:var(--gold);text-decoration:none}
       <div class="x" onclick="closePlay()"><i class="fa-solid fa-xmark"></i></div>
     </div>
     <div class="ov-bd"><iframe id="playFrame" title="玩法面板" src="about:blank"></iframe></div>
+  </div>
+</div>
+
+<!-- ============ NPC 对话 ============ -->
+<div id="dlg">
+  <div class="dlg-card">
+    <div class="dlg-x" onclick="closeDialog()"><i class="fa-solid fa-xmark"></i></div>
+    <div class="dlg-av" id="dlgAv">🕯️</div>
+    <div class="dlg-main">
+      <div class="dlg-name"><span id="dlgName">旅人</span><span class="dlg-role" id="dlgRole">衡洲</span></div>
+      <div class="dlg-txt" id="dlgTxt" onclick="dlgNext()"></div>
+      <div class="dlg-prog" id="dlgProg"></div>
+      <div class="dlg-acts" id="dlgActs"></div>
+      <div class="dlg-foot">
+        <button class="btn-o" onclick="closeDialog()">结束对话</button>
+        <button class="btn-o gold" id="dlgNext" onclick="dlgNext()">继续 <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -522,7 +697,13 @@ function renderFallback(msg){
       + (n.lore ? '<div class="lore">'+n.lore+'</div>' : '')
       + '<div class="d">'+n.d+'</div>'
       + '<div class="m" style="color:'+n.color+'">进入 '+n.name+' →</div></a>';
-  }).join('');
+  }).join('')
+  + '<div class="fb-h" style="grid-column:1/-1"><i class="fa-solid fa-users"></i>旅途上的人 <small>3D 模式下走近即可对话</small></div>'
+  + NPCS.map(function(q){
+      return '<div class="fb-card" style="border-left-color:'+(q.color||'#fbbf24')+'">'
+        + '<div class="t"><span>'+q.icon+'</span>'+q.name+'<span style="margin-left:auto;font-size:10.5px;color:var(--muted)">'+(q.role||'')+'</span></div>'
+        + '<div class="say">「'+((q.lines && q.lines[0]) || '')+'」</div></div>';
+    }).join('');
 }
 
 function syncStageTop(){
@@ -554,16 +735,30 @@ function loadThree(i){
 var renderer, scene, camera, clock, raycaster;
 var terrainMesh, heroObj, heroParts = {}, pickables = [], labels = {};
 var W = 0, H = 0;
+
+/* ---------- 触控判定 ----------
+   优先用「主指针为粗指针」判定；再退化为任意一次真实触摸事件。
+   这样触屏笔记本（主指针仍是鼠标）不会误显示摇杆，而手机 / 平板必然命中。 */
+var IS_TOUCH = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+var touchUI = false;
+function enableTouchUI(){
+  if(touchUI) return;
+  touchUI = true; IS_TOUCH = true;
+  if(document.body) document.body.classList.add('touch');
+  var st = document.getElementById('stick');   if(st) st.classList.add('on');
+  var jb = document.getElementById('jumpBtn');  if(jb) jb.classList.add('on');
+  if(renderer) renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+}
 var mode = 'follow';           // follow = 第三人称 | orbit = 俯瞰全局
 var autoRotate = true, lastInteract = 0;
-var hoverKey = null, selKey = null, nearKey = null;
+var hoverKey = null, selKey = null, nearKey = null, nearNpcKey = null;
 
 /* 相机状态 */
 var cam = {yaw:0, pitch:0.34, dist:15, tYaw:0, tPitch:0.34, tDist:15,
            oTheta:-0.7, oPhi:0.85, oDist:430, tOTheta:-0.7, tOPhi:0.85, tODist:430};
 
 /* 角色状态 */
-var hero = {x:0, z:52, y:0, yaw:0, vy:0, air:false, tx:null, tz:null, walk:0, speed:0};
+var hero = {x:0, z:52, y:0, yaw:0, vy:0, air:false, tx:null, tz:null, approach:null, walk:0, speed:0};
 var keys = {};
 var WALK = 16, RUN = 30, GRAV = 46, JUMP = 15;
 
@@ -603,8 +798,8 @@ function bootInner(){
   syncStageTop();
   W = stage.clientWidth; H = stage.clientHeight;
 
-  renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer = new THREE.WebGLRenderer({canvas:cv, antialias: !IS_TOUCH});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, IS_TOUCH ? 1.6 : 2));
   renderer.setSize(W, H, false);
   if(THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
 
@@ -625,13 +820,15 @@ function bootInner(){
   buildHero();
   buildLabels();
   buildMotes();
+  NPCS.forEach(buildNpc);
 
   hero.y = heightAt(hero.x, hero.z);
 
   document.getElementById('loading').style.display = 'none';
   window.__booted = true;
   bindControls();
-  if('ontouchstart' in window) document.getElementById('stick').classList.add('on');
+  if(IS_TOUCH) enableTouchUI();
+  window.addEventListener('touchstart', function once(){ enableTouchUI(); }, {passive:true, once:true});
   animate();
 }
 
@@ -647,7 +844,7 @@ function buildLights(){
 }
 
 function buildStars(){
-  var N = 1600, pos = new Float32Array(N*3);
+  var N = IS_TOUCH ? 800 : 1600, pos = new Float32Array(N*3);
   for(var i=0;i<N;i++){
     var r = 900 + Math.random()*900;
     var th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1);
@@ -757,7 +954,8 @@ function buildProps(){
   var rockGeo  = new THREE.IcosahedronGeometry(1, 0);
 
   var tPos = [], rPos = [];
-  for(var i=0;i<420;i++){
+  var propN = IS_TOUCH ? 260 : 420;
+  for(var i=0;i<propN;i++){
     var x = (Math.random()*2-1) * (HALF - 22);
     var z = (Math.random()*2-1) * (HALF - 22);
     if(Math.abs(x) > LIMIT - 4 || Math.abs(z) > LIMIT - 4) continue;
@@ -992,10 +1190,307 @@ function buildHero(){
   scene.add(g);
 }
 
+/* ==================== NPC ====================
+   11 位衡洲遗民：9 位驻守各圣域、2 位沿途巡行。
+   坐标用「相对某建筑的极角 + 距离」定义，避免手写 x/z 与地图几何脱节。 */
+function npcAnchor(k, deg, d){
+  var n = nodeByKey(k);
+  if(!n) return null;
+  var a = deg * Math.PI / 180;
+  return {x: n.x + Math.cos(a)*d, z: n.z + Math.sin(a)*d};
+}
+
+var NPCS = [
+  { k:'np_lamp', name:'守灯人 · 燧', icon:'🕯️', role:'引路者 · 最后一批守灯人', look:'sage', color:'#fbbf24',
+    at:'heroes', a:78, d:46,
+    lines:[
+      '你来得正好。灯就要灭了 —— 沿着这条路往外走，五行的碎片正一片片冷下去。',
+      '我是燧。五帝把命途刻进凡人血脉那一夜，灯是我点的。现在只剩我还记得怎么点。',
+      '先学会走路：手机上推左边的摇杆，电脑上按 WASD；拖屏幕转视角，两指开合拉远拉近。跳起来按这个小圆钮。',
+      '走到任意一座建筑跟前，按 E（手机上点一下）就能进去。中央那座是英雄圣殿 —— 没有英雄，你连一道划痕都留不下。',
+      '去吧。衡环的遗骸不会等你，那条龙也不会。'
+    ],
+    acts:[
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }},
+      {label:'我的角色', ic:'fa-solid fa-user-astronaut', run:function(){ openChar(); }},
+      {label:'带我回英雄圣殿', ic:'fa-solid fa-person-walking', run:function(){ routeTo('heroes'); }},
+      {label:'世界志 · 五纪元', ic:'fa-solid fa-scroll', href:'docs.html#world'}
+    ] },
+
+  { k:'np_smith', name:'白帝的锻徒 · 钺', icon:'⚒️', role:'锻金者 · 蓐收之徒', look:'smith', color:'#f59e0b',
+    at:'forge', a:-56, d:30,
+    lines:[
+      '站住。靴子上全是泥 —— 你去过外环了？',
+      '我是钺，白帝蓐收的锻徒。师父随衡环一起裂开的那天，炉子留给了我，名字也留给了我。',
+      '武器不是买来的，是捡出来的。打怪、拆旧兵器，都能得到碎片；碎片攒够了拿到我这儿来。',
+      '稀有度看天意，也看你舍不舍得两百到一千的手续费。舍得的人，手里往往是五星。'
+    ],
+    acts:[
+      {label:'去锻造工坊', ic:'fa-solid fa-hammer', run:function(){ goBuilding('forge'); }},
+      {label:'去兵器库', ic:'fa-solid fa-khanda', run:function(){ goBuilding('weapons'); }},
+      {label:'带我去熔炼火山', ic:'fa-solid fa-person-walking', run:function(){ routeTo('melt'); }}
+    ] },
+
+  { k:'np_ash', name:'赤帝余烬 · 炎', icon:'🔥', role:'守炉者 · 祝融最后一口气', look:'hunter', color:'#ef4444',
+    at:'melt', a:22, d:30,
+    lines:[
+      '别站那么近，头发会焦。……骗你的，我早就没有头发了。',
+      '赤帝祝融倒下时吐出的最后一口气，就是脚下这座火山。它烧了六个纪元，还剩这么一点。',
+      '用不上的兵器别扔。丢进炉里，碎片和精粹会回来 —— 比你留着当摆设强一百倍。',
+      '火不认旧情，只认轻重。'
+    ],
+    acts:[
+      {label:'去熔炼火山', ic:'fa-solid fa-fire', run:function(){ goBuilding('melt'); }},
+      {label:'去合成祭坛', ic:'fa-solid fa-flask-vial', run:function(){ goBuilding('compose'); }}
+    ] },
+
+  { k:'np_peng', name:'青帝门徒 · 芃', icon:'🌿', role:'炼精者 · 句芒座下', look:'sage', color:'#22c55e',
+    at:'compose', a:16, d:30,
+    lines:[
+      '小心脚下 —— 树根会缠人。……又骗你的，它们只缠坏人。',
+      '青帝句芒教我们的第一句话是：碎片只是碎了，不是死了。熔炼、提纯，它就回来。',
+      '一星碎片攒多了也别恼，它精粹起来最老实，从不挑三拣四。',
+      '武器要变强，只能靠精粹。别处都不出，只有这里。'
+    ],
+    acts:[
+      {label:'去合成祭坛', ic:'fa-solid fa-flask-vial', run:function(){ goBuilding('compose'); }},
+      {label:'去兵器库强化', ic:'fa-solid fa-gem', run:function(){ goBuilding('weapons'); }}
+    ] },
+
+  { k:'np_ling', name:'黑帝的渡者 · 舲', icon:'⛵', role:'摆渡人 · 玄冥麾下', look:'trader', color:'#38bdf8',
+    at:'market', a:164, d:30,
+    lines:[
+      '上船吗？……这里没有船，只有市集。习惯就好。',
+      '我是舲，替黑帝玄冥摆渡。潮水退了，船搁浅了，人却还得买卖。',
+      '挂单不问来历，成交通知链上。你要卖英雄，还是想捡一个便宜的？',
+      '水上市集最诚实的地方是：价格你自己写，撤单也随你。'
+    ],
+    acts:[
+      {label:'去水上市集', ic:'fa-solid fa-store', run:function(){ goBuilding('market'); }},
+      {label:'去金库领奖', ic:'fa-solid fa-vault', run:function(){ goBuilding('vault'); }}
+    ] },
+
+  { k:'np_yan', name:'后土的记名者 · 砚', icon:'📖', role:'记名者 · 后土文石之守', look:'sage', color:'#c2703a',
+    at:'gallery', a:234, d:30,
+    lines:[
+      '名字。你叫什么？……不必说，石头自己会写。',
+      '黄帝后土留下的记名石。英雄、武器、怪物 —— 凡有名字的，都在上面。',
+      '动手之前先看清对方是什么属性：相克多打三成，被克反过来只余四分之三。这不是玄学，是算术。',
+      '打不过就去图鉴石碑翻一页。翻页不要钱，送命才要钱。'
+    ],
+    acts:[
+      {label:'去图鉴石碑', ic:'fa-solid fa-book-open', run:function(){ goBuilding('gallery'); }},
+      {label:'看元素克制表', ic:'fa-solid fa-scale-balanced', href:'docs.html'}
+    ] },
+
+  { k:'np_xun', name:'流亡老兵 · 巽', icon:'🗡️', role:'老兵 · 流亡纪幸存者', look:'hunter', color:'#a3a3a3',
+    at:'fight', a:58, d:30,
+    lines:[
+      '第一次来？护腕勒紧点。这里不教你怎么活，只教你别死。',
+      '流亡纪那会儿，我们拿石头砸黯烬。现在年轻人开口就是稀有度，闭口就是战力。',
+      '打一场耗一点体力。赢了拿 EH，也拿经验；输了什么都留不下。',
+      '胜率是算出来的：你的战力占双方总战力的多少，就赢多少。别信运气，信数字。'
+    ],
+    acts:[
+      {label:'去试炼竞技场', ic:'fa-solid fa-crosshairs', run:function(){ goBuilding('fight'); }},
+      {label:'打开角色', ic:'fa-solid fa-user-astronaut', run:function(){ openChar(); }}
+    ] },
+
+  { k:'np_xing', name:'观星者 · 星', icon:'🔭', role:'观星者 · 环外守望', look:'sage', color:'#c084fc',
+    at:'rank', a:122, d:30,
+    lines:[
+      '抬头。你以为那是星星？那是衡环碎掉之后，还留在原地的位置。',
+      '我在这儿看排行榜。后土会记住每一个名字 —— 陨落的，和被传颂的。',
+      '想去碑上留名，先在外环活过七个昼夜。'
+    ],
+    acts:[
+      {label:'去英雄纪念碑', ic:'fa-solid fa-trophy', run:function(){ goBuilding('rank'); }},
+      {label:'世界志 · 五纪元', ic:'fa-solid fa-scroll', href:'docs.html#world'}
+    ] },
+
+  { k:'np_echo', name:'黯烬低语 · 残响', icon:'🕳️', role:'被腐蚀者 · 勿近', look:'shade', color:'#7f1d1d',
+    at:'boss', a:80, d:52,
+    lines:[
+      '……你也听见了？它在底下翻身。',
+      '我曾经是讨伐队的一员。现在我说的话，一半是它的词。',
+      '七天一循环。押上奖池百分之五的保证金，打完还你 —— 如果你还站着。',
+      '走吧。别学我，在这门口站太久。站久了，你也会开始低语。'
+    ],
+    acts:[
+      {label:'去巨龙巢穴', ic:'fa-solid fa-dragon', run:function(){ goBuilding('boss'); }},
+      {label:'世界志 · 黯龙纪', ic:'fa-solid fa-scroll', href:'docs.html#world'}
+    ] },
+
+  { k:'np_ye', name:'巡夜人 · 徼', icon:'🏮', role:'巡行者 · 环带夜哨', look:'hunter', color:'#facc15',
+    anchorFace:true,
+    lines:[
+      '当心点，这时候路上没什么人。',
+      '我绕着圣殿走了一辈子。五帝会盟的地方，也是最容易被咬开的地方。',
+      '黑夜里最好认路的办法，是记住灯 —— 有灯的地方，就是有人还在守着。'
+    ],
+    acts:[
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }},
+      {label:'世界志 · 五纪元', ic:'fa-solid fa-scroll', href:'docs.html#world'}
+    ],
+    patrol:{cx:0, cz:0, rad:70, spd:0.05, ph:2.1} },
+
+  { k:'np_qiao', name:'行商 · 荞', icon:'🎒', role:'货郎 · 往复于环带', look:'trader', color:'#34d399', anchorFace:true,
+    lines:[
+      '看一看吧，都是路上捡的。……啊，这把？这把不卖。',
+      '我算不上英雄，我只是把东西从这边搬到那边。可这世道，搬运也是本事。',
+      '你要是打到了用不上的东西，别丢 —— 挂到水上市集去，总有人正缺这一件。'
+    ],
+    acts:[
+      {label:'去水上市集', ic:'fa-solid fa-store', run:function(){ goBuilding('market'); }},
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }}
+    ],
+    patrol:{cx:0, cz:60, rad:20, spd:0.13, ph:0} }
+];
+
+var NPC_SEEN = (function(){
+  try{ return JSON.parse(localStorage.getItem('eh_npc_seen') || '[]') || []; }catch(e){ return []; }
+})();
+
+NPCS.forEach(function(q){
+  var p = q.at ? npcAnchor(q.at, q.a, q.d) : null;
+  if(p){ q.x = p.x; q.z = p.z; }
+  else if(q.patrol){ q.x = q.patrol.cx + Math.cos(q.patrol.ph)*q.patrol.rad; q.z = q.patrol.cz + Math.sin(q.patrol.ph)*q.patrol.rad; }
+  q.y = heightAt(q.x, q.z);
+  q.yaw = Math.atan2(q.x, q.z);
+  q.pa = q.patrol ? q.patrol.ph : 0;
+  q.topY = 2.9;
+  q.talked = NPC_SEEN.indexOf(q.k) >= 0;
+});
+
+function npcByKey(k){ for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k) return NPCS[i]; return null; }
+
+function buildNpc(q){
+  var col = q.color ? new THREE.Color(q.color) : new THREE.Color(0xfbbf24);
+  var look = q.look || 'sage';
+  var g = new THREE.Group();
+  g.position.set(q.x, q.y, q.z);
+  g.rotation.y = q.yaw;
+
+  var dark = col.clone().multiplyScalar(0.42);
+  var robeMat = new THREE.MeshStandardMaterial({color:dark, roughness:.88, flatShading:true});
+  var trimMat = new THREE.MeshStandardMaterial({color:col, emissive:col, emissiveIntensity:.32, roughness:.45, metalness:.3, flatShading:true});
+  var skinMat = new THREE.MeshStandardMaterial({color: look === 'shade' ? 0x9aa6bb : 0xe8c39a, roughness:.88, flatShading:true});
+
+  var bulk = look === 'smith' ? 1.16 : (look === 'hunter' ? 0.92 : 1.0);
+  var tall = look === 'shade' ? 1.14 : 1.0;
+
+  var robe = new THREE.Mesh(new THREE.ConeGeometry(0.62*bulk, 1.5*tall, 7), robeMat);
+  robe.position.y = 0.75*tall; g.add(robe);
+  var belt = new THREE.Mesh(new THREE.CylinderGeometry(0.36*bulk, 0.38*bulk, 0.16, 7), trimMat);
+  belt.position.y = 1.06*tall; g.add(belt);
+  var shawl = new THREE.Mesh(new THREE.CylinderGeometry(0.34*bulk, 0.5*bulk, 0.34, 7), trimMat);
+  shawl.position.y = 1.4*tall; g.add(shawl);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), skinMat);
+  head.position.y = 1.74*tall; g.add(head);
+  var hood = new THREE.Mesh(new THREE.SphereGeometry(0.245, 12, 8, 0, Math.PI*2, 0, Math.PI*0.62), robeMat);
+  hood.position.y = 1.75*tall; g.add(hood);
+  var armL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), robeMat);
+  armL.geometry.translate(0, -0.3, 0); armL.position.set(-0.42*bulk, 1.42*tall, 0); g.add(armL);
+  var armR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), robeMat);
+  armR.geometry.translate(0, -0.3, 0); armR.position.set(0.42*bulk, 1.42*tall, 0); g.add(armR);
+
+  // 随身物件：铁匠锤 / 猎手矛 / 长杖
+  if(look === 'smith'){
+    var hh = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.9, 6), robeMat);
+    hh.position.set(0.56*bulk, 0.95, 0.08); g.add(hh);
+    var hm = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.2, 0.2), trimMat);
+    hm.position.set(0.56*bulk, 1.45, 0.08); g.add(hm);
+  } else if(look === 'hunter'){
+    var spear = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 2.2, 6), robeMat);
+    spear.position.set(0.54*bulk, 1.2, 0.08); g.add(spear);
+    var tip = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.34, 5), trimMat);
+    tip.position.set(0.54*bulk, 2.42, 0.08); g.add(tip);
+  } else {
+    var staff = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.065, 1.95, 6), robeMat);
+    staff.position.set(0.58*bulk, 1.05, 0.08); g.add(staff);
+    var gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.15, 0), trimMat);
+    gem.position.set(0.58*bulk, 2.06, 0.08); g.add(gem);
+    q.gem = gem;
+  }
+
+  // 头顶待谈标记
+  var mark = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), new THREE.MeshBasicMaterial({color:0xfbbf24}));
+  mark.position.y = 2.72; g.add(mark);
+  var mglow = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xfbbf24, transparent:true, opacity:.6, blending:THREE.AdditiveBlending, depthWrite:false}));
+  mglow.scale.setScalar(1.7); mglow.position.y = 2.72; g.add(mglow);
+  q.mark = mark; q.mglow = mglow;
+  if(q.talked){ mark.visible = false; mglow.material.opacity = 0.18; }
+
+  // 脚下光环 + 假阴影
+  var ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.62, 0.86, 24),
+    new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.4, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
+  );
+  ring.rotation.x = -Math.PI/2; ring.position.y = 0.05; g.add(ring);
+  q.ring = ring;
+  var sh = new THREE.Mesh(new THREE.CircleGeometry(0.64, 18), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.32, depthWrite:false}));
+  sh.rotation.x = -Math.PI/2; sh.position.y = 0.04; g.add(sh);
+
+  // 拾取体（近距离点按可对话）
+  var hit = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.05, 1.05, 2.4, 8),
+    new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false})
+  );
+  hit.position.y = 1.2;
+  hit.userData.k = q.k; hit.userData.npc = true;
+  g.add(hit);
+  pickables.push(hit);
+
+  q.parts = {head:head, armL:armL, armR:armR, hood:hood};
+  q.grp = g;
+  scene.add(g);
+}
+
+function updateNpcs(dt, t){
+  for(var i=0;i<NPCS.length;i++){
+    var q = NPCS[i];
+    if(!q.grp) continue;
+
+    if(q.patrol){
+      q.pa += dt * q.patrol.spd;
+      q.x = q.patrol.cx + Math.cos(q.pa) * q.patrol.rad;
+      q.z = q.patrol.cz + Math.sin(q.pa) * q.patrol.rad;
+      q.y = heightAt(q.x, q.z);
+    }
+
+    // 朝向：玩家靠近时转身面向玩家，否则按巡逻切线 / 初始朝向
+    var dx = hero.x - q.x, dz = hero.z - q.z;
+    var dist = Math.hypot(dx, dz);
+    var want = q.patrol ? Math.atan2(-Math.sin(q.pa), Math.cos(q.pa)) : q.yaw;
+    if(dist < 15) want = Math.atan2(dx, dz);
+    var diff = Math.atan2(Math.sin(want - q.yaw), Math.cos(want - q.yaw));
+    q.yaw += diff * Math.min(1, dt * 3.4);
+
+    q.grp.position.set(q.x, q.y, q.z);
+    q.grp.rotation.y = q.yaw;
+
+    // 呼吸 + 摆臂
+    var br = Math.sin(t*1.5 + i*1.3);
+    if(q.parts){
+      q.parts.head.position.y = 1.74 * (q.look === 'shade' ? 1.14 : 1) + br*0.025;
+      q.parts.armL.rotation.x = br*0.09;
+      q.parts.armR.rotation.x = -br*0.09;
+    }
+    if(q.gem) q.gem.rotation.y += dt*1.2;
+    if(q.mark && q.mark.visible){
+      q.mark.rotation.y += dt*1.6;
+      q.mark.rotation.x += dt*0.9;
+      q.mark.position.y = 2.72 + Math.sin(t*2 + i)*0.12;
+      if(q.mglow) q.mglow.position.y = q.mark.position.y;
+      if(q.mglow) q.mglow.material.opacity = q.talked ? 0.18 : (0.45 + Math.sin(t*2.6 + i)*0.16);
+    }
+    if(q.ring) q.ring.material.opacity = (q.talked ? 0.16 : 0.3) + Math.sin(t*1.7 + i)*0.08;
+  }
+}
 /* 漂浮光点 */
 var motes;
 function buildMotes(){
-  var N = 260, pos = new Float32Array(N*3), spd = new Float32Array(N);
+  var N = IS_TOUCH ? 130 : 260, pos = new Float32Array(N*3), spd = new Float32Array(N);
   for(var i=0;i<N;i++){
     var a = Math.random()*Math.PI*2, r = Math.sqrt(Math.random())*HALF*0.95;
     pos[i*3] = Math.cos(a)*r;
@@ -1021,6 +1516,14 @@ function buildLabels(){
     d.onclick = function(){ selectNode(n.k); };
     box.appendChild(d);
     labels[n.k] = d;
+  });
+  NPCS.forEach(function(q){
+    var d = document.createElement('div');
+    d.className = 'mlabel npc';
+    d.innerHTML = '<span class="mi">' + q.icon + '</span><span>' + q.name + '</span>';
+    d.onclick = function(){ openDialog(q.k); };
+    box.appendChild(d);
+    labels[q.k] = d;
   });
 }
 
@@ -1083,14 +1586,16 @@ function bindControls(){
     var k = e.key.toLowerCase();
     keys[k] = true;
     if(k === 'tab'){ e.preventDefault(); toggleView(); }
-    if(k === 'e' && nearKey) enterNodeByKey(nearKey);
-    if(k === 'escape') closeInfo();
+    if(k === 'e' && !uiBlocked()) interact();
+    if(k === 'escape'){ if(DLG.npc) closeDialog(); else closeInfo(); }
     if(k === ' ') e.preventDefault();
   });
   window.addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = false; });
-  window.addEventListener('blur', function(){ keys = {}; });
+  window.addEventListener('blur', function(){ keys = {}; stickVec.x = 0; stickVec.y = 0; });
 
   window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', function(){ setTimeout(onResize, 260); });
+  if(window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
 
   document.getElementById('tView').onclick = toggleView;
   document.getElementById('tRotate').onclick = function(){
@@ -1101,10 +1606,43 @@ function bindControls(){
     cam.tYaw = 0; cam.tPitch = 0.34; cam.tDist = 15;
     closeInfo(); lastInteract = performance.now();
   };
-  document.getElementById('nearBar').onclick = function(){ if(nearKey) enterNodeByKey(nearKey); };
+  document.getElementById('nearBar').onclick = function(){ interact(); };
+
+  // 触控：点按跳跃
+  var jb = document.getElementById('jumpBtn');
+  if(jb){
+    jb.addEventListener('pointerdown', function(e){ e.preventDefault(); doJump(); });
+  }
+  // 抑制触屏双击缩放 / 长按菜单
+  document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
+  cv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
   bindStick();
   bindMini();
+}
+
+/* 跳跃（触控按钮与空格共用） */
+function doJump(){
+  if(uiBlocked()) return;
+  if(!hero.air){ hero.vy = JUMP; hero.air = true; }
+}
+
+/* 当前是否有浮层 / 对话占用输入 */
+function uiBlocked(){
+  var d = document.getElementById('dlg');
+  if(d && d.classList.contains('show')) return true;
+  var ids = ['bagOverlay', 'charOverlay', 'playOverlay'];
+  for(var i=0;i<ids.length;i++){
+    var o = document.getElementById(ids[i]);
+    if(o && o.classList.contains('show')) return true;
+  }
+  return false;
+}
+
+/* 统一交互入口：就近的 NPC 优先，其次建筑 */
+function interact(){
+  if(nearNpcKey) openDialog(nearNpcKey);
+  else if(nearKey) enterNodeByKey(nearKey);
 }
 
 function toggleView(){
@@ -1169,16 +1707,50 @@ function onHover(e){
 function onClick(e){
   raycaster.setFromCamera(ndc(e), camera);
   var hits = raycaster.intersectObjects(pickables, false);
-  if(hits.length){ selectNode(hits[0].object.userData.k); return; }
+  if(hits.length){
+    var ud = hits[0].object.userData || {};
+    if(ud.npc){
+      var q = npcByKey(ud.k);
+      if(q && Math.hypot(hero.x - q.x, hero.z - q.z) < 12) openDialog(ud.k);
+      else goToNpc(ud.k);
+    } else selectNode(ud.k);
+    return;
+  }
   if(terrainMesh){
     var th = raycaster.intersectObject(terrainMesh, false);
     if(th.length){
       var p = th[0].point;
       hero.tx = clamp(p.x, -LIMIT, LIMIT);
       hero.tz = clamp(p.z, -LIMIT, LIMIT);
+      hero.approach = null;
       closeInfo();
     }
   }
+}
+
+/* 自动寻路：走到 NPC 身旁后自动开启对话 */
+function goToNpc(k){
+  var q = npcByKey(k); if(!q) return;
+  var ang = Math.atan2(hero.z - q.z, hero.x - q.x);
+  hero.tx = clamp(q.x + Math.cos(ang)*2.8, -LIMIT, LIMIT);
+  hero.tz = clamp(q.z + Math.sin(ang)*2.8, -LIMIT, LIMIT);
+  hero.approach = 'npc:' + k;
+  npcToast('正在走向 ' + q.name + '…');
+}
+/* 自动寻路：走到建筑门口后自动打开玩法 */
+function routeTo(k){
+  var n = nodeByKey(k); if(!n) return;
+  var ang = Math.atan2(hero.z - n.z, hero.x - n.x);
+  var dd = n.R + 6;
+  hero.tx = clamp(n.x + Math.cos(ang)*dd, -LIMIT, LIMIT);
+  hero.tz = clamp(n.z + Math.sin(ang)*dd, -LIMIT, LIMIT);
+  hero.approach = 'nd:' + k;
+  npcToast('正在前往 ' + n.name + '…');
+}
+function goBuilding(k){ routeTo(k); }
+function runApproach(ap){
+  if(ap.indexOf('npc:') === 0) openDialog(ap.slice(4));
+  else if(ap.indexOf('nd:') === 0) enterNodeByKey(ap.slice(3));
 }
 
 function nodeByKey(k){ for(var i=0;i<NODES.length;i++) if(NODES[i].k === k) return NODES[i]; return null; }
@@ -1209,6 +1781,117 @@ function enterNodeByKey(k){
   else location.href = 'game.html#' + n.tab;
 }
 
+/* ==================== NPC 对话 ==================== */
+var DLG = {npc:null, i:0};
+var _typeTimer = null;
+
+function hexA(h, a){
+  if(!h || h.charAt(0) !== '#') return 'rgba(251,191,36,' + a + ')';
+  var s = h.slice(1);
+  if(s.length === 3) s = s.charAt(0)+s.charAt(0)+s.charAt(1)+s.charAt(1)+s.charAt(2)+s.charAt(2);
+  var v = parseInt(s, 16);
+  return 'rgba(' + ((v>>16)&255) + ',' + ((v>>8)&255) + ',' + (v&255) + ',' + a + ')';
+}
+function npcToast(msg){
+  try{ if(typeof toast === 'function') toast(msg, 'info'); }catch(e){}
+}
+
+function openDialog(k){
+  var q = npcByKey(k); if(!q) return;
+  var d = document.getElementById('dlg'); if(!d) return;
+  DLG.npc = q; DLG.i = 0;
+  var info = document.getElementById('info'); if(info) info.classList.remove('show');
+  selKey = null;
+  d.classList.add('show');
+  if(!q.talked){
+    q.talked = true;
+    if(q.mark) q.mark.visible = false;
+    try{
+      var seen = JSON.parse(localStorage.getItem('eh_npc_seen') || '[]') || [];
+      if(seen.indexOf(k) < 0){ seen.push(k); localStorage.setItem('eh_npc_seen', JSON.stringify(seen)); }
+    }catch(e){}
+  }
+  renderDialog();
+}
+
+function closeDialog(){
+  var d = document.getElementById('dlg'); if(d) d.classList.remove('show');
+  DLG.npc = null;
+  if(_typeTimer){ clearInterval(_typeTimer); _typeTimer = null; }
+}
+
+function renderDialog(){
+  var q = DLG.npc; if(!q) return;
+  var lines = (q.lines && q.lines.length) ? q.lines : [''];
+  var last = DLG.i >= lines.length - 1;
+  var av = document.getElementById('dlgAv');
+  if(av){
+    av.textContent = q.icon;
+    av.style.background = 'radial-gradient(circle at 50% 30%,' + hexA(q.color, .2) + ',#0d1526 82%)';
+    av.style.borderColor = hexA(q.color, .5);
+  }
+  var nm = document.getElementById('dlgName'); if(nm) nm.textContent = q.name;
+  var rl = document.getElementById('dlgRole'); if(rl) rl.textContent = q.role || '衡洲';
+  var pg = document.getElementById('dlgProg'); if(pg) pg.textContent = '第 ' + (DLG.i+1) + ' / ' + lines.length + ' 句';
+  typeInto(document.getElementById('dlgTxt'), lines[DLG.i]);
+  setDlgFoot(last);
+}
+
+/* 一行一句：打字中点击先补全，未到末行点击则翻页，末行显示动作按钮 */
+function dlgNext(){
+  if(!DLG.npc) return;
+  var lines = DLG.npc.lines || [''];
+  if(_typeTimer){
+    clearInterval(_typeTimer); _typeTimer = null;
+    var t = document.getElementById('dlgTxt');
+    if(t) t.textContent = lines[DLG.i];
+    setDlgFoot(DLG.i >= lines.length - 1);
+    return;
+  }
+  if(DLG.i < lines.length - 1){ DLG.i += 1; renderDialog(); }
+  else closeDialog();
+}
+
+function setDlgFoot(last){
+  var nx = document.getElementById('dlgNext');
+  if(nx) nx.innerHTML = last ? '结束对话 <i class="fa-solid fa-xmark"></i>' : '继续 <i class="fa-solid fa-chevron-right"></i>';
+  var box = document.getElementById('dlgActs');
+  if(!box || !DLG.npc) return;
+  box.innerHTML = '';
+  var acts = DLG.npc.acts;
+  if(!last || !acts || !acts.length){ box.classList.remove('show'); return; }
+  box.classList.add('show');
+  acts.forEach(function(a){
+    var node;
+    if(a.href){
+      node = document.createElement('a');
+      node.className = 'btn-o';
+      node.href = a.href; node.target = '_blank'; node.rel = 'noopener';
+    } else {
+      node = document.createElement('button');
+      node.type = 'button';
+      node.className = 'btn-o' + (a.gold ? ' gold' : '');
+      node.onclick = function(){ closeDialog(); try{ a.run(); }catch(e){ console.warn(e); } };
+    }
+    node.innerHTML = '<i class="' + (a.ic || 'fa-solid fa-arrow-right') + '"></i> ' + a.label;
+    box.appendChild(node);
+  });
+}
+
+function typeInto(node, str){
+  if(!node) return;
+  if(_typeTimer){ clearInterval(_typeTimer); _typeTimer = null; }
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce || !str){ node.textContent = str || ''; return; }
+  node.textContent = '';
+  var i = 0, total = str.length;
+  _typeTimer = setInterval(function(){
+    i += 1;
+    node.textContent = str.slice(0, i);
+    if(i >= total){ clearInterval(_typeTimer); _typeTimer = null; }
+  }, 22);
+}
+
 function onResize(){
   var stage = document.getElementById('stage');
   syncStageTop();
@@ -1235,26 +1918,34 @@ function tryMove(nx, nz){
 
 function updateHero(dt){
   var ix = 0, iz = 0;
-  if(keys['w'] || keys['arrowup'])    iz += 1;
-  if(keys['s'] || keys['arrowdown'])  iz -= 1;
-  if(keys['a'] || keys['arrowleft'])  ix -= 1;
-  if(keys['d'] || keys['arrowright']) ix += 1;
-  if(stickVec.x || stickVec.y){ ix += stickVec.x; iz -= stickVec.y; }
+  var locked = uiBlocked();
+  if(!locked){
+    if(keys['w'] || keys['arrowup'])    iz += 1;
+    if(keys['s'] || keys['arrowdown'])  iz -= 1;
+    if(keys['a'] || keys['arrowleft'])  ix -= 1;
+    if(keys['d'] || keys['arrowright']) ix += 1;
+    if(stickVec.x || stickVec.y){ ix += stickVec.x; iz -= stickVec.y; }
+  }
 
   var mx = 0, mz = 0;
   if(ix || iz){
-    hero.tx = null;
+    hero.tx = null; hero.approach = null;
     var len = Math.hypot(ix, iz) || 1;
     ix /= len; iz /= len;
-    var f = {x:-Math.sin(cam.yaw), z:-Math.cos(cam.yaw)};
-    var r = {x:Math.cos(cam.yaw), z:-Math.sin(cam.yaw)};
+    // 俯瞰模式下以「相机 → 角色」方向为前方
+    var byaw = (mode === 'follow') ? cam.yaw : Math.atan2(camera.position.x - hero.x, camera.position.z - hero.z);
+    var f = {x:-Math.sin(byaw), z:-Math.cos(byaw)};
+    var r = {x:Math.cos(byaw), z:-Math.sin(byaw)};
     mx = f.x * iz + r.x * ix;
     mz = f.z * iz + r.z * ix;
   } else if(hero.tx !== null){
     var dx = hero.tx - hero.x, dz = hero.tz - hero.z;
     var d = Math.hypot(dx, dz);
-    if(d < 2.5){ hero.tx = null; }
-    else { mx = dx/d; mz = dz/d; }
+    if(d < 2.6){
+      hero.tx = null;
+      var ap = hero.approach; hero.approach = null;
+      if(ap) runApproach(ap);
+    } else { mx = dx/d; mz = dz/d; }
   }
 
   var sp = 0;
@@ -1270,7 +1961,7 @@ function updateHero(dt){
 
   // 跳跃与重力
   var groundY = heightAt(hero.x, hero.z);
-  if(keys[' '] && !hero.air){ hero.vy = JUMP; hero.air = true; }
+  if(keys[' '] && !hero.air && !locked){ hero.vy = JUMP; hero.air = true; }
   if(hero.air){
     hero.vy -= GRAV * dt;
     hero.y += hero.vy * dt;
@@ -1295,7 +1986,7 @@ function updateHero(dt){
   heroObj.rotation.y = hero.yaw;
 }
 
-/* 靠近检测 */
+/* 靠近检测：建筑与 NPC 取更近的一个 */
 function updateNear(){
   var best = null, bd = 1e9;
   for(var i=0;i<NODES.length;i++){
@@ -1303,17 +1994,30 @@ function updateNear(){
     var d = Math.hypot(hero.x - n.x, hero.z - n.z) - n.R;
     if(d < 12 && d < bd){ bd = d; best = n; }
   }
+  var bestNpc = null, nd = 1e9;
+  for(var j=0;j<NPCS.length;j++){
+    var q = NPCS[j];
+    var qd = Math.hypot(hero.x - q.x, hero.z - q.z) - 1.0;
+    if(qd < 10 && qd < nd){ nd = qd; bestNpc = q; }
+  }
+
+  var useNpc = !!bestNpc && (!best || nd <= bd);
+  var tgt = useNpc ? bestNpc : best;
+  nearKey    = (!useNpc && best) ? best.k : null;
+  nearNpcKey = (useNpc && bestNpc) ? bestNpc.k : null;
+
   var bar = document.getElementById('nearBar');
-  if(best){
-    nearKey = best.k;
-    if(bar.dataset.k !== best.k){
-      bar.dataset.k = best.k;
-      document.getElementById('nbIcon').textContent = best.icon;
-      document.getElementById('nbName').textContent = best.name;
+  if(tgt){
+    var key = (useNpc ? 'npc:' : 'nd:') + tgt.k;
+    if(bar.dataset.k !== key){
+      bar.dataset.k = key;
+      document.getElementById('nbIcon').textContent = tgt.icon;
+      document.getElementById('nbName').textContent = tgt.name;
+      var sb = document.getElementById('nbSub');
+      if(sb) sb.textContent = useNpc ? '按 E 或点击对话' : '按 E 或点击查看';
     }
     bar.classList.add('show');
   } else {
-    nearKey = null;
     bar.classList.remove('show');
     bar.dataset.k = '';
   }
@@ -1360,6 +2064,19 @@ function drawMini(){
     }
   });
 
+  // NPC
+  for(var qi=0;qi<NPCS.length;qi++){
+    var qn = NPCS[qi];
+    c.beginPath();
+    c.fillStyle = '#cfe6ff';
+    c.arc(toX(qn.x), toY(qn.z), 2.1, 0, Math.PI*2);
+    c.fill();
+    if(qn.k === nearNpcKey){
+      c.strokeStyle = '#38bdf8'; c.lineWidth = 1.4;
+      c.beginPath(); c.arc(toX(qn.x), toY(qn.z), 4.6, 0, Math.PI*2); c.stroke();
+    }
+  }
+
   // 角色（朝向三角）
   var hx = toX(hero.x), hy = toY(hero.z);
   c.save();
@@ -1388,6 +2105,7 @@ function animate(){
 
   updateHero(dt);
   updateNear();
+  updateNpcs(dt, t);
 
   if(mode === 'follow'){
     cam.yaw = lerp(cam.yaw, cam.tYaw, 0.18);
@@ -1459,6 +2177,20 @@ function updateLabels(){
     var sc = clamp(1.15 - d/420, 0.68, 1.05);
     el.style.transform = 'translate(-50%,-100%) translate(' + sx.toFixed(1) + 'px,' + sy.toFixed(1) + 'px) scale(' + sc.toFixed(2) + ')';
     el.classList.toggle('on', n.k === hoverKey || n.k === selKey || n.k === nearKey);
+  }
+
+  for(var j=0;j<NPCS.length;j++){
+    var q = NPCS[j], ne = labels[q.k]; if(!ne) continue;
+    var qd = Math.hypot(hero.x - q.x, hero.z - q.z);
+    if(qd > 170){ ne.style.display = 'none'; continue; }
+    _v.set(q.x, q.y + q.topY, q.z).project(camera);
+    if(_v.z > 1){ ne.style.display = 'none'; continue; }
+    ne.style.display = 'flex';
+    var nx = (_v.x*0.5+0.5)*W, ny = (-_v.y*0.5+0.5)*H;
+    var ns = clamp(1.1 - qd/260, 0.62, 1.0);
+    ne.style.transform = 'translate(-50%,-100%) translate(' + nx.toFixed(1) + 'px,' + ny.toFixed(1) + 'px) scale(' + ns.toFixed(2) + ')';
+    ne.classList.toggle('on', q.k === nearNpcKey);
+    ne.classList.toggle('talked', !!q.talked);
   }
 }
 
@@ -1570,11 +2302,13 @@ function openBag(tab){
   el('bagOverlay').classList.add('show');
   refreshGameData(false);
 }
-function closeBag(){ el('bagOverlay').classList.remove('show'); }
-function setBagTab(t){ BAG.tab = t; BAG.sel = null; renderBag(); }
+function closeBag(){ el('bagOverlay').classList.remove('show'); hideBagDetail(); }
+function setBagTab(t){ BAG.tab = t; BAG.sel = null; hideBagDetail(); renderBag(); }
+function hideBagDetail(){ var d = el('bagDetail'); if(d) d.classList.remove('show'); }
 function selectBagItem(type, id){
   BAG.sel = {type:type, id:Number(id)};
   renderBag();
+  var d = el('bagDetail'); if(d) d.classList.add('show');   // 移动端：弹出详情抽屉
 }
 
 function renderBag(){
@@ -1665,6 +2399,7 @@ function renderBag(){
 
 function renderBagDetail(){
   var det = el('bagDetail'); if(!det) return;
+  var X = '<div class="dt-x" onclick="hideBagDetail()"><i class="fa-solid fa-chevron-down"></i></div>';
   var s = BAG.sel;
   if(!s){ det.innerHTML = '<div class="empty">选择一件物品查看详情</div>'; return; }
 
@@ -1678,7 +2413,7 @@ function renderBagDetail(){
     var stMax = Math.max(1, h.staminaMax || 5);
     var stPct = Math.min(100, Math.round(h.stamina / stMax * 100));
     var isCur = currentHero() && currentHero().id === h.id;
-    det.innerHTML =
+    det.innerHTML = X +
       '<div class="dt-art" style="background:radial-gradient(circle at 50% 30%,' + e.soft + ',#0d1526 80%)"><img src="' + heroImg(h.element) + '" alt="英雄"></div>'
       + '<div class="dt-h">英雄 #' + h.id + '</div>'
       + '<span class="dt-tag" style="color:' + e.color + ';border-color:' + e.border + ';background:' + e.soft + '">' + e.icon + ' ' + e.name + '系</span>'
@@ -1702,7 +2437,7 @@ function renderBagDetail(){
     if(!w){ det.innerHTML = '<div class="empty">未找到该武器</div>'; return; }
     var e2 = ELEMENTS[w.element] || ELEMENTS[0];
     var isEq = currentWeapon() && currentWeapon().id === w.id;
-    det.innerHTML =
+    det.innerHTML = X +
       '<div class="dt-art" style="background:radial-gradient(circle at 50% 30%,' + e2.soft + ',#0d1526 80%)">⚔️</div>'
       + '<div class="dt-h">武器 #' + w.id + '</div>'
       + '<span class="dt-tag" style="color:' + e2.color + ';border-color:' + e2.border + ';background:' + e2.soft + '">' + e2.icon + ' ' + e2.name + '系 · ' + w.stars + '星</span>'
@@ -1721,7 +2456,7 @@ function renderBagDetail(){
 
   if(s.type === 'shard'){
     var q1 = (S.shardsBal || {})[s.id] || 0;
-    det.innerHTML =
+    det.innerHTML = X +
       '<div class="dt-art" style="background:radial-gradient(circle at 50% 30%,rgba(167,139,250,.18),#0d1526 80%)">💎</div>'
       + '<div class="dt-h">' + (SHARD_TXT[s.id] || ('碎片 ' + s.id)) + '</div>'
       + '<span class="dt-tag" style="color:#a78bfa;border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.12)">锻造材料</span>'
@@ -1737,7 +2472,7 @@ function renderBagDetail(){
 
   if(s.type === 'essence'){
     var q2 = (S.essenceBal || {})[s.id] || 0;
-    det.innerHTML =
+    det.innerHTML = X +
       '<div class="dt-art" style="background:radial-gradient(circle at 50% 30%,rgba(52,211,153,.18),#0d1526 80%)">🧪</div>'
       + '<div class="dt-h">' + (ESS_TXT[s.id] || ('精粹 ' + s.id)) + '</div>'
       + '<span class="dt-tag" style="color:#34d399;border-color:rgba(52,211,153,.5);background:rgba(52,211,153,.12)">强化材料</span>'
