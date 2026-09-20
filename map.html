@@ -2086,91 +2086,27 @@ function limb(matU, matL, lenU, lenL, rU, rL, y0){
 function buildHero(elKey){
   var look = HERO_LOOKS[(elKey == null ? 0 : Number(elKey) % 5)] || HERO_LOOKS[0];
   var g = new THREE.Group();
-  var skin  = matC(look.skin, .8, .02, 0x2a1408, .15);
-  var armor = matOf('metal', 1, 1, {color:look.armor, roughness:look.armorR, metalness:look.armorM});
-  var cloth = clothMat(look.cloth, 1, 2);
-  var gold  = matC(look.accent, .3, .85, 0x6a4a0c, .55);
-  var dark  = matC(look.dark, .82, .12, 0x080d18, .25);
-  var bootM = matC(0x2b1d15, .85, .08, 0x0d0805, .2);
-
-  var body = new THREE.Group(); g.add(body);
-
-  /* 髋 + 躯干 */
-  var hips = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.31, 0.38, 10), dark);
-  hips.position.y = 0.86; body.add(hips); shade(hips);
-  var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.37, 0.44, 0.88, 12), armor);
-  torso.position.y = 1.45; body.add(torso); shade(torso);
-  var tabard = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.86, 0.06), cloth);
-  tabard.position.set(0, 1.42, 0.4); body.add(tabard);
-  var chest = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.44, 0.36), gold);
-  chest.position.set(0, 1.68, 0.1); body.add(chest);
-  var gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.13, 0), matC(look.accent2, .25, .5, look.accent, 1.6));
-  gem.position.set(0, 1.68, 0.3); body.add(gem);
-  var belt = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.15, 12), matC(0x3a2a18, .7, .25, 0x120a04, .25));
-  belt.position.y = 1.05; body.add(belt);
-  var buckle = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.18, 0.08), gold);
-  buckle.position.set(0, 1.05, 0.42); body.add(buckle);
-
-  /* 肩甲 */
-  var shL = new THREE.Mesh(new THREE.SphereGeometry(0.25, 12, 7, 0, 6.2832, 0, 1.5), gold);
-  shL.position.set(-0.47, 1.86, 0); body.add(shL); shade(shL);
-  var shR = shL.clone(); shR.position.x = 0.47; body.add(shR);
-
-  /* 头（兜帽 / 发冠） */
-  var neck = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.16, 0.18, 8), skin);
-  neck.position.y = 1.98; body.add(neck);
-  var head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 12), skin);
-  head.position.y = 2.2; body.add(head); shade(head);
-  var crest = null;
-  if(look.hood){
-    var hood = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 10, 0, 6.2832, 0, 1.65), cloth);
-    hood.position.y = 2.24; body.add(hood); shade(hood);
-    var hoodEdge = new THREE.Mesh(new THREE.TorusGeometry(0.285, 0.022, 6, 18), gold);
-    hoodEdge.rotation.x = Math.PI/2 - 0.42; hoodEdge.position.y = 2.16; body.add(hoodEdge);
-  } else {
-    var hair = new THREE.Mesh(new THREE.SphereGeometry(0.272, 16, 10, 0, 6.2832, 0, 1.95), matC(look.hair, .85, .05, 0x0d0812, .2));
-    hair.position.y = 2.21; body.add(hair); shade(hair);
-    if(look.crest){
-      var band = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.035, 6, 16), gold);
-      band.rotation.x = Math.PI/2 - 0.12; band.position.y = 2.33; body.add(band);
-      crest = new THREE.Mesh(new THREE.ConeGeometry(0.085, 0.46, 4), gold);
-      crest.position.set(0, 2.62, -0.02); crest.rotation.x = -0.18; body.add(crest);
-    }
-  }
-  var eyeM = matC(0xa8ecff, .3, 0, 0x6fd8ff, 1.5);
-  var e1 = new THREE.Mesh(new THREE.SphereGeometry(0.043, 8, 6), eyeM); e1.position.set(-0.088, 2.21, 0.225); body.add(e1);
-  var e2 = e1.clone(); e2.position.x = 0.088; body.add(e2);
-
-  /* 披风（分段，可飘动） */
-  var capeGeo = new THREE.BoxGeometry(0.86, 1.3, 0.08, 5, 6, 1);
-  var cape = new THREE.Mesh(capeGeo, new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:look.cape, side:THREE.DoubleSide, roughness:.95}));
-  cape.position.set(0, 1.42, -0.34); body.add(cape);
-  var capeTrim = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.06), gold);
-  capeTrim.position.set(0, 2.0, -0.32); body.add(capeTrim);
-
-  /* 四肢 */
-  var armL = limb(armor, skin, 0.42, 0.4, 0.11, 0.095, 0);
-  armL.grp.position.set(-0.47, 1.82, 0); body.add(armL.grp);
-  var armR = limb(armor, skin, 0.42, 0.4, 0.11, 0.095, 0);
-  armR.grp.position.set(0.47, 1.82, 0); body.add(armR.grp);
-  var handL = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), skin);
-  handL.position.y = -0.42; armL.lower.add(handL);
-  var handR = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), skin);
-  handR.position.y = -0.42; armR.lower.add(handR);
-
-  var legL = limb(dark, dark, 0.44, 0.42, 0.15, 0.13, 0);
-  legL.grp.position.set(-0.19, 0.86, 0); body.add(legL.grp);
-  var legR = limb(dark, dark, 0.44, 0.42, 0.15, 0.13, 0);
-  legR.grp.position.set(0.19, 0.86, 0); body.add(legR.grp);
-  var bootL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.2, 0.36), bootM);
-  bootL.position.set(0, -0.48, 0.06); legL.lower.add(bootL); shade(bootL);
-  var bootR = bootL.clone(); legR.lower.add(bootR);
-
-  /* 背武器（按元素） */
-  var weapon = makeProp(look.prop, look);
-  weapon.position.set(0, 1.5, -0.3);
-  weapon.rotation.set(0.35, 0, 0.5);
-  body.add(weapon);
+  /* 英雄立绘精灵：透明底全身像，始终面向相机，与游戏英雄形象一致 */
+  var idx = elKey == null ? 0 : Number(elKey) % 5;
+  /* file:// 下 three ImageLoader 会被 CORS 拦截，改用原生 Image 加载后包装为 Texture */
+  var spr = new THREE.Sprite(new THREE.SpriteMaterial({transparent:true, depthWrite:false, alphaTest:0.08}));
+  (function(){
+    var im = new Image();
+    im.onload = function(){
+      if(!heroSprite || heroSprite !== spr) return;
+      var t = new THREE.Texture(im);
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.needsUpdate = true;
+      spr.material.map = t;
+      spr.material.needsUpdate = true;
+    };
+    im.src = 'img/hero_cut/hero_' + idx + '.png';
+  })();
+  spr.center.set(0.5, 0.12);
+  spr.scale.set(1.7, 2.3, 1);
+  spr.position.y = 0.276;
+  g.add(spr);
+  heroSprite = spr;
 
   /* 脚下光环 + 假阴影 */
   var ring = new THREE.Mesh(
@@ -2181,16 +2117,19 @@ function buildHero(elKey){
   var sh = new THREE.Mesh(new THREE.CircleGeometry(0.72, 22), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.35, depthWrite:false}));
   sh.rotation.x = -Math.PI/2; sh.position.y = 0.05; g.add(sh);
 
+  /* 动画兼容占位：3D 肢体改为立绘摆动，保留键名避免动画报错 */
+  function dm(){ return new THREE.Object3D(); }
   heroParts = {
-    body:body, torso:torso, head:head, cape:cape,
-    armL:armL.grp, armR:armR.grp, foreL:armL.lower, foreR:armR.lower,
-    legL:legL.grp, legR:legR.grp, shinL:legL.lower, shinR:legR.lower,
-    ring:ring, sword:weapon, hips:hips, crest:crest
+    body:g, torso:dm(), head:dm(), cape:dm(),
+    armL:dm(), armR:dm(), foreL:dm(), foreR:dm(),
+    legL:dm(), legR:dm(), shinL:dm(), shinR:dm(),
+    ring:ring, sword:dm(), hips:dm(), crest:dm()
   };
   heroObj = g;
   scene.add(g);
 }
 
+var heroSprite = null;
 var HERO_LOOKS = {
   0:{armor:0x7c8aa4, armorR:.4, armorM:.82, cloth:0x8f1d2d, cape:0x8f1d2d, accent:0xfbbf24, accent2:0xffd777, dark:0x1d2942, skin:0xf0c49c, hair:0x2a1f36, glow:0xfbbf24, prop:'sword', crest:true, hood:false},
   1:{armor:0x3d6b3d, armorR:.7, armorM:.15, cloth:0x166534, cape:0x14532d, accent:0x4ade80, accent2:0x86efac, dark:0x0f2a17, skin:0xf2c89a, hair:0x2b3a1a, glow:0x22c55e, prop:'bow', crest:false, hood:true},
@@ -2246,7 +2185,7 @@ function applyHeroLook(){
   heroLookEl = k;
   if(heroObj){
     scene.remove(heroObj);
-    try{ heroObj.traverse(function(o){ if(o.geometry) o.geometry.dispose(); }); }catch(e){}
+    try{ if(heroSprite && heroSprite.material && heroSprite.material.map) heroSprite.material.map.dispose(); }catch(e){}
   }
   buildHero(k);
   hero.y = heightAt(hero.x, hero.z);
@@ -3266,6 +3205,7 @@ function updateHero(dt){
     heroParts.foreL.rotation.x = -0.45; heroParts.foreR.rotation.x = -0.35;
     heroParts.body.position.y = 0;
     heroParts.body.rotation.x = -0.1;
+    if(heroSprite){ heroSprite.rotation.z = 0.16; heroSprite.position.y = 0.276 + Math.sin(performance.now()*0.004)*0.06; }
   } else {
     heroParts.legL.rotation.x = sw;
     heroParts.legR.rotation.x = sw2;
@@ -3277,6 +3217,11 @@ function updateHero(dt){
     heroParts.foreR.rotation.x = -0.22 - Math.max(0, Math.sin(hero.walk + Math.PI)) * gait * 0.38;
     heroParts.body.position.y = Math.abs(Math.sin(hero.walk)) * 0.05 * gait + Math.sin(performance.now()*0.0016) * 0.013;
     heroParts.body.rotation.x = gait * 0.085;
+    if(heroSprite){
+      heroSprite.position.y = 0.276 + Math.abs(Math.sin(hero.walk)) * 0.09 * gait + Math.sin(performance.now()*0.0016) * 0.018;
+      heroSprite.rotation.z = Math.sin(hero.walk * 0.5) * 0.06;
+      heroSprite.scale.x = 1.7 * (1 + Math.sin(hero.walk * 2) * 0.012 * gait);
+    }
   }
   heroParts.head.rotation.z = Math.sin(hero.walk * 0.5) * 0.035;
   heroParts.cape.rotation.x = -0.08 - gait * 0.34 + Math.sin(hero.walk * 0.9) * 0.07;
