@@ -96,6 +96,13 @@ a{color:var(--gold);text-decoration:none}
 .inf-lore i{position:absolute;left:10px;top:9px;color:var(--gold);font-size:11px;opacity:.85}
 .inf-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .inf-meta span{padding:3px 9px;border-radius:8px;background:rgba(148,163,184,.1);border:1px solid var(--line);font-size:11px;color:#a8b8d0}
+/* 建筑信息里的驻守者 */
+.inf-guard{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:12px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.26);margin-bottom:8px}
+.inf-guard .ga{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;background:radial-gradient(circle at 50% 30%,rgba(251,191,36,.22),#0d1526 82%);border:1px solid rgba(251,191,36,.4);flex:0 0 auto}
+.inf-guard .gt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.inf-guard .gt b{font-size:13px;color:#fff}
+.inf-guard .gt span{font-size:11px;color:var(--muted)}
+.inf-tip{font-size:11.5px;color:var(--muted);line-height:1.6;margin-bottom:10px}
 .go{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px;border-radius:12px;font-size:13.5px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;border:0;cursor:pointer}
 .go:hover{filter:brightness(1.07)}
 
@@ -237,6 +244,8 @@ a{color:var(--gold);text-decoration:none}
 .mlabel.npc .mi{font-size:12px}
 .mlabel.npc.talked{opacity:.72}
 .mlabel.npc.talked .mi{filter:grayscale(.4)}
+.mlabel.npc .mp{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-style:normal;font-size:10px;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;vertical-align:1px}
 
 /* 跳跃（触控） */
 #jumpBtn{position:absolute;right:16px;bottom:206px;width:58px;height:58px;border-radius:50%;display:none;align-items:center;justify-content:center;
@@ -270,6 +279,26 @@ body.touch .touch-hint{display:block}
 .dlg-acts .btn-o{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
 .dlg-acts a.btn-o{color:#dbe4f2}
 .dlg-acts a.btn-o:hover{color:var(--gold)}
+.dlg-acts .btn-o.play{flex:1 1 100%;padding:12px;font-size:13.5px;justify-content:center;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;border-color:transparent;box-shadow:0 8px 20px rgba(251,191,36,.2)}
+.dlg-acts .btn-o.play:hover{color:#1a1305;filter:brightness(1.06)}
+
+/* 驻守者名录 */
+#roster{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(4,8,16,.74);backdrop-filter:blur(4px)}
+#roster.show{display:flex}
+.rost-card{position:relative;width:min(760px,100%);max-height:86vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:18px}
+.rost-x{position:absolute;right:13px;top:13px;color:var(--muted);cursor:pointer;font-size:15px;line-height:1}
+.rost-x:hover{color:var(--gold)}
+.rost-h{margin-bottom:14px;padding-right:30px}
+.rost-h b{display:block;font-size:15.5px;color:#fff;margin-bottom:4px}
+.rost-h span{font-size:11.5px;color:var(--muted);line-height:1.6}
+.rost-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(226px,1fr));gap:10px}
+.rost-item{display:flex;gap:10px;align-items:center;padding:10px 11px;border-radius:13px;border:1px solid var(--line);background:rgba(13,21,38,.62);cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.rost-item:hover{border-color:var(--gold);background:rgba(251,191,36,.08)}
+.rost-item .ra{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;background:radial-gradient(circle at 50% 30%,rgba(251,191,36,.2),#0d1526 82%);border:1px solid rgba(251,191,36,.34);flex:0 0 auto}
+.rost-item .rn{display:block;font-size:12.8px;font-weight:800;color:#fff}
+.rost-item .rr{display:block;font-size:10.8px;color:var(--muted);margin-top:1px}
+.rost-item .rp{display:inline-block;margin-top:4px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305}
+.rost-item.seen{opacity:.7}
 .dt-x{display:none}
 .dlg-foot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:11px;flex-wrap:wrap}
 .dlg-x{position:absolute;right:11px;top:11px;width:28px;height:28px;border-radius:9px;border:1px solid var(--line2);color:var(--muted);
@@ -280,8 +309,10 @@ body.touch .touch-hint{display:block}
 .fb-h{max-width:1180px;margin:6px auto 12px;font-size:15px;font-weight:900;color:#fff;display:flex;align-items:center;gap:8px}
 .fb-h small{font-size:11.5px;font-weight:600;color:var(--muted)}
 .fb-card .say{font-size:11.8px;color:#a9c7e6;line-height:1.65;margin-top:8px;padding-left:9px;border-left:2px solid rgba(56,189,248,.45)}
-.npc-card{cursor:default}
-.npc-card:hover{border-color:var(--line);transform:none}
+.fb-card.npc-card{cursor:pointer;width:100%;text-align:left;font:inherit;color:inherit;display:block}
+.fb-card.npc-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.fb-card .geo{margin-top:9px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.fb-card .geo b{color:var(--gold);font-weight:800}
 
 /* ==================== 移动端 / 触控布局 ==================== */
 @media(max-width:820px){
@@ -370,6 +401,11 @@ body.touch .touch-hint{display:block}
   .dlg-name{font-size:14.5px}
   .dlg-txt{font-size:13px;min-height:42px}
   .dlg-acts .btn-o{flex:1;min-width:calc(50% - 4px)}
+  .dlg-acts .btn-o.play{flex:1 1 100%;min-width:0}
+  /* 名录：底部抽屉 */
+  #roster{padding:8px;align-items:flex-end}
+  .rost-card{max-height:78vh;width:100%;border-radius:18px 18px 0 0;padding:15px 14px}
+  .rost-list{grid-template-columns:1fr}
 }
 
 /* 触屏但屏幕较宽（平板）：把摇杆抬到左下动作条之上，避免压住按钮 */
@@ -431,7 +467,7 @@ body.touch .touch-hint{display:block}
   <div class="hud-tl">
     <span class="eyebrow">衡洲 · HENGZHOU · OPEN WORLD</span>
     <h1>十二圣域 · 环带残骸</h1>
-    <p>五帝的秩序曾被一头龙咬碎。你脚下这片 580 × 580 米的土地，是衡环的遗骸 —— 越靠外环，五行越失序。走向任意建筑即可进入对应玩法。</p>
+    <p>五帝的秩序曾被一头龙咬碎。你脚下这片 580 × 580 米的土地，是衡环的遗骸 —— 越靠外环，五行越失序。<b style="color:#d8c79b">此地的事由人经手</b>：找到驻守各处的人，与他交谈，他才会替你开门。</p>
     <a class="world-link" href="docs.html#world" target="_blank" rel="noopener"><i class="fa-solid fa-scroll"></i> 世界志 · 衡洲五纪元</a>
     <div class="keys">
       <span class="kk"><b>WASD</b>移动</span>
@@ -439,12 +475,12 @@ body.touch .touch-hint{display:block}
       <span class="kk"><b>空格</b>跳跃</span>
       <span class="kk"><b>拖拽</b>转视角</span>
       <span class="kk"><b>滚轮</b>缩放</span>
-      <span class="kk"><b>E</b>进入建筑</span>
+      <span class="kk"><b>E</b>与人交谈</span>
       <span class="kk"><b>B</b>背包</span>
       <span class="kk"><b>C</b>角色</span>
       <span class="kk"><b>Tab</b>俯瞰全局</span>
     </div>
-    <div class="touch-hint"><b>左摇杆</b>移动 · <b>拖屏</b>转视角 · <b>双指</b>缩放 · <b>走近建筑点一下</b>进入 · <b>点 NPC</b>对话</div>
+    <div class="touch-hint"><b>左摇杆</b>移动 · <b>拖屏</b>转视角 · <b>双指</b>缩放 · <b>走到人跟前点一下</b>交谈，谈完由他开门</div>
   </div>
 
   <div class="tools">
@@ -459,9 +495,9 @@ body.touch .touch-hint{display:block}
   </div>
 
   <div id="nearBar">
-    <span class="ic" id="nbIcon">🏛️</span>
-    <span><span class="tx" id="nbName">英雄圣殿</span><br><span class="sub" id="nbSub">按 E 或点击查看</span></span>
-    <span class="en">查看</span>
+    <span class="ic" id="nbIcon">🕯️</span>
+    <span><span class="tx" id="nbName">守灯人 · 燧</span><br><span class="sub" id="nbSub">按 E 或点击交谈</span></span>
+    <span class="en">交谈</span>
   </div>
 
   <div id="stick"><div class="knob" id="knob"></div></div>
@@ -480,6 +516,7 @@ body.touch .touch-hint{display:block}
       <button class="act" onclick="openBag()"><i class="fa-solid fa-briefcase"></i>背包<span class="k">B</span></button>
       <button class="act" onclick="openChar()"><i class="fa-solid fa-user-astronaut"></i>角色<span class="k">C</span></button>
       <button class="act" onclick="togglePendingPanel()"><i class="fa-solid fa-hourglass-half"></i>待揭示<span class="dot" id="pendingCount">0</span></button>
+      <button class="act" onclick="toggleRoster()"><i class="fa-solid fa-address-book"></i>名录</button>
       <button class="act" onclick="refreshGameData(true)"><i class="fa-solid fa-rotate"></i>刷新</button>
     </div>
   </div>
@@ -507,7 +544,7 @@ body.touch .touch-hint{display:block}
 </div>
 
 <div id="fallback">
-  <div class="fb-note"><b>3D 引擎加载失败</b>（可能是网络无法访问 CDN）。已切换为平面地图，点击任意地点仍可进入对应玩法。</div>
+  <div class="fb-note"><b>3D 引擎加载失败</b>（可能是网络无法访问 CDN）。已切换为平面名录，点开任意一位驻守者即可交谈并进入玩法。</div>
   <div class="fb-grid" id="fbGrid"></div>
 </div>
 
@@ -557,6 +594,18 @@ body.touch .touch-hint{display:block}
   </div>
 </div>
 
+<!-- ============ 驻守者名录 ============ -->
+<div id="roster">
+  <div class="rost-card">
+    <div class="rost-x" onclick="closeRoster()"><i class="fa-solid fa-xmark"></i></div>
+    <div class="rost-h">
+      <b>衡洲名录 · 事由人经手</b>
+      <span>这片大陆上的本事都长在人身上。点一位驻守者，走过去与他交谈 —— 谈完，他才会替你开门。</span>
+    </div>
+    <div class="rost-list" id="rostList"></div>
+  </div>
+</div>
+
 <!-- ============ NPC 对话 ============ -->
 <div id="dlg">
   <div class="dlg-card">
@@ -568,7 +617,7 @@ body.touch .touch-hint{display:block}
       <div class="dlg-prog" id="dlgProg"></div>
       <div class="dlg-acts" id="dlgActs"></div>
       <div class="dlg-foot">
-        <button class="btn-o" onclick="closeDialog()">结束对话</button>
+        <button class="btn-o" id="dlgSkip" onclick="dlgSkipOrClose()">跳过对白</button>
         <button class="btn-o gold" id="dlgNext" onclick="dlgNext()">继续 <i class="fa-solid fa-chevron-right"></i></button>
       </div>
     </div>
@@ -690,20 +739,25 @@ function renderFallback(msg){
   document.getElementById('stage').style.display = 'none';
   var fb = document.getElementById('fallback'); fb.classList.add('show');
   syncStageTop();
-  if(msg){ fb.querySelector('.fb-note').innerHTML = '<b>3D 引擎加载失败</b>（'+msg+'）。已切换为平面地图，点击任意地点仍可进入对应玩法。'; }
-  document.getElementById('fbGrid').innerHTML = NODES.map(function(n){
-    return '<a class="fb-card" style="border-left-color:'+n.color+'" href="game.html#'+n.tab+'">'
-      + '<div class="t"><span>'+n.icon+'</span>'+n.name+'<span style="margin-left:auto;font-size:11px;color:'+n.color+'">'+EL[n.el].n+'</span></div>'
-      + (n.lore ? '<div class="lore">'+n.lore+'</div>' : '')
-      + '<div class="d">'+n.d+'</div>'
-      + '<div class="m" style="color:'+n.color+'">进入 '+n.name+' →</div></a>';
-  }).join('')
-  + '<div class="fb-h" style="grid-column:1/-1"><i class="fa-solid fa-users"></i>旅途上的人 <small>3D 模式下走近即可对话</small></div>'
-  + NPCS.map(function(q){
-      return '<div class="fb-card" style="border-left-color:'+(q.color||'#fbbf24')+'">'
-        + '<div class="t"><span>'+q.icon+'</span>'+q.name+'<span style="margin-left:auto;font-size:10.5px;color:var(--muted)">'+(q.role||'')+'</span></div>'
-        + '<div class="say">「'+((q.lines && q.lines[0]) || '')+'」</div></div>';
-    }).join('');
+  if(msg){ fb.querySelector('.fb-note').innerHTML = '<b>3D 引擎加载失败</b>（'+msg+'）。已切换为平面名录，点开任意一位驻守者即可交谈并进入玩法。'; }
+  document.getElementById('fbGrid').innerHTML =
+      '<div class="fb-h" style="grid-column:1/-1"><i class="fa-solid fa-users"></i>先找到人 <small>事由人经手 —— 点开对话，由他替你开门</small></div>'
+    + NPCS.map(function(q){
+        return '<button type="button" class="fb-card npc-card" style="border-left-color:'+(q.color||'#fbbf24')+'" onclick="openDialog(\''+q.k+'\')">'
+          + '<div class="t"><span>'+q.icon+'</span>'+q.name+'<span style="margin-left:auto;font-size:10.5px;color:var(--muted)">'+(q.role||'衡洲')+'</span></div>'
+          + '<div class="say">「'+((q.lines && q.lines[0]) || '')+'」</div>'
+          + (q.play ? '<div class="m" style="color:var(--gold)">'+q.play+' · '+((q.node && q.node.name) || '')+' <i class="fa-solid fa-comment-dots"></i></div>' : '')
+          + '</button>';
+      }).join('')
+    + '<div class="fb-h" style="grid-column:1/-1;margin-top:14px"><i class="fa-solid fa-map-location-dot"></i>衡洲地理志 <small>这些地方的门不开，要看就找驻守的人</small></div>'
+    + NODES.map(function(n){
+        var q = npcOfTab(n.tab);
+        return '<button type="button" class="fb-card npc-card" style="border-left-color:'+n.color+'" onclick="'+(q ? ('openDialog(\''+q.k+'\')') : '')+'">'
+          + '<div class="t"><span>'+n.icon+'</span>'+n.name+'<span style="margin-left:auto;font-size:11px;color:'+n.color+'">'+EL[n.el].n+'</span></div>'
+          + (n.lore ? '<div class="lore">'+n.lore+'</div>' : '')
+          + '<div class="d">'+n.d+'</div>'
+          + '<div class="geo">'+(q ? ('驻守者 <b>'+q.name+'</b> · 点击与他交谈') : '无人驻守')+'</div></button>';
+      }).join('');
 }
 
 function syncStageTop(){
@@ -830,6 +884,10 @@ function bootInner(){
   if(IS_TOUCH) enableTouchUI();
   window.addEventListener('touchstart', function once(){ enableTouchUI(); }, {passive:true, once:true});
   animate();
+  /* 玩法挂在人身上：开场先指一次路 */
+  setTimeout(function(){
+    try{ toast('走过去，和守灯人 · 燧 说句话 —— 事由人经手', 'info'); }catch(e){}
+  }, 900);
 }
 
 window.addEventListener('error', function(e){
@@ -1202,130 +1260,135 @@ function npcAnchor(k, deg, d){
 
 var NPCS = [
   { k:'np_lamp', name:'守灯人 · 燧', icon:'🕯️', role:'引路者 · 最后一批守灯人', look:'sage', color:'#fbbf24',
-    at:'heroes', a:78, d:46,
+    at:'heroes', a:78, d:46, tab:'heroes', play:'召唤英雄',
     lines:[
       '你来得正好。灯就要灭了 —— 沿着这条路往外走，五行的碎片正一片片冷下去。',
       '我是燧。五帝把命途刻进凡人血脉那一夜，灯是我点的。现在只剩我还记得怎么点。',
       '先学会走路：手机上推左边的摇杆，电脑上按 WASD；拖屏幕转视角，两指开合拉远拉近。跳起来按这个小圆钮。',
-      '走到任意一座建筑跟前，按 E（手机上点一下）就能进去。中央那座是英雄圣殿 —— 没有英雄，你连一道划痕都留不下。',
-      '去吧。衡环的遗骸不会等你，那条龙也不会。'
+      '这片大陆上的本事，都长在人身上，不长在房子里。想做什么，就去找到守着那件事的人 —— 圣殿的事归我，锻造归钺，熔炼归炎，市集归舲。',
+      '没有英雄，你连一道划痕都留不下。要我替你点灯吗？'
     ],
     acts:[
       {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }},
       {label:'我的角色', ic:'fa-solid fa-user-astronaut', run:function(){ openChar(); }},
-      {label:'带我回英雄圣殿', ic:'fa-solid fa-person-walking', run:function(){ routeTo('heroes'); }},
+      {label:'去找锻徒 · 钺', ic:'fa-solid fa-person-walking', run:function(){ talkTo('np_smith'); }},
       {label:'世界志 · 五纪元', ic:'fa-solid fa-scroll', href:'docs.html#world'}
     ] },
 
   { k:'np_smith', name:'白帝的锻徒 · 钺', icon:'⚒️', role:'锻金者 · 蓐收之徒', look:'smith', color:'#f59e0b',
-    at:'forge', a:-56, d:30,
+    at:'forge', a:-56, d:30, tab:'forge', play:'开始锻造',
     lines:[
       '站住。靴子上全是泥 —— 你去过外环了？',
       '我是钺，白帝蓐收的锻徒。师父随衡环一起裂开的那天，炉子留给了我，名字也留给了我。',
       '武器不是买来的，是捡出来的。打怪、拆旧兵器，都能得到碎片；碎片攒够了拿到我这儿来。',
-      '稀有度看天意，也看你舍不舍得两百到一千的手续费。舍得的人，手里往往是五星。'
+      '稀有度看天意，也看你舍不舍得两百到一千的手续费。舍得的人，手里往往是五星。',
+      '把手伸出来。我替你开炉。'
     ],
     acts:[
-      {label:'去锻造工坊', ic:'fa-solid fa-hammer', run:function(){ goBuilding('forge'); }},
-      {label:'去兵器库', ic:'fa-solid fa-khanda', run:function(){ goBuilding('weapons'); }},
-      {label:'带我去熔炼火山', ic:'fa-solid fa-person-walking', run:function(){ routeTo('melt'); }}
+      {label:'去兵器库看看', ic:'fa-solid fa-khanda', run:function(){ talkTo('np_qiao'); }},
+      {label:'带我去找炎', ic:'fa-solid fa-person-walking', run:function(){ talkTo('np_ash'); }}
     ] },
 
   { k:'np_ash', name:'赤帝余烬 · 炎', icon:'🔥', role:'守炉者 · 祝融最后一口气', look:'hunter', color:'#ef4444',
-    at:'melt', a:22, d:30,
+    at:'melt', a:22, d:30, tab:'melt', play:'开始熔炼',
     lines:[
       '别站那么近，头发会焦。……骗你的，我早就没有头发了。',
       '赤帝祝融倒下时吐出的最后一口气，就是脚下这座火山。它烧了六个纪元，还剩这么一点。',
       '用不上的兵器别扔。丢进炉里，碎片和精粹会回来 —— 比你留着当摆设强一百倍。',
-      '火不认旧情，只认轻重。'
+      '火不认旧情，只认轻重。把东西交给我。'
     ],
     acts:[
-      {label:'去熔炼火山', ic:'fa-solid fa-fire', run:function(){ goBuilding('melt'); }},
-      {label:'去合成祭坛', ic:'fa-solid fa-flask-vial', run:function(){ goBuilding('compose'); }}
+      {label:'去找芃炼精粹', ic:'fa-solid fa-person-walking', run:function(){ talkTo('np_peng'); }},
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }}
     ] },
 
   { k:'np_peng', name:'青帝门徒 · 芃', icon:'🌿', role:'炼精者 · 句芒座下', look:'sage', color:'#22c55e',
-    at:'compose', a:16, d:30,
+    at:'compose', a:16, d:30, tab:'compose', play:'炼制精粹',
     lines:[
       '小心脚下 —— 树根会缠人。……又骗你的，它们只缠坏人。',
       '青帝句芒教我们的第一句话是：碎片只是碎了，不是死了。熔炼、提纯，它就回来。',
       '一星碎片攒多了也别恼，它精粹起来最老实，从不挑三拣四。',
-      '武器要变强，只能靠精粹。别处都不出，只有这里。'
+      '武器要变强，只能靠精粹。别处都不出，只有我这里。'
     ],
     acts:[
-      {label:'去合成祭坛', ic:'fa-solid fa-flask-vial', run:function(){ goBuilding('compose'); }},
-      {label:'去兵器库强化', ic:'fa-solid fa-gem', run:function(){ goBuilding('weapons'); }}
+      {label:'去兵器库强化', ic:'fa-solid fa-gem', run:function(){ talkTo('np_qiao'); }},
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }}
     ] },
 
   { k:'np_ling', name:'黑帝的渡者 · 舲', icon:'⛵', role:'摆渡人 · 玄冥麾下', look:'trader', color:'#38bdf8',
-    at:'market', a:164, d:30,
+    at:'market', a:164, d:30, tab:'market', play:'进入市集',
     lines:[
       '上船吗？……这里没有船，只有市集。习惯就好。',
       '我是舲，替黑帝玄冥摆渡。潮水退了，船搁浅了，人却还得买卖。',
       '挂单不问来历，成交通知链上。你要卖英雄，还是想捡一个便宜的？',
-      '水上市集最诚实的地方是：价格你自己写，撤单也随你。'
+      '水上市集最诚实的地方是：价格你自己写，撤单也随你。摊子我给你摆开。'
     ],
     acts:[
-      {label:'去水上市集', ic:'fa-solid fa-store', run:function(){ goBuilding('market'); }},
-      {label:'去金库领奖', ic:'fa-solid fa-vault', run:function(){ goBuilding('vault'); }}
+      {label:'去找徼领奖', ic:'fa-solid fa-person-walking', run:function(){ talkTo('np_ye'); }},
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }}
     ] },
 
   { k:'np_yan', name:'后土的记名者 · 砚', icon:'📖', role:'记名者 · 后土文石之守', look:'sage', color:'#c2703a',
-    at:'gallery', a:234, d:30,
+    at:'gallery', a:234, d:30, tab:'gallery', play:'翻阅图鉴',
     lines:[
       '名字。你叫什么？……不必说，石头自己会写。',
       '黄帝后土留下的记名石。英雄、武器、怪物 —— 凡有名字的，都在上面。',
       '动手之前先看清对方是什么属性：相克多打三成，被克反过来只余四分之三。这不是玄学，是算术。',
-      '打不过就去图鉴石碑翻一页。翻页不要钱，送命才要钱。'
+      '打不过就让我翻一页给你看。翻页不要钱，送命才要钱。'
     ],
     acts:[
-      {label:'去图鉴石碑', ic:'fa-solid fa-book-open', run:function(){ goBuilding('gallery'); }},
+      {label:'去找巽下场试炼', ic:'fa-solid fa-person-walking', run:function(){ talkTo('np_xun'); }},
       {label:'看元素克制表', ic:'fa-solid fa-scale-balanced', href:'docs.html'}
     ] },
 
   { k:'np_xun', name:'流亡老兵 · 巽', icon:'🗡️', role:'老兵 · 流亡纪幸存者', look:'hunter', color:'#a3a3a3',
-    at:'fight', a:58, d:30,
+    at:'fight', a:58, d:30, tab:'fight', play:'进入试炼',
     lines:[
       '第一次来？护腕勒紧点。这里不教你怎么活，只教你别死。',
       '流亡纪那会儿，我们拿石头砸黯烬。现在年轻人开口就是稀有度，闭口就是战力。',
       '打一场耗一点体力。赢了拿 EH，也拿经验；输了什么都留不下。',
-      '胜率是算出来的：你的战力占双方总战力的多少，就赢多少。别信运气，信数字。'
+      '胜率是算出来的：你的战力占双方总战力的多少，就赢多少。别信运气，信数字。',
+      '站进场子里去 —— 我给你数着回合。'
     ],
     acts:[
-      {label:'去试炼竞技场', ic:'fa-solid fa-crosshairs', run:function(){ goBuilding('fight'); }},
-      {label:'打开角色', ic:'fa-solid fa-user-astronaut', run:function(){ openChar(); }}
+      {label:'打开角色', ic:'fa-solid fa-user-astronaut', run:function(){ openChar(); }},
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }}
     ] },
 
   { k:'np_xing', name:'观星者 · 星', icon:'🔭', role:'观星者 · 环外守望', look:'sage', color:'#c084fc',
-    at:'rank', a:122, d:30,
+    at:'rank', a:122, d:30, tab:'rank', play:'查看排行',
     lines:[
       '抬头。你以为那是星星？那是衡环碎掉之后，还留在原地的位置。',
       '我在这儿看排行榜。后土会记住每一个名字 —— 陨落的，和被传颂的。',
-      '想去碑上留名，先在外环活过七个昼夜。'
+      '想去碑上留名，先在外环活过七个昼夜。',
+      '碑在这儿，名字要你自己去挣。'
     ],
     acts:[
-      {label:'去英雄纪念碑', ic:'fa-solid fa-trophy', run:function(){ goBuilding('rank'); }},
+      {label:'去找巽挣战绩', ic:'fa-solid fa-person-walking', run:function(){ talkTo('np_xun'); }},
       {label:'世界志 · 五纪元', ic:'fa-solid fa-scroll', href:'docs.html#world'}
     ] },
 
   { k:'np_echo', name:'黯烬低语 · 残响', icon:'🕳️', role:'被腐蚀者 · 勿近', look:'shade', color:'#7f1d1d',
-    at:'boss', a:80, d:52,
+    at:'boss', a:80, d:52, tab:'boss', play:'挑战巨龙',
     lines:[
       '……你也听见了？它在底下翻身。',
       '我曾经是讨伐队的一员。现在我说的话，一半是它的词。',
       '七天一循环。押上奖池百分之五的保证金，打完还你 —— 如果你还站着。',
-      '走吧。别学我，在这门口站太久。站久了，你也会开始低语。'
+      '走吧。别学我，在这门口站太久。站久了，你也会开始低语。',
+      '……或者，你想下去？我替你把门打开。'
     ],
     acts:[
-      {label:'去巨龙巢穴', ic:'fa-solid fa-dragon', run:function(){ goBuilding('boss'); }},
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }},
       {label:'世界志 · 黯龙纪', ic:'fa-solid fa-scroll', href:'docs.html#world'}
     ] },
 
   { k:'np_ye', name:'巡夜人 · 徼', icon:'🏮', role:'巡行者 · 环带夜哨', look:'hunter', color:'#facc15',
+    tab:'vault', play:'领取奖励',
     anchorFace:true,
     lines:[
       '当心点，这时候路上没什么人。',
       '我绕着圣殿走了一辈子。五帝会盟的地方，也是最容易被咬开的地方。',
+      '打完仗的赏钱都压在我这儿。金库的钥匙只有一把，晃了一辈子，也没敢弄丢。',
       '黑夜里最好认路的办法，是记住灯 —— 有灯的地方，就是有人还在守着。'
     ],
     acts:[
@@ -1335,16 +1398,31 @@ var NPCS = [
     patrol:{cx:0, cz:0, rad:70, spd:0.05, ph:2.1} },
 
   { k:'np_qiao', name:'行商 · 荞', icon:'🎒', role:'货郎 · 往复于环带', look:'trader', color:'#34d399', anchorFace:true,
+    tab:'weapons', play:'检视兵器',
     lines:[
       '看一看吧，都是路上捡的。……啊，这把？这把不卖。',
       '我算不上英雄，我只是把东西从这边搬到那边。可这世道，搬运也是本事。',
-      '你要是打到了用不上的东西，别丢 —— 挂到水上市集去，总有人正缺这一件。'
+      '兵器我都替人收着。要用哪把、要不要强化，跟我说一声。',
+      '你要是打到了用不上的东西，别丢 —— 交给舲挂到市集去，总有人正缺这一件。'
     ],
     acts:[
-      {label:'去水上市集', ic:'fa-solid fa-store', run:function(){ goBuilding('market'); }},
+      {label:'去找舲挂单', ic:'fa-solid fa-person-walking', run:function(){ talkTo('np_ling'); }},
       {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }}
     ],
-    patrol:{cx:0, cz:60, rad:20, spd:0.13, ph:0} }
+    patrol:{cx:0, cz:60, rad:20, spd:0.13, ph:0} },
+
+  { k:'np_jian', name:'执笔者 · 简', icon:'🖋️', role:'执礼 · 五帝会盟之后', look:'sage', color:'#94a3b8',
+    at:'admin', a:-40, d:30, tab:'admin', play:'议会事务',
+    lines:[
+      '站住 —— 不是拦你，是提醒你：从这里往上的每一道命令，都会写进石头。',
+      '五帝会盟之后，议事的地方就空了。我留下来，只是把空着的座位擦干净。',
+      '合约的参数、权限、状态，都在我手边这支笔上。能改的人很少，能看到的人也不多。',
+      '若你只是路过，看看就好。若你是来改数的 —— 报上名字。'
+    ],
+    acts:[
+      {label:'打开背包', ic:'fa-solid fa-briefcase', run:function(){ openBag(); }},
+      {label:'世界志 · 五纪元', ic:'fa-solid fa-scroll', href:'docs.html#world'}
+    ] }
 ];
 
 var NPC_SEEN = (function(){
@@ -1360,6 +1438,12 @@ NPCS.forEach(function(q){
   q.pa = q.patrol ? q.patrol.ph : 0;
   q.topY = 2.9;
   q.talked = NPC_SEEN.indexOf(q.k) >= 0;
+  /* 玩法挂在人身上：tab 指向 game.html 的页签，node 指向他驻守的建筑 */
+  if(q.tab){
+    var _n = nodeByTab(q.tab);
+    q.node = _n || null;
+    if(!q.play) q.play = _n ? ('进入' + _n.name) : '';
+  } else { q.node = null; }
 });
 
 function npcByKey(k){ for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k) return NPCS[i]; return null; }
@@ -1520,8 +1604,9 @@ function buildLabels(){
   NPCS.forEach(function(q){
     var d = document.createElement('div');
     d.className = 'mlabel npc';
-    d.innerHTML = '<span class="mi">' + q.icon + '</span><span>' + q.name + '</span>';
-    d.onclick = function(){ openDialog(q.k); };
+    d.innerHTML = '<span class="mi">' + q.icon + '</span><span>' + q.name
+      + (q.play ? '<em class="mp">' + q.play + '</em>' : '') + '</span>';
+    d.onclick = function(){ talkTo(q.k); };
     box.appendChild(d);
     labels[q.k] = d;
   });
@@ -1631,7 +1716,7 @@ function doJump(){
 function uiBlocked(){
   var d = document.getElementById('dlg');
   if(d && d.classList.contains('show')) return true;
-  var ids = ['bagOverlay', 'charOverlay', 'playOverlay'];
+  var ids = ['bagOverlay', 'charOverlay', 'playOverlay', 'roster'];
   for(var i=0;i<ids.length;i++){
     var o = document.getElementById(ids[i]);
     if(o && o.classList.contains('show')) return true;
@@ -1642,7 +1727,11 @@ function uiBlocked(){
 /* 统一交互入口：就近的 NPC 优先，其次建筑 */
 function interact(){
   if(nearNpcKey) openDialog(nearNpcKey);
-  else if(nearKey) enterNodeByKey(nearKey);
+  else if(nearKey){
+    var n = nodeByKey(nearKey);
+    var q = n ? npcOfTab(n.tab) : null;
+    if(q) talkTo(q.k);
+  }
 }
 
 function toggleView(){
@@ -1709,11 +1798,8 @@ function onClick(e){
   var hits = raycaster.intersectObjects(pickables, false);
   if(hits.length){
     var ud = hits[0].object.userData || {};
-    if(ud.npc){
-      var q = npcByKey(ud.k);
-      if(q && Math.hypot(hero.x - q.x, hero.z - q.z) < 12) openDialog(ud.k);
-      else goToNpc(ud.k);
-    } else selectNode(ud.k);
+    if(ud.npc){ talkTo(ud.k); return; }
+    selectNode(ud.k);
     return;
   }
   if(terrainMesh){
@@ -1737,26 +1823,59 @@ function goToNpc(k){
   hero.approach = 'npc:' + k;
   npcToast('正在走向 ' + q.name + '…');
 }
-/* 自动寻路：走到建筑门口后自动打开玩法 */
+/* 自动寻路：走到某位 NPC 身边，到了自动开口对话 */
+function goToNpc(k){
+  var q = npcByKey(k); if(!q) return;
+  var ang = Math.atan2(hero.z - q.z, hero.x - q.x);
+  hero.tx = clamp(q.x + Math.cos(ang)*2.8, -LIMIT, LIMIT);
+  hero.tz = clamp(q.z + Math.sin(ang)*2.8, -LIMIT, LIMIT);
+  hero.approach = 'npc:' + k;
+  npcToast('正在走向 ' + q.name + '…');
+}
+/* 走向建筑：不再直接开玩法，而是走到驻守者身边（建筑只是地点） */
 function routeTo(k){
+  var q = npcOfTab((nodeByKey(k) || {}).tab);
+  if(q){ goToNpc(q.k); return; }
   var n = nodeByKey(k); if(!n) return;
   var ang = Math.atan2(hero.z - n.z, hero.x - n.x);
   var dd = n.R + 6;
   hero.tx = clamp(n.x + Math.cos(ang)*dd, -LIMIT, LIMIT);
   hero.tz = clamp(n.z + Math.sin(ang)*dd, -LIMIT, LIMIT);
-  hero.approach = 'nd:' + k;
+  hero.approach = null;
   npcToast('正在前往 ' + n.name + '…');
 }
-function goBuilding(k){ routeTo(k); }
 function runApproach(ap){
   if(ap.indexOf('npc:') === 0) openDialog(ap.slice(4));
   else if(ap.indexOf('nd:') === 0) enterNodeByKey(ap.slice(3));
 }
 
 function nodeByKey(k){ for(var i=0;i<NODES.length;i++) if(NODES[i].k === k) return NODES[i]; return null; }
+function nodeByTab(t){ if(!t) return null; for(var i=0;i<NODES.length;i++) if(NODES[i].tab === t) return NODES[i]; return null; }
+/* 找负责某个玩法的人：优先 tab 精确匹配，其次驻守在该 tab 建筑旁 */
+function npcOfTab(t){
+  if(!t) return null;
+  var i, q;
+  for(i=0;i<NPCS.length;i++){ q = NPCS[i]; if(q.tab === t) return q; }
+  for(i=0;i<NPCS.length;i++){ q = NPCS[i]; if(q.at && q.at === t) return q; }
+  return null;
+}
+/* 与某人交谈：近了直接开口，远了先走过去 */
+function talkTo(k){
+  var q = npcByKey(k); if(!q) return;
+  if(Math.hypot(hero.x - q.x, hero.z - q.z) < 13) openDialog(k);
+  else goToNpc(k);
+}
+/* 玩法入口：只能由 NPC 发起 */
+function startPlay(tab){
+  var n = nodeByTab(tab);
+  if(!n) return;
+  if(typeof openPlay === 'function') openPlay(tab, n.name, n.icon);
+  else location.href = 'game.html#' + tab;
+}
 
 function selectNode(k){
   var n = nodeByKey(k); if(!n) return;
+  var q = npcOfTab(n.tab);
   selKey = k;
   var c = n.color;
   document.getElementById('infoBody').innerHTML =
@@ -1766,19 +1885,21 @@ function selectNode(k){
     + (n.lore ? '<div class="inf-lore"><i class="fa-solid fa-scroll"></i>' + n.lore + '</div>' : '')
     + '<div class="inf-d">' + n.d + '</div>'
     + '<div class="inf-meta">' + n.m.map(function(x){ return '<span>' + x + '</span>'; }).join('') + '</div>'
-    + '<button class="go" onclick="enterNodeByKey(\'' + n.k + '\')">进入 ' + n.name + ' <i class="fa-solid fa-arrow-right"></i></button>'
-    + '<a href="game.html#' + n.tab + '" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:11px;color:var(--muted);margin-top:8px">在完整界面打开 <i class="fa-solid fa-up-right-from-square"></i></a>';
+    + (q
+        ? '<div class="inf-guard"><div class="ga">' + q.icon + '</div><div class="gt"><b>' + q.name + '</b><span>' + (q.role || '衡洲') + '</span></div></div>'
+          + '<div class="inf-tip">此地的门不开 —— 事由 ' + q.name + ' 经手，去与他交谈。</div>'
+          + '<button class="go" onclick="talkTo(\'' + q.k + '\')">与 ' + q.name + ' 交谈 <i class="fa-solid fa-comment-dots"></i></button>'
+        : '<div class="inf-tip">此地无人驻守。</div>');
   document.getElementById('info').classList.add('show');
 }
 function closeInfo(){
   selKey = null;
   document.getElementById('info').classList.remove('show');
 }
-/* 进入建筑：优先在地图内以浮层打开对应玩法（同源嵌入 game.html 页签） */
+/* 底层：拉起玩法面板。不再由建筑直接触发，只经 NPC 对话调用 */
 function enterNodeByKey(k){
   var n = nodeByKey(k); if(!n) return;
-  if(typeof openPlay === 'function') openPlay(n.tab, n.name, n.icon);
-  else location.href = 'game.html#' + n.tab;
+  startPlay(n.tab);
 }
 
 /* ==================== NPC 对话 ==================== */
@@ -1855,13 +1976,25 @@ function dlgNext(){
 function setDlgFoot(last){
   var nx = document.getElementById('dlgNext');
   if(nx) nx.innerHTML = last ? '结束对话 <i class="fa-solid fa-xmark"></i>' : '继续 <i class="fa-solid fa-chevron-right"></i>';
+  var sk = document.getElementById('dlgSkip');
+  if(sk) sk.textContent = last ? '结束对话' : '跳过对白';
   var box = document.getElementById('dlgActs');
   if(!box || !DLG.npc) return;
   box.innerHTML = '';
-  var acts = DLG.npc.acts;
-  if(!last || !acts || !acts.length){ box.classList.remove('show'); return; }
+  var q = DLG.npc;
+  var acts = q.acts;
+  if(!last){ box.classList.remove('show'); return; }
   box.classList.add('show');
-  acts.forEach(function(a){
+  /* 主玩法按钮：玩法挂在人身上，谈完话由他开 */
+  if(q.tab && q.play){
+    var pb = document.createElement('button');
+    pb.type = 'button';
+    pb.className = 'btn-o gold play';
+    pb.onclick = function(){ closeDialog(); try{ startPlay(q.tab); }catch(e){ console.warn(e); } };
+    pb.innerHTML = '<i class="fa-solid fa-door-open"></i> ' + q.play + ' · ' + ((q.node && q.node.name) || '玩法');
+    box.appendChild(pb);
+  }
+  (acts || []).forEach(function(a){
     var node;
     if(a.href){
       node = document.createElement('a');
@@ -1876,6 +2009,15 @@ function setDlgFoot(last){
     node.innerHTML = '<i class="' + (a.ic || 'fa-solid fa-arrow-right') + '"></i> ' + a.label;
     box.appendChild(node);
   });
+}
+
+/* 跳过对白：直接跳到末句（末句才出现「开门」按钮） */
+function dlgSkipOrClose(){
+  var q = DLG.npc;
+  if(!q){ closeDialog(); return; }
+  var lines = q.lines || [''];
+  if(DLG.i < lines.length - 1){ DLG.i = lines.length - 1; renderDialog(); }
+  else closeDialog();
 }
 
 function typeInto(node, str){
@@ -1986,7 +2128,8 @@ function updateHero(dt){
   heroObj.rotation.y = hero.yaw;
 }
 
-/* 靠近检测：建筑与 NPC 取更近的一个 */
+/* 靠近检测：玩法挂在人身上，所以 NPC 永远优先；
+   建筑只作为「地点」提示，点了也是去找到驻守它的人。 */
 function updateNear(){
   var best = null, bd = 1e9;
   for(var i=0;i<NODES.length;i++){
@@ -2001,25 +2144,31 @@ function updateNear(){
     if(qd < 10 && qd < nd){ nd = qd; bestNpc = q; }
   }
 
-  var useNpc = !!bestNpc && (!best || nd <= bd);
+  var useNpc = !!bestNpc;
   var tgt = useNpc ? bestNpc : best;
   nearKey    = (!useNpc && best) ? best.k : null;
-  nearNpcKey = (useNpc && bestNpc) ? bestNpc.k : null;
+  nearNpcKey = useNpc ? bestNpc.k : null;
 
   var bar = document.getElementById('nearBar');
   if(tgt){
     var key = (useNpc ? 'npc:' : 'nd:') + tgt.k;
-    if(bar.dataset.k !== key){
+    var guard = useNpc ? null : npcOfTab(tgt.tab);
+    var sub = useNpc
+      ? (tgt.play ? '按 E 或点击交谈 · ' + tgt.play : '按 E 或点击交谈')
+      : (guard ? '驻守者 ' + guard.name + ' · 点击去找他' : '按 E 或点击查看');
+    if(bar.dataset.k !== key || bar.dataset.sub !== sub){
       bar.dataset.k = key;
-      document.getElementById('nbIcon').textContent = tgt.icon;
-      document.getElementById('nbName').textContent = tgt.name;
+      bar.dataset.sub = sub;
+      document.getElementById('nbIcon').textContent = useNpc ? tgt.icon : (guard ? guard.icon : tgt.icon);
+      document.getElementById('nbName').textContent = useNpc ? tgt.name : tgt.name;
       var sb = document.getElementById('nbSub');
-      if(sb) sb.textContent = useNpc ? '按 E 或点击对话' : '按 E 或点击查看';
+      if(sb) sb.textContent = sub;
     }
     bar.classList.add('show');
   } else {
     bar.classList.remove('show');
     bar.dataset.k = '';
+    bar.dataset.sub = '';
   }
 }
 
@@ -2064,16 +2213,23 @@ function drawMini(){
     }
   });
 
-  // NPC
+  // NPC：金色 = 手上有玩法可开，白色 = 只是路人
+  var tn = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
   for(var qi=0;qi<NPCS.length;qi++){
     var qn = NPCS[qi];
+    var px = toX(qn.x), py = toY(qn.z);
+    var hasPlay = !!qn.tab;
     c.beginPath();
-    c.fillStyle = '#cfe6ff';
-    c.arc(toX(qn.x), toY(qn.z), 2.1, 0, Math.PI*2);
+    c.fillStyle = hasPlay ? '#fbbf24' : '#cfe6ff';
+    c.arc(px, py, hasPlay ? 2.7 : 2.0, 0, Math.PI*2);
     c.fill();
+    if(hasPlay && !qn.talked){
+      c.strokeStyle = 'rgba(251,191,36,.5)'; c.lineWidth = 1;
+      c.beginPath(); c.arc(px, py, 5 + Math.sin(tn*2.6 + qi*0.7)*1.1, 0, Math.PI*2); c.stroke();
+    }
     if(qn.k === nearNpcKey){
-      c.strokeStyle = '#38bdf8'; c.lineWidth = 1.4;
-      c.beginPath(); c.arc(toX(qn.x), toY(qn.z), 4.6, 0, Math.PI*2); c.stroke();
+      c.strokeStyle = hasPlay ? '#fbbf24' : '#38bdf8'; c.lineWidth = 1.6;
+      c.beginPath(); c.arc(px, py, 5.2, 0, Math.PI*2); c.stroke();
     }
   }
 
@@ -2552,6 +2708,28 @@ function renderChar(){
     + '</div>';
 }
 
+/* ---------------- 驻守者名录 ---------------- */
+function toggleRoster(){
+  var r = el('roster'); if(!r) return;
+  if(r.classList.contains('show')){ r.classList.remove('show'); return; }
+  renderRoster();
+  r.classList.add('show');
+}
+function closeRoster(){ var r = el('roster'); if(r) r.classList.remove('show'); }
+function renderRoster(){
+  var box = el('rostList'); if(!box) return;
+  if(typeof NPCS === 'undefined'){ box.innerHTML = '<div style="font-size:12px;color:var(--muted)">名录暂不可用</div>'; return; }
+  box.innerHTML = NPCS.map(function(q){
+    return '<button type="button" class="rost-item' + (q.talked ? ' seen' : '') + '" onclick="closeRoster(); talkTo(\'' + q.k + '\')">'
+      + '<span class="ra">' + q.icon + '</span>'
+      + '<span style="min-width:0">'
+      + '<span class="rn">' + q.name + '</span>'
+      + '<span class="rr">' + (q.role || '衡洲') + '</span>'
+      + (q.play ? '<span class="rp">' + q.play + '</span>' : '')
+      + '</span></button>';
+  }).join('');
+}
+
 /* ---------------- 地图内玩法面板 ---------------- */
 function openPlay(tab, name, icon){
   var ov = el('playOverlay'); if(!ov) return;
@@ -2584,7 +2762,7 @@ window.addEventListener('keydown', function(e){
   var k = (e.key || '').toLowerCase();
   if(k === 'b'){ openBag(); }
   else if(k === 'c'){ openChar(); }
-  else if(k === 'escape'){ closeBag(); closeChar(); closePlay(); }
+  else if(k === 'escape'){ closeBag(); closeChar(); closePlay(); closeRoster(); }
 });
 </script>
 </body>
