@@ -18,6 +18,7 @@
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.75;-webkit-font-smoothing:antialiased}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(900px 420px at 78% -8%,rgba(251,191,36,.07),transparent 60%),radial-gradient(700px 420px at 8% 12%,rgba(56,189,248,.05),transparent 60%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(560px 320px at 4% 34%,rgba(245,158,11,.055),transparent 62%),radial-gradient(560px 320px at 96% 46%,rgba(56,189,248,.05),transparent 62%),radial-gradient(620px 340px at 50% 102%,rgba(239,68,68,.05),transparent 62%),radial-gradient(480px 300px at 12% 92%,rgba(34,197,94,.045),transparent 62%)}
 a{color:var(--gold);text-decoration:none}
 a:hover{text-decoration:underline}
 h1,h2,h3,h4{font-family:'Noto Serif SC','Noto Sans SC',serif;letter-spacing:.02em}
@@ -112,6 +113,33 @@ footer .fl{color:var(--gold);margin:0 8px}
   .side a{border-left:0;border-bottom:2px solid transparent;padding:8px 12px;border-radius:8px}
   .side a.on{border-bottom-color:var(--gold)}
 }
+
+/* ===== 世界观 / 纪元 ===== */
+.tl{position:relative;margin:20px 0 8px;padding-left:28px}
+.tl::before{content:'';position:absolute;left:8px;top:8px;bottom:10px;width:2px;background:linear-gradient(180deg,var(--gold),rgba(251,191,36,.08))}
+.tl .it{position:relative;margin-bottom:22px}
+.tl .it:last-child{margin-bottom:0}
+.tl .it::before{content:'';position:absolute;left:-25px;top:5px;width:11px;height:11px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(251,191,36,.16),0 0 14px rgba(251,191,36,.5)}
+.tl .it h4{font-size:15.5px;font-weight:800;color:#fff;margin-bottom:5px;font-family:'Noto Sans SC',sans-serif;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.tl .it h4 em{font-style:normal;font-size:11.5px;color:var(--gold);border:1px solid var(--line2);border-radius:6px;padding:1px 7px;font-family:ui-monospace,monospace;letter-spacing:.05em}
+.tl .it p{font-size:13.6px;color:var(--muted);margin:0}
+
+.deity{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 18px 20px;overflow:hidden}
+.deity::after{content:'';position:absolute;right:-34px;top:-34px;width:120px;height:120px;border-radius:50%;background:var(--dc);opacity:.14;pointer-events:none}
+.deity .eb{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:800;margin-bottom:11px}
+.deity h4{font-size:16.5px;font-weight:800;color:#fff;font-family:'Noto Sans SC',sans-serif;margin-bottom:3px}
+.deity .ttl{font-size:11px;letter-spacing:.16em;color:var(--muted);margin-bottom:9px;text-transform:uppercase}
+.deity p{font-size:13px;color:#c6d3e6;margin:0}
+
+.geo{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(252px,1fr))}
+.geo .g{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gc,#fbbf24);border-radius:14px;padding:14px 16px}
+.geo .g h4{font-size:14.5px;color:#fff;font-family:'Noto Sans SC',sans-serif;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.geo .g h4 i{font-style:normal;font-size:16px}
+.geo .g p{font-size:12.8px;color:var(--muted);margin:0;line-height:1.7}
+
+.rune-sep{display:flex;align-items:center;justify-content:center;gap:12px;margin:34px 0 30px;color:rgba(251,191,36,.5)}
+.rune-sep::before,.rune-sep::after{content:'';height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--line2),transparent)}
+.rune-sep span{font-size:14px;letter-spacing:.5em}
 </style>
 </head>
 <body>
@@ -133,6 +161,7 @@ footer .fl{color:var(--gold);margin:0 8px}
 <div class="layout">
   <aside class="side" id="toc">
     <h4>文档目录</h4>
+    <a href="#world">00 · 世界观与纪元</a>
     <a href="#overview">01 · 项目简介</a>
     <a href="#start">02 · 快速开始</a>
     <a href="#elements">03 · 五行与克制</a>
@@ -154,14 +183,151 @@ footer .fl{color:var(--gold);margin:0 8px}
     <div class="doc-hero">
       <span class="eyebrow">ELEMENT HEROES · DOCUMENTATION</span>
       <h1><span class="t">元素英雄 Docs</span></h1>
-      <p>一份把链上规则讲清楚的说明书：五行克制、英雄与武器、锻造熔炼、战斗结算、世界 BOSS、市场与金库，以及当前部署的合约地址。所有数值均取自合约与前端实现，随链上配置变动时以游戏内实时显示为准。</p>
+      <p>在这片名为<b>衡洲</b>的大陆上，五行秩序曾被炼成环、又被一头龙咬碎。这份文档先讲清楚它为何崩坏、谁在守护，再讲清楚链上规则：五行克制、英雄与武器、锻造熔炼、战斗结算、世界 BOSS、市场与金库，以及当前部署的合约地址。所有数值均取自合约与前端实现，随链上配置变动时以游戏内实时显示为准。</p>
       <div class="chips">
+        <span class="chip">世界 <b>衡洲 · 五纪元</b></span>
         <span class="chip">网络 <b>BSC 测试网（chainId 97）</b></span>
         <span class="chip">游戏内代币 <b>EH</b></span>
         <span class="chip">官网计价 <b>USDT</b></span>
         <span class="chip">结算方式 <b>commit-reveal 链上随机</b></span>
       </div>
     </div>
+
+    <!-- 00 -->
+    <section id="world">
+      <h2><span class="n">00</span>世界观与纪元</h2>
+      <p class="lead">衡洲不是被创造的，而是被<b>炼</b>出来的。读懂这段神话，就读懂了游戏里每一次召唤、每一块碎片、每一轮 BOSS 讨伐的来处。</p>
+
+      <h3>太初 · 五行成环</h3>
+      <p>太初无物，唯有一缕未分化的原初之气，古称<b>元一</b>。元一自混沌中睁眼，以自身为炉、以混沌为薪，将无序炼作五种本源：金之锐、木之生、土之载、水之流、火之燃。</p>
+      <p>五行并非并列，而是首尾相衔、彼此制衡 —— <b>金克木、木克土、土克水、水克火、火克金</b>。这条咬合的环，即为<b>衡环</b>。衡环既成，混沌退散，大地自环心向外层层凝结，是为<b>衡洲</b>。炼尽自身的元一没有留下形体，只余五缕神性与一枚<b>元一心核</b>，镇在衡环正中。</p>
+      <div class="el-row">
+        <div class="el"><i style="color:#f59e0b">◈</i><span style="color:#f59e0b">金 · 锐</span></div>
+        <div class="el"><i style="color:#22c55e">✦</i><span style="color:#22c55e">木 · 生</span></div>
+        <div class="el"><i style="color:#c2703a">◆</i><span style="color:#c2703a">土 · 载</span></div>
+        <div class="el"><i style="color:#38bdf8">◉</i><span style="color:#38bdf8">水 · 流</span></div>
+        <div class="el"><i style="color:#ef4444">▲</i><span style="color:#ef4444">火 · 燃</span></div>
+      </div>
+      <div class="note"><b>为什么是五行：</b>五元素不是贴皮美术，而是规则本身。战斗中的克制系数、武器的元素归属、英雄的命途倾向，全部由这段创世设定推导而来 —— 所以它值得被认真写进文档。</div>
+
+      <div class="rune-sep"><span>◇ ◆ ◇</span></div>
+
+      <h3>五帝纪 · 秩序的巅峰</h3>
+      <p>元一的五缕神性化为五帝，各执一行，共守衡环。他们是衡洲一切力量的上游，也是今日「元素英雄」的血脉之源。</p>
+      <div class="grid g3">
+        <div class="deity" style="--dc:#f59e0b">
+          <span class="eb" style="background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(251,191,36,.3)">◈ 金</span>
+          <h4>白帝 · 蓐收</h4>
+          <div class="ttl">Lord of the West</div>
+          <p>主刑杀与秩序。衡环上每一节断裂的链条，都由他亲手接回。锻造工坊是他的锻金炉。</p>
+        </div>
+        <div class="deity" style="--dc:#22c55e">
+          <span class="eb" style="background:rgba(34,197,94,.14);color:#4ade80;border:1px solid rgba(34,197,94,.3)">✦ 木</span>
+          <h4>青帝 · 句芒</h4>
+          <div class="ttl">Lord of the East</div>
+          <p>主生长与治愈。草木听其号令，衡洲的一切伤口都靠他的气息愈合。合成祭坛即其生命之树。</p>
+        </div>
+        <div class="deity" style="--dc:#c2703a">
+          <span class="eb" style="background:rgba(180,83,9,.2);color:#d97706;border:1px solid rgba(180,83,9,.4)">◆ 土</span>
+          <h4>黄帝 · 后土</h4>
+          <div class="ttl">Lord of the Centre</div>
+          <p>主承载与记忆。他是大陆的骨；万物之名刻在其记名石上 —— 图鉴石碑由此而来。</p>
+        </div>
+        <div class="deity" style="--dc:#38bdf8">
+          <span class="eb" style="background:rgba(56,189,248,.14);color:#7dd3fc;border:1px solid rgba(56,189,248,.3)">◉ 水</span>
+          <h4>黑帝 · 玄冥</h4>
+          <div class="ttl">Lord of the North</div>
+          <p>主流变与契约。掌潮汐涨落，水上市集随他的潮水迁移，买卖不问来历，只认契约。</p>
+        </div>
+        <div class="deity" style="--dc:#ef4444">
+          <span class="eb" style="background:rgba(239,68,68,.14);color:#f87171;border:1px solid rgba(239,68,68,.3)">▲ 火</span>
+          <h4>赤帝 · 祝融</h4>
+          <div class="ttl">Lord of the South</div>
+          <p>主燃烧与新生。毁物亦生物 —— 熔炼火山的火焰是他的余烬，一切残器终归于火。</p>
+        </div>
+        <div class="deity" style="--dc:#fbbf24">
+          <span class="eb" style="background:rgba(251,191,36,.14);color:var(--gold);border:1px solid rgba(251,191,36,.3)">⊙ 衡</span>
+          <h4>元一 · 心核</h4>
+          <div class="ttl">The Primordial Core</div>
+          <p>五帝共守的中枢，五行之力的源头。它既是世界的引擎，也是世界唯一的死穴。</p>
+        </div>
+      </div>
+
+      <div class="rune-sep"><span>◇ ◆ ◇</span></div>
+
+      <h3>黯龙纪 · 衡环碎裂</h3>
+      <p>元一炼尽混沌时，留下了未能化尽的残渣 —— 那是不愿被秩序收编的、纯粹的<b>无序</b>。残渣蛰伏在衡环的阴影里不可计数的岁月，最终凝成一头巨龙：<b>黯烬之龙 · 烛幽</b>。</p>
+      <p>烛幽没有去砸碎衡环，而是<b>咬住</b>它。它将相克的链条一节节扯到极致 —— 令金克木至于尽、木克土至于绝，让五行<b>自相残杀</b>。这种权能被称为<b>逆衡</b>：不违背规则，而是把规则推向毁灭。</p>
+      <p>衡环在自噬中崩断。<b>元一心核当空炸裂</b>，五行之力化作漫天结晶坠向大地 —— 那便是今日你背包里的<b>碎片（Shards）</b>与<b>精粹（Essence）</b>。失去环的约束，大地沿着裂痕塌陷，衡洲从此成为一个层层相套的<b>环带</b>：中央是残存的圣域，向外依次是元素环、外环，最外侧是烛幽盘踞的那道裂口。</p>
+      <div class="note warn"><b>这就是地图的形状：</b>你在 3D 世界里看到的分环地形，不是设计方便，而是「衡环碎裂」的遗骸。越靠外，五行越失序 —— 所以巨龙巢穴在最外环。</div>
+
+      <div class="rune-sep"><span>◇ ◆ ◇</span></div>
+
+      <h3>五纪元 · 从创世到当下</h3>
+      <p class="lead">你所在的服务器，正运行在第五纪元的开端。</p>
+      <div class="tl">
+        <div class="it">
+          <h4>太初纪 <em>EPOCH I</em></h4>
+          <p>元一开炉，五行成环，衡洲自环心层层凝结。世界安静得只有相生相克的节律。</p>
+        </div>
+        <div class="it">
+          <h4>五帝纪 <em>EPOCH II</em></h4>
+          <p>五帝立序，铸神器、建圣殿、教化众生。英雄圣殿即是当年五帝会盟之坛，至今未移。</p>
+        </div>
+        <div class="it">
+          <h4>黯龙纪 <em>EPOCH III</em></h4>
+          <p>烛幽以逆衡之力咬碎衡环，心核炸散，大陆塌成环带。这一纪没有记载者 —— 能记的人都没能活下来。</p>
+        </div>
+        <div class="it">
+          <h4>流亡纪 <em>EPOCH IV</em></h4>
+          <p>五帝力竭，在隐入碎片之前，将各自的「命途」刻进凡人血脉。人类筑议会塔议事、以水上市集流转、在竞技场练兵，与黯烬相持了漫长的岁月。</p>
+        </div>
+        <div class="it">
+          <h4>觉醒纪 <em>EPOCH V · 当下</em></h4>
+          <p>血脉中的命途被重新唤醒，<b>元素英雄</b>现世。凡人第一次拥有了向巨龙还手的力量 —— 每一轮世界 BOSS，都是从龙的伤口上撕下一块衡环碎片，试图重铸那枚心核。</p>
+        </div>
+      </div>
+
+      <div class="rune-sep"><span>◇ ◆ ◇</span></div>
+
+      <h3>衡洲地理志 · 十二圣域</h3>
+      <p class="lead">地图上的每一座建筑都不是功能按钮，而是有来历的地标。</p>
+      <div class="geo">
+        <div class="g" style="--gc:#fbbf24"><h4><i>🏛️</i>英雄圣殿 · 环心</h4><p>五帝会盟之坛，元一心核的原址。命途在此被唤回人间 —— 你召唤的每一位英雄，都是从这里睁眼。</p></div>
+        <div class="g" style="--gc:#f59e0b"><h4><i>⚒️</i>锻造工坊 · 白帝炉</h4><p>蓐收的锻金炉。战损的神器在此回炉，重铸为新的兵刃；碎片与材料在这里合成为武器。</p></div>
+        <div class="g" style="--gc:#ef4444"><h4><i>🔥</i>熔炼火山 · 祝融余烬</h4><p>赤帝陨落时喷出的最后一口气，至今未熄。不再需要的武器投入其中，化回最本源的碎片与精粹。</p></div>
+        <div class="g" style="--gc:#22c55e"><h4><i>🧪</i>合成祭坛 · 句芒之树</h4><p>以生命之力为薪，将散落的碎片重新凝练、提纯为精粹 —— 强化武器的一切材料由此而来。</p></div>
+        <div class="g" style="--gc:#38bdf8"><h4><i>🏪</i>水上市集 · 玄冥浮市</h4><p>随潮而动的浮城。英雄与武器在此易主，买卖不问来历，只认链上契约。</p></div>
+        <div class="g" style="--gc:#c2703a"><h4><i>📖</i>图鉴石碑 · 后土记名石</h4><p>大陆的记忆。凡有名字之物 —— 英雄、武器、怪物 —— 皆刻其上，无名者不予记载。</p></div>
+        <div class="g" style="--gc:#fbbf24"><h4><i>🏟️</i>试炼竞技场 · 流亡纪练兵场</h4><p>流亡纪人类与黯烬交手的地方。如今是挑战五行怪物的试炼地，胜者带走它们体内的五行之力。</p></div>
+        <div class="g" style="--gc:#f59e0b"><h4><i>⚔️</i>兵器库 · 神器陈列</h4><p>历代神器的安放之所。检视你名下的全部武器，看它们各自的元素归属与强化印记。</p></div>
+        <div class="g" style="--gc:#fbbf24"><h4><i>🏆</i>英雄纪念碑 · 战绩石</h4><p>镌刻被传颂与被遗忘之名，全服战绩榜随赛季刷新 —— 后土会记住每一个名字。</p></div>
+        <div class="g" style="--gc:#94a3b8"><h4><i>🛡️</i>议会塔 · 人间规则</h4><p>流亡纪人类议会的据点，如今代管合约与参数 —— 世间规则由它校准，包括召唤与锻造的价格。</p></div>
+        <div class="g" style="--gc:#38bdf8"><h4><i>🏦</i>金库 · 五行暂存</h4><p>战利品并非凭空而生。它们被衡环碎片托住、暂存在此，等你亲手取回 —— 领取即是从环中取回属于你的那部分。</p></div>
+        <div class="g" style="--gc:#ef4444"><h4><i>🐉</i>巨龙巢穴 · 碎环裂口</h4><p>烛幽盘踞之处，也是衡环被咬开的那道伤口。每一轮世界 BOSS 讨伐，都是往这道伤口上再撕一块。</p></div>
+      </div>
+
+      <div class="rune-sep"><span>◇ ◆ ◇</span></div>
+
+      <h3>术语表</h3>
+      <p class="lead">社群与文档里反复出现的高频词，一次讲清。</p>
+      <table>
+        <thead><tr><th>术语</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><b>衡环</b></td><td>五行相生相克、首尾相衔的秩序之环，是这片大陆的规则本体。</td></tr>
+          <tr><td><b>元一</b></td><td>太初唯一的存在，衡洲与五行的炼制者，炼尽自身后只余神性与心核。</td></tr>
+          <tr><td><b>元一心核</b></td><td>衡环正中的本源之核，被烛幽咬碎，碎片散落全图，成为一切材料的源头。</td></tr>
+          <tr><td><b>五帝</b></td><td>白帝蓐收、青帝句芒、黄帝后土、黑帝玄冥、赤帝祝融，各执一行。</td></tr>
+          <tr><td><b>烛幽</b></td><td>黯烬之龙，由创世残渣凝成，即游戏中的「远古巨龙」世界 BOSS。</td></tr>
+          <tr><td><b>逆衡</b></td><td>烛幽的权能 —— 不违背相克，而是把相克推到极致，令五行自相残杀。</td></tr>
+          <tr><td><b>命途</b></td><td>五帝在隐没前刻入凡人血脉的神性印记，是英雄觉醒与元素归属的根源。</td></tr>
+          <tr><td><b>碎片 Shards</b></td><td>心核崩碎后的五行结晶，锻造与合成的基础原料（ERC-1155）。</td></tr>
+          <tr><td><b>精粹 Essence</b></td><td>由碎片提纯的纯粹五行之力，用于武器强化（ERC-1155）。</td></tr>
+          <tr><td><b>黯烬</b></td><td>烛幽经过之处残留的无序物质，会让局部五行短暂失序。</td></tr>
+        </tbody>
+      </table>
+      <div class="note"><b>一句话概括：</b>你玩的不是「打怪升级」，而是<b>在一场持续了五个纪元的崩坏里，把世界一块块拼回去</b>。碎片是世界的尸体，英雄是神明的回声，而那条龙，还在咬。</div>
+    </section>
 
     <!-- 01 -->
     <section id="overview">

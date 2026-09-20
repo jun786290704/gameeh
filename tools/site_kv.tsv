@@ -121,3 +121,36 @@ foot	元素英雄 Element Heroes 	Element Heroes
 foot-enter	进入游戏	Enter Game
 cta-map	3D 世界地图	3D World Map
 foot-map	世界地图	World Map
+world-eyebrow	序章 · 世界观	PROLOGUE · THE WORLD
+t-world	衡洲，一个被龙咬碎的世界	Hengzhou, a World Bitten Apart
+s-world	在开始冒险之前，先认识这片大陆	Before your adventure begins, meet this continent
+world-p1	太初之时，唯有「元一」。它以自身为炉，将混沌炼作金木土水火五种本源。五种力量首尾相衔、彼此制衡，结成一条不息的「衡环」—— 那便是衡洲的秩序。五缕神性化为五帝，各守一行。	In the beginning there was only Yuan-yi, the One. It used itself as a furnace and smelted chaos into five origins: Metal, Wood, Earth, Water, Fire. The five lock head to tail, each restraining the next, forming the endless Ring of Balance — the order of Hengzhou. Its five divine strands became the Five Emperors, each guarding one element.
+world-p2	直到创世的残渣凝成一头巨龙：黯烬之龙 · 烛幽。它没有砸碎衡环，而是咬住它，把相克推到极致，令五行自相残杀。心核当空炸裂，碎片散落全图 —— 那便是你背包里的每一块碎片与精粹。	Until the residue of creation coalesced into a dragon: Zhuyou, the Ashen Dragon. It did not smash the Ring — it bit into it, driving every counter to its extreme until the five tore at one another. The Core burst in the sky and its fragments rained across the land — every shard and essence in your bag.
+world-deities	五帝 · 五行之源	The Five Emperors
+world-epochs	五纪元 · 从创世到当下	Five Epochs · From Creation to Now
+d0-e	金	Metal
+d0-n	白帝 · 蓐收	Baidi · Rushou
+d0-d	主刑杀与秩序，衡环断裂的链条由他接回。	Lord of retribution and order; he re-forges every broken link of the Ring.
+d1-e	木	Wood
+d1-n	青帝 · 句芒	Qingdi · Goumang
+d1-d	主生长与治愈，草木听其号令，万物生机之源。	Lord of growth and healing; all plants answer his call.
+d2-e	土	Earth
+d2-n	黄帝 · 后土	Huangdi · Houtu
+d2-d	主承载与记忆，万物之名皆刻于其记名石。	Lord of bearing and memory; every name is carved on his stone.
+d3-e	水	Water
+d3-n	黑帝 · 玄冥	Heidi · Xuanming
+d3-d	主流变与契约，潮汐与浮市皆随他而行。	Lord of flux and covenant; tides and floating markets follow him.
+d4-e	火	Fire
+d4-n	赤帝 · 祝融	Chidi · Zhurong
+d4-d	主燃烧与新生，毁物亦生物，残器终归于火。	Lord of burning and rebirth; all broken things return to fire.
+e0-n	太初纪	Primordial Epoch
+e0-d	元一开炉，五行成环，衡洲自环心凝结。	Yuan-yi opens the furnace; the Ring forms and Hengzhou condenses from its heart.
+e1-n	五帝纪	Epoch of Emperors
+e1-d	五帝立序，铸神器、建圣殿、教化众生。	The Five Emperors set order, forge relics and raise the Sanctum.
+e2-n	黯龙纪	Epoch of the Ashen Dragon
+e2-d	烛幽咬碎衡环，心核炸散，大陆塌成环带。	Zhuyou bites the Ring apart; the Core bursts; the land collapses into rings.
+e3-n	流亡纪	Epoch of Exile
+e3-d	五帝将命途刻入凡人血脉，人类筑塔相持。	The Emperors carve their Fates into mortal blood; humans build towers and endure.
+e4-n	觉醒纪	Epoch of Awakening
+e4-d	英雄现世，向巨龙讨回衡环碎片，重铸心核。	Heroes rise to tear Ring-shards back from the dragon and reforge the Core.
+world-cta	阅读完整世界观	Read the full lore

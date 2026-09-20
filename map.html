@@ -44,6 +44,8 @@ a{color:var(--gold);text-decoration:none}
 .hud-tl .eyebrow{display:inline-block;padding:3px 10px;border-radius:999px;border:1px solid rgba(251,191,36,.4);background:rgba(251,191,36,.08);color:var(--gold);font-size:10.5px;letter-spacing:.14em;margin-bottom:8px}
 .hud-tl h1{font-size:clamp(19px,2.6vw,27px);font-weight:900;line-height:1.2;margin-bottom:5px;background:linear-gradient(120deg,var(--gold),#fff7d6 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .hud-tl p{font-size:12px;color:var(--muted);line-height:1.6}
+.world-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 12px;border-radius:999px;border:1px solid rgba(251,191,36,.42);background:rgba(251,191,36,.09);color:var(--gold);font-size:11.5px;font-weight:700;text-decoration:none;pointer-events:auto}
+.world-link:hover{background:rgba(251,191,36,.18)}
 .keys{margin-top:9px;display:flex;gap:5px;flex-wrap:wrap;max-width:420px}
 .kk{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:7px;background:rgba(13,21,38,.8);border:1px solid var(--line);font-size:11px;color:#a8b8d0}
 .kk b{font-family:ui-monospace,monospace;color:var(--gold);font-size:10.5px}
@@ -87,6 +89,8 @@ a{color:var(--gold);text-decoration:none}
 .inf-tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.06em;margin-bottom:8px;border:1px solid}
 .inf-h{font-size:17px;font-weight:900;margin-bottom:6px;color:#fff}
 .inf-d{font-size:12.8px;color:var(--muted);line-height:1.7;margin-bottom:12px}
+.inf-lore{position:relative;font-size:12.2px;color:#d8c79b;line-height:1.7;margin-bottom:11px;padding:9px 11px 9px 30px;border-radius:0 10px 10px 0;background:rgba(251,191,36,.07);border-left:2px solid rgba(251,191,36,.5)}
+.inf-lore i{position:absolute;left:10px;top:9px;color:var(--gold);font-size:11px;opacity:.85}
 .inf-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .inf-meta span{padding:3px 9px;border-radius:8px;background:rgba(148,163,184,.1);border:1px solid var(--line);font-size:11px;color:#a8b8d0}
 .go{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px;border-radius:12px;font-size:13.5px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;border:0;cursor:pointer}
@@ -97,6 +101,8 @@ a{color:var(--gold);text-decoration:none}
 .spin{width:38px;height:38px;border-radius:50%;border:3px solid rgba(251,191,36,.22);border-top-color:var(--gold);animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 #loading p{font-size:12.5px;color:var(--muted)}
+#loading .lbrand{font-size:20px;font-weight:900;letter-spacing:.18em;background:linear-gradient(120deg,var(--gold),#fff7d6 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#loading .llore{max-width:420px;text-align:center;font-size:12px;color:#8a7d5c;line-height:1.8;padding:0 22px}
 #fallback{position:fixed;inset:0;top:50px;overflow-y:auto;padding:22px;display:none}
 #fallback.show{display:block}
 .fb-note{max-width:1180px;margin:0 auto 18px;padding:13px 16px;border-left:3px solid var(--gold);background:rgba(251,191,36,.07);border-radius:0 12px 12px 0;font-size:13px;color:#dbe4f2}
@@ -105,6 +111,7 @@ a{color:var(--gold);text-decoration:none}
 .fb-card:hover{border-color:var(--gold);transform:translateY(-2px);text-decoration:none}
 .fb-card .t{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:800;color:#fff;margin-bottom:7px}
 .fb-card .d{font-size:12.5px;color:var(--muted);line-height:1.65}
+.fb-card .lore{font-size:11.8px;color:#d8c79b;line-height:1.6;margin-bottom:8px;padding-left:9px;border-left:2px solid rgba(251,191,36,.45)}
 .fb-card .m{margin-top:10px;font-size:11.5px;font-weight:700}
 
 @media(max-width:820px){
@@ -268,9 +275,10 @@ a{color:var(--gold);text-decoration:none}
   <div id="labels"></div>
 
   <div class="hud-tl">
-    <span class="eyebrow">ELEMENT HEROES · OPEN WORLD</span>
-    <h1>悬浮大陆 · 十二圣所</h1>
-    <p>你已降临在这片 580 × 580 米的土地上。走向任意建筑即可进入对应玩法。</p>
+    <span class="eyebrow">衡洲 · HENGZHOU · OPEN WORLD</span>
+    <h1>十二圣域 · 环带残骸</h1>
+    <p>五帝的秩序曾被一头龙咬碎。你脚下这片 580 × 580 米的土地，是衡环的遗骸 —— 越靠外环，五行越失序。走向任意建筑即可进入对应玩法。</p>
+    <a class="world-link" href="docs.html#world" target="_blank" rel="noopener"><i class="fa-solid fa-scroll"></i> 世界志 · 衡洲五纪元</a>
     <div class="keys">
       <span class="kk"><b>WASD</b>移动</span>
       <span class="kk"><b>Shift</b>疾跑</span>
@@ -333,7 +341,12 @@ a{color:var(--gold);text-decoration:none}
     <div id="infoBody"></div>
   </aside>
 
-  <div id="loading"><div class="spin"></div><p id="loadTxt">正在载入 3D 世界…</p></div>
+  <div id="loading">
+    <div class="lbrand">衡洲 · HENGZHOU</div>
+    <div class="spin"></div>
+    <p id="loadTxt">正在载入 3D 世界…</p>
+    <div class="llore">太初，元一以自身为炉，将混沌炼作五行 —— 直到一头龙咬住了那条环。<br>你正踏入的，是衡环的残骸。</div>
+  </div>
 </div>
 
 <div id="fallback">
@@ -420,50 +433,62 @@ var EL = {
 var NODES = [
   {k:'heroes', tab:'heroes', name:'英雄圣殿', icon:'🏛️', el:'none', ring:0, a:0,   r:0,   h:58, R:26, type:'tower',
    d:'大陆的心脏。在这里召唤、查看与升级你的英雄 NFT，管理等级、体力与出战阵容。',
+   lore:'五帝会盟之坛，元一心核的原址。命途在此被唤回人间 —— 你召唤的每一位英雄，都从这里睁眼。',
    m:['召唤英雄','等级提升','最多持有 4 名']},
 
   {k:'forge',  tab:'forge',  name:'锻造工坊', icon:'⚒️', el:'metal', ring:1, a:-90, r:105, h:30, R:16, type:'shrine',
    d:'金之神殿。消耗武器碎片与 EH 合成新武器，稀有度越高基础属性与追加属性越强。',
+   lore:'白帝蓐收的锻金炉。战损的神器在此回炉，重铸为新的兵刃。',
    m:['碎片合成武器','手续费 50→1000 EH','可产出高稀有度']},
 
   {k:'melt',   tab:'melt',   name:'熔炼火山', icon:'🔥', el:'fire', ring:1, a:-18, r:105, h:30, R:16, type:'volcano',
    d:'火之神殿。把多余或低阶武器投入熔炉，回收碎片与精粹，变废为宝。',
+   lore:'赤帝祝融陨落时喷出的最后一口气，至今未熄。一切残器终归于火。',
    m:['批量熔炼','回收碎片/精粹','不可逆转']},
 
   {k:'compose',tab:'compose',name:'合成祭坛', icon:'🧪', el:'wood', ring:1, a:54,  r:105, h:30, R:16, type:'shrine',
    d:'木之神殿。将碎片熔炼铸成精粹，为武器强化与进阶提供材料来源。',
+   lore:'青帝句芒的生命之树。散落的碎片在此重新凝练、提纯为精粹。',
    m:['碎片→精粹','手续费 20/100/500 EH','强化必备']},
 
   {k:'market', tab:'market', name:'水上市集', icon:'🏪', el:'water', ring:1, a:126, r:105, h:30, R:16, type:'tent',
    d:'水之神殿。链上挂单买卖英雄与武器，价格自定，随时撤单，成交自动结算。',
+   lore:'黑帝玄冥的浮市，随潮而动。买卖不问来历，只认链上契约。',
    m:['挂单 / 撤单','购买英雄与武器','链上撮合']},
 
   {k:'gallery',tab:'gallery',name:'图鉴石碑', icon:'📖', el:'earth', ring:1, a:198, r:105, h:30, R:16, type:'obelisk',
    d:'土之神殿。记载全部英雄、武器与怪物资料，含元素克制表与战力算法说明。',
+   lore:'黄帝后土的记名石。凡有名字之物 —— 英雄、武器、怪物 —— 皆刻其上。',
    m:['全图鉴查阅','克制表','怪物资料']},
 
   {k:'fight',  tab:'fight',  name:'试炼竞技场', icon:'🏟️', el:'none', ring:2, a:18,  r:205, h:26, R:15, type:'arena',
    d:'挑战五行怪物，胜利可赢取 EH 奖励与英雄经验。每次出战消耗 1 点体力。',
+   lore:'流亡纪人类与黯烬交手之地。如今是试炼场，胜者带走对手体内的五行之力。',
    m:['PVE 战斗','胜率 = 战力占比','消耗体力 1 点']},
 
   {k:'weapons',tab:'weapons',name:'兵器库',   icon:'⚔️', el:'none', ring:2, a:90,  r:205, h:26, R:15, type:'forge',
    d:'存放并检视你的全部武器，查看强化等级、附加属性与元素归属。',
+   lore:'历代神器的安放之所。它们曾属于谁已无人记得，只等你让它们重新出鞘。',
    m:['武器总览','强化等级','元素属性']},
 
   {k:'rank',   tab:'rank',   name:'英雄纪念碑', icon:'🏆', el:'none', ring:2, a:162, r:205, h:32, R:15, type:'obelisk',
    d:'镌刻全服战绩：伤害榜、财富榜与各元素最强英雄，赛季数据实时更新。',
+   lore:'后土会记住每一个名字 —— 陨落的，与被传颂的。',
    m:['全服排行','伤害榜','财富榜']},
 
   {k:'admin',  tab:'admin',  name:'议会塔',   icon:'🛡️', el:'none', ring:2, a:234, r:205, h:34, R:15, type:'tower',
    d:'合约参数与管理工具中枢，供管理员调整配置、查看合约状态与权限。',
+   lore:'流亡纪人类议会的据点。如今代持世间规则 —— 包括召唤与锻造的价格。',
    m:['合约管理','参数配置','仅管理员']},
 
   {k:'vault',  tab:'vault',  name:'金库',     icon:'🏦', el:'none', ring:2, a:306, r:205, h:26, R:15, type:'vault',
    d:'领取战斗与世界 BOSS 奖励。按金库模式发放：代币模式折算 EH，USDT 模式直接发放 USDT。',
+   lore:'战利品并非凭空而生，而是被衡环碎片托住、暂存在此 —— 领取即是从环中取回属于你的那部分。',
    m:['领取奖励','EH / USDT 双模式','实时余额']},
 
   {k:'boss',   tab:'boss',   name:'巨龙巢穴', icon:'🐉', el:'fire', ring:3, a:-100, r:255, h:46, R:34, type:'dragon',
    d:'7 天一轮的世界 BOSS。全服合力攻击，击破分走 100% 奖池，未击破按伤害占比分 50%。攻击需押奖池 5% 的保证金，揭示后退还。',
+   lore:'黯烬之龙 · 烛幽盘踞之处，也是衡环被咬开的那道伤口。每一轮讨伐，都是往伤口上再撕一块。',
    m:['7 天一轮','押金 = 奖池 5%','按伤害占比分奖']}
 ];
 
@@ -494,6 +519,7 @@ function renderFallback(msg){
   document.getElementById('fbGrid').innerHTML = NODES.map(function(n){
     return '<a class="fb-card" style="border-left-color:'+n.color+'" href="game.html#'+n.tab+'">'
       + '<div class="t"><span>'+n.icon+'</span>'+n.name+'<span style="margin-left:auto;font-size:11px;color:'+n.color+'">'+EL[n.el].n+'</span></div>'
+      + (n.lore ? '<div class="lore">'+n.lore+'</div>' : '')
       + '<div class="d">'+n.d+'</div>'
       + '<div class="m" style="color:'+n.color+'">进入 '+n.name+' →</div></a>';
   }).join('');
@@ -1165,6 +1191,7 @@ function selectNode(k){
     '<div class="inf-ic" style="background:' + c + '1f;border-color:' + c + '66">' + n.icon + '</div>'
     + '<span class="inf-tag" style="color:' + c + ';border-color:' + c + '66;background:' + c + '14">' + EL[n.el].n + '元素 · ' + (n.ring === 0 ? '中央' : (n.ring === 3 ? '远境' : '外环')) + '</span>'
     + '<div class="inf-h">' + n.name + '</div>'
+    + (n.lore ? '<div class="inf-lore"><i class="fa-solid fa-scroll"></i>' + n.lore + '</div>' : '')
     + '<div class="inf-d">' + n.d + '</div>'
     + '<div class="inf-meta">' + n.m.map(function(x){ return '<span>' + x + '</span>'; }).join('') + '</div>'
     + '<button class="go" onclick="enterNodeByKey(\'' + n.k + '\')">进入 ' + n.name + ' <i class="fa-solid fa-arrow-right"></i></button>'

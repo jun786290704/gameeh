@@ -35,6 +35,8 @@ img{display:block}
 /* ===== Hero ===== */
 .hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background:radial-gradient(1100px 520px at 50% 12%,rgba(251,191,36,.13),transparent 62%),radial-gradient(900px 600px at 85% 90%,rgba(56,189,248,.08),transparent 60%),radial-gradient(900px 600px at 8% 80%,rgba(239,68,68,.09),transparent 60%),#070c18}
+#embers{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:.85}
+@media(prefers-reduced-motion:reduce){#embers{display:none}}
 .hero-imgs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.55;filter:saturate(1.05)}
 .hero-imgs img{width:min(30vw,340px);height:min(30vw,340px);object-fit:cover;object-position:center 22%;opacity:.82;border-radius:24px}
 .hero-imgs img:nth-child(1){transform:translateX(-46%) translateY(-2%) rotate(-7deg)}
@@ -137,6 +139,31 @@ img{display:block}
 .comm-card:hover .comm-go svg{transform:translateX(4px)}
 footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--muted);font-size:13px}
 footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
+/* ===== 世界观 · 序章 ===== */
+#world{position:relative;overflow:hidden}
+#world::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(760px 400px at 12% 6%,rgba(245,158,11,.11),transparent 62%),radial-gradient(680px 380px at 88% 24%,rgba(56,189,248,.10),transparent 62%),radial-gradient(640px 360px at 50% 100%,rgba(239,68,68,.10),transparent 62%),radial-gradient(560px 340px at 5% 86%,rgba(34,197,94,.09),transparent 62%)}
+#world .wrap{position:relative;z-index:1}
+.world-eyebrow{display:block;text-align:center;font-size:12.5px;letter-spacing:.34em;color:var(--gold);margin-bottom:16px}
+.world-text{max-width:840px;margin:0 auto}
+.world-text p{color:#c6d3e6;font-size:15px;line-height:1.95;margin-bottom:15px;text-align:center}
+.world-text p b{color:var(--gold);font-weight:700}
+.world-h3{text-align:center;font-size:clamp(18px,2.5vw,24px);font-weight:900;margin:56px 0 24px;letter-spacing:.04em;color:#fff}
+.deity-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(188px,1fr));gap:14px}
+.deity-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 18px 22px;overflow:hidden;transition:transform .2s,border-color .2s}
+.deity-card:hover{transform:translateY(-4px);border-color:var(--dc,rgba(251,191,36,.45))}
+.deity-card::after{content:'';position:absolute;right:-40px;top:-40px;width:122px;height:122px;border-radius:50%;background:var(--dc,#fbbf24);opacity:.13;pointer-events:none}
+.deity-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:800;margin-bottom:12px}
+.deity-card h3{font-size:17px;font-weight:800;margin-bottom:3px;font-family:'Noto Serif SC',serif}
+.deity-card .ttl{font-size:10.5px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.deity-card p{font-size:12.8px;color:var(--muted);line-height:1.7}
+.epoch-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));gap:12px}
+.epoch{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px 15px}
+.epoch .num{font-size:11px;font-family:ui-monospace,monospace;color:var(--gold);letter-spacing:.1em}
+.epoch h4{font-size:15px;font-weight:800;margin:6px 0 6px;color:#fff}
+.epoch p{font-size:12.5px;color:var(--muted);line-height:1.65}
+.epoch.now{border-color:rgba(251,191,36,.5);background:linear-gradient(180deg,rgba(251,191,36,.10),rgba(13,21,38,.45))}
+.epoch.now::before{content:'';position:absolute;top:-1px;left:16px;right:16px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.world-cta{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:40px}
 @media(max-width:820px){
   .weapon-hero,.boss-wrap{grid-template-columns:1fr}
   .hero-imgs img{width:min(44vw,180px);height:min(44vw,180px)}
@@ -185,6 +212,7 @@ footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
 <!-- ===== Hero ===== -->
 <header class="hero" data-page-node-id="YaseN7nV51pnN3JZqWB1RB">
   <div class="hero-bg" data-page-node-id="mtHnNnETfweL3BURrAAaLd"></div>
+  <canvas id="embers"></canvas>
   <div class="hero-imgs" data-page-node-id="jb2nlej0RcJV4r5QELf9L9">
     <img src="img/hero_1.png" alt="木系英雄" data-page-node-id="EwbPG8lcHkLEXz2NO3xNAZ">
     <img src="img/hero_0.png" alt="金系英雄" data-page-node-id="44modnJi39zdSFtKp5dn8B">
@@ -220,6 +248,71 @@ footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
   </div>
   <div class="scroll-hint" data-i18n="scroll" data-page-node-id="5aTI5AuLZpoQSScFBXBOcY">向下滚动</div>
 </header>
+
+<!-- ===== 世界观 · 序章 ===== -->
+<section class="sec" id="world">
+  <div class="wrap">
+    <span class="world-eyebrow" data-i18n="world-eyebrow">序章 · 世界观</span>
+    <h2 class="sec-title"><span class="t" data-i18n="t-world">衡洲，一个被龙咬碎的世界</span></h2>
+    <div class="gold-line"></div>
+    <p class="sec-sub" data-i18n="s-world">在开始冒险之前，先认识这片大陆</p>
+    <div class="world-text">
+      <p data-i18n="world-p1">太初之时，唯有「元一」。它以自身为炉，将混沌炼作金木土水火五种本源。五种力量首尾相衔、彼此制衡，结成一条不息的「衡环」—— 那便是衡洲的秩序。五缕神性化为五帝，各守一行。</p>
+      <p data-i18n="world-p2">直到创世的残渣凝成一头巨龙：黯烬之龙 · 烛幽。它没有砸碎衡环，而是咬住它，把相克推到极致，令五行自相残杀。心核当空炸裂，碎片散落全图 —— 那便是你背包里的每一块碎片与精粹。</p>
+    </div>
+
+    <h3 class="world-h3" data-i18n="world-deities">五帝 · 五行之源</h3>
+    <div class="deity-grid">
+      <div class="deity-card" style="--dc:#f59e0b">
+        <span class="deity-chip" style="background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(251,191,36,.3)">◈ <span data-i18n="d0-e">金</span></span>
+        <h3 data-i18n="d0-n">白帝 · 蓐收</h3>
+        <div class="ttl">Lord of the West</div>
+        <p data-i18n="d0-d">主刑杀与秩序，衡环断裂的链条由他接回。</p>
+      </div>
+      <div class="deity-card" style="--dc:#22c55e">
+        <span class="deity-chip" style="background:rgba(34,197,94,.14);color:#4ade80;border:1px solid rgba(34,197,94,.3)">✦ <span data-i18n="d1-e">木</span></span>
+        <h3 data-i18n="d1-n">青帝 · 句芒</h3>
+        <div class="ttl">Lord of the East</div>
+        <p data-i18n="d1-d">主生长与治愈，草木听其号令，万物生机之源。</p>
+      </div>
+      <div class="deity-card" style="--dc:#c2703a">
+        <span class="deity-chip" style="background:rgba(180,83,9,.2);color:#d97706;border:1px solid rgba(180,83,9,.4)">◆ <span data-i18n="d2-e">土</span></span>
+        <h3 data-i18n="d2-n">黄帝 · 后土</h3>
+        <div class="ttl">Lord of the Centre</div>
+        <p data-i18n="d2-d">主承载与记忆，万物之名皆刻于其记名石。</p>
+      </div>
+      <div class="deity-card" style="--dc:#38bdf8">
+        <span class="deity-chip" style="background:rgba(56,189,248,.14);color:#7dd3fc;border:1px solid rgba(56,189,248,.3)">◉ <span data-i18n="d3-e">水</span></span>
+        <h3 data-i18n="d3-n">黑帝 · 玄冥</h3>
+        <div class="ttl">Lord of the North</div>
+        <p data-i18n="d3-d">主流变与契约，潮汐与浮市皆随他而行。</p>
+      </div>
+      <div class="deity-card" style="--dc:#ef4444">
+        <span class="deity-chip" style="background:rgba(239,68,68,.14);color:#f87171;border:1px solid rgba(239,68,68,.3)">▲ <span data-i18n="d4-e">火</span></span>
+        <h3 data-i18n="d4-n">赤帝 · 祝融</h3>
+        <div class="ttl">Lord of the South</div>
+        <p data-i18n="d4-d">主燃烧与新生，毁物亦生物，残器终归于火。</p>
+      </div>
+    </div>
+
+    <h3 class="world-h3" data-i18n="world-epochs">五纪元 · 从创世到当下</h3>
+    <div class="epoch-row">
+      <div class="epoch"><div class="num">EPOCH I</div><h4 data-i18n="e0-n">太初纪</h4><p data-i18n="e0-d">元一开炉，五行成环，衡洲自环心凝结。</p></div>
+      <div class="epoch"><div class="num">EPOCH II</div><h4 data-i18n="e1-n">五帝纪</h4><p data-i18n="e1-d">五帝立序，铸神器、建圣殿、教化众生。</p></div>
+      <div class="epoch"><div class="num">EPOCH III</div><h4 data-i18n="e2-n">黯龙纪</h4><p data-i18n="e2-d">烛幽咬碎衡环，心核炸散，大陆塌成环带。</p></div>
+      <div class="epoch"><div class="num">EPOCH IV</div><h4 data-i18n="e3-n">流亡纪</h4><p data-i18n="e3-d">五帝将命途刻入凡人血脉，人类筑塔相持。</p></div>
+      <div class="epoch now"><div class="num">EPOCH V</div><h4 data-i18n="e4-n">觉醒纪</h4><p data-i18n="e4-d">英雄现世，向巨龙讨回衡环碎片，重铸心核。</p></div>
+    </div>
+
+    <div class="world-cta">
+      <a class="btn btn-gold" href="game.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <span data-i18n="cta-start">开始游戏</span>
+      </a>
+      <a class="btn btn-ghost" href="docs.html#world"><span data-i18n="world-cta">阅读完整世界观</span></a>
+    </div>
+  </div>
+</section>
 
 <!-- ===== 玩法 ===== -->
 <section class="sec" id="gameplay" data-page-node-id="qpdgZIb9ATZL7FoK82gpSd">
@@ -540,7 +633,25 @@ scroll:'向下滚动',
 'c1-n':'币安','c1-d':'全球领先的交易平台，GameFi 生态与流动性支持。','c1-g':'访问平台',
 'c2-n':'官方推特 X','c2-d':'每日动态、开发进度与社区活动公告。','c2-g':'关注我们',
 'c3-n':'官方电报','c3-d':'玩家交流社区与官方客服支持，实时答疑。','c3-g':'加入社区',
-foot:'元素英雄 Element Heroes ','foot-enter':'进入游戏','cta-map':'3D 世界地图','foot-map':'世界地图'
+foot:'元素英雄 Element Heroes ','foot-enter':'进入游戏','cta-map':'3D 世界地图','foot-map':'世界地图',
+'world-eyebrow':'序章 · 世界观',
+'t-world':'衡洲，一个被龙咬碎的世界',
+'s-world':'在开始冒险之前，先认识这片大陆',
+'world-p1':'太初之时，唯有「元一」。它以自身为炉，将混沌炼作金木土水火五种本源。五种力量首尾相衔、彼此制衡，结成一条不息的「衡环」—— 那便是衡洲的秩序。五缕神性化为五帝，各守一行。',
+'world-p2':'直到创世的残渣凝成一头巨龙：黯烬之龙 · 烛幽。它没有砸碎衡环，而是咬住它，把相克推到极致，令五行自相残杀。心核当空炸裂，碎片散落全图 —— 那便是你背包里的每一块碎片与精粹。',
+'world-deities':'五帝 · 五行之源',
+'world-epochs':'五纪元 · 从创世到当下',
+'d0-e':'金','d0-n':'白帝 · 蓐收','d0-d':'主刑杀与秩序，衡环断裂的链条由他接回。',
+'d1-e':'木','d1-n':'青帝 · 句芒','d1-d':'主生长与治愈，草木听其号令，万物生机之源。',
+'d2-e':'土','d2-n':'黄帝 · 后土','d2-d':'主承载与记忆，万物之名皆刻于其记名石。',
+'d3-e':'水','d3-n':'黑帝 · 玄冥','d3-d':'主流变与契约，潮汐与浮市皆随他而行。',
+'d4-e':'火','d4-n':'赤帝 · 祝融','d4-d':'主燃烧与新生，毁物亦生物，残器终归于火。',
+'e0-n':'太初纪','e0-d':'元一开炉，五行成环，衡洲自环心凝结。',
+'e1-n':'五帝纪','e1-d':'五帝立序，铸神器、建圣殿、教化众生。',
+'e2-n':'黯龙纪','e2-d':'烛幽咬碎衡环，心核炸散，大陆塌成环带。',
+'e3-n':'流亡纪','e3-d':'五帝将命途刻入凡人血脉，人类筑塔相持。',
+'e4-n':'觉醒纪','e4-d':'英雄现世，向巨龙讨回衡环碎片，重铸心核。',
+'world-cta':'阅读完整世界观'
 },
 en:{
 badge:'BSC Testnet · On-chain Contracts',
@@ -587,7 +698,25 @@ scroll:'Scroll down',
 'c1-n':'Binance','c1-d':'World-leading exchange with GameFi ecosystem support.','c1-g':'Visit',
 'c2-n':'Official X','c2-d':'Daily updates, dev progress and community events.','c2-g':'Follow',
 'c3-n':'Telegram','c3-d':'Player community and official support, live Q&A.','c3-g':'Join',
-foot:'Element Heroes ','foot-enter':'Enter Game','cta-map':'3D World Map','foot-map':'World Map'
+foot:'Element Heroes ','foot-enter':'Enter Game','cta-map':'3D World Map','foot-map':'World Map',
+'world-eyebrow':'PROLOGUE · THE WORLD',
+'t-world':'Hengzhou, a World Bitten Apart',
+'s-world':'Before your adventure begins, meet this continent',
+'world-p1':'In the beginning there was only Yuan-yi, the One. It used itself as a furnace and smelted chaos into five origins: Metal, Wood, Earth, Water, Fire. The five lock head to tail, each restraining the next, forming the endless Ring of Balance — the order of Hengzhou. Its five divine strands became the Five Emperors, each guarding one element.',
+'world-p2':'Until the residue of creation coalesced into a dragon: Zhuyou, the Ashen Dragon. It did not smash the Ring — it bit into it, driving every counter to its extreme until the five tore at one another. The Core burst in the sky and its fragments rained across the land — every shard and essence in your bag.',
+'world-deities':'The Five Emperors',
+'world-epochs':'Five Epochs · From Creation to Now',
+'d0-e':'Metal','d0-n':'Baidi · Rushou','d0-d':'Lord of retribution and order; he re-forges every broken link of the Ring.',
+'d1-e':'Wood','d1-n':'Qingdi · Goumang','d1-d':'Lord of growth and healing; all plants answer his call.',
+'d2-e':'Earth','d2-n':'Huangdi · Houtu','d2-d':'Lord of bearing and memory; every name is carved on his stone.',
+'d3-e':'Water','d3-n':'Heidi · Xuanming','d3-d':'Lord of flux and covenant; tides and floating markets follow him.',
+'d4-e':'Fire','d4-n':'Chidi · Zhurong','d4-d':'Lord of burning and rebirth; all broken things return to fire.',
+'e0-n':'Primordial Epoch','e0-d':'Yuan-yi opens the furnace; the Ring forms and Hengzhou condenses from its heart.',
+'e1-n':'Epoch of Emperors','e1-d':'The Five Emperors set order, forge relics and raise the Sanctum.',
+'e2-n':'Epoch of the Ashen Dragon','e2-d':'Zhuyou bites the Ring apart; the Core bursts; the land collapses into rings.',
+'e3-n':'Epoch of Exile','e3-d':'The Emperors carve their Fates into mortal blood; humans build towers and endure.',
+'e4-n':'Epoch of Awakening','e4-d':'Heroes rise to tear Ring-shards back from the dragon and reforge the Core.',
+'world-cta':'Read the full lore'
 },
 ja:{
 badge:'BSC テストネット · オンチェーン本物契約',
@@ -634,7 +763,25 @@ scroll:'スクロール',
 'c1-n':'バイナンス','c1-d':'世界有数の取引所、GameFiエコシステムと流動性をサポート。','c1-g':'アクセス',
 'c2-n':'公式X','c2-d':'毎日の最新情報・開発進捗・コミュニティイベント。','c2-g':'フォロー',
 'c3-n':'テレグラム','c3-d':'プレイヤー交流コミュニティと公式サポート、リアルタイム対応。','c3-g':'参加する',
-foot:'エレメントヒーローズ Element Heroes','foot-enter':'ゲームへ','cta-map':'3D ワールドマップ','foot-map':'ワールドマップ'
+foot:'エレメントヒーローズ Element Heroes','foot-enter':'ゲームへ','cta-map':'3D ワールドマップ','foot-map':'ワールドマップ',
+'world-eyebrow':'序章 · 世界観',
+'t-world':'衡洲 —— 竜に噛み砕かれた世界',
+'s-world':'冒険を始める前に、この大陸を知る',
+'world-p1':'太初、ただ「元一」のみが在った。自らを炉とし、混沌を金・木・土・水・火の五つの本源に錬成する。五つの力は尾と頭を咬み合わせ、互いを制し、絶えざる「衡環」を成す —— それが衡洲の秩序である。五つの神性は五帝となり、それぞれ一行を守る。',
+'world-p2':'やがて創世の残滓が一頭の竜となった：黯燼の竜・燭幽。それは衡環を砕かず、噛みついた。相克を極限まで引き伸ばし、五行を互いに殺し合わせた。心核は空に砕け散り、破片は大陸全土へ降り注ぐ —— それが君の鞄にある破片とエッセンスだ。',
+'world-deities':'五帝 · 五行の源',
+'world-epochs':'五つの紀元 · 創世から現在へ',
+'d0-e':'金','d0-n':'白帝 · 蓐収','d0-d':'刑罰と秩序を司る。断たれた環の鎖は彼が繋ぎ直す。',
+'d1-e':'木','d1-n':'青帝 · 勾芒','d1-d':'成長と治癒を司る。草木はその号令に従う。',
+'d2-e':'土','d2-n':'黄帝 · 后土','d2-d':'載せ持つ力と記憶を司る。万物の名はその石に刻まれる。',
+'d3-e':'水','d3-n':'黒帝 · 玄冥','d3-d':'流転と契約を司る。潮汐と浮市は彼に従う。',
+'d4-e':'火','d4-n':'赤帝 · 祝融','d4-d':'燃焼と新生を司る。壊れたものは炎へ還る。',
+'e0-n':'太初紀','e0-d':'元一が炉を開き衡環が成る。衡洲は環心から凝る。',
+'e1-n':'五帝紀','e1-d':'五帝が秩序を定め、神器を鋳、聖殿を建てる。',
+'e2-n':'黯竜紀','e2-d':'燭幽が衡環を噛み砕き、心核は砕散し大陸は環帯へ。',
+'e3-n':'流亡紀','e3-d':'五帝は命途を人の血に刻む。人は塔を築き耐える。',
+'e4-n':'覚醒紀','e4-d':'英雄が現れ、竜から環の破片を奪い心核を再鋳する。',
+'world-cta':'世界観の全文を読む'
 },
 es:{
 badge:'BSC Testnet · Contratos en cadena',
@@ -681,7 +828,25 @@ scroll:'Desplázate',
 'c1-n':'Binance','c1-d':'Exchange líder mundial con soporte al ecosistema GameFi.','c1-g':'Visitar',
 'c2-n':'X Oficial','c2-d':'Novedades diarias, progreso de desarrollo y eventos.','c2-g':'Seguir',
 'c3-n':'Telegram','c3-d':'Comunidad de jugadores y soporte oficial en vivo.','c3-g':'Unirse',
-foot:'Element Heroes ','foot-enter':'Entrar al Juego','cta-map':'Mapa 3D','foot-map':'Mapa del Mundo'
+foot:'Element Heroes ','foot-enter':'Entrar al Juego','cta-map':'Mapa 3D','foot-map':'Mapa del Mundo',
+'world-eyebrow':'PRÓLOGO · EL MUNDO',
+'t-world':'Hengzhou, un mundo mordido en pedazos',
+'s-world':'Antes de tu aventura, conoce este continente',
+'world-p1':'Al principio solo existía el Uno, Yuan-yi. Se usó a sí mismo como horno y fundió el caos en cinco orígenes: Metal, Madera, Tierra, Agua y Fuego. Los cinco se muerden la cola, cada uno frena al siguiente, formando el Anillo del Equilibrio: el orden de Hengzhou. Sus cinco hebras divinas se volvieron los Cinco Emperadores.',
+'world-p2':'Hasta que el residuo de la creación se unió en un dragón: Zhuyou, el Dragón de la Ceniza. No rompió el Anillo: lo mordió, llevando cada contrapeso al extremo hasta que los cinco se destrozaron entre sí. El Núcleo estalló y sus fragmentos cayeron sobre la tierra: cada esquirla y esencia de tu mochila.',
+'world-deities':'Los Cinco Emperadores',
+'world-epochs':'Cinco Eras · De la creación al presente',
+'d0-e':'Metal','d0-n':'Baidi · Rushou','d0-d':'Señor del orden y el castigo; él rehace cada eslabón roto.',
+'d1-e':'Madera','d1-n':'Qingdi · Goumang','d1-d':'Señor del crecimiento y la curación; toda vida le responde.',
+'d2-e':'Tierra','d2-n':'Huangdi · Houtu','d2-d':'Señor del sostén y la memoria; todo nombre se graba en su piedra.',
+'d3-e':'Agua','d3-n':'Heidi · Xuanming','d3-d':'Señor del flujo y el pacto; mareas y mercados le siguen.',
+'d4-e':'Fuego','d4-n':'Chidi · Zhurong','d4-d':'Señor del fuego y el renacer; todo lo roto vuelve al fuego.',
+'e0-n':'Era Primordial','e0-d':'Yuan-yi enciende el horno; Hengzhou se condensa del núcleo.',
+'e1-n':'Era de los Emperadores','e1-d':'Los Cinco Emperadores fijan el orden, forjan reliquias y alzan el Santuario.',
+'e2-n':'Era del Dragón','e2-d':'Zhuyou muerde el Anillo; el Núcleo estalla; la tierra se hunde en anillos.',
+'e3-n':'Era del Exilio','e3-d':'Los Emperadores graban su Sino en la sangre mortal; la humanidad resiste.',
+'e4-n':'Era del Despertar','e4-d':'Los héroes arrancan esquirlas al dragón para rehacer el Núcleo.',
+'world-cta':'Leer la historia completa'
 }
 };
 const LANG_KEY = 'eh_lang';
@@ -770,6 +935,71 @@ applyLang(curLang);
   }
   load();
   setInterval(load, 60000);
+})();
+</script>
+<script>
+/* 五行余烬：hero 背景轻量粒子层（无依赖、可降级） */
+(function () {
+  var cv = document.getElementById('embers');
+  if (!cv) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var ctx = cv.getContext && cv.getContext('2d');
+  if (!ctx) return;
+  var COLORS = ['#f59e0b', '#22c55e', '#c2703a', '#38bdf8', '#ef4444'];
+  var parts = [], W = 0, H = 0, dpr = 1, N = 0, raf = 0;
+
+  function hexA(hex, a) {
+    var n = parseInt(hex.slice(1), 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
+  function mk(init) {
+    return {
+      x: Math.random() * W,
+      y: init ? Math.random() * H : H + 10,
+      r: 0.7 + Math.random() * 2.1,
+      v: 0.14 + Math.random() * 0.5,
+      a: 0.05 + Math.random() * 0.32,
+      c: COLORS[(Math.random() * COLORS.length) | 0],
+      ph: Math.random() * Math.PI * 2,
+      sw: 0.2 + Math.random() * 0.6
+    };
+  }
+  function resize() {
+    var host = cv.parentElement || document.body;
+    W = host.clientWidth || window.innerWidth;
+    H = host.clientHeight || window.innerHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.floor(W * dpr); cv.height = Math.floor(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    N = Math.max(18, Math.min(54, Math.round(W / 34)));
+    if (parts.length > N) parts.length = N;
+    while (parts.length < N) parts.push(mk(true));
+  }
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      p.y -= p.v; p.ph += 0.01;
+      p.x += Math.sin(p.ph) * p.sw * 0.35;
+      if (p.y < -12) { parts[i] = mk(false); continue; }
+      var g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 7);
+      g.addColorStop(0, hexA(p.c, p.a));
+      g.addColorStop(1, hexA(p.c, 0));
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 7, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    raf = window.requestAnimationFrame(tick);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  if (!window.requestAnimationFrame) return;
+  raf = window.requestAnimationFrame(tick);
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (raf) window.cancelAnimationFrame(raf); raf = 0; }
+    else if (!raf) { raf = window.requestAnimationFrame(tick); }
+  });
 })();
 </script>
 </body>
