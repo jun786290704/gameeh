@@ -58,13 +58,15 @@ window.GAME_RE = [
 
 window.GAME_I18N = (function () {
   var LANG_KEY = 'eh_lang';
-  var LANGS = ['zh', 'en', 'ja', 'es'];
-  var LABELS = { zh: '中文', en: 'EN', ja: '日本語', es: 'ES' };
+  var LANGS = ['zh', 'en', 'ja', 'es', 'ko', 'ru'];
+  var LABELS = { zh: '中文', en: 'EN', ja: '日本語', es: 'ES', ko: '한국어', ru: 'Русский' };
   var TITLES = {
     zh: '元素英雄 · RPG',
     en: 'Element Heroes · RPG',
     ja: 'エレメントヒーローズ · RPG',
-    es: 'Element Heroes · RPG'
+    es: 'Element Heroes · RPG',
+    ko: '엘리먼트 히어로즈 · RPG',
+    ru: 'Element Heroes · RPG'
   };
   var cur = 'zh';
   try { cur = localStorage.getItem(LANG_KEY) || 'zh'; } catch (e) {}
