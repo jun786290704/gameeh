@@ -845,7 +845,9 @@ function tex_circle(){
   g.fillStyle = grd; g.fillRect(0,0,64,64);
   return new THREE.CanvasTexture(c);
 }
+var _glowTex = null;
 function tex_glow(){
+  if(_glowTex) return _glowTex;               // 共享一张，Sprite 各自控制颜色与透明度
   var c = document.createElement('canvas'); c.width = c.height = 128;
   var g = c.getContext('2d');
   var grd = g.createRadialGradient(64,64,4,64,64,64);
@@ -853,7 +855,273 @@ function tex_glow(){
   grd.addColorStop(0.25,'rgba(255,255,255,.35)');
   grd.addColorStop(1,'rgba(255,255,255,0)');
   g.fillStyle = grd; g.fillRect(0,0,128,128);
-  return new THREE.CanvasTexture(c);
+  _glowTex = new THREE.CanvasTexture(c);
+  return _glowTex;
+}
+
+/* ==================== 程序化贴图 ====================
+   全部用 canvas 现画，不引入任何外部图片；同一张画布可按需生成不同 repeat 的贴图。 */
+var CV = {}, TEXCACHE = {}, MATC = {};
+function cvs(s){ var c = document.createElement('canvas'); c.width = c.height = s; return c; }
+function rnd(a,b){ return a + Math.random()*(b-a); }
+function speckle(g, s, n, alpha, cols){
+  for(var i=0;i<n;i++){
+    g.globalAlpha = alpha*(0.35 + Math.random()*0.65);
+    g.fillStyle = cols[(Math.random()*cols.length)|0];
+    g.beginPath(); g.arc(Math.random()*s, Math.random()*s, rnd(0.5,2.4), 0, 6.2832); g.fill();
+  }
+  g.globalAlpha = 1;
+}
+function cracks(g, s, n, col){
+  g.strokeStyle = col; g.lineWidth = 1;
+  for(var i=0;i<n;i++){
+    var x = Math.random()*s, y = Math.random()*s;
+    g.beginPath(); g.moveTo(x,y);
+    for(var k=0;k<4;k++){ x += rnd(-16,16); y += rnd(-16,16); g.lineTo(x,y); }
+    g.stroke();
+  }
+}
+
+function buildTextureCanvases(){
+  var S = 256, c, g, r, x, y, w, h, v, i, j;
+
+  /* 石墙：错缝砖 + 上亮下暗 + 噪点 + 裂纹 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#2b3854'; g.fillRect(0,0,S,S);
+  h = S/7;
+  for(r=0;r<7;r++){
+    var off = (r%2) ? h*0.72 : 0;
+    for(x=-h; x<S; x+=h*1.5){
+      w = h*1.5 - 3; v = 0.8 + Math.random()*0.42;
+      g.fillStyle = 'rgb('+((74*v)|0)+','+((92*v)|0)+','+((130*v)|0)+')';
+      g.fillRect(x+off+1.5, r*h+1.5, w, h-3);
+      g.fillStyle = 'rgba(255,255,255,.08)'; g.fillRect(x+off+1.5, r*h+1.5, w, 2);
+      g.fillStyle = 'rgba(0,0,0,.24)';       g.fillRect(x+off+1.5, r*h+h-4.5, w, 2.5);
+    }
+  }
+  speckle(g,S,360,.16,['#ffffff','#9fb3d4','#0d1424']);
+  cracks(g,S,10,'rgba(8,12,22,.38)');
+  CV.stone = c;
+
+  /* 深色石：地基 / 墙裙 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#161f36'; g.fillRect(0,0,S,S);
+  h = S/6;
+  for(r=0;r<6;r++){
+    var o2 = (r%2) ? h*0.6 : 0;
+    for(x=-h; x<S; x+=h*1.7){
+      w = h*1.7 - 3; v = 0.75 + Math.random()*0.45;
+      g.fillStyle = 'rgb('+((42*v)|0)+','+((54*v)|0)+','+((80*v)|0)+')';
+      g.fillRect(x+o2+1.5, r*h+1.5, w, h-3);
+      g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x+o2+1.5, r*h+h-4, w, 2);
+    }
+  }
+  speckle(g,S,420,.2,['#ffffff','#7f92b5','#070c16']);
+  CV.stoneD = c;
+
+  /* 木纹：竖向板条 + 木理 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#4a3421'; g.fillRect(0,0,S,S);
+  w = S/6;
+  for(x=0;x<S;x+=w){
+    v = 0.78 + Math.random()*0.4;
+    g.fillStyle = 'rgb('+((92*v)|0)+','+((64*v)|0)+','+((38*v)|0)+')';
+    g.fillRect(x+1, 0, w-2, S);
+    g.strokeStyle = 'rgba(40,26,14,.55)'; g.lineWidth = 1;
+    for(i=0;i<7;i++){
+      var yy = Math.random()*S;
+      g.beginPath(); g.moveTo(x+2, yy);
+      g.bezierCurveTo(x+w*0.3, yy+rnd(-9,9), x+w*0.7, yy+rnd(-9,9), x+w-2, yy+rnd(-6,6));
+      g.stroke();
+    }
+    g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x+w-2.5, 0, 2.5, S);
+  }
+  speckle(g,S,180,.12,['#d8b083','#2a1a0d']);
+  CV.wood = c;
+
+  /* 瓦顶：筒瓦 + 檐口高光 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#3b2233'; g.fillRect(0,0,S,S);
+  w = S/9;
+  for(x=0;x<S;x+=w){
+    var grd = g.createLinearGradient(x,0,x+w,0);
+    grd.addColorStop(0,'rgba(0,0,0,.45)');
+    grd.addColorStop(0.35,'rgba(150,90,110,.55)');
+    grd.addColorStop(0.6,'rgba(86,44,60,.9)');
+    grd.addColorStop(1,'rgba(0,0,0,.5)');
+    g.fillStyle = grd; g.fillRect(x,0,w-1,S);
+  }
+  h = S/10;
+  for(y=0;y<S;y+=h){
+    g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(0,y,S,2);
+    g.fillStyle = 'rgba(255,220,200,.09)'; g.fillRect(0,y+2,S,1.5);
+  }
+  speckle(g,S,200,.1,['#e8c9b0','#1a0e16']);
+  CV.roof = c;
+
+  /* 金属：拉丝 + 铆钉 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#5b6474'; g.fillRect(0,0,S,S);
+  for(y=0;y<S;y+=2){
+    v = 0.72 + Math.random()*0.5;
+    g.fillStyle = 'rgba('+((140*v)|0)+','+((150*v)|0)+','+((168*v)|0)+',.5)';
+    g.fillRect(0,y,S,1);
+  }
+  for(i=0;i<5;i++) for(j=0;j<5;j++){
+    g.fillStyle = 'rgba(30,34,44,.85)'; g.beginPath(); g.arc(26+i*51, 26+j*51, 4, 0, 6.2832); g.fill();
+    g.fillStyle = 'rgba(200,210,225,.7)'; g.beginPath(); g.arc(25+i*51, 25+j*51, 2.2, 0, 6.2832); g.fill();
+  }
+  speckle(g,S,220,.14,['#dfe6f0','#20242e']);
+  CV.metal = c;
+
+  /* 布料：经纬织纹（颜色由材质 color 染） */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#b9b9b9'; g.fillRect(0,0,S,S);
+  for(x=0;x<S;x+=4){
+    g.fillStyle = 'rgba(255,255,255,.10)'; g.fillRect(x,0,2,S);
+    g.fillStyle = 'rgba(0,0,0,.10)';       g.fillRect(x+2,0,2,S);
+  }
+  for(y=0;y<S;y+=4){
+    g.fillStyle = 'rgba(255,255,255,.07)'; g.fillRect(0,y,S,2);
+    g.fillStyle = 'rgba(0,0,0,.07)';       g.fillRect(0,y+2,S,2);
+  }
+  speckle(g,S,200,.1,['#ffffff','#666666']);
+  CV.cloth = c;
+
+  /* 地面：草土岩混合 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#274a35'; g.fillRect(0,0,S,S);
+  for(i=0;i<220;i++){
+    var rr = rnd(8,34);
+    g.globalAlpha = rnd(0.06,0.2);
+    g.fillStyle = (Math.random()<0.5) ? '#5c8b4e' : (Math.random()<0.5 ? '#3d5b46' : '#6b5b3c');
+    g.beginPath(); g.arc(Math.random()*S, Math.random()*S, rr, 0, 6.2832); g.fill();
+  }
+  g.globalAlpha = 1;
+  speckle(g,S,700,.22,['#8fbf72','#3a4a2c','#7a6b48','#2b3a52']);
+  CV.ground = c;
+
+  /* 石板路 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#22283a'; g.fillRect(0,0,S,S);
+  for(i=0;i<26;i++){
+    var cx = Math.random()*S, cy = Math.random()*S, rad = rnd(16,30);
+    v = 0.75 + Math.random()*0.4;
+    g.fillStyle = 'rgb('+((96*v)|0)+','+((104*v)|0)+','+((122*v)|0)+')';
+    g.beginPath();
+    for(j=0;j<7;j++){
+      var a = j/7*6.2832, r2 = rad*rnd(0.78,1.12);
+      var px = cx + Math.cos(a)*r2, py = cy + Math.sin(a)*r2;
+      if(j===0) g.moveTo(px,py); else g.lineTo(px,py);
+    }
+    g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(10,14,24,.5)'; g.lineWidth = 1.6; g.stroke();
+  }
+  speckle(g,S,300,.16,['#c8d2e2','#141a28']);
+  CV.road = c;
+
+  /* 沙地（竞技场） */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#9a7b4f'; g.fillRect(0,0,S,S);
+  for(i=0;i<200;i++){
+    g.globalAlpha = rnd(0.05,0.18);
+    g.fillStyle = Math.random()<0.5 ? '#c2a173' : '#7a5f3b';
+    g.beginPath(); g.arc(Math.random()*S, Math.random()*S, rnd(6,22), 0, 6.2832); g.fill();
+  }
+  g.globalAlpha = 1;
+  speckle(g,S,600,.2,['#e2cba0','#5c4630']);
+  CV.sand = c;
+
+  /* 龙鳞 / 暗甲 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#2a1420'; g.fillRect(0,0,S,S);
+  h = S/10;
+  for(r=0;r<10;r++){
+    var o3 = (r%2) ? h*0.5 : 0;
+    for(x=-h; x<S; x+=h){
+      var grd2 = g.createRadialGradient(x+h*0.5+o3, r*h+h*0.45, 1, x+h*0.5+o3, r*h+h*0.45, h*0.62);
+      grd2.addColorStop(0,'rgba(120,52,64,.95)');
+      grd2.addColorStop(1,'rgba(26,12,20,.95)');
+      g.fillStyle = grd2;
+      g.beginPath(); g.arc(x+h*0.5+o3, r*h+h*0.5, h*0.55, 0, 6.2832); g.fill();
+    }
+  }
+  speckle(g,S,240,.16,['#ff8a6a','#120810']);
+  CV.scale = c;
+
+  /* 符文（自发光贴图，黑底 + 亮线） */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#000000'; g.fillRect(0,0,S,S);
+  g.strokeStyle = '#ffffff'; g.lineWidth = 3;
+  g.beginPath(); g.arc(128,128,86,0,6.2832); g.stroke();
+  g.lineWidth = 2;
+  g.beginPath(); g.arc(128,128,66,0,6.2832); g.stroke();
+  for(i=0;i<8;i++){
+    var a2 = i/8*6.2832;
+    g.beginPath();
+    g.moveTo(128+Math.cos(a2)*66, 128+Math.sin(a2)*66);
+    g.lineTo(128+Math.cos(a2)*86, 128+Math.sin(a2)*86);
+    g.stroke();
+    g.beginPath();
+    g.moveTo(128+Math.cos(a2+0.32)*30, 128+Math.sin(a2+0.32)*30);
+    g.lineTo(128+Math.cos(a2+0.32)*62, 128+Math.sin(a2+0.32)*62);
+    g.stroke();
+  }
+  g.lineWidth = 3;
+  g.beginPath(); g.moveTo(128,58); g.lineTo(128,198); g.moveTo(58,128); g.lineTo(198,128); g.stroke();
+  CV.rune = c;
+
+  /* 水面：波纹 */
+  c = cvs(S); g = c.getContext('2d');
+  g.fillStyle = '#123a52'; g.fillRect(0,0,S,S);
+  for(i=0;i<40;i++){
+    g.strokeStyle = 'rgba(150,220,255,'+rnd(0.05,0.18)+')';
+    g.lineWidth = rnd(1,2.6);
+    g.beginPath();
+    var yy2 = Math.random()*S;
+    g.moveTo(0, yy2);
+    for(j=0;j<=8;j++) g.lineTo(j*32, yy2 + Math.sin(j*0.9 + i)*rnd(3,9));
+    g.stroke();
+  }
+  CV.water = c;
+}
+
+/* 贴图 / 材质工厂：按名字 + repeat 缓存，避免重复上传 */
+function texOf(name, rx, ry){
+  var key = name + '|' + (rx||1) + '|' + (ry||1);
+  if(TEXCACHE[key]) return TEXCACHE[key];
+  var c = CV[name]; if(!c) return null;
+  var t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(rx||1, ry||1);
+  if(THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding;
+  t.anisotropy = 4;
+  TEXCACHE[key] = t;
+  return t;
+}
+function matOf(name, rx, ry, opt){
+  var tag = opt ? opt.tag || '' : '';
+  var key = 'm|' + name + '|' + (rx||1) + '|' + (ry||1) + '|' + tag;
+  if(MATC[key]) return MATC[key];
+  var t = texOf(name, rx, ry);
+  var o = {map:t, bumpMap:t, bumpScale:0.07, roughness:.92, metalness:.05};
+  if(opt) for(var k in opt){ if(k !== 'tag') o[k] = opt[k]; }
+  var m = new THREE.MeshStandardMaterial(o);
+  MATC[key] = m;
+  return m;
+}
+/* 纯色材质（金属 / 自发光 / 布） */
+function matC(color, rough, metal, emis, ei, flat){
+  return new THREE.MeshStandardMaterial({
+    color:color, roughness:(rough === undefined ? .8 : rough),
+    metalness:(metal || 0), emissive:(emis || 0x000000),
+    emissiveIntensity:(ei === undefined ? 1 : ei),
+    flatShading: !!flat
+  });
+}
+/* 元素色布料（每个建筑一条） */
+function clothMat(hex, rx, ry){
+  return matOf('cloth', rx || 2, ry || 2, {color:hex, roughness:.95, metalness:.02, tag:'c' + hex});
 }
 
 function boot(){
@@ -872,16 +1140,21 @@ function bootInner(){
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, IS_TOUCH ? 1.6 : 2));
   renderer.setSize(W, H, false);
   if(THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
+  if(THREE.ACESFilmicToneMapping !== undefined){ renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.12; }
+  renderer.shadowMap.enabled = !IS_TOUCH;                       // 移动端关阴影保帧率
+  if(THREE.PCFSoftShadowMap !== undefined) renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x070c18);
-  scene.fog = new THREE.FogExp2(0x070c18, 0.0022);
+  scene.fog = new THREE.FogExp2(0x080f1e, 0.0019);
 
   camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 4000);
   clock = new THREE.Clock();
   raycaster = new THREE.Raycaster();
 
+  buildTextureCanvases();
   buildLights();
+  buildSky();
   buildStars();
   buildTerrain();
   NODES.forEach(buildNode);
@@ -910,11 +1183,65 @@ window.addEventListener('error', function(e){
   if(!window.__booted && window.THREE) renderFallback('3D 场景启动失败：' + ((e && e.message) || '未知错误'));
 });
 
+/* 光照：主光带阴影（阴影相机跟着角色走，保证近处清晰），另有冷暖补光与环心金光 */
+var sun, sunTarget;
 function buildLights(){
-  scene.add(new THREE.HemisphereLight(0x4a6da8, 0x0a1020, 0.75));
-  var d1 = new THREE.DirectionalLight(0xffe6bd, 0.95); d1.position.set(180, 260, 120); scene.add(d1);
-  var d2 = new THREE.DirectionalLight(0x4aa8ff, 0.34); d2.position.set(-200, 120, -170); scene.add(d2);
-  var core = new THREE.PointLight(0xfbbf24, 1.4, 260); core.position.set(0, 40, 0); scene.add(core);
+  scene.add(new THREE.AmbientLight(0x30405f, 0.55));
+  scene.add(new THREE.HemisphereLight(0x5b82c8, 0x121a2c, 0.85));
+
+  sun = new THREE.DirectionalLight(0xffe3b0, 1.25);
+  sun.position.set(120, 180, 90);
+  if(!IS_TOUCH){
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(IS_TOUCH ? 1024 : 2048, IS_TOUCH ? 1024 : 2048);
+    var sc = sun.shadow.camera;
+    sc.left = -70; sc.right = 70; sc.top = 70; sc.bottom = -70; sc.near = 1; sc.far = 460;
+    sun.shadow.bias = -0.0012;
+    sun.shadow.normalBias = 0.03;
+  }
+  scene.add(sun);
+  sunTarget = new THREE.Object3D();
+  scene.add(sunTarget);
+  sun.target = sunTarget;
+
+  var fill = new THREE.DirectionalLight(0x4aa8ff, 0.42); fill.position.set(-180, 130, -150); scene.add(fill);
+  var rim  = new THREE.DirectionalLight(0xff9d5c, 0.26); rim.position.set(60, 40, -220); scene.add(rim);
+  var core = new THREE.PointLight(0xfbbf24, 1.5, 300, 1.6); core.position.set(0, 46, 0); scene.add(core);
+}
+/* 阴影相机跟随角色 */
+function updateSun(){
+  if(!sun || !sun.castShadow) return;
+  sun.position.set(hero.x + 110, hero.y + 165, hero.z + 80);
+  sunTarget.position.set(hero.x, hero.y, hero.z);
+  sunTarget.updateMatrixWorld();
+}
+
+/* 渐变天穹：底部暖橙 → 顶部深蓝，压住地平线的空 */
+function buildSky(){
+  var c = cvs(256); var g = c.getContext('2d');
+  var grd = g.createLinearGradient(0, 0, 0, 256);
+  grd.addColorStop(0.00, '#050a18');
+  grd.addColorStop(0.42, '#0b1730');
+  grd.addColorStop(0.68, '#1a2f56');
+  grd.addColorStop(0.86, '#3d4b74');
+  grd.addColorStop(1.00, '#7a6a86');
+  g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+  /* 高空星尘 */
+  for(var i=0;i<160;i++){
+    var y = Math.random()*110;
+    g.globalAlpha = (1 - y/110) * 0.7 * Math.random();
+    g.fillStyle = '#ffffff';
+    g.fillRect(Math.random()*256, y, 1.4, 1.4);
+  }
+  g.globalAlpha = 1;
+  var t = new THREE.CanvasTexture(c);
+  if(THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding;
+  var sky = new THREE.Mesh(
+    new THREE.SphereGeometry(1500, 32, 20),
+    new THREE.MeshBasicMaterial({map:t, side:THREE.BackSide, fog:false, depthWrite:false})
+  );
+  sky.renderOrder = -1;
+  scene.add(sky);
 }
 
 function buildStars(){
@@ -933,7 +1260,7 @@ function buildStars(){
 }
 
 function buildTerrain(){
-  var seg = 108;
+  var seg = IS_TOUCH ? 96 : 152;
   var geo = new THREE.PlaneGeometry(MAP, MAP, seg, seg);
   geo.rotateX(-Math.PI/2);
   var p = geo.attributes.position;
@@ -951,7 +1278,12 @@ function buildTerrain(){
   }
   geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
   geo.computeVertexNormals();
-  terrainMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({vertexColors:true, roughness:.97, metalness:.02, flatShading:true}));
+  var gTex = texOf('ground', 130, 130);
+  terrainMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+    vertexColors:true, map:gTex, bumpMap:gTex, bumpScale:.4,
+    roughness:.98, metalness:.02, flatShading:true
+  }));
+  terrainMesh.receiveShadow = true;
   scene.add(terrainMesh);
 
   // 地基岩体（让边缘不穿帮）
@@ -1001,179 +1333,666 @@ function buildRoads(){
       arr.push({x:px, z:pz, y:heightAt(px,pz) + 0.35, rot:-ang, sx:len/count + 1.6, sz:w});
     }
   });
+  /* 石板路面 + 中央元素光带 */
+  var roadMat = new THREE.MeshStandardMaterial({
+    map:texOf('road', 3, 2), bumpMap:texOf('road', 3, 2), bumpScale:.06,
+    roughness:.95, metalness:.03,
+    polygonOffset:true, polygonOffsetFactor:-3, polygonOffsetUnits:-3
+  });
   Object.keys(buckets).forEach(function(col){
     var arr = buckets[col];
     var geo = new THREE.PlaneGeometry(1, 1);
-    var mat = new THREE.MeshBasicMaterial({color:new THREE.Color(col), transparent:true, opacity:.32,
-      side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false});
-    var inst = new THREE.InstancedMesh(geo, mat, arr.length);
+    var inst = new THREE.InstancedMesh(geo, roadMat, arr.length);
+    var glow = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({
+      color:new THREE.Color(col), transparent:true, opacity:.2, side:THREE.DoubleSide,
+      blending:THREE.AdditiveBlending, depthWrite:false
+    }), arr.length);
     arr.forEach(function(it, i){
       dummy.rotation.set(-Math.PI/2, it.rot, 0, 'YXZ');   // 先放平，再绕世界 Y 转向
       dummy.position.set(it.x, it.y, it.z);
       dummy.scale.set(it.sx, it.sz, 1);
       dummy.updateMatrix();
       inst.setMatrixAt(i, dummy.matrix);
+      dummy.position.y = it.y + 0.06;
+      dummy.scale.set(it.sx, it.sz*0.34, 1);
+      dummy.updateMatrix();
+      glow.setMatrixAt(i, dummy.matrix);
     });
     inst.instanceMatrix.needsUpdate = true;
-    inst.frustumCulled = false;        // 实例分布全图，禁用整体剔除避免消失
-    scene.add(inst);
+    glow.instanceMatrix.needsUpdate = true;
+    inst.frustumCulled = false; glow.frustumCulled = false;   // 实例分布全图，禁用整体剔除避免消失
+    inst.receiveShadow = !IS_TOUCH;
+    scene.add(inst); scene.add(glow);
   });
 }
 
-/* 树木与岩石 */
+/* 树木 / 灌木 / 岩石 / 草丛 */
 function buildProps(){
   var dummy = new THREE.Object3D();
-  var trunkGeo = new THREE.CylinderGeometry(0.55, 0.8, 4.2, 6);
-  var crownGeo = new THREE.ConeGeometry(3.4, 9, 7);
-  var rockGeo  = new THREE.IcosahedronGeometry(1, 0);
+  var propN = IS_TOUCH ? 300 : 520;
+  var pine = [], broad = [], bush = [], rockA = [], rockB = [], grass = [];
+  var i, x, z, y, s, r, d;
 
-  var tPos = [], rPos = [];
-  var propN = IS_TOUCH ? 260 : 420;
-  for(var i=0;i<propN;i++){
-    var x = (Math.random()*2-1) * (HALF - 22);
-    var z = (Math.random()*2-1) * (HALF - 22);
+  for(i=0;i<propN;i++){
+    x = (Math.random()*2-1) * (HALF - 22);
+    z = (Math.random()*2-1) * (HALF - 22);
     if(Math.abs(x) > LIMIT - 4 || Math.abs(z) > LIMIT - 4) continue;
-    if(nearBuilding(x, z, 14)) continue;
-    if(Math.hypot(x, z) < 34) continue;         // 出生点留空
-    var y = heightAt(x, z);
-    if(y < -6) continue;                         // 悬崖上不种树
-    (Math.random() < 0.62 ? tPos : rPos).push({x:x, y:y, z:z, s:0.7 + Math.random()*0.9, r:Math.random()*Math.PI*2});
+    if(nearBuilding(x, z, 15)) continue;
+    if(Math.hypot(x, z) < 34) continue;              // 出生点留空
+    y = heightAt(x, z);
+    if(y < -6) continue;                             // 悬崖上不种树
+    s = 0.7 + Math.random()*0.9; r = Math.random()*Math.PI*2;
+    d = Math.random();
+    var it = {x:x, y:y, z:z, s:s, r:r};
+    if(d < 0.38) pine.push(it);
+    else if(d < 0.62) broad.push(it);
+    else if(d < 0.78) bush.push(it);
+    else if(d < 0.90) rockA.push(it);
+    else rockB.push(it);
   }
 
-  var trunk = new THREE.InstancedMesh(trunkGeo, new THREE.MeshStandardMaterial({color:0x4a3524, roughness:1, flatShading:true}), tPos.length);
-  var crown = new THREE.InstancedMesh(crownGeo, new THREE.MeshStandardMaterial({color:0x2f7a4f, roughness:.88, flatShading:true}), tPos.length);
-  tPos.forEach(function(p, i){
-    dummy.position.set(p.x, p.y + 2.1*p.s, p.z); dummy.rotation.set(0, p.r, 0); dummy.scale.setScalar(p.s); dummy.updateMatrix();
-    trunk.setMatrixAt(i, dummy.matrix);
-    dummy.position.set(p.x, p.y + 7.2*p.s, p.z);
-    dummy.updateMatrix();
-    crown.setMatrixAt(i, dummy.matrix);
-  });
-  trunk.instanceMatrix.needsUpdate = true; crown.instanceMatrix.needsUpdate = true;
-  trunk.frustumCulled = false; crown.frustumCulled = false;
-  scene.add(trunk); scene.add(crown);
+  var grassN = IS_TOUCH ? 220 : 560;
+  for(i=0;i<grassN;i++){
+    x = (Math.random()*2-1) * (HALF - 14);
+    z = (Math.random()*2-1) * (HALF - 14);
+    if(nearBuilding(x, z, 7)) continue;
+    y = heightAt(x, z);
+    if(y < -4) continue;
+    grass.push({x:x, y:y, z:z, s:0.6 + Math.random()*0.8, r:Math.random()*6.2832});
+  }
 
-  var rocks = new THREE.InstancedMesh(rockGeo, new THREE.MeshStandardMaterial({color:0x2a3a5e, roughness:1, flatShading:true}), rPos.length);
-  rPos.forEach(function(p, i){
-    var s = p.s * 2.6;
-    dummy.position.set(p.x, p.y + s*0.35, p.z);
-    dummy.rotation.set(p.r, p.r*1.7, p.r*0.6); dummy.scale.setScalar(s); dummy.updateMatrix();
-    rocks.setMatrixAt(i, dummy.matrix);
-  });
-  rocks.instanceMatrix.needsUpdate = true;
-  rocks.frustumCulled = false;
-  scene.add(rocks);
+  var woodM      = matOf('wood', 1, 2);
+  var pineCrown  = matC(0x2f7a4f, .92, .02, 0x0c2418, .28, true);
+  var broadCrown = matC(0x3f8f52, .92, .02, 0x0e2a18, .26, true);
+  var bushM      = matC(0x33684a, .94, .02, 0x0b2016, .22, true);
+  var rockM      = matC(0x2a3a5e, .96, .06, 0x080d18, .22, true);
+  var grassM     = matC(0x4f7a3a, .95, 0, 0x10240e, .3, true);
+
+  var trunkGeo   = new THREE.CylinderGeometry(0.5, 0.8, 4.2, 7);
+  var pineGeo1   = new THREE.ConeGeometry(3.0, 5.4, 8);
+  var pineGeo2   = new THREE.ConeGeometry(2.1, 4.6, 8);
+  var broadTrunk = new THREE.CylinderGeometry(0.42, 0.66, 4.6, 7);
+  var broadGeo   = new THREE.IcosahedronGeometry(2.9, 0);
+  var bushGeo    = new THREE.IcosahedronGeometry(1.5, 0);
+  var rockAGeo   = new THREE.IcosahedronGeometry(1, 0);
+  var rockBGeo   = new THREE.DodecahedronGeometry(1, 0);
+  var grassGeo   = new THREE.ConeGeometry(0.55, 1.5, 4);
+
+  function fill(geo, mat, arr, yOff, mul, squash, randRot, noShadow){
+    if(!arr.length) return null;
+    var inst = new THREE.InstancedMesh(geo, mat, arr.length);
+    arr.forEach(function(p, i){
+      dummy.position.set(p.x, p.y + yOff * p.s, p.z);
+      if(randRot) dummy.rotation.set(p.r, p.r*1.7, p.r*0.6);
+      else dummy.rotation.set(0, p.r, 0);
+      dummy.scale.set(p.s*(mul||1), p.s*(squash||1)*(mul||1), p.s*(mul||1));
+      dummy.updateMatrix();
+      inst.setMatrixAt(i, dummy.matrix);
+    });
+    inst.instanceMatrix.needsUpdate = true;
+    inst.frustumCulled = false;          // 实例分布全图，禁用整体剔除避免消失
+    if(!IS_TOUCH && !noShadow){ inst.castShadow = true; }
+    scene.add(inst);
+    return inst;
+  }
+
+  fill(trunkGeo,   woodM,      pine,  2.1, 1);
+  fill(pineGeo1,   pineCrown,  pine,  5.2, 1);
+  fill(pineGeo2,   pineCrown,  pine,  8.3, 1);
+  fill(broadTrunk, woodM,      broad, 2.3, 1);
+  fill(broadGeo,   broadCrown, broad, 6.5, 1, 0.78);
+  fill(bushGeo,    bushM,      bush,  0.85, 1, 0.72);
+  fill(rockAGeo,   rockM,      rockA, 0.5, 2.4, 1, true);
+  fill(rockBGeo,   rockM,      rockB, 0.42, 2.0, 1, true);
+  fill(grassGeo,   grassM,     grass, 0.5, 1, 1, false, true);
 }
 
-/* 建筑 */
+
+/* ---------- 建筑零件库 ---------- */
+var FLAMES = [], BANNERS = [], SPINS = [], SMOKES = [];
+
+function shade(m, cast, receive){
+  if(IS_TOUCH) return m;
+  m.castShadow = cast !== false;
+  m.receiveShadow = receive !== false;
+  return m;
+}
+function put(parent, mesh, x, y, z, ry){
+  mesh.position.set(x || 0, y || 0, z || 0);
+  if(ry) mesh.rotation.y = ry;
+  parent.add(mesh);
+  return mesh;
+}
+/* 台阶：由外向内拾级而上 */
+function addStairs(grp, R, mat, ang, steps, topY){
+  steps = steps || 5;
+  var hh = (topY || 4.1) / steps;
+  for(var i=0;i<steps;i++){
+    var d = R*1.24 - i*(R*0.06 + 0.45);
+    var m = new THREE.Mesh(new THREE.BoxGeometry(R*0.52, hh, R*0.2 + 0.9), mat);
+    m.position.set(Math.cos(ang)*d, hh*(i + 0.5), Math.sin(ang)*d);
+    m.rotation.y = -ang;
+    grp.add(m); shade(m);
+  }
+}
+/* 石柱：柱础 + 柱身 + 柱头 */
+function addColumn(grp, r, hh, matBody, matCap, x, z, y0){
+  var base = new THREE.Mesh(new THREE.BoxGeometry(r*2.6, 0.42, r*2.6), matCap);
+  put(grp, base, x, y0 + 0.21, z); shade(base);
+  var body = new THREE.Mesh(new THREE.CylinderGeometry(r*0.84, r, hh, 10), matBody);
+  put(grp, body, x, y0 + 0.42 + hh/2, z); shade(body);
+  var cap = new THREE.Mesh(new THREE.BoxGeometry(r*2.8, 0.48, r*2.8), matCap);
+  put(grp, cap, x, y0 + 0.42 + hh + 0.24, z); shade(cap);
+  return y0 + 0.42 + hh + 0.48;
+}
+/* 石灯笼 */
+function addLantern(grp, x, z, y0, colHex){
+  var g = new THREE.Group(); g.position.set(x, y0, z);
+  var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.4, 2.3, 6), matOf('stoneD', 1, 1));
+  put(g, pole, 0, 1.15, 0); shade(pole);
+  var seat = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.28, 1.05), matOf('stoneD', 1, 1));
+  put(g, seat, 0, 2.4, 0); shade(seat);
+  var box = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.9, 0.86), matC(colHex, .35, .2, colHex, 1.25));
+  put(g, box, 0, 2.98, 0);
+  var cap = new THREE.Mesh(new THREE.ConeGeometry(0.92, 0.52, 4), matOf('roof', 1, 1));
+  cap.rotation.y = Math.PI/4; put(g, cap, 0, 3.68, 0); shade(cap);
+  var sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:colHex, transparent:true, opacity:.62, blending:THREE.AdditiveBlending, depthWrite:false}));
+  sp.scale.setScalar(3.6); put(g, sp, 0, 2.98, 0);
+  FLAMES.push({sp:sp, base:.55, amp:.22, spd:1.9, ph:Math.random()*6.28});
+  grp.add(g);
+  return g;
+}
+/* 火盆 */
+function addBrazier(grp, x, z, y0, colHex, sc){
+  sc = sc || 1;
+  var g = new THREE.Group(); g.position.set(x, y0, z);
+  var stand = new THREE.Mesh(new THREE.CylinderGeometry(0.3*sc, 0.52*sc, 1.5*sc, 8), matOf('metal', 1, 1, {roughness:.5, metalness:.8}));
+  put(g, stand, 0, 0.75*sc, 0); shade(stand);
+  var bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.95*sc, 0.55*sc, 0.62*sc, 12), matOf('metal', 1, 1, {roughness:.45, metalness:.85}));
+  put(g, bowl, 0, 1.78*sc, 0); shade(bowl);
+  var coal = new THREE.Mesh(new THREE.SphereGeometry(0.72*sc, 10, 8), matC(0xff7a1a, .5, 0, 0xff5a10, 1.5));
+  put(g, coal, 0, 2.05*sc, 0);
+  var fire = new THREE.Mesh(new THREE.ConeGeometry(0.66*sc, 1.6*sc, 7), matC(colHex, .4, 0, colHex, 1.5));
+  put(g, fire, 0, 2.7*sc, 0);
+  var sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:colHex, transparent:true, opacity:.75, blending:THREE.AdditiveBlending, depthWrite:false}));
+  sp.scale.setScalar(5.2*sc); put(g, sp, 0, 2.6*sc, 0);
+  FLAMES.push({sp:sp, mesh:fire, base:.62, amp:.3, spd:2.7, ph:Math.random()*6.28});
+  grp.add(g);
+  return g;
+}
+/* 旗帜（带飘动） */
+function addBanner(grp, x, z, y0, colHex, hh, ry){
+  var g = new THREE.Group(); g.position.set(x, y0, z);
+  var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, hh, 6), matOf('wood', 1, 2));
+  put(g, pole, 0, hh/2, 0); shade(pole);
+  var geo = new THREE.PlaneGeometry(2.0, hh*0.5, 8, 4);
+  var flag = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+    map:texOf('cloth', 1, 1), color:colHex, side:THREE.DoubleSide, roughness:.95, metalness:.02
+  }));
+  put(g, flag, 1.0, hh - hh*0.25 - 0.4, 0);
+  BANNERS.push({mesh:flag, base:Float32Array.from(geo.attributes.position.array), ph:Math.random()*6.28});
+  var fin = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), matC(0xfbbf24, .35, .85, 0x3a2606, .5));
+  put(g, fin, 0, hh + 0.18, 0);
+  g.rotation.y = ry || 0;
+  grp.add(g);
+  return g;
+}
+/* 木箱 / 木桶 */
+function addCrate(grp, x, y, z, s, ry){
+  var m = new THREE.Mesh(new THREE.BoxGeometry(1.5*s, 1.4*s, 1.5*s), matOf('wood', 1, 1));
+  m.position.set(x, y + 0.7*s, z); m.rotation.y = ry || 0; grp.add(m); shade(m);
+  var band = new THREE.Mesh(new THREE.BoxGeometry(1.57*s, 0.13*s, 1.57*s), matOf('metal', 1, 1, {roughness:.5, metalness:.8}));
+  band.position.set(x, y + 1.08*s, z); band.rotation.y = ry || 0; grp.add(band);
+  return m;
+}
+function addBarrel(grp, x, y, z, s){
+  var m = new THREE.Mesh(new THREE.CylinderGeometry(0.62*s, 0.54*s, 1.5*s, 10), matOf('wood', 2, 1));
+  put(grp, m, x, y + 0.75*s, z); shade(m);
+  var h1 = new THREE.Mesh(new THREE.TorusGeometry(0.63*s, 0.055*s, 5, 14), matOf('metal', 1, 1, {roughness:.45, metalness:.85}));
+  h1.rotation.x = Math.PI/2; put(grp, h1, x, y + 1.12*s, z);
+  var h2 = h1.clone(); h2.position.y = y + 0.38*s; grp.add(h2);
+  return m;
+}
+/* 碎石 */
+function addRubble(grp, cx, cz, count, rad, mat){
+  for(var i=0;i<count;i++){
+    var a = Math.random()*6.2832, d = Math.sqrt(Math.random())*rad, s = rnd(0.5, 1.7);
+    var m = new THREE.Mesh(new THREE.DodecahedronGeometry(s, 0), mat);
+    m.position.set(cx + Math.cos(a)*d, s*0.34, cz + Math.sin(a)*d);
+    m.rotation.set(Math.random()*3, Math.random()*3, Math.random()*3);
+    grp.add(m); shade(m, false, true);
+  }
+}
+/* 兵器架：木架 + 剑 + 矛 */
+function addWeaponRack(grp, x, z, y0, ry, colHex){
+  var g = new THREE.Group(); g.position.set(x, y0, z); g.rotation.y = ry || 0;
+  var wm = matOf('wood', 1, 1), mm = matOf('metal', 1, 1, {roughness:.38, metalness:.9});
+  var p1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 2.2, 0.22), wm); put(g, p1, -1.0, 1.1, 0); shade(p1);
+  var p2 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 2.2, 0.22), wm); put(g, p2, 1.0, 1.1, 0); shade(p2);
+  var bar = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.18, 0.18), wm); put(g, bar, 0, 1.9, 0); shade(bar);
+  for(var i=0;i<3;i++){
+    var sw = new THREE.Group();
+    var blade = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 0.22), mm);
+    put(sw, blade, 0, 0.75, 0); shade(blade);
+    var guard = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.1, 0.14), matC(0xfbbf24, .35, .8, 0x3a2606, .4));
+    put(sw, guard, 0, 0.02, 0);
+    var grip = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.5, 6), matOf('wood', 1, 1));
+    put(sw, grip, 0, -0.25, 0);
+    sw.position.set(-0.7 + i*0.7, 0.55, 0);
+    sw.rotation.z = (i - 1) * 0.16;
+    g.add(sw);
+  }
+  var spear = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 2.6, 6), matOf('wood', 1, 2));
+  spear.rotation.z = 0.2; put(g, spear, 1.35, 1.3, 0.1); shade(spear);
+  var tip = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.44, 6), matC(colHex, .35, .5, colHex, .55));
+  tip.rotation.z = 0.2; put(g, tip, 1.58, 2.72, 0.1);
+  grp.add(g);
+  return g;
+}
+/* 守卫石像 */
+function addStatue(grp, x, z, y0, ry, colHex){
+  var g = new THREE.Group(); g.position.set(x, y0, z); g.rotation.y = ry || 0;
+  var st = matOf('stone', 1, 2), stD = matOf('stoneD', 1, 1);
+  var base = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.5, 1.7), stD); put(g, base, 0, 0.25, 0); shade(base);
+  var body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.68, 1.9, 8), st); put(g, body, 0, 1.45, 0); shade(body);
+  var sh = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.35, 0.6), st); put(g, sh, 0, 2.3, 0); shade(sh);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), st); put(g, head, 0, 2.75, 0); shade(head);
+  var helm = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.55, 6), matC(0xfbbf24, .35, .8, 0x3a2606, .4));
+  put(g, helm, 0, 3.05, 0);
+  var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 5), matC(colHex, .3, 0, colHex, 1.6));
+  put(g, eye1, -0.12, 2.78, 0.28);
+  var eye2 = eye1.clone(); eye2.position.x = 0.12; g.add(eye2);
+  var shield = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.14, 12), matOf('metal', 1, 1, {roughness:.45, metalness:.8}));
+  shield.rotation.set(Math.PI/2, 0, 0); put(g, shield, -0.72, 1.5, 0.2); shade(shield);
+  var spear = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 3.2, 6), matOf('wood', 1, 2));
+  put(g, spear, 0.72, 1.6, 0.1); shade(spear);
+  grp.add(g);
+  return g;
+}
+/* 上升烟 / 火星柱 */
+function addSmoke(grp, x, y, z, colHex, count, spread, rise, size){
+  var N = count || 34, pos = new Float32Array(N*3), spd = new Float32Array(N), base = new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var a = Math.random()*6.2832, r = Math.random()*spread;
+    pos[i*3] = x + Math.cos(a)*r; pos[i*3+1] = y + Math.random()*rise; pos[i*3+2] = z + Math.sin(a)*r;
+    spd[i] = 2.2 + Math.random()*4.5;
+    base[i*3] = pos[i*3]; base[i*3+1] = y; base[i*3+2] = pos[i*3+2];
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  var p = new THREE.Points(g, new THREE.PointsMaterial({
+    size:size || 8, map:tex_glow(), color:colHex, transparent:true, opacity:.3,
+    depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true
+  }));
+  grp.add(p);
+  SMOKES.push({pts:p, spd:spd, base:base, y0:y, rise:rise});
+  return p;
+}
+
+/* ==================== 建筑 ==================== */
 function buildNode(n){
   var col = new THREE.Color(n.color);
+  var colHex = col.getHex();
   var grp = new THREE.Group();
   grp.position.set(n.x, n.baseY, n.z);
   var R = n.R, h = n.h;
 
-  var stone  = new THREE.MeshStandardMaterial({color:0x1a2743, roughness:.92, metalness:.06, flatShading:true});
-  var stoneL = new THREE.MeshStandardMaterial({color:0x25355a, roughness:.88, metalness:.08, flatShading:true});
-  var emis   = new THREE.MeshStandardMaterial({color:col, emissive:col, emissiveIntensity:.7, roughness:.4, metalness:.25, flatShading:true});
+  var stone  = matOf('stone',  Math.max(3, Math.round(R*0.62)), Math.max(2, Math.round(h*0.20)));
+  var stoneD = matOf('stoneD', Math.max(3, Math.round(R*0.55)), 2);
+  var wood   = matOf('wood',   Math.max(2, Math.round(R*0.45)), 2);
+  var roofM  = matOf('roof',   Math.max(4, Math.round(R*0.85)), 2);
+  var metalM = matOf('metal',  2, 2, {roughness:.42, metalness:.78});
+  var goldM  = matC(0xfbbf24, .32, .85, 0x3a2606, .45);
+  var clothM = clothMat(colHex, Math.max(2, Math.round(R*0.4)), 2);
+  var emisM  = matC(colHex, .35, .25, colHex, .95);
+  var emisHi = matC(colHex, .3, .15, colHex, 1.7);
 
-  var base = new THREE.Mesh(new THREE.CylinderGeometry(R*1.04, R*1.12, 2.6, 6), stone); base.position.y = 1.3; grp.add(base);
-  var base2 = new THREE.Mesh(new THREE.CylinderGeometry(R*0.84, R*0.94, 1.8, 6), stoneL); base2.position.y = 3.4; grp.add(base2);
-  // 地基柱：向下延伸，填平地形起伏，避免悬空
-  var footing = new THREE.Mesh(new THREE.CylinderGeometry(R*1.02, R*1.15, 14, 6), stone);
-  footing.position.y = -6.6; grp.add(footing);
-  var top = 4.3;
+  /* 台地：石板铺面 + 石砌护沿（把起伏地形挡在外面） */
+  var plazaR = R * (n.ring === 3 ? 1.42 : 1.62);
+  var plaza = new THREE.Mesh(
+    new THREE.CircleGeometry(plazaR, 40),
+    new THREE.MeshStandardMaterial({map:texOf('road', Math.max(3, Math.round(plazaR*0.5)), Math.max(3, Math.round(plazaR*0.5))), bumpMap:texOf('road',1,1), bumpScale:.05, roughness:.95, metalness:.03})
+  );
+  plaza.rotation.x = -Math.PI/2; plaza.position.y = 0.62;
+  grp.add(plaza); shade(plaza, false, true);
+  var curb = new THREE.Mesh(new THREE.CylinderGeometry(plazaR, plazaR*1.03, 3.2, 40, 1, true), stoneD);
+  curb.position.y = -0.98; grp.add(curb); shade(curb, false, true);
+
+  /* 三层台基 */
+  var tiers = [[R*1.06, R*1.18, 1.5], [R*0.93, R*1.04, 1.4], [R*0.80, R*0.90, 1.2]];
+  var ty = 0, segs = (n.ring === 0) ? 16 : 12;
+  for(var ti=0; ti<tiers.length; ti++){
+    var t = tiers[ti];
+    var m = new THREE.Mesh(new THREE.CylinderGeometry(t[0], t[1], t[2], segs), ti === 0 ? stoneD : stone);
+    m.position.y = ty + t[2]/2; grp.add(m); shade(m);
+    ty += t[2];
+  }
+  var top = ty;                                     // ≈ 4.1
+  /* 地基柱：向下延伸填平地形 */
+  var footing = new THREE.Mesh(new THREE.CylinderGeometry(R*1.02, R*1.16, 15, segs), stoneD);
+  footing.position.y = -7.2; grp.add(footing);
+
+  var toCenter = Math.atan2(-n.z, -n.x);            // 朝向地图中心（路来的方向）
+  if(n.ring === 0) toCenter = Math.PI/2;
 
   if(n.type === 'tower'){
-    var b1 = new THREE.Mesh(new THREE.CylinderGeometry(R*0.5, R*0.68, h*0.5, 8), stoneL); b1.position.y = top + h*0.25; grp.add(b1);
-    var md = new THREE.Mesh(new THREE.CylinderGeometry(R*0.74, R*0.74, 1.4, 8), stone);  md.position.y = top + h*0.5; grp.add(md);
-    var b2 = new THREE.Mesh(new THREE.CylinderGeometry(R*0.34, R*0.48, h*0.28, 8), stoneL); b2.position.y = top + h*0.5 + h*0.14; grp.add(b2);
-    var rf = new THREE.Mesh(new THREE.ConeGeometry(R*0.66, h*0.22, 8), emis); rf.position.y = top + h*0.78 + h*0.11; grp.add(rf);
-    top = top + h*0.78 + h*0.22;
+    /* 塔：柱廊 + 多层塔身 + 攒尖顶 + 宝顶 */
+    var colTop = top;
+    for(var c=0;c<8;c++){
+      var a = c/8*6.2832;
+      addColumn(grp, 0.95 * (R/16 < 1 ? R/16*1.1 : 1.15), h*0.26, stone, stoneD, Math.cos(a)*R*0.62, Math.sin(a)*R*0.62, colTop);
+    }
+    var podium = new THREE.Mesh(new THREE.CylinderGeometry(R*0.74, R*0.78, 0.6, segs), stone);
+    podium.position.y = colTop + h*0.26 + 0.72; grp.add(podium); shade(podium);
+    var y1 = colTop + h*0.26 + 1.02;
+    var b1 = new THREE.Mesh(new THREE.CylinderGeometry(R*0.48, R*0.62, h*0.46, segs), stone);
+    b1.position.y = y1 + h*0.23; grp.add(b1); shade(b1);
+    var eave1 = new THREE.Mesh(new THREE.CylinderGeometry(R*0.78, R*0.66, 0.7, segs), roofM);
+    eave1.position.y = y1 + h*0.46 + 0.35; grp.add(eave1); shade(eave1);
+    var y2 = y1 + h*0.46 + 0.7;
+    var b2 = new THREE.Mesh(new THREE.CylinderGeometry(R*0.32, R*0.44, h*0.24, segs), stone);
+    b2.position.y = y2 + h*0.12; grp.add(b2); shade(b2);
+    var spire = new THREE.Mesh(new THREE.ConeGeometry(R*0.72, h*0.3, segs), roofM);
+    spire.position.y = y2 + h*0.24 + h*0.15; grp.add(spire); shade(spire);
+    var finial = new THREE.Mesh(new THREE.SphereGeometry(1.5, 12, 10), goldM);
+    finial.position.y = y2 + h*0.24 + h*0.3 + 0.9; grp.add(finial);
+    var orb = new THREE.Mesh(new THREE.IcosahedronGeometry(2.6, 0), emisHi);
+    orb.position.y = y2 + h*0.24 + h*0.3 + 4.4; grp.add(orb);
+    n.rune = orb;
+    top = orb.position.y + 3;
+    /* 台阶与灯笼 */
+    addStairs(grp, R, stoneD, toCenter, 5, 4.1);
+    addStairs(grp, R, stoneD, toCenter + Math.PI, 5, 4.1);
+    for(var L=0;L<(IS_TOUCH?2:4);L++){
+      var la = toCenter + Math.PI/2 + L*Math.PI/2;
+      addLantern(grp, Math.cos(la)*R*1.34, Math.sin(la)*R*1.34, 0.3, n.ring === 0 ? 0xfbbf24 : colHex);
+    }
   } else if(n.type === 'shrine'){
-    for(var i=0;i<4;i++){
-      var a = i*Math.PI/2 + Math.PI/4;
-      var pl = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.3, h*0.52, 6), stoneL);
-      pl.position.set(Math.cos(a)*R*0.5, top + h*0.26, Math.sin(a)*R*0.5); grp.add(pl);
+    /* 亭：四柱 + 瓦顶 + 中央法器 */
+    for(var s4=0;s4<4;s4++){
+      var a4 = s4/4*6.2832 + Math.PI/4;
+      addColumn(grp, 1.05, h*0.46, stone, stoneD, Math.cos(a4)*R*0.56, Math.sin(a4)*R*0.56, top);
     }
-    var rf2 = new THREE.Mesh(new THREE.ConeGeometry(R*1.0, h*0.4, 6), emis); rf2.position.y = top + h*0.52 + h*0.2; grp.add(rf2);
-    var core = new THREE.Mesh(new THREE.IcosahedronGeometry(2.6, 0), emis); core.position.y = top + h*0.3; grp.add(core);
+    var arch = new THREE.Mesh(new THREE.CylinderGeometry(R*0.66, R*0.66, 0.7, 12), stone);
+    arch.position.y = top + h*0.46 + 0.78; grp.add(arch); shade(arch);
+    var roof1 = new THREE.Mesh(new THREE.ConeGeometry(R*1.02, h*0.42, 8), roofM);
+    roof1.position.y = top + h*0.46 + 1.13 + h*0.21; grp.add(roof1); shade(roof1);
+    var knob = new THREE.Mesh(new THREE.SphereGeometry(0.9, 10, 8), goldM);
+    knob.position.y = top + h*0.46 + 1.13 + h*0.42 + 0.5; grp.add(knob);
+    var core = new THREE.Mesh(new THREE.OctahedronGeometry(2.4, 0), emisHi);
+    core.position.y = top + h*0.34; grp.add(core);
     n.rune = core;
-    top = top + h*0.52 + h*0.4;
+    /* 中央陈设：铁砧 or 坩埚 */
+    if(n.k === 'forge'){
+      var anvil = new THREE.Mesh(new THREE.BoxGeometry(R*0.5, 1.0, R*0.34), matOf('metal', 1, 1, {roughness:.45, metalness:.9}));
+      anvil.position.y = top + 1.1; grp.add(anvil); shade(anvil);
+      var horn = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.5, 6), matOf('metal', 1, 1, {roughness:.45, metalness:.9}));
+      horn.rotation.z = -Math.PI/2; horn.position.set(R*0.34, top + 1.1, 0); grp.add(horn); shade(horn);
+      var stump = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.1, 1.1, 8), wood);
+      stump.position.y = top + 0.55; grp.add(stump); shade(stump);
+      addBrazier(grp, -R*0.5, R*0.2, top, colHex, 1.1);
+      addWeaponRack(grp, -R*0.72, -R*0.5, top, toCenter + 1.2, colHex);
+    } else {
+      var cauldron = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.4, 2.0, 12), matOf('metal', 1, 1, {roughness:.5, metalness:.8}));
+      cauldron.position.y = top + 1.0; grp.add(cauldron); shade(cauldron);
+      var brew = new THREE.Mesh(new THREE.CylinderGeometry(1.72, 1.72, 0.16, 12), matC(colHex, .3, .1, colHex, 1.5));
+      brew.position.y = top + 1.95; grp.add(brew);
+      var legs = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.7, 0.5, 8), matOf('stoneD', 1, 1));
+      legs.position.y = top + 0.25; grp.add(legs); shade(legs);
+      addSmoke(grp, 0, top + 2.2, 0, colHex, IS_TOUCH ? 14 : 30, 1.4, 16, 6);
+      addBarrel(grp, R*0.62, top, R*0.38, 1.1);
+      addCrate(grp, -R*0.66, top, -R*0.3, 1.0, 0.5);
+    }
+    addStairs(grp, R, stoneD, toCenter, 5, 4.1);
+    addLantern(grp, Math.cos(toCenter + 1.9)*R*1.28, Math.sin(toCenter + 1.9)*R*1.28, 0.3, colHex);
+    addLantern(grp, Math.cos(toCenter - 1.9)*R*1.28, Math.sin(toCenter - 1.9)*R*1.28, 0.3, colHex);
+    top = top + h*0.46 + 1.13 + h*0.42 + 2;
   } else if(n.type === 'volcano'){
-    var cone = new THREE.Mesh(new THREE.ConeGeometry(R*1.05, h*0.85, 9), new THREE.MeshStandardMaterial({color:0x2a1f2c, roughness:1, flatShading:true}));
-    cone.position.y = top + h*0.42; grp.add(cone);
-    var lava = new THREE.Mesh(new THREE.SphereGeometry(3.2, 14, 12), new THREE.MeshBasicMaterial({color:0xff7a1a}));
-    lava.position.y = top + h*0.85; grp.add(lava);
-    var hl = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xff6a1a, transparent:true, opacity:.85, blending:THREE.AdditiveBlending, depthWrite:false}));
-    hl.scale.setScalar(R*1.7); hl.position.y = top + h*0.85; grp.add(hl);
+    /* 火山：层叠岩体 + 熔岩流 + 火山口 + 烟柱 */
+    var cone = new THREE.Mesh(new THREE.ConeGeometry(R*1.06, h*0.8, 12), matOf('stoneD', 6, 4));
+    cone.position.y = top + h*0.4; grp.add(cone); shade(cone);
+    var ridge = new THREE.Mesh(new THREE.ConeGeometry(R*0.72, h*0.92, 10), matOf('stone', 4, 3));
+    ridge.position.y = top + h*0.46; grp.add(ridge); shade(ridge);
+    for(var f=0;f<4;f++){
+      var fa = f/4*6.2832 + 0.6;
+      var flow = new THREE.Mesh(new THREE.BoxGeometry(1.6, h*0.5, 0.5), matC(0xff5a12, .5, 0, 0xff4a08, 1.4));
+      flow.position.set(Math.cos(fa)*R*0.42, top + h*0.32, Math.sin(fa)*R*0.42);
+      flow.rotation.set(0.42, -fa, 0.1); grp.add(flow);
+    }
+    var crater = new THREE.Mesh(new THREE.CylinderGeometry(R*0.3, R*0.2, 1.4, 12), matOf('stoneD', 3, 1));
+    crater.position.y = top + h*0.8 - 0.4; grp.add(crater); shade(crater);
+    var lava = new THREE.Mesh(new THREE.CircleGeometry(R*0.27, 16), matC(0xff7a1a, .4, 0, 0xff5c10, 1.8));
+    lava.rotation.x = -Math.PI/2; lava.position.y = top + h*0.8 + 0.28; grp.add(lava);
     n.pulse = lava;
-    top = top + h*0.85 + 4;
+    var hl = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xff6a1a, transparent:true, opacity:.8, blending:THREE.AdditiveBlending, depthWrite:false}));
+    hl.scale.setScalar(R*1.9); put(grp, hl, 0, top + h*0.8 + 1.2, 0);
+    FLAMES.push({sp:hl, base:.7, amp:.25, spd:1.6, ph:Math.random()*6.28});
+    addSmoke(grp, 0, top + h*0.85, 0, 0xff7a2a, IS_TOUCH ? 20 : 46, R*0.22, 52, 14);
+    addRubble(grp, R*1.3, R*0.4, IS_TOUCH?3:7, R*0.5, matOf('stoneD', 1, 1));
+    addRubble(grp, -R*1.25, -R*0.5, IS_TOUCH?3:6, R*0.45, matOf('stoneD', 1, 1));
+    top = top + h*0.8 + 6;
   } else if(n.type === 'tent'){
-    var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, h*0.7, 6), stoneL); pole.position.y = top + h*0.35; grp.add(pole);
-    var tent = new THREE.Mesh(new THREE.ConeGeometry(R*0.98, h*0.55, 8), emis); tent.position.y = top + h*0.32; grp.add(tent);
-    for(var s=0;s<3;s++){
-      var st = new THREE.Mesh(new THREE.BoxGeometry(R*1.1, 2.4, R*0.55), stone);
-      var aa = s*Math.PI*2/3;
-      st.position.set(Math.cos(aa)*R*1.25, top + 1.2, Math.sin(aa)*R*1.25); st.rotation.y = -aa; grp.add(st);
+    /* 水上市集：主帐 + 三摊位 + 水面 + 灯笼串 */
+    var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, h*0.75, 8), wood);
+    pole.position.y = top + h*0.37; grp.add(pole); shade(pole);
+    var tent = new THREE.Mesh(new THREE.ConeGeometry(R*1.0, h*0.5, 10), clothM);
+    tent.position.y = top + h*0.52; grp.add(tent); shade(tent);
+    var skirt = new THREE.Mesh(new THREE.CylinderGeometry(R*1.0, R*1.02, 1.4, 10), clothM);
+    skirt.position.y = top + h*0.27; grp.add(skirt); shade(skirt);
+    var flagP = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 3.4, 6), wood);
+    flagP.position.y = top + h*0.75 + 1.4; grp.add(flagP);
+    var topFlag = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.0, 6, 3), new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:colHex, side:THREE.DoubleSide, roughness:.95}));
+    topFlag.position.set(0.85, top + h*0.75 + 2.6, 0); grp.add(topFlag);
+    BANNERS.push({mesh:topFlag, base:Float32Array.from(topFlag.geometry.attributes.position.array), ph:Math.random()*6.28});
+    for(var st2=0; st2<3; st2++){
+      var sa = st2/3*6.2832 + 0.4, sx = Math.cos(sa)*R*1.32, sz = Math.sin(sa)*R*1.32;
+      var sg = new THREE.Group(); sg.position.set(sx, top, sz); sg.rotation.y = -sa + Math.PI/2;
+      var leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.2, 0.22), wood); put(sg, leg1, -1.5, 1.6, 0); shade(leg1);
+      var leg2 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.2, 0.22), wood); put(sg, leg2, 1.5, 1.6, 0); shade(leg2);
+      var beam = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.2, 0.2), wood); put(sg, beam, 0, 3.2, 0); shade(beam);
+      var canopy = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.16, 2.4), clothM);
+      canopy.position.set(0, 3.5, 0); canopy.rotation.x = 0.14; sg.add(canopy); shade(canopy);
+      var counter = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.0, 1.2), wood); put(sg, counter, 0, 0.5, 0.5); shade(counter);
+      var goods = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 0.7), matC(colHex, .5, .2, colHex, .5));
+      put(sg, goods, -0.8, 1.25, 0.5);
+      var goods2 = new THREE.Mesh(new THREE.SphereGeometry(0.36, 8, 6), matC(0xfde68a, .45, .3, 0x7a5a10, .35));
+      put(sg, goods2, 0.2, 1.25, 0.5);
+      var goods3 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 0.7, 8), matC(0x38bdf8, .5, .2, 0x0b3a55, .4));
+      put(sg, goods3, 1.0, 1.35, 0.5);
+      grp.add(sg);
     }
-    top = top + h*0.32 + h*0.28;
+    /* 水面（浮市） */
+    var water = new THREE.Mesh(new THREE.CircleGeometry(R*0.62, 28), new THREE.MeshStandardMaterial({
+      map:texOf('water', 3, 3), color:0x4aa8d8, transparent:true, opacity:.74, roughness:.2, metalness:.6
+    }));
+    water.rotation.x = -Math.PI/2; water.position.set(R*0.92, 0.78, -R*0.62); grp.add(water);
+    var poolRim = new THREE.Mesh(new THREE.TorusGeometry(R*0.62, 0.3, 6, 26), stoneD);
+    poolRim.rotation.x = Math.PI/2; poolRim.position.set(R*0.92, 0.72, -R*0.62); grp.add(poolRim); shade(poolRim, false, true);
+    n.water = water;
+    for(var lan=0; lan<(IS_TOUCH?3:6); lan++){
+      var lx = Math.cos(lan/6*6.2832)*R*1.5, lz = Math.sin(lan/6*6.2832)*R*1.5;
+      var lamp = new THREE.Mesh(new THREE.SphereGeometry(0.42, 8, 6), matC(0xfbbf24, .3, .1, 0xffb020, 1.8));
+      put(grp, lamp, lx, top + 3.6 + Math.sin(lan)*0.3, lz);
+      var lsp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xffc257, transparent:true, opacity:.55, blending:THREE.AdditiveBlending, depthWrite:false}));
+      lsp.scale.setScalar(2.6); put(grp, lsp, lx, top + 3.6 + Math.sin(lan)*0.3, lz);
+      FLAMES.push({sp:lsp, base:.45, amp:.18, spd:1.3, ph:lan});
+    }
+    addCrate(grp, R*0.9, top, -R*1.1, 1.0, 0.4);
+    addBarrel(grp, -R*1.0, top, R*1.0, 1.1);
+    addStairs(grp, R, stoneD, toCenter, 4, 4.1);
+    top = top + h*0.75 + 4;
   } else if(n.type === 'obelisk'){
-    var ob = new THREE.Mesh(new THREE.CylinderGeometry(1.1, R*0.55, h, 4), stoneL);
-    ob.position.y = top + h*0.5; ob.rotation.y = Math.PI/4; grp.add(ob);
-    var tip = new THREE.Mesh(new THREE.ConeGeometry(2.2, 5, 4), emis); tip.position.y = top + h + 2.4; grp.add(tip);
-    top = top + h + 5;
+    /* 石碑：基座 + 四方碑（带符文自发光）+ 石灯石凳 */
+    var plinth = new THREE.Mesh(new THREE.BoxGeometry(R*0.9, 1.2, R*0.9), stoneD);
+    plinth.position.y = top + 0.6; grp.add(plinth); shade(plinth);
+    var step2 = new THREE.Mesh(new THREE.BoxGeometry(R*0.66, 0.9, R*0.66), stone);
+    step2.position.y = top + 1.65; grp.add(step2); shade(step2);
+    var obMat = new THREE.MeshStandardMaterial({
+      map:texOf('stone', 2, 6), bumpMap:texOf('stone', 2, 6), bumpScale:.08,
+      emissiveMap:texOf('rune', 1, 3), emissive:new THREE.Color(colHex), emissiveIntensity:.55,
+      roughness:.9, metalness:.06
+    });
+    var ob = new THREE.Mesh(new THREE.CylinderGeometry(R*0.2, R*0.42, h, 4), obMat);
+    ob.rotation.y = Math.PI/4; ob.position.y = top + 2.1 + h*0.5; grp.add(ob); shade(ob);
+    var tip = new THREE.Mesh(new THREE.ConeGeometry(R*0.34, 5.2, 4), emisM);
+    tip.rotation.y = Math.PI/4; tip.position.y = top + 2.1 + h + 2.6; grp.add(tip);
+    var haloRing = new THREE.Mesh(new THREE.RingGeometry(R*0.5, R*0.62, 32), new THREE.MeshBasicMaterial({color:colHex, transparent:true, opacity:.3, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false}));
+    haloRing.rotation.x = -Math.PI/2; haloRing.position.y = 0.45; grp.add(haloRing);
+    SPINS.push({mesh:haloRing, spd:0.25});
+    for(var o4=0;o4<(IS_TOUCH?2:4);o4++){
+      var oa = o4/4*6.2832 + Math.PI/4;
+      addLantern(grp, Math.cos(oa)*R*0.95, Math.sin(oa)*R*0.95, 0.3, colHex);
+      var bench = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.45, 0.9), stoneD);
+      bench.position.set(Math.cos(oa+0.7)*R*1.28, 0.55, Math.sin(oa+0.7)*R*1.28);
+      bench.rotation.y = -oa; grp.add(bench); shade(bench);
+    }
+    addStairs(grp, R, stoneD, toCenter, 4, 4.1);
+    top = top + 2.1 + h + 5;
   } else if(n.type === 'arena'){
-    var plat = new THREE.Mesh(new THREE.CylinderGeometry(R*0.95, R, 1.6, 20), stoneL); plat.position.y = top + 0.8; grp.add(plat);
-    var wall = new THREE.Mesh(new THREE.CylinderGeometry(R*0.95, R*0.95, h*0.35, 20, 1, true), stone); wall.position.y = top + h*0.2; grp.add(wall);
-    for(var q=0;q<8;q++){
-      var aq = q*Math.PI/4;
-      var pl2 = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, h*0.5, 6), stoneL);
-      pl2.position.set(Math.cos(aq)*R*0.92, top + h*0.25, Math.sin(aq)*R*0.92); grp.add(pl2);
+    /* 竞技场：阶梯看台 + 列柱 + 沙场 + 火盆 */
+    var sand = new THREE.Mesh(new THREE.CircleGeometry(R*0.72, 32), new THREE.MeshStandardMaterial({map:texOf('sand', 8, 8), bumpMap:texOf('sand',8,8), bumpScale:.06, roughness:.98, metalness:.02}));
+    sand.rotation.x = -Math.PI/2; sand.position.y = top + 0.55; grp.add(sand); shade(sand, false, true);
+    for(var st3=0; st3<3; st3++){
+      var rr = R*(0.74 + st3*0.1), hh2 = 1.5 + st3*1.5;
+      var ring = new THREE.Mesh(new THREE.CylinderGeometry(rr, rr + 0.4, hh2, 28, 1, true), stone);
+      ring.position.y = top + 0.5 + hh2/2; grp.add(ring); shade(ring);
+      var rim2 = new THREE.Mesh(new THREE.TorusGeometry(rr, 0.28, 6, 28), stoneD);
+      rim2.rotation.x = Math.PI/2; rim2.position.y = top + 0.5 + hh2; grp.add(rim2); shade(rim2);
     }
-    var fl = new THREE.Mesh(new THREE.SphereGeometry(2.4, 12, 10), emis); fl.position.y = top + h*0.7; grp.add(fl);
+    for(var c8=0;c8<8;c8++){
+      var ca = c8/8*6.2832;
+      var colY = addColumn(grp, 0.72, h*0.42, stone, stoneD, Math.cos(ca)*R*0.94, Math.sin(ca)*R*0.94, top + 5.0);
+      var cornice = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.5, 1.8), stoneD);
+      cornice.position.set(Math.cos(ca)*R*0.94, colY + 0.25, Math.sin(ca)*R*0.94); grp.add(cornice); shade(cornice);
+    }
+    addBrazier(grp, 0, 0, top + 0.6, colHex, 1.5);
+    for(var b4=0;b4<(IS_TOUCH?2:4);b4++){
+      var ba = b4/4*6.2832 + Math.PI/4;
+      addBrazier(grp, Math.cos(ba)*R*0.6, Math.sin(ba)*R*0.6, top + 0.6, colHex, 1.0);
+    }
+    for(var bn=0;bn<(IS_TOUCH?2:4);bn++){
+      var bna = bn/4*6.2832;
+      addBanner(grp, Math.cos(bna)*R*1.16, Math.sin(bna)*R*1.16, top + 5.4, colHex, 7.5, -bna);
+    }
+    addStairs(grp, R, stoneD, toCenter, 4, 4.1);
+    var fl = new THREE.Mesh(new THREE.SphereGeometry(2.2, 12, 10), emisHi);
+    fl.position.y = top + 9.5; grp.add(fl);
     n.rune = fl;
-    top = top + h*0.7 + 4;
+    top = top + h*0.42 + 11;
   } else if(n.type === 'forge'){
-    var an = new THREE.Mesh(new THREE.BoxGeometry(R*1.25, 4.5, R*0.85), stone); an.position.y = top + 2.2; grp.add(an);
-    var ch = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.8, h*0.85, 6), stoneL);
-    ch.position.set(R*0.5, top + h*0.42, -R*0.35); grp.add(ch);
-    var bl = new THREE.Mesh(new THREE.OctahedronGeometry(3, 0), emis);
-    bl.position.y = top + 9; bl.scale.set(0.55, 1.6, 0.28); grp.add(bl);
+    /* 兵器库：石木屋 + 烟囱 + 兵器架 + 熔炉 */
+    var walls = new THREE.Mesh(new THREE.BoxGeometry(R*1.5, h*0.42, R*1.2), stone);
+    walls.position.y = top + h*0.21; grp.add(walls); shade(walls);
+    var beamW = new THREE.Mesh(new THREE.BoxGeometry(R*1.56, 0.4, R*1.26), wood);
+    beamW.position.y = top + h*0.42; grp.add(beamW); shade(beamW);
+    var roofA = new THREE.Mesh(new THREE.BoxGeometry(R*1.7, 0.35, R*0.78), roofM);
+    roofA.position.set(0, top + h*0.42 + 1.1, R*0.3); roofA.rotation.x = -0.55; grp.add(roofA); shade(roofA);
+    var roofB = new THREE.Mesh(new THREE.BoxGeometry(R*1.7, 0.35, R*0.78), roofM);
+    roofB.position.set(0, top + h*0.42 + 1.1, -R*0.3); roofB.rotation.x = 0.55; grp.add(roofB); shade(roofB);
+    var ridgeB = new THREE.Mesh(new THREE.BoxGeometry(R*1.72, 0.3, 0.4), wood);
+    ridgeB.position.y = top + h*0.42 + 1.55; grp.add(ridgeB); shade(ridgeB);
+    var chim = new THREE.Mesh(new THREE.BoxGeometry(2.6, h*0.5, 2.6), stoneD);
+    chim.position.set(R*0.5, top + h*0.68, -R*0.35); grp.add(chim); shade(chim);
+    addSmoke(grp, R*0.5, top + h*0.95, -R*0.35, 0xb9c6d8, IS_TOUCH ? 10 : 24, 1.2, 26, 11);
+    var door = new THREE.Mesh(new THREE.BoxGeometry(R*0.44, h*0.26, 0.4), matOf('wood', 1, 1));
+    door.position.set(0, top + h*0.13, R*0.61); grp.add(door); shade(door);
+    var win1 = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 0.3), matC(0xffb347, .3, 0, 0xff9a1a, 1.5));
+    win1.position.set(-R*0.45, top + h*0.26, R*0.62); grp.add(win1);
+    var win2 = win1.clone(); win2.position.x = R*0.45; grp.add(win2);
+    addWeaponRack(grp, -R*0.95, R*0.55, top, toCenter + 1.4, colHex);
+    addWeaponRack(grp, R*0.95, R*0.55, top, toCenter - 1.4, colHex);
+    addBrazier(grp, R*0.95, -R*0.6, top, colHex, 1.1);
+    addBarrel(grp, -R*1.0, top, -R*0.5, 1.1);
+    addCrate(grp, -R*1.1, top, R*0.1, 1.0, 0.3);
+    addStairs(grp, R, stoneD, toCenter, 4, 4.1);
+    var bl = new THREE.Mesh(new THREE.OctahedronGeometry(2.6, 0), emisHi);
+    bl.position.y = top + h*0.42 + 4.5; grp.add(bl);
     n.rune = bl;
-    top = top + 14;
+    top = top + h*0.42 + 8;
   } else if(n.type === 'vault'){
-    var box = new THREE.Mesh(new THREE.BoxGeometry(R*1.5, h*0.45, R*1.2), stone); box.position.y = top + h*0.22; grp.add(box);
-    var door = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.2, 1.1, 20), emis);
-    door.rotation.x = Math.PI/2; door.position.set(0, top + h*0.22, R*0.61); grp.add(door);
-    var coin = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 1, 22), emis);
-    coin.rotation.x = Math.PI/2; coin.position.y = top + h*0.45 + 5; grp.add(coin);
-    n.rune = coin;
-    top = top + h*0.45 + 10;
-  } else if(n.type === 'dragon'){
-    var mt = new THREE.Mesh(new THREE.ConeGeometry(R*1.12, h*0.8, 8), new THREE.MeshStandardMaterial({color:0x241a26, roughness:1, flatShading:true}));
-    mt.position.y = top + h*0.4; grp.add(mt);
-    var cr = new THREE.Mesh(new THREE.CylinderGeometry(6, 9, 3.4, 12), new THREE.MeshBasicMaterial({color:0xff4d1a}));
-    cr.position.y = top + h*0.8; grp.add(cr);
-    var eye = new THREE.Mesh(new THREE.IcosahedronGeometry(6, 1), new THREE.MeshStandardMaterial({color:0x7f1d1d, emissive:0xff3b1a, emissiveIntensity:.9, roughness:.35, flatShading:true}));
-    eye.position.y = top + h*0.8 + 10; grp.add(eye);
-    n.rune = eye;
-    for(var w=0;w<6;w++){
-      var aw = w*Math.PI/3 + 0.4;
-      var sh = new THREE.Mesh(new THREE.TetrahedronGeometry(3, 0), new THREE.MeshStandardMaterial({color:0x3a1c22, roughness:1, flatShading:true}));
-      sh.position.set(Math.cos(aw)*R*0.85, top + h*0.8 + 4 + Math.sin(w)*2.5, Math.sin(aw)*R*0.85);
-      sh.rotation.set(w, w*1.3, w*0.7); grp.add(sh); n['sh'+w] = sh;
+    /* 金库：石殿 + 圆门 + 金币堆 + 守卫石像 */
+    var cella = new THREE.Mesh(new THREE.BoxGeometry(R*1.5, h*0.5, R*1.25), stone);
+    cella.position.y = top + h*0.25; grp.add(cella); shade(cella);
+    var architrave = new THREE.Mesh(new THREE.BoxGeometry(R*1.62, 0.6, R*1.36), stoneD);
+    architrave.position.y = top + h*0.5 + 0.3; grp.add(architrave); shade(architrave);
+    var ped = new THREE.Mesh(new THREE.ConeGeometry(R*1.05, 3.6, 4), stoneD);
+    ped.rotation.y = Math.PI/4; ped.position.y = top + h*0.5 + 2.4; grp.add(ped); shade(ped);
+    for(var v4=0; v4<4; v4++){
+      var va = v4/4*6.2832 + Math.PI/4;
+      addColumn(grp, 0.78, h*0.42, stone, stoneD, Math.cos(va)*R*0.72, Math.sin(va)*R*0.72, top);
     }
-    var hl3 = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xff3b1a, transparent:true, opacity:.7, blending:THREE.AdditiveBlending, depthWrite:false}));
-    hl3.scale.setScalar(R*1.5); hl3.position.y = top + h*0.8 + 9; grp.add(hl3);
-    top = top + h*0.8 + 18;
+    var door = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.6, 1.1, 20), matC(0xfbbf24, .3, .9, 0x7a5410, .35));
+    door.rotation.x = Math.PI/2; door.position.set(0, top + h*0.22, R*0.64); grp.add(door); shade(door);
+    var doorGlow = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.22, 8, 22), matC(colHex, .35, .5, colHex, 1.1));
+    doorGlow.rotation.x = 0; doorGlow.position.set(0, top + h*0.22, R*0.7); grp.add(doorGlow);
+    for(var co=0; co<5; co++){
+      var coinPile = new THREE.Mesh(new THREE.CylinderGeometry(1.9 - co*0.22, 2.1 - co*0.22, 0.34, 18), matC(0xfbbf24, .28, .9, 0x6a4a0c, .3));
+      coinPile.position.set((co-2)*0.9, top + 0.2 + co*0.32, R*0.95 + 1.2); grp.add(coinPile); shade(coinPile);
+    }
+    var coin = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.7, 24), matC(0xfbbf24, .25, .95, 0x8a5f10, .5));
+    coin.rotation.x = Math.PI/2; coin.position.y = top + h*0.5 + 5.2; grp.add(coin);
+    SPINS.push({mesh:coin, spd:0.9});
+    n.rune = coin;
+    addStatue(grp, -R*0.95, R*0.78, top, toCenter + 0.9, colHex);
+    addStatue(grp, R*0.95, R*0.78, top, toCenter - 0.9, colHex);
+    addLantern(grp, -R*1.3, R*0.3, 0.3, 0xfbbf24);
+    addLantern(grp, R*1.3, R*0.3, 0.3, 0xfbbf24);
+    addStairs(grp, R, stoneD, toCenter, 5, 4.1);
+    top = top + h*0.5 + 8;
+  } else if(n.type === 'dragon'){
+    /* 巨龙巢穴：焦岩 + 熔岩湖 + 龙骨拱 + 龙首骨 + 尖刺 */
+    var mt = new THREE.Mesh(new THREE.ConeGeometry(R*1.14, h*0.78, 10), matOf('stoneD', 6, 5));
+    mt.position.y = top + h*0.39; grp.add(mt); shade(mt);
+    var mt2 = new THREE.Mesh(new THREE.ConeGeometry(R*0.66, h*0.92, 8), matOf('scale', 4, 4));
+    mt2.position.y = top + h*0.46; grp.add(mt2); shade(mt2);
+    var lake = new THREE.Mesh(new THREE.CircleGeometry(R*0.42, 24), matC(0xff4d1a, .4, 0, 0xff2a08, 1.9));
+    lake.rotation.x = -Math.PI/2; lake.position.y = top + h*0.79; grp.add(lake);
+    n.pulse = lake;
+    var lakeGlow = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xff3b1a, transparent:true, opacity:.75, blending:THREE.AdditiveBlending, depthWrite:false}));
+    lakeGlow.scale.setScalar(R*1.9); put(grp, lakeGlow, 0, top + h*0.85, 0);
+    FLAMES.push({sp:lakeGlow, base:.68, amp:.22, spd:1.4, ph:1.2});
+    addSmoke(grp, 0, top + h*0.9, 0, 0xff5a2a, IS_TOUCH ? 22 : 52, R*0.3, 62, 16);
+    /* 肋骨拱 */
+    for(var rb=0; rb<(IS_TOUCH?3:5); rb++){
+      var rib = new THREE.Mesh(new THREE.TorusGeometry(6.5 - rb*0.65, 0.42, 5, 14, Math.PI), matC(0xd8cdb8, .85, .05, 0x1a1408, .25));
+      rib.position.set((rb-2)*3.4, top + h*0.72, 0);
+      rib.rotation.y = Math.PI/2 + (rb-2)*0.06;
+      grp.add(rib); shade(rib);
+    }
+    var spine = new THREE.Mesh(new THREE.BoxGeometry(20, 0.7, 0.7), matC(0xd8cdb8, .85, .05, 0x1a1408, .25));
+    spine.position.set(0, top + h*0.72 + 5.6, 0); grp.add(spine); shade(spine);
+    /* 龙首骨 */
+    var skull = new THREE.Group();
+    skull.position.set(0, top + h*0.72 + 8.5, -R*0.35);
+    var sk1 = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.0, 5.0), matC(0xe2d8c4, .85, .05, 0x1a1408, .25));
+    skull.add(sk1); shade(sk1);
+    var snout = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.8, 4.4), matC(0xd8cdb8, .85, .05, 0x1a1408, .25));
+    snout.position.set(0, -0.5, -4.2); skull.add(snout); shade(snout);
+    var horn1 = new THREE.Mesh(new THREE.ConeGeometry(0.6, 5.2, 6), matC(0x3a1c22, .9, .05, 0x120608, .3));
+    horn1.position.set(-1.5, 2.2, 1.2); horn1.rotation.set(-0.5, 0, -0.35); skull.add(horn1);
+    var horn2 = horn1.clone(); horn2.position.x = 1.5; horn2.rotation.z = 0.35; skull.add(horn2);
+    var eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.7, 10, 8), matC(0xff3b1a, .3, 0, 0xff2a08, 2.0));
+    eye1.position.set(-1.3, 0.5, -2.4); skull.add(eye1);
+    var eye2 = eye1.clone(); eye2.position.x = 1.3; skull.add(eye2);
+    grp.add(skull);
+    n.skull = skull;
+    /* 尖刺 */
+    for(var sp2=0; sp2<(IS_TOUCH?4:8); sp2++){
+      var spa = sp2/8*6.2832 + 0.3;
+      var spike = new THREE.Mesh(new THREE.ConeGeometry(1.6, rnd(6, 11), 5), matOf('scale', 2, 3));
+      spike.position.set(Math.cos(spa)*R*0.92, top + h*0.5 + 2, Math.sin(spa)*R*0.92);
+      spike.rotation.set(Math.sin(sp2)*0.2, 0, -Math.cos(spa)*0.22);
+      grp.add(spike); shade(spike);
+    }
+    addRubble(grp, R*1.35, R*0.7, IS_TOUCH?4:8, R*0.6, matOf('stoneD', 1, 1));
+    addRubble(grp, -R*1.3, -R*0.7, IS_TOUCH?4:8, R*0.6, matOf('stoneD', 1, 1));
+    var eye = new THREE.Mesh(new THREE.IcosahedronGeometry(3.2, 1), matC(0x7f1d1d, .35, .2, 0xff3b1a, 1.4));
+    eye.position.y = top + h*0.78 + 16; grp.add(eye);
+    n.rune = eye;
+    top = top + h*0.78 + 22;
   }
 
-  if(!n.rune && n.type !== 'volcano' && n.type !== 'dragon'){
-    var rn = new THREE.Mesh(new THREE.OctahedronGeometry(3, 0), emis);
-    rn.position.y = top + 3; grp.add(rn); n.rune = rn; top += 7;
-  }
-
-  // 光柱
+  /* 光柱 / 光环 / 光晕 / 元素点光 */
   var pillar = new THREE.Mesh(
     new THREE.CylinderGeometry(R*0.45, R*0.7, h + 34, 10, 1, true),
     new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.1, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
@@ -1181,7 +2000,6 @@ function buildNode(n){
   pillar.position.y = (h + 34)/2; grp.add(pillar);
   n.pillar = pillar;
 
-  // 基座光环（落在基座台阶上，避免被地形穿插）
   var disc = new THREE.Mesh(
     new THREE.RingGeometry(R*0.86, R*1.02, 48),
     new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.34, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
@@ -1189,16 +2007,14 @@ function buildNode(n){
   disc.rotation.x = -Math.PI/2; disc.position.y = 4.35; grp.add(disc);
   n.disc = disc;
 
-  // 光晕
   var halo = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:col, transparent:true, opacity:.45, blending:THREE.AdditiveBlending, depthWrite:false}));
   halo.scale.setScalar(R*2.4); halo.position.y = h*0.55; grp.add(halo);
   n.halo = halo;
 
-  // 元素点光
-  var pl = new THREE.PointLight(n.ring === 3 ? 0xff4d1a : col, n.ring === 0 ? 2.2 : 1.2, n.ring === 0 ? 220 : 110);
+  var pl = new THREE.PointLight(n.ring === 3 ? 0xff4d1a : col, n.ring === 0 ? 2.0 : 1.15, n.ring === 0 ? 220 : 110);
   pl.position.y = h*0.7; grp.add(pl);
 
-  // 拾取盒
+  /* 拾取盒 */
   var hit = new THREE.Mesh(
     new THREE.CylinderGeometry(R*1.35, R*1.35, h + 26, 8),
     new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false})
@@ -1214,52 +2030,118 @@ function buildNode(n){
 }
 
 /* ==================== 角色 ==================== */
+/* 两段肢体：肩/髋为轴，下段再挂一节（肘/膝） */
+function limb(matU, matL, lenU, lenL, rU, rL, y0){
+  var g = new THREE.Group(); g.position.y = y0;
+  var up = new THREE.Mesh(new THREE.CylinderGeometry(rU*0.92, rU, lenU, 8), matU);
+  up.position.y = -lenU/2; g.add(up); shade(up);
+  var lo = new THREE.Group(); lo.position.y = -lenU; g.add(lo);
+  var low = new THREE.Mesh(new THREE.CylinderGeometry(rL*0.95, rL, lenL, 8), matL);
+  low.position.y = -lenL/2; lo.add(low); shade(low);
+  return {grp:g, lower:lo, upper:up, lowMesh:low};
+}
+
 function buildHero(){
   var g = new THREE.Group();
-  var skin = new THREE.MeshStandardMaterial({color:0xf1c9a5, roughness:.8, flatShading:true});
-  var armor = new THREE.MeshStandardMaterial({color:0x2b3d63, roughness:.5, metalness:.45, flatShading:true});
-  var gold = new THREE.MeshStandardMaterial({color:0xfbbf24, roughness:.35, metalness:.7, emissive:0x3a2606, flatShading:true});
-  var cloth = new THREE.MeshStandardMaterial({color:0x8f1d2d, roughness:.9, flatShading:true});
+  var skin  = matC(0xf0c49c, .8, .02, 0x2a1408, .15);
+  var armor = matOf('metal', 1, 1, {color:0x7c8aa4, roughness:.4, metalness:.82});
+  var cloth = clothMat(0x8f1d2d, 1, 2);
+  var gold  = matC(0xfbbf24, .3, .85, 0x6a4a0c, .55);
+  var dark  = matC(0x1d2942, .82, .12, 0x080d18, .25);
+  var bootM = matC(0x2b1d15, .85, .08, 0x0d0805, .2);
 
-  // 躯干
-  var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.46, 1.0, 8), armor);
-  torso.position.y = 1.25; g.add(torso);
-  var chest = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.5, 0.42), gold);
-  chest.position.y = 1.55; g.add(chest);
-  // 头
-  var head = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 10), skin);
-  head.position.y = 1.98; g.add(head);
-  var helm = new THREE.Mesh(new THREE.SphereGeometry(0.29, 12, 8, 0, Math.PI*2, 0, Math.PI*0.62), gold);
-  helm.position.y = 1.99; g.add(helm);
-  var crest = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.42, 4), gold);
-  crest.position.set(0, 2.28, 0); g.add(crest);
-  // 披风
-  var cape = new THREE.Mesh(new THREE.BoxGeometry(0.78, 1.15, 0.07), cloth);
-  cape.position.set(0, 1.28, -0.32); g.add(cape);
-  // 手臂
-  var armL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.72, 0.16), armor);
-  armL.geometry.translate(0, -0.36, 0); armL.position.set(-0.52, 1.6, 0); g.add(armL);
-  var armR = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.72, 0.16), armor);
-  armR.geometry.translate(0, -0.36, 0); armR.position.set(0.52, 1.6, 0); g.add(armR);
-  // 腿
-  var legL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.82, 0.2), armor);
-  legL.geometry.translate(0, -0.41, 0); legL.position.set(-0.19, 0.82, 0); g.add(legL);
-  var legR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.82, 0.2), armor);
-  legR.geometry.translate(0, -0.41, 0); legR.position.set(0.19, 0.82, 0); g.add(legR);
-  // 剑
-  var sword = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.15, 0.16), gold);
-  sword.position.set(0.62, 1.05, -0.18); sword.rotation.x = -0.35; g.add(sword);
-  // 脚下光环
+  var body = new THREE.Group(); g.add(body);
+
+  /* 髋 + 躯干 */
+  var hips = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.31, 0.38, 10), dark);
+  hips.position.y = 0.86; body.add(hips); shade(hips);
+  var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.37, 0.44, 0.88, 12), armor);
+  torso.position.y = 1.45; body.add(torso); shade(torso);
+  var tabard = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.86, 0.06), cloth);
+  tabard.position.set(0, 1.42, 0.4); body.add(tabard);
+  var chest = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.44, 0.36), gold);
+  chest.position.set(0, 1.68, 0.1); body.add(chest);
+  var gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.13, 0), matC(0xffd777, .25, .5, 0xffb020, 1.6));
+  gem.position.set(0, 1.68, 0.3); body.add(gem);
+  var belt = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.15, 12), matC(0x3a2a18, .7, .25, 0x120a04, .25));
+  belt.position.y = 1.05; body.add(belt);
+  var buckle = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.18, 0.08), gold);
+  buckle.position.set(0, 1.05, 0.42); body.add(buckle);
+
+  /* 肩甲 */
+  var shL = new THREE.Mesh(new THREE.SphereGeometry(0.25, 12, 7, 0, 6.2832, 0, 1.5), gold);
+  shL.position.set(-0.47, 1.86, 0); body.add(shL); shade(shL);
+  var shR = shL.clone(); shR.position.x = 0.47; body.add(shR);
+
+  /* 头 */
+  var neck = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.16, 0.18, 8), skin);
+  neck.position.y = 1.98; body.add(neck);
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 12), skin);
+  head.position.y = 2.2; body.add(head); shade(head);
+  var hair = new THREE.Mesh(new THREE.SphereGeometry(0.272, 16, 10, 0, 6.2832, 0, 1.95), matC(0x2a1f36, .85, .05, 0x0d0812, .2));
+  hair.position.y = 2.21; body.add(hair); shade(hair);
+  var band = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.035, 6, 16), gold);
+  band.rotation.x = Math.PI/2 - 0.12; band.position.y = 2.33; body.add(band);
+  var crest = new THREE.Mesh(new THREE.ConeGeometry(0.085, 0.46, 4), gold);
+  crest.position.set(0, 2.62, -0.02); crest.rotation.x = -0.18; body.add(crest);
+  var eyeM = matC(0xa8ecff, .3, 0, 0x6fd8ff, 1.5);
+  var e1 = new THREE.Mesh(new THREE.SphereGeometry(0.043, 8, 6), eyeM); e1.position.set(-0.088, 2.21, 0.225); body.add(e1);
+  var e2 = e1.clone(); e2.position.x = 0.088; body.add(e2);
+
+  /* 披风（分段，可飘动） */
+  var capeGeo = new THREE.PlaneGeometry(0.86, 1.3, 5, 6);
+  var cape = new THREE.Mesh(capeGeo, new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:0x8f1d2d, side:THREE.DoubleSide, roughness:.95}));
+  cape.position.set(0, 1.42, -0.34); body.add(cape);
+  var capeTrim = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.06), gold);
+  capeTrim.position.set(0, 2.0, -0.32); body.add(capeTrim);
+
+  /* 四肢 */
+  var armL = limb(armor, skin, 0.42, 0.4, 0.11, 0.095, 0);
+  armL.grp.position.set(-0.47, 1.82, 0); body.add(armL.grp);
+  var armR = limb(armor, skin, 0.42, 0.4, 0.11, 0.095, 0);
+  armR.grp.position.set(0.47, 1.82, 0); body.add(armR.grp);
+  var handL = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), skin);
+  handL.position.y = -0.42; armL.lower.add(handL);
+  var handR = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), skin);
+  handR.position.y = -0.42; armR.lower.add(handR);
+
+  var legL = limb(dark, dark, 0.44, 0.42, 0.15, 0.13, 0);
+  legL.grp.position.set(-0.19, 0.86, 0); body.add(legL.grp);
+  var legR = limb(dark, dark, 0.44, 0.42, 0.15, 0.13, 0);
+  legR.grp.position.set(0.19, 0.86, 0); body.add(legR.grp);
+  var bootL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.2, 0.36), bootM);
+  bootL.position.set(0, -0.48, 0.06); legL.lower.add(bootL); shade(bootL);
+  var bootR = bootL.clone(); legR.lower.add(bootR);
+
+  /* 背剑 */
+  var sword = new THREE.Group();
+  sword.position.set(0, 1.5, -0.3);
+  sword.rotation.set(0.35, 0, 0.5);
+  var blade = new THREE.Mesh(new THREE.BoxGeometry(0.09, 1.25, 0.2), matOf('metal', 1, 1, {color:0xcfe0f5, roughness:.25, metalness:.95}));
+  blade.position.y = 0.72; sword.add(blade); shade(blade);
+  var guard = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.09, 0.12), gold);
+  guard.position.y = 0.06; sword.add(guard);
+  var grip = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.42, 8), matC(0x3a2a18, .8, .05, 0x120a04, .2));
+  grip.position.y = -0.18; sword.add(grip);
+  var pommel = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), gold);
+  pommel.position.y = -0.4; sword.add(pommel);
+  body.add(sword);
+
+  /* 脚下光环 + 假阴影 */
   var ring = new THREE.Mesh(
     new THREE.RingGeometry(0.62, 0.92, 28),
     new THREE.MeshBasicMaterial({color:0xfbbf24, transparent:true, opacity:.55, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
   );
   ring.rotation.x = -Math.PI/2; ring.position.y = 0.06; g.add(ring);
-  // 假阴影
-  var sh = new THREE.Mesh(new THREE.CircleGeometry(0.7, 20), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.35, depthWrite:false}));
-  sh.rotation.x = -Math.PI/2; sh.position.y = 0.04; g.add(sh);
+  var sh = new THREE.Mesh(new THREE.CircleGeometry(0.72, 22), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.35, depthWrite:false}));
+  sh.rotation.x = -Math.PI/2; sh.position.y = 0.05; g.add(sh);
 
-  heroParts = {torso:torso, head:head, cape:cape, armL:armL, armR:armR, legL:legL, legR:legR, ring:ring, sword:sword};
+  heroParts = {
+    body:body, torso:torso, head:head, cape:cape,
+    armL:armL.grp, armR:armR.grp, foreL:armL.lower, foreR:armR.lower,
+    legL:legL.grp, legR:legR.grp, shinL:legL.lower, shinR:legR.lower,
+    ring:ring, sword:sword, hips:hips, crest:crest
+  };
   heroObj = g;
   scene.add(g);
 }
@@ -1466,54 +2348,122 @@ function npcByKey(k){ for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k) return 
 
 function buildNpc(q){
   var col = q.color ? new THREE.Color(q.color) : new THREE.Color(0xfbbf24);
+  var colHex = col.getHex();
   var look = q.look || 'sage';
   var g = new THREE.Group();
   g.position.set(q.x, q.y, q.z);
   g.rotation.y = q.yaw;
 
-  var dark = col.clone().multiplyScalar(0.42);
-  var robeMat = new THREE.MeshStandardMaterial({color:dark, roughness:.88, flatShading:true});
-  var trimMat = new THREE.MeshStandardMaterial({color:col, emissive:col, emissiveIntensity:.32, roughness:.45, metalness:.3, flatShading:true});
-  var skinMat = new THREE.MeshStandardMaterial({color: look === 'shade' ? 0x9aa6bb : 0xe8c39a, roughness:.88, flatShading:true});
+  var dk = col.clone().multiplyScalar(0.38);
+  var robeM  = clothMat(dk.getHex(), 1, 2);
+  var robeL  = clothMat(col.clone().multiplyScalar(0.6).getHex(), 1, 2);
+  var trimM  = matC(colHex, .45, .32, colHex, .38);
+  var skinM  = matC(look === 'shade' ? 0x93a0b8 : 0xe4bf95, .85, .03, 0x1a1208, .15);
+  var woodM  = matOf('wood', 1, 1);
+  var metalM = matOf('metal', 1, 1, {roughness:.45, metalness:.8});
+  var bootM  = matC(0x241a12, .85, .06, 0x0d0805, .2);
 
-  var bulk = look === 'smith' ? 1.16 : (look === 'hunter' ? 0.92 : 1.0);
-  var tall = look === 'shade' ? 1.14 : 1.0;
+  var body = new THREE.Group(); g.add(body);
+  var bulk = look === 'smith' ? 1.18 : (look === 'hunter' ? 0.92 : 1.0);
+  var tall = look === 'shade' ? 1.12 : (look === 'hunter' ? 1.05 : 1.0);
 
-  var robe = new THREE.Mesh(new THREE.ConeGeometry(0.62*bulk, 1.5*tall, 7), robeMat);
-  robe.position.y = 0.75*tall; g.add(robe);
-  var belt = new THREE.Mesh(new THREE.CylinderGeometry(0.36*bulk, 0.38*bulk, 0.16, 7), trimMat);
-  belt.position.y = 1.06*tall; g.add(belt);
-  var shawl = new THREE.Mesh(new THREE.CylinderGeometry(0.34*bulk, 0.5*bulk, 0.34, 7), trimMat);
-  shawl.position.y = 1.4*tall; g.add(shawl);
-  var head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), skinMat);
-  head.position.y = 1.74*tall; g.add(head);
-  var hood = new THREE.Mesh(new THREE.SphereGeometry(0.245, 12, 8, 0, Math.PI*2, 0, Math.PI*0.62), robeMat);
-  hood.position.y = 1.75*tall; g.add(hood);
-  var armL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), robeMat);
-  armL.geometry.translate(0, -0.3, 0); armL.position.set(-0.42*bulk, 1.42*tall, 0); g.add(armL);
-  var armR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), robeMat);
-  armR.geometry.translate(0, -0.3, 0); armR.position.set(0.42*bulk, 1.42*tall, 0); g.add(armR);
+  /* 袍身 */
+  var skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.4*bulk, 0.7*bulk, 0.74*tall, 10), robeM);
+  skirt.position.y = 0.66*tall; body.add(skirt); shade(skirt);
+  var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.33*bulk, 0.42*bulk, 0.68*tall, 10), robeL);
+  torso.position.y = 1.25*tall; body.add(torso); shade(torso);
+  var sash = new THREE.Mesh(new THREE.CylinderGeometry(0.41*bulk, 0.41*bulk, 0.14, 10), trimM);
+  sash.position.y = 0.98*tall; body.add(sash);
+  var collar = new THREE.Mesh(new THREE.CylinderGeometry(0.29*bulk, 0.45*bulk, 0.24, 10), robeL);
+  collar.position.y = 1.56*tall; body.add(collar); shade(collar);
 
-  // 随身物件：铁匠锤 / 猎手矛 / 长杖
-  if(look === 'smith'){
-    var hh = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.9, 6), robeMat);
-    hh.position.set(0.56*bulk, 0.95, 0.08); g.add(hh);
-    var hm = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.2, 0.2), trimMat);
-    hm.position.set(0.56*bulk, 1.45, 0.08); g.add(hm);
+  /* 头 + 头饰 */
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 14, 12), skinM);
+  head.position.y = 1.86*tall; body.add(head); shade(head);
+  var hood = null;
+  if(look === 'shade'){
+    hood = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.62, 8), robeM);
+    hood.position.y = 1.98*tall; body.add(hood); shade(hood);
+    var eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.042, 8, 6), matC(0xff5a3a, .3, 0, 0xff3a18, 1.8));
+    eyeL.position.set(-0.075, 1.87*tall, 0.17); body.add(eyeL);
+    var eyeR = eyeL.clone(); eyeR.position.x = 0.075; body.add(eyeR);
+    var aura = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0x8a1a2a, transparent:true, opacity:.32, blending:THREE.AdditiveBlending, depthWrite:false}));
+    aura.scale.setScalar(3.4); aura.position.y = 1.2; g.add(aura);
+    FLAMES.push({sp:aura, base:.26, amp:.1, spd:.9, ph:Math.random()*6.28});
+  } else if(look === 'smith'){
+    var band = new THREE.Mesh(new THREE.TorusGeometry(0.205, 0.03, 6, 14), trimM);
+    band.rotation.x = Math.PI/2 - 0.1; band.position.y = 1.96*tall; body.add(band);
+    var apron = new THREE.Mesh(new THREE.BoxGeometry(0.56*bulk, 0.9, 0.06), matC(0x4a3524, .9, .05, 0x140d06, .2));
+    apron.position.set(0, 0.95*tall, 0.34*bulk); body.add(apron);
   } else if(look === 'hunter'){
-    var spear = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 2.2, 6), robeMat);
-    spear.position.set(0.54*bulk, 1.2, 0.08); g.add(spear);
-    var tip = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.34, 5), trimMat);
-    tip.position.set(0.54*bulk, 2.42, 0.08); g.add(tip);
+    hood = new THREE.Mesh(new THREE.SphereGeometry(0.235, 14, 10, 0, 6.2832, 0, 1.7), robeM);
+    hood.position.y = 1.88*tall; body.add(hood); shade(hood);
+    var feather = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.42, 4), trimM);
+    feather.position.set(0.14, 2.12*tall, -0.05); feather.rotation.z = -0.5; body.add(feather);
+    var cloak = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 1.0, 4, 5), new THREE.MeshStandardMaterial({map:texOf('cloth',1,1), color:dk.getHex(), side:THREE.DoubleSide, roughness:.95}));
+    cloak.position.set(0, 1.15*tall, -0.28); body.add(cloak);
+    q.cloak = cloak;
+  } else if(look === 'trader'){
+    var hat = new THREE.Mesh(new THREE.ConeGeometry(0.46, 0.34, 12), matC(0x6b5334, .9, .04, 0x1a1208, .2));
+    hat.position.y = 2.04*tall; body.add(hat); shade(hat);
+    var brim = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.46, 0.05, 14), matC(0x5b4529, .9, .04, 0x1a1208, .2));
+    brim.position.y = 1.94*tall; body.add(brim);
+    var pack = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.72, 0.34), matC(0x6b5334, .9, .04, 0x1a1208, .2));
+    pack.position.set(0, 1.28*tall, -0.4); body.add(pack); shade(pack);
+    var roll = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.66, 8), matC(0x8a6a42, .95, .02, 0x1a1208, .2));
+    roll.rotation.z = Math.PI/2; roll.position.set(0, 1.66*tall, -0.42); body.add(roll);
   } else {
-    var staff = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.065, 1.95, 6), robeMat);
-    staff.position.set(0.58*bulk, 1.05, 0.08); g.add(staff);
-    var gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.15, 0), trimMat);
-    gem.position.set(0.58*bulk, 2.06, 0.08); g.add(gem);
+    var hair = new THREE.Mesh(new THREE.SphereGeometry(0.222, 14, 10, 0, 6.2832, 0, 1.5), matC(0x2b2438, .88, .04, 0x0d0812, .2));
+    hair.position.y = 1.88*tall; body.add(hair); shade(hair);
+    var beard = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.42, 6), matC(0xd8d2c6, .9, .03, 0x201a12, .2));
+    beard.position.set(0, 1.62*tall, 0.14); beard.rotation.x = 0.2; body.add(beard);
+  }
+
+  /* 四肢 */
+  var armL = limb(robeL, skinM, 0.36, 0.34, 0.095, 0.085, 0);
+  armL.grp.position.set(-0.42*bulk, 1.5*tall, 0); body.add(armL.grp);
+  var armR = limb(robeL, skinM, 0.36, 0.34, 0.095, 0.085, 0);
+  armR.grp.position.set(0.42*bulk, 1.5*tall, 0); body.add(armR.grp);
+  var handL = new THREE.Mesh(new THREE.SphereGeometry(0.095, 8, 6), skinM); handL.position.y = -0.36; armL.lower.add(handL);
+  var handR = new THREE.Mesh(new THREE.SphereGeometry(0.095, 8, 6), skinM); handR.position.y = -0.36; armR.lower.add(handR);
+
+  var legL = limb(robeM, robeM, 0.32, 0.3, 0.115, 0.1, 0);
+  legL.grp.position.set(-0.16*bulk, 0.6*tall, 0); body.add(legL.grp);
+  var legR = limb(robeM, robeM, 0.32, 0.3, 0.115, 0.1, 0);
+  legR.grp.position.set(0.16*bulk, 0.6*tall, 0); body.add(legR.grp);
+  var bootL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.16, 0.3), bootM); bootL.position.set(0, -0.36, 0.05); legL.lower.add(bootL); shade(bootL);
+  var bootR = bootL.clone(); legR.lower.add(bootR);
+
+  /* 随身物件 */
+  if(look === 'smith'){
+    var haft = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.86, 6), woodM);
+    haft.position.set(0, -0.34, 0.06); haft.rotation.x = 0.25; armR.lower.add(haft); shade(haft);
+    var head2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.18, 0.18), metalM);
+    head2.position.set(0, -0.78, 0.14); armR.lower.add(head2); shade(head2);
+  } else if(look === 'hunter'){
+    var bow = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.045, 6, 14, Math.PI*1.1), woodM);
+    bow.position.set(0, 1.2*tall, -0.3); bow.rotation.set(0.2, 0.4, 1.2); body.add(bow); shade(bow);
+    var quiver = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.7, 8), matC(0x4a3524, .9, .04, 0x140d06, .2));
+    quiver.position.set(-0.3, 1.4*tall, -0.34); quiver.rotation.set(0.3, 0, 0.4); body.add(quiver); shade(quiver);
+  } else if(look === 'trader'){
+    var purse = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), matC(0x8a6a42, .9, .04, 0x1a1208, .2));
+    purse.position.set(0, -0.34, 0.08); armR.lower.add(purse);
+  } else if(look === 'shade'){
+    var orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.13, 0), matC(0xff3a18, .3, .2, 0xff2a08, 1.6));
+    orb.position.set(0, -0.34, 0.06); armR.lower.add(orb);
+    q.gem = orb;
+  } else {
+    var staff = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.062, 1.95, 6), woodM);
+    staff.position.set(0, -0.5, 0.14); staff.rotation.x = 0.12; armR.lower.add(staff); shade(staff);
+    var gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), matC(colHex, .3, .3, colHex, 1.5));
+    gem.position.set(0, -1.42, 0.24); armR.lower.add(gem);
+    var gglow = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:colHex, transparent:true, opacity:.55, blending:THREE.AdditiveBlending, depthWrite:false}));
+    gglow.scale.setScalar(1.5); gglow.position.set(0, -1.42, 0.24); armR.lower.add(gglow);
+    FLAMES.push({sp:gglow, base:.48, amp:.16, spd:1.5, ph:Math.random()*6.28});
     q.gem = gem;
   }
 
-  // 头顶待谈标记
+  /* 头顶待谈标记 */
   var mark = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), new THREE.MeshBasicMaterial({color:0xfbbf24}));
   mark.position.y = 2.72; g.add(mark);
   var mglow = new THREE.Sprite(new THREE.SpriteMaterial({map:tex_glow(), color:0xfbbf24, transparent:true, opacity:.6, blending:THREE.AdditiveBlending, depthWrite:false}));
@@ -1521,7 +2471,7 @@ function buildNpc(q){
   q.mark = mark; q.mglow = mglow;
   if(q.talked){ mark.visible = false; mglow.material.opacity = 0.18; }
 
-  // 脚下光环 + 假阴影
+  /* 脚下光环 + 假阴影 */
   var ring = new THREE.Mesh(
     new THREE.RingGeometry(0.62, 0.86, 24),
     new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.4, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
@@ -1531,7 +2481,7 @@ function buildNpc(q){
   var sh = new THREE.Mesh(new THREE.CircleGeometry(0.64, 18), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.32, depthWrite:false}));
   sh.rotation.x = -Math.PI/2; sh.position.y = 0.04; g.add(sh);
 
-  // 拾取体（近距离点按可对话）
+  /* 拾取体 */
   var hit = new THREE.Mesh(
     new THREE.CylinderGeometry(1.05, 1.05, 2.4, 8),
     new THREE.MeshBasicMaterial({transparent:true, opacity:0, depthWrite:false})
@@ -1541,7 +2491,7 @@ function buildNpc(q){
   g.add(hit);
   pickables.push(hit);
 
-  q.parts = {head:head, armL:armL, armR:armR, hood:hood};
+  q.parts = {body:body, head:head, hood:hood, armL:armL.grp, armR:armR.grp, foreL:armL.lower, foreR:armR.lower, legL:legL.grp, legR:legR.grp, shinL:legL.lower, shinR:legR.lower};
   q.grp = g;
   scene.add(g);
 }
@@ -1551,17 +2501,19 @@ function updateNpcs(dt, t){
     var q = NPCS[i];
     if(!q.grp) continue;
 
+    var moving = 0;
     if(q.patrol){
       q.pa += dt * q.patrol.spd;
-      q.x = q.patrol.cx + Math.cos(q.pa) * q.patrol.rad;
-      q.z = q.patrol.cz + Math.sin(q.pa) * q.patrol.rad;
+      var nx = q.patrol.cx + Math.cos(q.pa) * q.patrol.rad;
+      var nz = q.patrol.cz + Math.sin(q.pa) * q.patrol.rad;
+      moving = Math.hypot(nx - q.x, nz - q.z) / Math.max(dt, 0.0001);
+      q.x = nx; q.z = nz;
       q.y = heightAt(q.x, q.z);
     }
 
-    // 朝向：玩家靠近时转身面向玩家，否则按巡逻切线 / 初始朝向
     var dx = hero.x - q.x, dz = hero.z - q.z;
     var dist = Math.hypot(dx, dz);
-    var want = q.patrol ? Math.atan2(-Math.sin(q.pa), Math.cos(q.pa)) : q.yaw;
+    var want = q.patrol ? Math.atan2(Math.cos(q.pa), -Math.sin(q.pa)) : q.yaw;
     if(dist < 15) want = Math.atan2(dx, dz);
     var diff = Math.atan2(Math.sin(want - q.yaw), Math.cos(want - q.yaw));
     q.yaw += diff * Math.min(1, dt * 3.4);
@@ -1569,14 +2521,24 @@ function updateNpcs(dt, t){
     q.grp.position.set(q.x, q.y, q.z);
     q.grp.rotation.y = q.yaw;
 
-    // 呼吸 + 摆臂
-    var br = Math.sin(t*1.5 + i*1.3);
     if(q.parts){
-      q.parts.head.position.y = 1.74 * (q.look === 'shade' ? 1.14 : 1) + br*0.025;
-      q.parts.armL.rotation.x = br*0.09;
-      q.parts.armR.rotation.x = -br*0.09;
+      var p = q.parts;
+      var sp = Math.min(moving / 9, 1);
+      q.walk = (q.walk || 0) + moving * dt * 1.1 + dt * 0.6 * (sp > 0.05 ? 1 : 0);
+      var sw = Math.sin(q.walk) * (0.12 + sp * 0.55);
+      p.legL.rotation.x = sw;
+      p.legR.rotation.x = -sw;
+      p.legL.rotation.z = 0; p.legR.rotation.z = 0;
+      p.shinL.rotation.x = Math.max(0, Math.sin(q.walk + 1.1)) * (0.1 + sp*0.5);
+      p.shinR.rotation.x = Math.max(0, Math.sin(q.walk + 1.1 + Math.PI)) * (0.1 + sp*0.5);
+      p.armL.rotation.x = -sw * 0.75;
+      p.armR.rotation.x = sw * 0.75;
+      var br = Math.sin(t*1.5 + i*1.3);
+      p.body.position.y = Math.abs(Math.sin(q.walk)) * 0.03 * (0.3 + sp) + br * 0.012;
+      p.head.position.y = 1.86 * (q.look === 'shade' ? 1.12 : (q.look === 'hunter' ? 1.05 : 1)) + br * 0.02;
     }
     if(q.gem) q.gem.rotation.y += dt*1.2;
+    if(q.cloak) q.cloak.rotation.x = -0.1 + Math.sin(t*2.2 + i)*0.05;
     if(q.mark && q.mark.visible){
       q.mark.rotation.y += dt*1.6;
       q.mark.rotation.x += dt*0.9;
@@ -1587,6 +2549,7 @@ function updateNpcs(dt, t){
     if(q.ring) q.ring.material.opacity = (q.talked ? 0.16 : 0.3) + Math.sin(t*1.7 + i)*0.08;
   }
 }
+
 /* 漂浮光点 */
 var motes;
 function buildMotes(){
@@ -2128,16 +3091,34 @@ function updateHero(dt){
     hero.y = lerp(hero.y, groundY, Math.min(1, dt*14));
   }
 
-  // 动画
-  hero.walk += hero.speed * dt * 0.9;
-  var sw = Math.sin(hero.walk) * clamp(hero.speed / WALK, 0, 1.4) * 0.75;
-  heroParts.legL.rotation.x = sw;
-  heroParts.legR.rotation.x = -sw;
-  heroParts.armL.rotation.x = -sw * 0.8;
-  heroParts.armR.rotation.x = sw * 0.8;
-  heroParts.torso.position.y = 1.25 + Math.abs(Math.sin(hero.walk)) * 0.045;
-  heroParts.head.position.y = 1.98 + Math.abs(Math.sin(hero.walk)) * 0.045;
-  heroParts.cape.rotation.x = -0.12 - clamp(hero.speed / RUN, 0, 1) * 0.35 + Math.sin(hero.walk*0.8)*0.05;
+  /* 动画：走 / 跑 / 跳 / 待机呼吸 */
+  hero.walk += hero.speed * dt * 0.62;
+  var gait = clamp(hero.speed / WALK, 0, 1.7);
+  var sw  = Math.sin(hero.walk) * gait * 0.78;
+  var sw2 = Math.sin(hero.walk + Math.PI) * gait * 0.78;
+  if(hero.air){
+    heroParts.legL.rotation.x = -0.85; heroParts.legR.rotation.x = -0.3;
+    heroParts.shinL.rotation.x = 1.15;  heroParts.shinR.rotation.x = 0.45;
+    heroParts.armL.rotation.x = -1.15;  heroParts.armR.rotation.x = -0.95;
+    heroParts.foreL.rotation.x = -0.45; heroParts.foreR.rotation.x = -0.35;
+    heroParts.body.position.y = 0;
+    heroParts.body.rotation.x = -0.1;
+  } else {
+    heroParts.legL.rotation.x = sw;
+    heroParts.legR.rotation.x = sw2;
+    heroParts.shinL.rotation.x = Math.max(0, Math.sin(hero.walk + 1.05)) * gait * 0.72;
+    heroParts.shinR.rotation.x = Math.max(0, Math.sin(hero.walk + 1.05 + Math.PI)) * gait * 0.72;
+    heroParts.armL.rotation.x = -sw * 0.85;
+    heroParts.armR.rotation.x = -sw2 * 0.85;
+    heroParts.foreL.rotation.x = -0.22 - Math.max(0, Math.sin(hero.walk)) * gait * 0.38;
+    heroParts.foreR.rotation.x = -0.22 - Math.max(0, Math.sin(hero.walk + Math.PI)) * gait * 0.38;
+    heroParts.body.position.y = Math.abs(Math.sin(hero.walk)) * 0.05 * gait + Math.sin(performance.now()*0.0016) * 0.013;
+    heroParts.body.rotation.x = gait * 0.085;
+  }
+  heroParts.head.rotation.z = Math.sin(hero.walk * 0.5) * 0.035;
+  heroParts.cape.rotation.x = -0.08 - gait * 0.34 + Math.sin(hero.walk * 0.9) * 0.07;
+  heroParts.cape.rotation.z = Math.sin(hero.walk * 0.5) * 0.06;
+  heroParts.sword.rotation.z = 0.5 + Math.sin(hero.walk * 0.7) * 0.05;
   heroParts.ring.material.opacity = 0.35 + Math.sin(performance.now()*0.003)*0.15;
 
   heroObj.position.set(hero.x, hero.y, hero.z);
@@ -2269,6 +3250,51 @@ function drawMini(){
 
 /* ==================== 主循环 ==================== */
 var _v = null, frame = 0;
+/* 世界动效：火焰摇曳、旗帜飘动、烟柱上升、法器旋转、水面波光 */
+function updateWorldFx(dt, t){
+  var i, p;
+  for(i=0;i<FLAMES.length;i++){
+    var f = FLAMES[i];
+    f.sp.material.opacity = f.base + Math.sin(t*f.spd + f.ph) * f.amp;
+    if(f.mesh){
+      var sc = 1 + Math.sin(t*f.spd*1.3 + f.ph) * 0.12;
+      f.mesh.scale.set(sc, 1 + Math.sin(t*f.spd + f.ph) * 0.24, sc);
+    }
+  }
+  for(i=0;i<BANNERS.length;i++){
+    var bn = BANNERS[i];
+    var pos = bn.mesh.geometry.attributes.position, base = bn.base;
+    for(p=0;p<pos.count;p++){
+      var bx = base[p*3], by = base[p*3+1];
+      pos.setZ(p, Math.sin(bx*2.4 + t*4.2 + bn.ph) * (bx + 1.0) * 0.09 + Math.sin(by*1.7 + t*2.6) * 0.04);
+    }
+    pos.needsUpdate = true;
+  }
+  for(i=0;i<SMOKES.length;i++){
+    var sm = SMOKES[i];
+    var sp = sm.pts.geometry.attributes.position;
+    for(p=0;p<sm.spd.length;p++){
+      var y = sp.getY(p) + sm.spd[p]*dt;
+      if(y > sm.y0 + sm.rise){
+        y = sm.y0;
+        sp.setX(p, sm.base[p*3]); sp.setZ(p, sm.base[p*3+2]);
+      } else {
+        sp.setX(p, sp.getX(p) + Math.sin(t*0.6 + p) * dt * 0.8);
+      }
+      sp.setY(p, y);
+    }
+    sp.needsUpdate = true;
+  }
+  for(i=0;i<SPINS.length;i++) SPINS[i].mesh.rotation.y += dt * SPINS[i].spd;
+  for(i=0;i<NODES.length;i++){
+    var n = NODES[i];
+    if(n.water && n.water.material.map){
+      n.water.material.map.offset.x = Math.sin(t*0.09) * 0.06;
+      n.water.material.map.offset.y = t * 0.014;
+    }
+  }
+}
+
 function animate(){
   requestAnimationFrame(animate);
   var dt = Math.min(clock.getDelta(), 0.05);
@@ -2278,6 +3304,8 @@ function animate(){
   updateHero(dt);
   updateNear();
   updateNpcs(dt, t);
+  updateSun();
+  updateWorldFx(dt, t);
 
   if(mode === 'follow'){
     cam.yaw = lerp(cam.yaw, cam.tYaw, 0.18);
