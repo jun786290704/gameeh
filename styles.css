@@ -100,6 +100,11 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .market-tab.active{background:rgba(251,191,36,.12);color:var(--gold);border-color:rgba(251,191,36,.35);}
 .bg-grid{background-image:linear-gradient(rgba(148,163,184,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.045) 1px,transparent 1px);background-size:34px 34px;}
 .text-gold{color:var(--gold);}.text-muted{color:var(--muted);}.num-mono{font-variant-numeric:tabular-nums;}
+/* 以下三个在 game.html / js 里被用到，但既非 tailwind 内置、也未在别处定义，此处补齐 */
+.text-info{color:#38bdf8;}
+.btn-primary{background:linear-gradient(135deg,#7dd3fc,#0ea5e9);color:#062c44;box-shadow:0 4px 18px -4px rgba(14,165,233,.5);}
+.btn-primary:hover{filter:brightness(1.06);}
+.stamina-tick{font-variant-numeric:tabular-nums;font-size:11px;color:#67e8f9;}
 
 /* ============ 选择芯片行（英雄/武器/怪物） ============ */
 .pick-row{display:flex;gap:.5rem;overflow-x:auto;padding:.35rem .1rem .65rem;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;}

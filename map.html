@@ -629,7 +629,16 @@ body.touch .touch-hint{display:block}
 <span id="errBadge" style="display:none"></span>
 <span id="pendingPillBtn" style="display:none"></span>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<script src="./vendor/ethers.umd.min.js"></script>
+<script>
+/* ethers 本地优先；本地缺失时才回退 CDN（离线环境下一律走本地） */
+if(!window.ethers){
+  var _e = document.createElement('script');
+  _e.src = 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js';
+  _e.onerror = function(){ window.__ethersFailed = true; };
+  document.head.appendChild(_e);
+}
+</script>
 <script src="./js/core.js" defer></script>
 <script src="./js/utils.js" defer></script>
 <script src="./js/wallet.js" defer></script>
@@ -771,17 +780,24 @@ function syncStageTop(){
 }
 
 /* ==================== 引擎加载 ==================== */
+/* 本地优先：vendor/three.min.js 随仓库一起分发，离线 / 无法访问 CDN 时照常可用；
+   后面几个只是本地文件缺失时的兜底，失败即降级为平面地图。 */
 var CDNS = [
+  './vendor/three.min.js',
   'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',
   'https://unpkg.com/three@0.128.0/build/three.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.128.0/three.min.js'
 ];
 function loadThree(i){
-  if(i >= CDNS.length){ renderFallback('无法访问任何 CDN'); return; }
+  if(i >= CDNS.length){ renderFallback('3D 引擎不可用（本地 vendor/three.min.js 与全部 CDN 均加载失败）'); return; }
   var s = document.createElement('script');
   s.src = CDNS[i];
   s.onload = function(){ if(window.THREE) boot(); else loadThree(i+1); };
-  s.onerror = function(){ document.getElementById('loadTxt').textContent = '换用备用节点…'; loadThree(i+1); };
+  s.onerror = function(){
+    var t = document.getElementById('loadTxt');
+    if(t) t.textContent = (i === 0) ? '本地引擎缺失，改用 CDN…' : '换用备用节点…';
+    loadThree(i+1);
+  };
   document.head.appendChild(s);
 }
 

@@ -4,9 +4,18 @@
 <meta charset="UTF-8" data-page-node-id="bjs0rLANQCg7AfS5TvfDU9">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" data-page-node-id="xFOFYn4Y3vj8OjABC6v5s6">
 <title>元素英雄 · RPG</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" data-page-node-id="NPgwuOLXe4TdfMaSjqEADx">
+<link rel="stylesheet" href="./vendor/tailwind.min.css">
+<script src="./vendor/ethers.umd.min.js"></script>
+<script>
+/* ethers 本地优先；本地缺失时才回退 CDN */
+if(!window.ethers){
+  var _e = document.createElement('script');
+  _e.src = 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js';
+  _e.onerror = function(){ window.__ethersFailed = true; };
+  document.head.appendChild(_e);
+}
+</script>
+<link rel="stylesheet" href="./vendor/fontawesome/css/all.min.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'" data-page-node-id="NPgwuOLXe4TdfMaSjqEADx">
 <link rel="stylesheet" href="./styles.css" data-page-node-id="qA8u54aM0w37ERSMbqRxOS">
 </head>
 <body class="bg-grid" data-page-node-id="x3xvJLeGCHXfYx1Wp430qJ">

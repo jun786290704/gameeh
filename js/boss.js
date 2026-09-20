@@ -82,7 +82,7 @@ async function loadBossTop(rid){
     const medals = ['text-gold','text-slate-300','text-amber-600'];
     el.innerHTML = top.map((r,i)=>{
       const isMe = r.addr===me;
-      return `<div class="flex items-center gap-2 py-1.5 ${isMe?'rounded-lg bg-[#fbbf24]0f border border-[#fbbf24]33 px-1.5 -mx-1.5':''}">
+      return `<div class="flex items-center gap-2 py-1.5 ${isMe?'rounded-lg bg-[#fbbf240f] border border-[#fbbf2433] px-1.5 -mx-1.5':''}">
         <span class="w-4 text-center font-black text-[13px] ${medals[i]||'text-muted'}">${i+1}</span>
         <img src="${monImg(9)}" class="w-7 h-7 rounded-lg object-cover" style="object-position:center 30%;">
         <span class="text-[11px] font-bold num-mono w-16 truncate ${isMe?'text-gold':'text-muted'}">${isMe?'👤 我':r.addr.slice(0,4)+'…'+r.addr.slice(-3)}</span>
