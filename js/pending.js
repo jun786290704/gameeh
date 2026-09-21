@@ -249,4 +249,10 @@ function renderPending(){
     </div>`;
   }).join('');
 }
-function togglePendingPanel(){ $('#pendingPanel').classList.toggle('hidden'); }
+function togglePendingPanel(){
+  var el = $('#pendingPanel'); if(!el) return;
+  /* game.html 引了 Tailwind（靠 .hidden 隐藏），map.html 没引（面板靠 .show 显示）。
+     两个类一起切，两种环境都能正确开合 —— 只切 hidden 会让地图页面板点不开。 */
+  el.classList.toggle('show');
+  el.classList.toggle('hidden');
+}

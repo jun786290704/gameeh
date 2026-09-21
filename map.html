@@ -237,6 +237,32 @@ a{color:var(--gold);text-decoration:none}
 @keyframes sp2{to{transform:rotate(360deg)}}
 #pendingPanel{position:absolute;right:16px;top:60px;width:292px;background:rgba(11,18,32,.96);border:1px solid var(--line2);border-radius:14px;padding:12px;z-index:40;display:none;max-height:calc(100% - 220px);overflow-y:auto}
 #pendingPanel.show{display:block}
+/* 面板内容由 js/pending.js 渲染，用的是 Tailwind 风类名，而地图页没引 Tailwind ——
+   这里补它实际用到的那一小撮，全部限定在 #pendingPanel 内，不会影响页面其它部分。 */
+#pendingPanel .text-muted{color:#8b9ab3}
+#pendingPanel .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pendingPanel .text-\[10px\]{font-size:10px}
+#pendingPanel .text-\[11px\]{font-size:11px}
+#pendingPanel .text-\[12px\]{font-size:12px}
+#pendingPanel .text-\[13px\]{font-size:13px}
+#pendingPanel .text-blue-400{color:#60a5fa}
+#pendingPanel .hover\:underline:hover{text-decoration:underline}
+#pendingPanel .bg-\[\#0d1526\]{background:#0d1526}
+#pendingPanel .border{border:1px solid #24304a}
+#pendingPanel .border-\[\#24304a\]{border-color:#24304a}
+#pendingPanel .rounded-lg{border-radius:10px}
+#pendingPanel .p-2{padding:8px}
+#pendingPanel .p-2\.5{padding:10px}
+#pendingPanel .flex{display:flex}
+#pendingPanel .items-center{align-items:center}
+#pendingPanel .gap-2{gap:8px}
+#pendingPanel .flex-1{flex:1 1 0%}
+#pendingPanel .min-w-0{min-width:0}
+#pendingPanel .font-bold{font-weight:700}
+#pendingPanel .btn{display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:9px;border:1px solid var(--line2);background:rgba(13,21,38,.85);color:#dbe4f2;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
+#pendingPanel .btn-sm{padding:5px 10px;font-size:11px;border-radius:8px}
+#pendingPanel .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;border-color:transparent}
+#pendingPanel .btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* ================= NPC ================= */
 .mlabel.npc{border-color:rgba(56,189,248,.34);background:rgba(7,12,24,.7);color:#cfe6ff}
@@ -1516,6 +1542,21 @@ function put(parent, mesh, x, y, z, ry){
   parent.add(mesh);
   return mesh;
 }
+/* 台基三层锥台（半径底 / 半径顶 / 起止高度）—— 唯一数据源：
+   站立面 standHeightAt 与台阶贴合面 podiumSurfaceY 都从这里取，改这里即可全部同步。 */
+function tierDefOf(R){
+  return [[R*1.18, R*1.06, 0, 1.5], [R*1.04, R*0.93, 1.5, 2.9], [R*0.90, R*0.80, 2.9, 4.1]];
+}
+/* 锥台表面在半径 d 处的高度（相对建筑 baseY） */
+function podiumSurfaceY(d, R){
+  var t = tierDefOf(R), i;
+  for(i=0;i<t.length;i++){
+    if(d <= t[i][0] && d >= t[i][1]){
+      return t[i][2] + (t[i][3] - t[i][2]) * ((t[i][0] - d) / (t[i][0] - t[i][1]));
+    }
+  }
+  return (d > t[0][0]) ? 0.62 : t[t.length-1][3];   // 台地外 → 铺面；顶层内 → 顶面
+}
 /* 台阶：由外向内拾级而上 */
 function addStairs(grp, R, mat, ang, steps, topY){
   steps = steps || 5;
@@ -1523,9 +1564,18 @@ function addStairs(grp, R, mat, ang, steps, topY){
   for(var i=0;i<steps;i++){
     var d = R*1.24 - i*(R*0.06 + 0.45);
     var m = new THREE.Mesh(new THREE.BoxGeometry(R*0.52, hh, R*0.2 + 0.9), mat);
-    m.position.set(Math.cos(ang)*d, hh*(i + 0.5), Math.sin(ang)*d);
+    /* 台阶顶面贴合锥台表面（而不是线性升高）：否则台阶会悬空在斜面上方 1m 多，
+       角色沿斜面走时身体会穿过台阶块 —— 这是实测到的最后一处穿模。 */
+    m.position.set(Math.cos(ang)*d, podiumSurfaceY(d, R) - hh*0.5, Math.sin(ang)*d);
     m.rotation.y = -ang;
     grp.add(m); shade(m);
+    // 台阶侧面碰撞：小圆柱挡穿模，留中心通道能拾级而上
+    var cx = Math.cos(ang)*d, cz = Math.sin(ang)*d;
+    var cr = R * 0.22;
+    /* 偏移必须沿「垂直于台阶」的方向 (-sin, cos)；写成 (-sin,-cos)/(sin,cos) 会让两个圆柱
+       落在台阶中线的前后，正好堵死「留中心通道拾级而上」的设计。 */
+    OBSTACLES.push({cx:cx - Math.sin(ang)*R*0.32, cz:cz + Math.cos(ang)*R*0.32, r:cr});
+    OBSTACLES.push({cx:cx + Math.sin(ang)*R*0.32, cz:cz - Math.cos(ang)*R*0.32, r:cr});
   }
   /* 台阶只作视觉引导。真正的可站立面是台基锥台（见 standHeightAt）——
      若让台阶斜坡独立提供高度，它的高度-距离曲线与锥台的半径-高度曲线不一致，
@@ -1539,6 +1589,10 @@ function addColumn(grp, r, hh, matBody, matCap, x, z, y0){
   put(grp, body, x, y0 + 0.42 + hh/2, z); shade(body);
   var cap = new THREE.Mesh(new THREE.BoxGeometry(r*2.8, 0.48, r*2.8), matCap);
   put(grp, cap, x, y0 + 0.42 + hh + 0.24, z); shade(cap);
+  // 注册柱子碰撞体（世界坐标 = grp.position + 局部 x,z）
+  if(typeof OBSTACLES !== 'undefined'){
+    OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:r*1.6});
+  }
   return y0 + 0.42 + hh + 0.48;
 }
 /* 石灯笼 */
@@ -1555,6 +1609,7 @@ function addLantern(grp, x, z, y0, colHex){
   var sp = glowMesh(colHex, 1.8, .62); put(g, sp, 0, 2.98, 0);
   FLAMES.push({sp:sp, base:.55, amp:.22, spd:1.9, ph:Math.random()*6.28});
   grp.add(g);
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.6});
   return g;
 }
 /* 火盆 */
@@ -1572,6 +1627,7 @@ function addBrazier(grp, x, z, y0, colHex, sc){
   var sp = glowMesh(colHex, 2.6*sc, .75); put(g, sp, 0, 2.6*sc, 0);
   FLAMES.push({sp:sp, mesh:fire, base:.62, amp:.3, spd:2.7, ph:Math.random()*6.28});
   grp.add(g);
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.9*sc});
   return g;
 }
 /* 旗帜（带飘动） */
@@ -1597,6 +1653,7 @@ function addCrate(grp, x, y, z, s, ry){
   m.position.set(x, y + 0.7*s, z); m.rotation.y = ry || 0; grp.add(m); shade(m);
   var band = new THREE.Mesh(new THREE.BoxGeometry(1.57*s, 0.13*s, 1.57*s), matOf('metal', 1, 1, {roughness:.5, metalness:.8}));
   band.position.set(x, y + 1.08*s, z); band.rotation.y = ry || 0; grp.add(band);
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.9*s});
   return m;
 }
 function addBarrel(grp, x, y, z, s){
@@ -1605,6 +1662,7 @@ function addBarrel(grp, x, y, z, s){
   var h1 = new THREE.Mesh(new THREE.TorusGeometry(0.63*s, 0.055*s, 5, 14), matOf('metal', 1, 1, {roughness:.45, metalness:.85}));
   h1.rotation.x = Math.PI/2; put(grp, h1, x, y + 1.12*s, z);
   var h2 = h1.clone(); h2.position.y = y + 0.38*s; grp.add(h2);
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.7*s});
   return m;
 }
 /* 碎石 */
@@ -1641,6 +1699,7 @@ function addWeaponRack(grp, x, z, y0, ry, colHex){
   var tip = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.44, 6), matC(colHex, .35, .5, colHex, .55));
   tip.rotation.z = 0.2; put(g, tip, 1.58, 2.72, 0.1);
   grp.add(g);
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:1.2});
   return g;
 }
 /* 守卫石像 */
@@ -1661,6 +1720,7 @@ function addStatue(grp, x, z, y0, ry, colHex){
   var spear = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 3.2, 6), matOf('wood', 1, 2));
   put(g, spear, 0.72, 1.6, 0.1); shade(spear);
   grp.add(g);
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.9});
   return g;
 }
 /* 上升烟 / 火星柱 */
@@ -1727,7 +1787,7 @@ function buildNode(n){
      脚底恒在表面上，既不会陷入也不会穿模。
      若再叠一层圆柱碰撞，就会与站立面互相顶死 —— 角色向内走被斜面挡回，
      而向内走恰恰是升高的前提，结果永远卡在台地高度上不去。 */
-  var tierDef = [[R*1.18, R*1.06, 0, 1.5], [R*1.04, R*0.93, 1.5, 2.9], [R*0.90, R*0.80, 2.9, 4.1]];
+  var tierDef = tierDefOf(R);
   for(var qi=0; qi<tierDef.length; qi++){
     var td = tierDef[qi];
     TIERS.push({cx:n.x, cz:n.z, rBot:td[0], rTop:td[1],
@@ -1744,6 +1804,10 @@ function buildNode(n){
 
   var toCenter = Math.atan2(-n.z, -n.x);            // 朝向地图中心（路来的方向）
   if(n.ring === 0) toCenter = Math.PI/2;
+  /* 这里原本有一圈「台基斜面环形碰撞」，但 12 根小圆柱（半径 R*0.1）排在半径 R*1.24 的
+     圆周上：相邻间距约 16m、直径却只有 5m，缺口十几米 —— 根本围不成环，既挡不住人，
+     又白白往物理世界塞十几个障碍。台基本就设计为可沿斜面从任意方向走上（由站立面
+     负责托住角色），并不需要这圈阻挡，故移除。 */
 
   if(n.type === 'tower'){
     /* 塔：柱廊 + 多层塔身 + 攒尖顶 + 宝顶 */
@@ -1796,6 +1860,7 @@ function buildNode(n){
     if(n.k === 'forge'){
       var anvil = new THREE.Mesh(new THREE.BoxGeometry(R*0.5, 1.0, R*0.34), matOf('metal', 1, 1, {roughness:.45, metalness:.9}));
       anvil.position.y = top + 1.1; grp.add(anvil); shade(anvil);
+      OBSTACLES.push({cx:n.x, cz:n.z, r:R*0.32});
       var horn = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.5, 6), matOf('metal', 1, 1, {roughness:.45, metalness:.9}));
       horn.rotation.z = -Math.PI/2; horn.position.set(R*0.34, top + 1.1, 0); grp.add(horn); shade(horn);
       var stump = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.1, 1.1, 8), wood);
@@ -1805,6 +1870,7 @@ function buildNode(n){
     } else {
       var cauldron = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.4, 2.0, 12), matOf('metal', 1, 1, {roughness:.5, metalness:.8}));
       cauldron.position.y = top + 1.0; grp.add(cauldron); shade(cauldron);
+      OBSTACLES.push({cx:n.x, cz:n.z, r:1.6});
       var brew = new THREE.Mesh(new THREE.CylinderGeometry(1.72, 1.72, 0.16, 12), matC(colHex, .3, .1, colHex, 1.5));
       brew.position.y = top + 1.95; grp.add(brew);
       var legs = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.7, 0.5, 8), matOf('stoneD', 1, 1));
@@ -1823,6 +1889,7 @@ function buildNode(n){
     cone.position.y = top + h*0.4; grp.add(cone); shade(cone);
     var ridge = new THREE.Mesh(new THREE.ConeGeometry(R*0.72, h*0.92, 10), matOf('stone', 4, 3));
     ridge.position.y = top + h*0.46; grp.add(ridge); shade(ridge);
+    OBSTACLES.push({cx:n.x, cz:n.z, r:R*0.6});
     for(var f=0;f<4;f++){
       var fa = f/4*6.2832 + 0.6;
       var flow = new THREE.Mesh(new THREE.BoxGeometry(1.6, h*0.5, 0.5), matC(0xff5a12, .5, 0, 0xff4a08, 1.4));
@@ -1844,6 +1911,7 @@ function buildNode(n){
     /* 水上市集：主帐 + 三摊位 + 水面 + 灯笼串 */
     var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, h*0.75, 8), wood);
     pole.position.y = top + h*0.37; grp.add(pole); shade(pole);
+    OBSTACLES.push({cx:n.x, cz:n.z, r:1.2});
     var tent = new THREE.Mesh(new THREE.ConeGeometry(R*1.0, h*0.5, 10), clothM);
     tent.position.y = top + h*0.52; grp.add(tent); shade(tent);
     var skirt = new THREE.Mesh(new THREE.CylinderGeometry(R*1.0, R*1.02, 1.4, 10), clothM);
@@ -1869,6 +1937,7 @@ function buildNode(n){
       var goods3 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 0.7, 8), matC(0x38bdf8, .5, .2, 0x0b3a55, .4));
       put(sg, goods3, 1.0, 1.35, 0.5);
       grp.add(sg);
+      OBSTACLES.push({cx:n.x+sx, cz:n.z+sz, r:1.6});
     }
     /* 水面（浮市） */
     var water = new THREE.Mesh(new THREE.CircleGeometry(R*0.62, 28), new THREE.MeshStandardMaterial({
@@ -1902,6 +1971,7 @@ function buildNode(n){
     });
     var ob = new THREE.Mesh(new THREE.CylinderGeometry(R*0.2, R*0.42, h, 4), obMat);
     ob.rotation.y = Math.PI/4; ob.position.y = top + 2.1 + h*0.5; grp.add(ob); shade(ob);
+    OBSTACLES.push({cx:n.x, cz:n.z, r:R*0.4});
     var tip = new THREE.Mesh(new THREE.ConeGeometry(R*0.34, 5.2, 4), emisM);
     tip.rotation.y = Math.PI/4; tip.position.y = top + 2.1 + h + 2.6; grp.add(tip);
     var haloRing = new THREE.Mesh(new THREE.RingGeometry(R*0.5, R*0.62, 32), new THREE.MeshBasicMaterial({color:colHex, transparent:true, opacity:.3, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false}));
@@ -1951,6 +2021,7 @@ function buildNode(n){
     /* 兵器库：石木屋 + 烟囱 + 兵器架 + 熔炉 */
     var walls = new THREE.Mesh(new THREE.BoxGeometry(R*1.5, h*0.42, R*1.2), stone);
     walls.position.y = top + h*0.21; grp.add(walls); shade(walls);
+    OBSTACLES.push({cx:n.x, cz:n.z, r:R*0.6});
     var beamW = new THREE.Mesh(new THREE.BoxGeometry(R*1.56, 0.4, R*1.26), wood);
     beamW.position.y = top + h*0.42; grp.add(beamW); shade(beamW);
     var roofA = new THREE.Mesh(new THREE.BoxGeometry(R*1.7, 0.35, R*0.78), roofM);
@@ -1996,9 +2067,11 @@ function buildNode(n){
     for(var co=0; co<5; co++){
       var coinPile = new THREE.Mesh(new THREE.CylinderGeometry(1.9 - co*0.22, 2.1 - co*0.22, 0.34, 18), matC(0xfbbf24, .28, .9, 0x6a4a0c, .3));
       coinPile.position.set((co-2)*0.9, top + 0.2 + co*0.32, R*0.95 + 1.2); grp.add(coinPile); shade(coinPile);
+      OBSTACLES.push({cx:n.x+(co-2)*0.9, cz:n.z+R*0.95+1.2, r:1.6});
     }
     var coin = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.7, 24), matC(0xfbbf24, .25, .95, 0x8a5f10, .5));
     coin.rotation.x = Math.PI/2; coin.position.y = top + h*0.5 + 5.2; grp.add(coin);
+    OBSTACLES.push({cx:n.x, cz:n.z, r:3.0});
     SPINS.push({mesh:coin, spd:0.9});
     n.rune = coin;
     addStatue(grp, -R*0.95, R*0.78, top, toCenter + 0.9, colHex);
@@ -2013,6 +2086,7 @@ function buildNode(n){
     mt.position.y = top + h*0.39; grp.add(mt); shade(mt);
     var mt2 = new THREE.Mesh(new THREE.ConeGeometry(R*0.66, h*0.92, 8), matOf('scale', 4, 4));
     mt2.position.y = top + h*0.46; grp.add(mt2); shade(mt2);
+    OBSTACLES.push({cx:n.x, cz:n.z, r:R*0.5});
     var lake = new THREE.Mesh(new THREE.CircleGeometry(R*0.42, 24), matC(0xff4d1a, .4, 0, 0xff2a08, 1.9));
     lake.rotation.x = -Math.PI/2; lake.position.y = top + h*0.79; grp.add(lake);
     n.pulse = lake;
@@ -2317,13 +2391,24 @@ function applyHeroLook(){
   heroLookEl = k;
   if(heroObj){
     scene.remove(heroObj);
-    try{ heroObj.traverse(function(o){ if(o.geometry) o.geometry.dispose(); }); }catch(e){}
+    /* matOf / clothMat 走全局缓存 MATC，是共享材质 —— 绝不能 dispose，
+       否则场景里其它用同款材质的物体会一起失效。只回收 matC 新建的（不在缓存里的）。 */
+    try{
+      var shared = {};
+      for(var mk in MATC){ if(MATC[mk]) shared[MATC[mk].uuid] = 1; }
+      heroObj.traverse(function(o){
+        if(o.geometry) o.geometry.dispose();
+        if(!o.material) return;
+        var ms = Array.isArray(o.material) ? o.material : [o.material];
+        ms.forEach(function(m){ if(!shared[m.uuid]) m.dispose(); });
+      });
+    }catch(e){}
   }
   buildHero(k);
-  hero.y = heightAt(hero.x, hero.z);
+  hero.y = standHeightAt(hero.x, hero.z);   // 与角色同源，避免切换瞬间在台基上掉半米
 }
 /* ==================== NPC ====================
-   11 位衡洲遗民：9 位驻守各圣域、2 位沿途巡行。
+   12 位衡洲遗民：10 位驻守各圣域、2 位沿途巡行。
    坐标用「相对某建筑的极角 + 距离」定义，避免手写 x/z 与地图几何脱节。 */
 function npcAnchor(k, deg, d){
   var n = nodeByKey(k);
@@ -2518,6 +2603,9 @@ NPCS.forEach(function(q){
     q.node = _n || null;
     if(!q.play) q.play = _n ? ('进入' + _n.name) : '';
   } else { q.node = null; }
+  // NPC 碰撞体：角色不能穿过 NPC（巡逻者每帧同步位置，见 updateNpcs 里的 q.obs 更新）
+  q.obs = {cx:q.x, cz:q.z, r:0.9, npc:true};
+  OBSTACLES.push(q.obs);
 });
 
 function npcByKey(k){ for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k) return NPCS[i]; return null; }
@@ -2556,6 +2644,10 @@ function attachNpcModel(q, g, body){
   }, undefined, function(){ /* 静默降级：保留程序化模型 */ });
 }
 function buildNpc(q){
+  /* 站立面与角色同源（地形 / 台基 / 台地）。NPCS 的坐标在脚本加载时就已算出 q.y，
+     但那时台地 / 台基数据还没构建（PLATFORMS 为空），必须在这里重算 ——
+     否则走进台地范围的 NPC（如行商·荞的巡逻圆最近点距中心仅 40m）会陷进铺面 0.62m，即穿模。 */
+  q.y = standHeightAt(q.x, q.z);
   var col = q.color ? new THREE.Color(q.color) : new THREE.Color(0xfbbf24);
   var colHex = col.getHex();
   var look = q.look || 'sage';
@@ -2715,7 +2807,11 @@ function updateNpcs(dt, t){
       var nz = q.patrol.cz + Math.sin(q.pa) * q.patrol.rad;
       moving = Math.hypot(nx - q.x, nz - q.z) / Math.max(dt, 0.0001);
       q.x = nx; q.z = nz;
-      q.y = heightAt(q.x, q.z);
+      q.y = standHeightAt(q.x, q.z);
+      if(q.obs){
+        q.obs.cx = nx; q.obs.cz = nz;
+        if(q.obs.body){ q.obs.body.shape.cx = nx; q.obs.body.shape.cz = nz; }
+      }
     }
 
     var dx = hero.x - q.x, dz = hero.z - q.z;
@@ -2927,7 +3023,12 @@ function bindControls(){
     autoRotate = !autoRotate; this.classList.toggle('on', autoRotate);
   };
   document.getElementById('tReset').onclick = function(){
-    hero.x = 0; hero.z = 52; hero.y = heightAt(0, 52); hero.tx = null;
+    hero.x = 0; hero.z = 52; hero.y = standHeightAt(0, 52); hero.tx = null;
+    /* 必须同步物理体：否则一按方向键，updateHero 就会从 PHYS.body.pos 读回重置前的坐标，把角色瞬移回去 */
+    if(PHYS && PHYS.ready){
+      PHYS.body.pos.x = 0; PHYS.body.pos.z = 52;
+      PHYS.body.velocity.x = 0; PHYS.body.velocity.z = 0;
+    }
     cam.tYaw = 0; cam.tPitch = 0.34; cam.tDist = 15;
     closeInfo(); lastInteract = performance.now();
   };
@@ -3290,7 +3391,8 @@ function onResize(){
    锥台表面与 tierRadius() 用的是同一组参数，所以「站立高度」与「碰撞半径」天然自洽：
    角色沿斜面向上走 → 脚下变高 → 该层半径随之收窄 → 允许他继续向内，不会互相顶死。 */
 function standHeightAt(x, z){
-  var h = heightAt(x, z), i, dx, dz, dd, y;
+  var h0 = heightAt(x, z);              // 地形基准：台地外沿的渐变必须以它为起点
+  var h = h0, i, dx, dz, dd, y;
   for(i=0;i<TIERS.length;i++){
     var c = TIERS[i];
     dx = x - c.cx; dz = z - c.cz;
@@ -3305,7 +3407,9 @@ function standHeightAt(x, z){
     dx = x - p.cx; dz = z - p.cz;
     dd = Math.sqrt(dx*dx + dz*dz);
     if(dd <= p.r) y = p.y;
-    else if(p.edge && dd < p.r + p.edge) y = h + (p.y - h) * (1 - (dd - p.r) / p.edge);
+    /* 外沿渐变以「地形高度 h0」为起点。若用已被台基抬高的 h 当基准，
+       在台基与台地重叠的区域就会出现突兀的台阶感。 */
+    else if(p.edge && dd < p.r + p.edge) y = h0 + (p.y - h0) * (1 - (dd - p.r) / p.edge);
     else continue;
     if(y > h) h = y;
   }
@@ -3316,14 +3420,25 @@ function tryMove(nx, nz){
   nx = clamp(nx, -LIMIT, LIMIT);
   nz = clamp(nz, -LIMIT, LIMIT);
   // 树 / 岩石 / 建筑主体（垂直墙面）—— 兜底路径：物理引擎未加载时仍防穿模
-  for(var j=0;j<OBSTACLES.length;j++){
-    var o = OBSTACLES[j], cr = o.r + 0.85;
-    if(Math.hypot(nx - o.cx, nz - o.cz) < cr){
-      var ddx = nx - o.cx, ddz = nz - o.cz, dd = Math.hypot(ddx, ddz) || 1e-4;
-      nx = o.cx + ddx/dd * cr; nz = o.cz + ddz/dd * cr;
+  // 步长细分：高速跑步一帧可移动 1.5m，直接判定会一步跨进障碍物；
+  // 拆成多段逐段检测，每段不超过 0.4m，彻底杜绝高速穿模
+  var sx = hero.x, sz = hero.z;
+  var dx = nx - sx, dz = nz - sz;
+  var total = Math.hypot(dx, dz);
+  var seg = 0.4;
+  var steps = Math.max(1, Math.ceil(total / seg));
+  for(var k=1;k<=steps;k++){
+    var cx = sx + dx * k / steps;
+    var cz = sz + dz * k / steps;
+    for(var j=0;j<OBSTACLES.length;j++){
+      var o = OBSTACLES[j], cr = o.r + 1.0;
+      if(Math.hypot(cx - o.cx, cz - o.cz) < cr){
+        var ddx = cx - o.cx, ddz = cz - o.cz, dd = Math.hypot(ddx, ddz) || 1e-4;
+        cx = o.cx + ddx/dd * cr; cz = o.cz + ddz/dd * cr;
+      }
     }
   }
-  hero.x = nx; hero.z = nz;
+  hero.x = clamp(cx, -LIMIT, LIMIT); hero.z = clamp(cz, -LIMIT, LIMIT);
 }
 
 /* 构建物理世界：建筑 / 树 / 岩石为静态圆柱，角色为动态球体。
@@ -3334,7 +3449,11 @@ function buildPhysics(){
     var w = new PHYSICS.World({gravity:0, iterations:4});
     for(var i=0;i<OBSTACLES.length;i++){
       var o = OBSTACLES[i];
-      w.addBody(PHYSICS.Body({mass:0, shape:{type:'cylinder', cx:o.cx, cz:o.cz, r:o.r}}));
+      /* 必须把 body 回写到 o.body —— 巡逻 NPC 每帧靠它同步位置。
+         少了这一步，人走开了碰撞体还留在出生点（挡住空气），而人身上反而没碰撞。 */
+      var b = PHYSICS.Body({mass:0, shape:{type:'cylinder', cx:o.cx, cz:o.cz, r:o.r}});
+      w.addBody(b);
+      o.body = b;
     }
     var body = PHYSICS.Body({mass:1, x:hero.x, y:hero.y + 0.85, z:hero.z, shape:{type:'sphere', r:0.85}});
     w.addBody(body);
@@ -3371,8 +3490,13 @@ function updateHero(dt){
   } else if(hero.tx !== null){
     var dx = hero.tx - hero.x, dz = hero.tz - hero.z;
     var d = Math.hypot(dx, dz);
-    if(d < 2.6){
-      hero.tx = null;
+    /* 卡住兜底：被障碍挡住时距离不再缩短。没有它，导航光柱会一直挂着、对话永远不开。
+       只要还在靠近就清零，连续 2.5s 没能靠近则按「已到达」处理，直接触发到达动作。 */
+    if(hero.navLastD != null && d < hero.navLastD - 0.08) hero.navStuck = 0;
+    else hero.navStuck = (hero.navStuck || 0) + dt;
+    hero.navLastD = d;
+    if(d < 2.6 || hero.navStuck > 2.5){
+      hero.tx = null; hero.navLastD = null; hero.navStuck = 0;
       var ap = hero.approach; hero.approach = null;
       if(ap) runApproach(ap);
     } else { mx = dx/d; mz = dz/d; }
@@ -3380,13 +3504,20 @@ function updateHero(dt){
 
   var sp = 0;
   if(mx || mz){
-    sp = (keys['shift'] ? RUN : WALK);
+    /* 移动端没有 Shift 键：摇杆推到边缘（模长 >0.85）即视为疾跑，
+       否则手机上永远只有 16m/s，跑不过桌面的 30m/s。 */
+    var sm2 = stickVec.x * stickVec.x + stickVec.y * stickVec.y;
+    sp = (keys['shift'] || sm2 > 0.72) ? RUN : WALK;
     if(PHYS && PHYS.ready){
-      // 物理引擎接管水平移动：设速度 -> 步进 -> 读回，碰撞自动解算
-      PHYS.body.velocity.x = mx * sp;
-      PHYS.body.velocity.z = mz * sp;
-      PHYS.body.velocity.y = 0;
-      PHYS.world.step(dt);
+      // 物理引擎接管水平移动：设速度 -> 细分步进 -> 读回，高速也不穿模
+      var subDt = Math.min(dt, 0.02);
+      var subN = Math.max(1, Math.ceil(dt / subDt));
+      for(var si=0; si<subN; si++){
+        PHYS.body.velocity.x = mx * sp;
+        PHYS.body.velocity.z = mz * sp;
+        PHYS.body.velocity.y = 0;
+        PHYS.world.step(subDt);
+      }
       hero.x = clamp(PHYS.body.pos.x, -LIMIT, LIMIT);
       hero.z = clamp(PHYS.body.pos.z, -LIMIT, LIMIT);
     } else {
@@ -3663,11 +3794,34 @@ function animate(){
     cam.pitch = lerp(cam.pitch, cam.tPitch, 0.18);
     cam.dist = lerp(cam.dist, cam.tDist, 0.15);
     var cp = Math.cos(cam.pitch), sp2 = Math.sin(cam.pitch);
-    camera.position.set(
-      hero.x + cam.dist * cp * Math.sin(cam.yaw),
-      hero.y + 2.2 + cam.dist * sp2,
-      hero.z + cam.dist * cp * Math.cos(cam.yaw)
-    );
+    var dirx = cp * Math.sin(cam.yaw), dirz = cp * Math.cos(cam.yaw);
+    var useD = cam.dist;
+    /* 相机避让一：视线被建筑主体挡住 → 缩到墙前，否则镜头会穿进塔身看到模型内部。
+       只对「大障碍」（建筑主体，半径 ≥5）生效，小装饰不参与，避免镜头抖动。 */
+    for(var oi=0; oi<OBSTACLES.length; oi++){
+      var ob = OBSTACLES[oi];
+      if(!ob.r || ob.r < 5) continue;
+      var ox = ob.cx - hero.x, oz = ob.cz - hero.z;
+      var proj = ox * dirx + oz * dirz;
+      if(proj <= 0) continue;
+      var rr = ob.r + 1.1;
+      if(proj - rr >= useD) continue;
+      var perp2 = ox*ox + oz*oz - proj*proj;
+      if(perp2 < rr*rr){
+        var hitD = proj - Math.sqrt(rr*rr - perp2);
+        if(hitD > 1.6 && hitD < useD) useD = hitD;
+      }
+    }
+    if(cam.avoid == null) cam.avoid = useD;
+    cam.avoid = lerp(cam.avoid, useD, useD < cam.avoid ? 0.5 : 0.06);   // 贴近快、回退慢
+    useD = cam.avoid;
+    var cxp = hero.x + useD * dirx;
+    var czp = hero.z + useD * dirz;
+    var cyp = hero.y + 2.2 + useD * sp2;
+    /* 相机避让二：不钻地面 / 不钻台基，抬到「可站立面」之上（与角色同源） */
+    var camFloor = standHeightAt(cxp, czp) + 1.1;
+    if(cyp < camFloor) cyp = camFloor;
+    camera.position.set(cxp, cyp, czp);
     camera.lookAt(hero.x, hero.y + 1.7, hero.z);
   } else {
     if(autoRotate && performance.now() - lastInteract > 2600) cam.tOTheta += dt * 0.05;
@@ -3696,7 +3850,8 @@ function animate(){
     if(n.disc)   n.disc.material.opacity = 0.26 + Math.sin(t*1.8 + i)*0.06;
     if(n.halo)   n.halo.material.opacity = 0.42 + Math.sin(t*1.2 + i)*0.08;
     if(n.pulse)  n.pulse.scale.setScalar(1 + Math.sin(t*2.2 + i)*0.09);
-    for(var w=0;w<6;w++) if(n['sh'+w]) n['sh'+w].rotation.y += dt*0.5;
+    /* 原本这里有一句 for(w=0;w<6;w++) if(n['sh'+w]) … —— NODES 上从来不存在 sh0..sh5，
+       等于每帧白跑 12×6=72 次无效属性查找，已移除。 */
   }
 
   // 光点
@@ -4158,8 +4313,9 @@ window.addEventListener('keydown', function(e){
   var t = e.target && e.target.tagName;
   if(t === 'INPUT' || t === 'SELECT' || t === 'TEXTAREA') return;
   var k = (e.key || '').toLowerCase();
-  if(k === 'b'){ openBag(); }
-  else if(k === 'c'){ openChar(); }
+  /* 对话浮层 / 玩法浮层打开时不再弹出背包或角色面板，否则会叠层 */
+  if(k === 'b'){ if(!uiBlocked()) openBag(); }
+  else if(k === 'c'){ if(!uiBlocked()) openChar(); }
   else if(k === 'escape'){ closeBag(); closeChar(); closePlay(); closeRoster(); }
 });
 </script>

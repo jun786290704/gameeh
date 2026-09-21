@@ -17,6 +17,17 @@ if(!window.ethers){
 </script>
 <link rel="stylesheet" href="./vendor/fontawesome/css/all.min.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'" data-page-node-id="NPgwuOLXe4TdfMaSjqEADx">
 <link rel="stylesheet" href="./styles.css" data-page-node-id="qA8u54aM0w37ERSMbqRxOS">
+<style>
+  /* 被地图页以 iframe 嵌入时，隐藏自己的页头与页签栏，避免出现两套导航。
+     放在 game.html 自己身上做（而不是让父页面跨域改写 DOM），
+     这样 file:// 打开或跨域部署时同样有效。 */
+  html.embedded header,
+  html.embedded #tabBar{display:none !important}
+  html.embedded #mainArea{padding-top:8px !important;max-width:100% !important}
+</style>
+<script>
+  try{ if(window.self !== window.top) document.documentElement.classList.add('embedded'); }catch(e){}
+</script>
 </head>
 <body class="bg-grid" data-page-node-id="x3xvJLeGCHXfYx1Wp430qJ">
 

@@ -13,6 +13,11 @@
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
+  /* 粗筛半径（米）的平方：只解算落在这个范围内的障碍。
+     地图有 700+ 个障碍，全量解算每帧要上万次判定；而角色单步位移不到 1m，
+     60m 的余量绰绰有余，不会漏掉任何碰撞。 */
+  var CULL2 = 60 * 60;
+
   // 动态刚体
   function Body(opts) {
     opts = opts || {};
@@ -67,6 +72,10 @@
           o = bs[j];
           if (!o._static) continue;       // 单角色场景无需动态-动态解算
           if (!o.shape) continue;
+          if (o.shape.cx != null) {
+            var ddx = d.pos.x - o.shape.cx, ddz = d.pos.z - o.shape.cz;
+            if (ddx * ddx + ddz * ddz > CULL2) continue;
+          }
           resolve(d, o);
         }
       }
