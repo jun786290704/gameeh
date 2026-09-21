@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NPC 3D 模型预览 · 元素英雄</title>
+<style>
+html,body{margin:0;height:100%;background:#0e1116;color:#e5e7eb;font:14px/1.5 system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden}
+#c{display:block;width:100vw;height:100vh}
+#hud{position:fixed;left:18px;top:16px;pointer-events:none}
+#hud h1{margin:0 0 6px;font-size:16px;font-weight:600;color:#fbbf24}
+#hud p{margin:0;font-size:12px;color:#94a3b8}
+#tag{position:fixed;right:16px;top:16px;font-size:12px;color:#64748b}
+#names{position:fixed;left:0;right:0;bottom:16px;display:flex;justify-content:center;gap:28px;font-size:12px;color:#cbd5e1;flex-wrap:wrap}
+#err{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:#f87171;white-space:pre-wrap;text-align:center;font-size:13px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <h1>NPC 3D 模型预览</h1>
+  <p>拖拽旋转 · 滚轮缩放 — 载入 models/npc/*.glb</p>
+</div>
+<div id="tag">元素英雄 · 衡洲</div>
+<div id="names"></div>
+<div id="err"></div>
+<script src="./vendor/three.min.js"></script>
+<script src="./vendor/GLTFLoader.js"></script>
+<script>
+(function(){
+  var names  = ['np_ash','np_peng'];
+  var labels = {np_ash:'赤帝余烬·炎', np_peng:'青帝门徒·芃'};
+  var canvas = document.getElementById('c');
+  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  if('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
+
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0e1116);
+  scene.fog = new THREE.Fog(0x0e1116, 18, 40);
+  var cam = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 200);
+
+  var root = new THREE.Group(); scene.add(root);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x3a3f52, 1.05));
+  var d1 = new THREE.DirectionalLight(0xffffff, 1.5); d1.position.set(5, 9, 7);  scene.add(d1);
+  var d2 = new THREE.DirectionalLight(0x88aaff, .65); d2.position.set(-7, 4, -6); scene.add(d2);
+  var grid = new THREE.GridHelper(22, 22, 0x334155, 0x1c2534); root.add(grid);
+
+  var step = 2.8, x0 = -(names.length-1)*step/2, loaded = 0;
+  names.forEach(function(n, i){
+    new THREE.GLTFLoader().load('models/npc/'+n+'.glb', function(g){
+      var m = g.scene;
+      var b = new THREE.Box3().setFromObject(m), s = new THREE.Vector3(); b.getSize(s);
+      m.scale.multiplyScalar(1.95/(s.y||1));
+      b.setFromObject(m);
+      var c = new THREE.Vector3(); b.getCenter(c);
+      m.position.set(x0 + i*step - c.x, -b.min.y, -c.z);
+      m.traverse(function(o){ if(o.isMesh){ o.castShadow = false; } });
+      root.add(m);
+      if(++loaded === names.length){
+        document.getElementById('names').innerHTML =
+          names.map(function(k){ return '<span>'+labels[k]+'</span>'; }).join('');
+      }
+    }, undefined, function(e){
+      document.getElementById('err').textContent =
+        '加载失败：' + n + '\n' + (e && e.message ? e.message : e) +
+        '\n（请通过本地 http 服务打开，file:// 会被浏览器拦截）';
+    });
+  });
+
+  var yaw = 0, pitch = .12, dist = 10, drag = false, px = 0, py = 0;
+  canvas.addEventListener('pointerdown', function(e){ drag = true; px = e.clientX; py = e.clientY; });
+  window.addEventListener('pointerup', function(){ drag = false; });
+  window.addEventListener('pointermove', function(e){
+    if(!drag) return;
+    yaw -= (e.clientX - px) * .006;
+    pitch = Math.max(-.5, Math.min(1.0, pitch + (e.clientY - py) * .005));
+    px = e.clientX; py = e.clientY;
+  });
+  canvas.addEventListener('wheel', function(e){
+    e.preventDefault();
+    dist = Math.max(3.5, Math.min(26, dist + e.deltaY * .012));
+  }, {passive:false});
+  window.addEventListener('resize', function(){
+    cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  (function tick(){
+    var cy = Math.cos(pitch);
+    cam.position.set(Math.sin(yaw)*dist*cy, 2.4 + Math.sin(pitch)*dist, Math.cos(yaw)*dist*cy);
+    cam.lookAt(0, 1.05, 0);
+    renderer.render(scene, cam);
+    requestAnimationFrame(tick);
+  })();
+})();
+</script>
+</body>
+</html>
