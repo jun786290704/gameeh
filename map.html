@@ -858,6 +858,12 @@ var W = 0, H = 0;
 /* 碰撞障碍物（建筑 / 树 / 岩石）与物理世界句柄；见 buildPhysics() */
 var OBSTACLES = [];
 var PHYS = null;
+/* 建筑「可进入」配置 —— 原来所有建筑都用 R*0.66 整圈实心头挡，人只能绕着走。
+   现在按类型只挡住真正实体的核心：有内部开放空间的类型（塔的柱廊 / 亭内四柱之间 /
+   帐内 / 竞技场沙场）留出可走动的空间，人能真正走进建筑里面。
+   ENTERABLE 里的类型还会把驻守 NPC 请进屋里；火山锥、石碑基座、龙巢是实心体，进不去。 */
+var CORE_R_TYPE = {tower:.24, shrine:.18, tent:.10, arena:.08, forge:.42, vault:.40, obelisk:.60, volcano:.60, dragon:.52};
+var ENTERABLE  = {tower:1, shrine:1, tent:1, arena:1, forge:1, vault:1};
 /* 可站立面：TIERS = 建筑分层锥台（既是碰撞体也是站立面 —— 半径与高度同源插值，
    见 tierRadius / syncTierColliders，两者天然自洽、不会互相顶死）；
    PLATFORMS = 台地广场铺面。二者配合 standHeightAt() 让角色沿台基斜面走上建筑。 */
@@ -1793,9 +1799,10 @@ function buildNode(n){
     TIERS.push({cx:n.x, cz:n.z, rBot:td[0], rTop:td[1],
                 yBot:n.baseY + td[2], yTop:n.baseY + td[3]});
   }
-  /* 建筑主体（塔身 / 亭柱 / 龙巢）：纯阻挡、不提供站立面，
-     避免角色站上三层顶面后径直走进建筑内部造成穿模。 */
-  OBSTACLES.push({cx:n.x, cz:n.z, r:R*0.66});
+  /* 建筑核心阻挡：不再整圈 R*0.66 实心头挡，而是按类型只挡住真正的实体，
+     让有内部空间的类型（柱廊 / 亭内 / 帐内 / 沙场）可以走进去。
+     中央陈设（铁砧、坩埚、中心柱…）各自另有碰撞体，不会让人穿进去。 */
+  OBSTACLES.push({cx:n.x, cz:n.z, r:R * (CORE_R_TYPE[n.type] != null ? CORE_R_TYPE[n.type] : 0.66)});
   /* 台地广场：始终可站立，外沿 2.6m 渐变，避免从起伏地形被瞬间抬起 */
   PLATFORMS.push({cx:n.x, cz:n.z, r:plazaR, y:n.baseY + 0.62, edge:2.6});
   /* 地基柱：向下延伸填平地形 */
@@ -2589,7 +2596,11 @@ var NPC_SEEN = (function(){
 })();
 
 NPCS.forEach(function(q){
-  var p = q.at ? npcAnchor(q.at, q.a, q.d) : null;
+  /* 驻守者搬进屋里：建筑内部有开放空间时，站位从「建筑外」改到「建筑内」。
+     R*0.45 既在核心阻挡半径之外，也不会跟中央陈设（铁砧/坩埚/中心柱）重叠。
+     实心建筑（火山、石碑、龙巢）进不去，对应的 NPC 仍留在外面。 */
+  var _b = q.at ? nodeByKey(q.at) : null;
+  var p = q.at ? npcAnchor(q.at, q.a, (_b && ENTERABLE[_b.type]) ? _b.R * 0.45 : q.d) : null;
   if(p){ q.x = p.x; q.z = p.z; }
   else if(q.patrol){ q.x = q.patrol.cx + Math.cos(q.patrol.ph)*q.patrol.rad; q.z = q.patrol.cz + Math.sin(q.patrol.ph)*q.patrol.rad; }
   q.y = heightAt(q.x, q.z);
