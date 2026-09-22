@@ -1634,6 +1634,9 @@ function addHall(grp, n, W, D, H, y0, mat, doorAng, doorW){
 function addStairs(grp, R, mat, ang, steps, topY){
   steps = steps || 5;
   var hh = (topY || 4.1) / steps;
+  /* 记下台阶朝向：放灯 / 火盆这类落地摆件时要避开这条走廊，
+     否则灯会正正立在拾级而上的路上（这是实测到最常见的一类「灯挡路」）。 */
+  (grp.userData.stairAngs || (grp.userData.stairAngs = [])).push(ang);
   for(var i=0;i<steps;i++){
     var d = R*1.24 - i*(R*0.06 + 0.45);
     var m = new THREE.Mesh(new THREE.BoxGeometry(R*0.52, hh, R*0.2 + 0.9), mat);
@@ -1696,7 +1699,7 @@ function addLantern(grp, x, z, y0, colHex){
   grp.add(g);
   /* 这是一盏贴地的装饰路灯，杆径不到 0.5m —— 碰撞取 0.45 即可。
      摆这么小还给出 0.6 的大圈，加上角色自身的 0.85，等于凭空多出一圈走的过去的空气墙。 */
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.45, kind:'prop'});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.45, kind:'prop', src:'lantern'});
   return g;
 }
 /* 火盆 */
@@ -1715,7 +1718,7 @@ function addBrazier(grp, x, z, y0, colHex, sc){
   var sp = glowMesh(colHex, 2.6*sc, .75); put(g, sp, 0, 2.6*sc, 0);
   FLAMES.push({sp:sp, mesh:fire, base:.62, amp:.3, spd:2.7, ph:Math.random()*6.28});
   grp.add(g);
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.6*sc, kind:'prop'});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.6*sc, kind:'prop', src:'brazier'});
   return g;
 }
 /* 旗帜（带飘动） */
@@ -1743,7 +1746,7 @@ function addCrate(grp, x, y, z, s, ry){
   var band = new THREE.Mesh(new THREE.BoxGeometry(1.57*s, 0.13*s, 1.57*s), matOf('metal', 1, 1, {roughness:.5, metalness:.8}));
   band.position.set(x, y + 1.08*s, z); band.rotation.y = ry || 0; grp.add(band);
   m.userData.propGround = y;
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.6*s, kind:'prop'});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.6*s, kind:'prop', src:'crate'});
   return m;
 }
 function addBarrel(grp, x, y, z, s){
@@ -1754,7 +1757,7 @@ function addBarrel(grp, x, y, z, s){
   h1.rotation.x = Math.PI/2; put(grp, h1, x, y + 1.12*s, z);
   var h2 = h1.clone(); h2.position.y = y + 0.38*s; grp.add(h2);
   m.userData.propGround = y;
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.5*s, kind:'prop'});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.5*s, kind:'prop', src:'barrel'});
   return m;
 }
 /* 碎石 */
@@ -1792,12 +1795,13 @@ function addWeaponRack(grp, x, z, y0, ry, colHex){
   var tip = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.44, 6), matC(colHex, .35, .5, colHex, .55));
   tip.rotation.z = 0.2; put(g, tip, 1.58, 2.72, 0.1);
   grp.add(g);
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.75, kind:'prop'});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.75, kind:'prop', src:'rack'});
   return g;
 }
 /* 守卫石像 */
 function addStatue(grp, x, z, y0, ry, colHex){
-  var g = new THREE.Group(); g.position.set(x, y0, z); g.rotation.y = ry || 0;
+  y0 = propGroundY(grp, x, z, y0 || 0);     // 同其它摆件：贴合站立面（原来传写死的 top，会悬空 3m 多）
+  var g = new THREE.Group(); g.position.set(x, y0, z); g.rotation.y = ry || 0; g.userData.propGround = y0;
   var st = matOf('stone', 1, 2), stD = matOf('stoneD', 1, 1);
   var base = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.5, 1.7), stD); put(g, base, 0, 0.25, 0); shade(base);
   var body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.68, 1.9, 8), st); put(g, body, 0, 1.45, 0); shade(body);
@@ -1813,7 +1817,7 @@ function addStatue(grp, x, z, y0, ry, colHex){
   var spear = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 3.2, 6), matOf('wood', 1, 2));
   put(g, spear, 0.72, 1.6, 0.1); shade(spear);
   grp.add(g);
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.7, kind:'prop'});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.7, kind:'prop', src:'statue'});
   return g;
 }
 /* 上升烟 / 火星柱 */
@@ -1932,7 +1936,11 @@ function buildNode(n){
     addStairs(grp, R, stoneD, toCenter, 5, 4.1);
     addStairs(grp, R, stoneD, toCenter + Math.PI, 5, 4.1);
     for(var L=0;L<(IS_TOUCH?2:4);L++){
-      var la = toCenter + Math.PI/2 + L*Math.PI/2;
+      /* 台阶开在 toCenter 与 toCenter+π 两侧，灯笼绝不能落在这两个方向上 ——
+         原来写 toCenter + π/2 + L·π/2，L=1 得到 toCenter+π、L=3 得到 toCenter+2π(=toCenter)，
+         正好两盏灯死死堵在正反两道台阶中央。改为绕开 0 与 ±π 的四个斜向：
+         桌面 ±π/4 / ±3π/4，移动端 ±π/4。 */
+      var la = toCenter + (IS_TOUCH ? (L - 0.5) : (L - 1.5)) * Math.PI/2;
       addLantern(grp, Math.cos(la)*R*1.34, Math.sin(la)*R*1.34, 0, n.ring === 0 ? 0xfbbf24 : colHex);
     }
   } else if(n.type === 'shrine'){
@@ -2048,8 +2056,10 @@ function buildNode(n){
       var lsp = glowMesh(0xffc257, 1.3, .55); put(grp, lsp, lx, top + 3.6 + Math.sin(lan)*0.3, lz);
       FLAMES.push({sp:lsp, base:.45, amp:.18, spd:1.3, ph:lan});
     }
-    addCrate(grp, R*0.9, 0, -R*1.1, 1.0, 0.4);
-    addBarrel(grp, -R*1.0, 0, R*1.0, 1.1);
+    /* 木箱 / 木桶原来用写死的局部坐标，跟台阶朝向毫无关系，有一半概率压在拾级而上的路上。
+       改为落在 toCenter 两侧（偏离 ≥0.95rad，超过台阶走廊的 ±0.45rad 判定阈值）。 */
+    addCrate(grp, Math.cos(toCenter + 0.95)*R*1.42, 0, Math.sin(toCenter + 0.95)*R*1.42, 1.0, 0.4);
+    addBarrel(grp, Math.cos(toCenter - 2.20)*R*1.42, 0, Math.sin(toCenter - 2.20)*R*1.42, 1.1);
     addStairs(grp, R, stoneD, toCenter, 4, 4.1);
     top = top + h*0.75 + 4;
   } else if(n.type === 'obelisk'){
@@ -2072,7 +2082,9 @@ function buildNode(n){
     haloRing.rotation.x = -Math.PI/2; haloRing.position.y = 0.45; grp.add(haloRing);
     SPINS.push({mesh:haloRing, spd:0.25});
     for(var o4=0;o4<(IS_TOUCH?2:4);o4++){
-      var oa = o4/4*6.2832 + Math.PI/4;
+      /* 原先用绝对角度 o4/4·2π + π/4，跟台阶朝向完全无关 —— 有一半概率压到台阶上。
+         改为相对 toCenter 的四个斜向，同 tower：±π/4 / ±3π/4。 */
+      var oa = toCenter + (IS_TOUCH ? (o4 - 0.5) : (o4 - 1.5)) * Math.PI/2;
       /* 灯笼原在 R*0.95 —— 那落在三层台基的斜面上，竖直灯柱插斜坡既不贴地也难看。
          移到 R*1.30：仍在本建筑的台地铺面内（plazaR ≥ 1.42R），与柱身、长椅都不打架。 */
       addLantern(grp, Math.cos(oa)*R*1.30, Math.sin(oa)*R*1.30, 0, colHex);
@@ -2138,8 +2150,9 @@ function buildNode(n){
     addWeaponRack(grp, -R*0.95, R*0.55, 0, toCenter + 1.4, colHex);
     addWeaponRack(grp, R*0.95, R*0.55, 0, toCenter - 1.4, colHex);
     addBrazier(grp, R*0.95, -R*0.6, 0, colHex, 1.1);
-    addBarrel(grp, -R*1.0, 0, -R*0.5, 1.1);
-    addCrate(grp, -R*1.1, 0, R*0.1, 1.0, 0.3);
+    /* 木桶 / 木箱同 oben：改为相对 toCenter，避免写死坐标撞上台阶走廊 */
+    addBarrel(grp, Math.cos(toCenter - 2.05)*R*1.12, 0, Math.sin(toCenter - 2.05)*R*1.12, 1.1);
+    addCrate(grp, Math.cos(toCenter + 2.30)*R*1.10, 0, Math.sin(toCenter + 2.30)*R*1.10, 1.0, 0.3);
     addStairs(grp, R, stoneD, toCenter, 4, 4.1);
     var bl = new THREE.Mesh(new THREE.OctahedronGeometry(2.6, 0), emisHi);
     bl.position.y = top + h*0.42 + 4.5; grp.add(bl);
@@ -2171,10 +2184,14 @@ function buildNode(n){
     /* 中心金币悬在屋顶上方，纯装饰 —— 不再在地面留 r=3 的碰撞（那会凭空挡一个圈） */
     SPINS.push({mesh:coin, spd:0.9});
     n.rune = coin;
-    addStatue(grp, -R*0.95, R*0.78, top, toCenter + 0.9, colHex);
-    addStatue(grp, R*0.95, R*0.78, top, toCenter - 0.9, colHex);
-    addLantern(grp, -R*1.3, R*0.3, 0, 0xfbbf24);
-    addLantern(grp, R*1.3, R*0.3, 0, 0xfbbf24);
+    /* 守卫石像原来用写死的 (-R*0.95, R*0.78)，同样会压到台阶；改为对称落在 toCenter 两侧。
+       注意 y 传的是相对站立面的抬升（0）—— 原来传写死的 top，石像会悬在台地铺面上方 3m 多。 */
+    addStatue(grp, Math.cos(toCenter + 1.30)*R*1.23, Math.sin(toCenter + 1.30)*R*1.23, 0, toCenter + 0.9, colHex);
+    addStatue(grp, Math.cos(toCenter - 1.30)*R*1.23, Math.sin(toCenter - 1.30)*R*1.23, 0, toCenter - 0.9, colHex);
+    /* 原来两盏灯是写死坐标 (-R*1.3, R*0.3) / (R*1.3, R*0.3)，与台阶朝向毫无关系，
+       只要 toCenter 转到这里就会被挡住去路。改为对称分布在 toCenter 两侧 ±1.35rad。 */
+    addLantern(grp, Math.cos(toCenter + 1.35)*R*1.34, Math.sin(toCenter + 1.35)*R*1.34, 0, 0xfbbf24);
+    addLantern(grp, Math.cos(toCenter - 1.35)*R*1.34, Math.sin(toCenter - 1.35)*R*1.34, 0, 0xfbbf24);
     addStairs(grp, R, stoneD, toCenter, 5, 4.1);
     top = top + h*0.5 + 8;
   } else if(n.type === 'dragon'){
