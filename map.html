@@ -1589,6 +1589,13 @@ function podiumSurfaceY(d, R){
       return t[i][2] + (t[i][3] - t[i][2]) * ((t[i][0] - d) / (t[i][0] - t[i][1]));
     }
   }
+  /* 落在相邻两层的缝隙里时（tier 的 rTop 与下一层的 rBot 之间有 0.02R 的间隔，
+     比如 1.06R 与 1.04R 之间），高度其实是连续的 —— 取外层顶高即可（tier1 顶 1.5 = tier2 底 1.5）。
+     过去这里直接落到最后一行返回「顶层 4.1」，等于把踏面抬到屋顶高度 ——
+     实测 weapons 处踏面因此高出站立面 0.36m，正是肉眼看到的「没贴合」。 */
+  for(i=0;i<t.length-1;i++){
+    if(d < t[i][1] && d > t[i+1][0]) return t[i][3];
+  }
   return (d > t[0][0]) ? 0.62 : t[t.length-1][3];   // 台地外 → 铺面；顶层内 → 顶面
 }
 /* 可进入的厅堂：把原来的「实心 Box」换成四面墙 + 门洞（门朝 toCenter 即来路方向），
@@ -1630,6 +1637,17 @@ function addHall(grp, n, W, D, H, y0, mat, doorAng, doorW){
   return g;
 }
 
+/* 锥台在半径 d 处的解析坡度 Δy/Δr（恒正；台地铺面与顶层是平的，返回 0）。
+   不能用「podiumSurfaceY 的数值差分」代替：锥台是分段的，一旦采样区间跨过 tier 边界，
+   差分会把两段混在一起 —— 实测第 5 级算出的坡度是 0.299，而真实值是 0.49，
+   踏面因此倾斜不足、外角冒出地面 0.86m。 */
+function podiumSlopeAt(d, R){
+  var t = tierDefOf(R), i;
+  for(i=0;i<t.length;i++){
+    if(d <= t[i][0] && d >= t[i][1]) return (t[i][3] - t[i][2]) / (t[i][0] - t[i][1]);
+  }
+  return 0;
+}
 /* 台阶：由外向内拾级而上 */
 function addStairs(grp, R, mat, ang, steps, topY){
   steps = steps || 5;
@@ -1640,20 +1658,24 @@ function addStairs(grp, R, mat, ang, steps, topY){
   var ca = Math.cos(ang), sa = Math.sin(ang);
   var ox = grp.position.x || 0, oz = grp.position.z || 0, oy = grp.position.y || 0;
   var gap = R*0.06 + 0.45;                          // 级间距
-  /* 踏面高度直接取「真实站立面」standHeightAt，而不是纯几何的 podiumSurfaceY：
-     后者只算理想化的锥台/铺面，不含地形起伏 —— 遇到地形高于设计面的位置，
-     踏面就会陷进地里（实测最大 0.46m）。用站立面才与角色脚底真正对齐。 */
-  function groundAt(d){ return standHeightAt(ox + ca*d, oz + sa*d) - oy; }
+  /* 踏面跟随「台基的理想锥面 / 台地铺面」(podiumSurfaceY)，而不是 standHeightAt。
+     这点很关键：standHeightAt = max(地形, 台基, 台地)，会被局部地形顶起来，
+     而平板只能贴合到平均坡度 —— 一旦某处地形凸起，踏面顶就会冒过脚底挡住角色（穿模）。
+     跟着理想锥面走则恒有：踏面顶 ≤ 台基面 ≤ standHeightAt，从原理上不可能穿模。 */
+  function groundAt(d){ return podiumSurfaceY(d, R); }
+  var SINK = 0.05;                                  // 再压低一点，避免边界抖动冒头
+  var len = gap*0.95;                               // 沿径向的踏面进深
   for(var i=0;i<steps;i++){
     var d = R*1.24 - i*gap;
-    var surf = groundAt(d);
+    /* 顶面取「外端」的锥面高度 —— 外端半径更大、锥面更低，用它当基准，
+       整块踏面（水平的）就处处不高于锥面，内端自然埋进台基。 */
+    var surf = groundAt(d + len/2) - SINK;
     /* 踏面必须「平行于锥台斜面」，而不能是一块水平板：
        这里坡度约 0.48（≈26°），而踏板沿径向长达 R*0.52≈13.5m ——
        一块水平板的两端相对斜面会差 ±3.25m，可板厚只有 hh≈0.82m，
        于是一头整个翘在空中挡路、另一头完全埋进台基。这就是「走上去就穿模」的根因。
        修法：把踏面绕本地 z 轴转到与斜面同坡度，顶面恰与站立面齐平。 */
-    var eps = gap*0.5;                              // 用站立面的数值导数，与上面同一套基准
-    var slope = (groundAt(d - eps) - groundAt(d + eps)) / (2*eps);
+    var slope = podiumSlopeAt(d, R);                // 解析坡度，避免跨 tier 边界时算错
     if(!isFinite(slope)) slope = 0;
     if(slope > 1.2) slope = 1.2; else if(slope < -1.2) slope = -1.2;   // 台阶不会陡于 50°
     var g = new THREE.Group();
@@ -1661,10 +1683,15 @@ function addStairs(grp, R, mat, ang, steps, topY){
     g.rotation.y = -ang;                            // 转到这里后：本地 +x = 径向朝外，+z = 切向
     g.userData.stairTread = true;                   // 供回归断言核对「踏面是否贴合站立面」
     grp.add(g);
-    /* 尺寸沿「本地」轴理解：x = 沿径向的踏面进深，z = 切向的踏面宽度 */
-    var m = new THREE.Mesh(new THREE.BoxGeometry(gap*0.82, hh, R*0.52), mat);
-    m.rotation.z = -Math.atan(slope);               // 负值：让径向外端随斜面下沉
-    m.position.y = -hh*0.5;                         // 顶面与站立面齐平，板体向斜面下方延伸
+    /* 经典台阶造型：踏面是「水平的平台」，不是斜板。
+       斜板理论上能贴合锥面，但锥面是圆锥、平板是直的 —— 沿切向（圆弧）必然偏离，
+       再加上 tier 缝隙与地形起伏，实测四角仍有 0.36m 冒出地面。
+       水平踏面则天然不会冒出：把顶面定在「外端」（整块里最低的一边）的锥面高度，
+       内端自然埋进台基，板厚加厚到能填满 —— 视觉上就是一级级的台阶。 */
+    var thick = hh + Math.abs(slope) * len;         // 加厚，让内端也能填到锥面，不悬空
+    var m = new THREE.Mesh(new THREE.BoxGeometry(len, thick, R*0.20), mat);
+    m.position.y = -thick/2;                        // 顶面恰在 surf
+    m.userData.stairFace = true;                    // 供回归断言逐角核对贴合度
     g.add(m); shade(m);
     /* 这里原本每级台阶还推两个「侧面碰撞柱」，但它们是错的，已移除：
        1) 坐标算的是局部坐标却没加 n.x/n.z —— 12 座建筑的台阶碰撞柱全部堆在世界原点，
