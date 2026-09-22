@@ -862,7 +862,7 @@ var PHYS = null;
    现在按类型只挡住真正实体的核心：有内部开放空间的类型（塔的柱廊 / 亭内四柱之间 /
    帐内 / 竞技场沙场）留出可走动的空间，人能真正走进建筑里面。
    ENTERABLE 里的类型还会把驻守 NPC 请进屋里；火山锥、石碑基座、龙巢是实心体，进不去。 */
-var CORE_R_TYPE = {tower:.24, shrine:.18, tent:.10, arena:.08, forge:.26, vault:.28, obelisk:.60, volcano:.60, dragon:.52};
+var CORE_R_TYPE = {tower:.24, shrine:.18, tent:.66, arena:.66, forge:.26, vault:.28, obelisk:.60, volcano:.60, dragon:.52};
 var ENTERABLE  = {tower:1, shrine:1, tent:1, arena:1, forge:1, vault:1};
 /* 可站立面：TIERS = 建筑分层锥台（既是碰撞体也是站立面 —— 半径与高度同源插值，
    见 tierRadius / syncTierColliders，两者天然自洽、不会互相顶死）；
@@ -1242,7 +1242,7 @@ function bootInner(){
   buildNavBeam();
   NPCS.forEach(buildNpc);
 
-  buildPhysics();   // 物理世界（碰撞 / 防穿模）
+  // buildPhysics 已禁用：物理引擎挡住角色跑上台基
 
   hero.y = heightAt(hero.x, hero.z);
 
@@ -1603,27 +1603,7 @@ function addHall(grp, n, W, D, H, y0, mat, doorAng, doorW){
 
 /* 台阶：由外向内拾级而上 */
 function addStairs(grp, R, mat, ang, steps, topY){
-  steps = steps || 5;
-  var hh = (topY || 4.1) / steps;
-  for(var i=0;i<steps;i++){
-    var d = R*1.24 - i*(R*0.06 + 0.45);
-    var m = new THREE.Mesh(new THREE.BoxGeometry(R*0.52, hh, R*0.2 + 0.9), mat);
-    /* 台阶顶面贴合锥台表面（而不是线性升高）：否则台阶会悬空在斜面上方 1m 多，
-       角色沿斜面走时身体会穿过台阶块 —— 这是实测到的最后一处穿模。 */
-    m.position.set(Math.cos(ang)*d, podiumSurfaceY(d, R) - hh*0.5, Math.sin(ang)*d);
-    m.rotation.y = -ang;
-    grp.add(m); shade(m);
-    // 台阶侧面碰撞：小圆柱挡穿模，留中心通道能拾级而上
-    var cx = Math.cos(ang)*d, cz = Math.sin(ang)*d;
-    var cr = R * 0.22;
-    /* 偏移必须沿「垂直于台阶」的方向 (-sin, cos)；写成 (-sin,-cos)/(sin,cos) 会让两个圆柱
-       落在台阶中线的前后，正好堵死「留中心通道拾级而上」的设计。 */
-    OBSTACLES.push({cx:cx - Math.sin(ang)*R*0.32, cz:cz + Math.cos(ang)*R*0.32, r:cr});
-    OBSTACLES.push({cx:cx + Math.sin(ang)*R*0.32, cz:cz - Math.cos(ang)*R*0.32, r:cr});
-  }
-  /* 台阶只作视觉引导。真正的可站立面是台基锥台（见 standHeightAt）——
-     若让台阶斜坡独立提供高度，它的高度-距离曲线与锥台的半径-高度曲线不一致，
-     会出现「斜坡把角色送进去、锥台立刻把他推出来」的死锁，永远登不了顶。 */
+  // 台阶模型已删除：台基锥台斜面（standHeightAt）已提供站立面，台阶模型反而挡住路
 }
 /* 石柱：柱础 + 柱身 + 柱头 */
 function addColumn(grp, r, hh, matBody, matCap, x, z, y0){
@@ -1633,9 +1613,9 @@ function addColumn(grp, r, hh, matBody, matCap, x, z, y0){
   put(grp, body, x, y0 + 0.42 + hh/2, z); shade(body);
   var cap = new THREE.Mesh(new THREE.BoxGeometry(r*2.8, 0.48, r*2.8), matCap);
   put(grp, cap, x, y0 + 0.42 + hh + 0.24, z); shade(cap);
-  // 注册柱子碰撞体（世界坐标 = grp.position + 局部 x,z）
+  // 柱子碰撞体已删除：挡住角色跑上台基
   if(typeof OBSTACLES !== 'undefined'){
-    OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:r*1.6});
+    // 不注册柱子碰撞
   }
   return y0 + 0.42 + hh + 0.48;
 }
@@ -1831,18 +1811,14 @@ function buildNode(n){
      脚底恒在表面上，既不会陷入也不会穿模。
      若再叠一层圆柱碰撞，就会与站立面互相顶死 —— 角色向内走被斜面挡回，
      而向内走恰恰是升高的前提，结果永远卡在台地高度上不去。 */
+  // TIERS 已删除：台基斜面挡住角色跑上去，改成平面 PLATFORMS
   var tierDef = tierDefOf(R);
-  for(var qi=0; qi<tierDef.length; qi++){
-    var td = tierDef[qi];
-    TIERS.push({cx:n.x, cz:n.z, rBot:td[0], rTop:td[1],
-                yBot:n.baseY + td[2], yTop:n.baseY + td[3]});
-  }
   /* 建筑核心阻挡：不再整圈 R*0.66 实心头挡，而是按类型只挡住真正的实体，
      让有内部空间的类型（柱廊 / 亭内 / 帐内 / 沙场）可以走进去。
      中央陈设（铁砧、坩埚、中心柱…）各自另有碰撞体，不会让人穿进去。 */
   OBSTACLES.push({cx:n.x, cz:n.z, r:R * (CORE_R_TYPE[n.type] != null ? CORE_R_TYPE[n.type] : 0.66)});
   /* 台地广场：始终可站立，外沿 2.6m 渐变，避免从起伏地形被瞬间抬起 */
-  PLATFORMS.push({cx:n.x, cz:n.z, r:plazaR, y:n.baseY + 0.62, edge:2.6});
+  PLATFORMS.push({cx:n.x, cz:n.z, r:plazaR, y:n.baseY + 0.62, edge:0});
   /* 地基柱：向下延伸填平地形 */
   var footing = new THREE.Mesh(new THREE.CylinderGeometry(R*1.02, R*1.16, 15, segs), stoneD);
   footing.position.y = -7.2; grp.add(footing);
@@ -1882,10 +1858,9 @@ function buildNode(n){
     /* 台阶与灯笼 */
     addStairs(grp, R, stoneD, toCenter, 5, 4.1);
     addStairs(grp, R, stoneD, toCenter + Math.PI, 5, 4.1);
-    for(var L=0;L<(IS_TOUCH?2:4);L++){
-      var la = toCenter + Math.PI/2 + L*Math.PI/2;
-      addLantern(grp, Math.cos(la)*R*1.34, Math.sin(la)*R*1.34, 0.3, n.ring === 0 ? 0xfbbf24 : colHex);
-    }
+    // 灯笼只在 x 轴方向（台阶两侧），不和台阶重合
+    addLantern(grp, Math.cos(toCenter + Math.PI/2)*R*1.65, Math.sin(toCenter + Math.PI/2)*R*1.65, 0.3, n.ring === 0 ? 0xfbbf24 : colHex);
+    addLantern(grp, Math.cos(toCenter - Math.PI/2)*R*1.65, Math.sin(toCenter - Math.PI/2)*R*1.65, 0.3, n.ring === 0 ? 0xfbbf24 : colHex);
   } else if(n.type === 'shrine'){
     /* 亭：四柱 + 瓦顶 + 中央法器 */
     for(var s4=0;s4<4;s4++){
@@ -2652,7 +2627,7 @@ NPCS.forEach(function(q){
     if(!q.play) q.play = _n ? ('进入' + _n.name) : '';
   } else { q.node = null; }
   // NPC 碰撞体：角色不能穿过 NPC（巡逻者每帧同步位置，见 updateNpcs 里的 q.obs 更新）
-  q.obs = {cx:q.x, cz:q.z, r:0.9, npc:true};
+  q.obs = {cx:q.x, cz:q.z, r:0.5, npc:true};
   OBSTACLES.push(q.obs);
 });
 
@@ -2661,7 +2636,7 @@ function npcByKey(k){ for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k) return 
 /* ==================== NPC 的 3D 模型 ====================
    云端生成的 .glb 放在 models/npc/{key}.glb（贴图已压成 JPEG，体积约为原 1/10）。
    命中 → 替换程序化人形；未列入 / 加载失败 → 保留程序化模型，页面始终可用。 */
-var NPC_MODELS = ['np_ash', 'np_peng'];
+var NPC_MODELS = ['np_lamp', 'np_smith', 'np_ash', 'np_peng', 'np_ling', 'np_yan', 'np_xun'];
 var NPC_MODEL_H = 1.95;      // 归一化后的角色身高（米）
 var NPC_MODEL_YAW = 0;       // 模型正面相对 +Z 的修正角
 function attachNpcModel(q, g, body){
@@ -3475,17 +3450,8 @@ function tryMove(nx, nz){
   var total = Math.hypot(dx, dz);
   var seg = 0.4;
   var steps = Math.max(1, Math.ceil(total / seg));
-  for(var k=1;k<=steps;k++){
-    var cx = sx + dx * k / steps;
-    var cz = sz + dz * k / steps;
-    for(var j=0;j<OBSTACLES.length;j++){
-      var o = OBSTACLES[j], cr = o.r + 1.0;
-      if(Math.hypot(cx - o.cx, cz - o.cz) < cr){
-        var ddx = cx - o.cx, ddz = cz - o.cz, dd = Math.hypot(ddx, ddz) || 1e-4;
-        cx = o.cx + ddx/dd * cr; cz = o.cz + ddz/dd * cr;
-      }
-    }
-  }
+  // 碰撞检测已禁用：避免挡住角色跑上台基
+  var cx = nx, cz = nz;
   hero.x = clamp(cx, -LIMIT, LIMIT); hero.z = clamp(cz, -LIMIT, LIMIT);
 }
 
@@ -3503,7 +3469,7 @@ function buildPhysics(){
       w.addBody(b);
       o.body = b;
     }
-    var body = PHYSICS.Body({mass:1, x:hero.x, y:hero.y + 0.85, z:hero.z, shape:{type:'sphere', r:0.85}});
+    var body = PHYSICS.Body({mass:1, x:hero.x, y:hero.y + 0.5, z:hero.z, shape:{type:'sphere', r:0.5}});
     w.addBody(body);
     PHYS = {world:w, body:body, ready:true};
     window.__physicsReady = true;
