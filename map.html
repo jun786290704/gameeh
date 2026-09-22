@@ -2179,26 +2179,8 @@ function buildNode(n){
     top = top + h*0.78 + 22;
   }
 
-  /* 光柱 / 光环 / 光晕 / 元素点光 */
-  var pillar = new THREE.Mesh(
-    new THREE.CylinderGeometry(R*0.45, R*0.7, h + 34, 10, 1, true),
-    new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.1, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
-  );
-  pillar.position.y = (h + 34)/2; grp.add(pillar);
-  n.pillar = pillar;
-
-  var disc = new THREE.Mesh(
-    new THREE.RingGeometry(R*0.86, R*1.02, 48),
-    new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:.34, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false})
-  );
-  disc.rotation.x = -Math.PI/2; disc.position.y = 4.35; grp.add(disc);
-  n.disc = disc;
-
-  var halo = glowMesh(col, R*1.2, .45); halo.position.y = h*0.55; grp.add(halo);
-  n.halo = halo;
-
-  var pl = new THREE.PointLight(n.ring === 3 ? 0xff4d1a : col, n.ring === 0 ? 2.0 : 1.15, n.ring === 0 ? 220 : 110);
-  pl.position.y = h*0.7; grp.add(pl);
+  /* 建筑外层的发光包装（冲天光柱 / 地面光环 / 球状光晕 / 元素点光）已按需求全部移除：
+     建筑保持纯实体外观，只保留熔岩、窗扉等「内容物」自身的发光。 */
 
   /* 拾取盒 */
   var hit = new THREE.Mesh(
@@ -3919,9 +3901,6 @@ function animate(){
       if(n.rune.userData.y0 === undefined) n.rune.userData.y0 = n.rune.position.y;
       n.rune.position.y = n.rune.userData.y0 + Math.sin(t*1.4 + i)*1.2;
     }
-    if(n.pillar) n.pillar.material.opacity = 0.09 + Math.sin(t*1.5 + i)*0.03;
-    if(n.disc)   n.disc.material.opacity = 0.26 + Math.sin(t*1.8 + i)*0.06;
-    if(n.halo)   n.halo.material.opacity = 0.42 + Math.sin(t*1.2 + i)*0.08;
     if(n.pulse)  n.pulse.scale.setScalar(1 + Math.sin(t*2.2 + i)*0.09);
     /* 原本这里有一句 for(w=0;w<6;w++) if(n['sh'+w]) … —— NODES 上从来不存在 sh0..sh5，
        等于每帧白跑 12×6=72 次无效属性查找，已移除。 */
