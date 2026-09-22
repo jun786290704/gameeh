@@ -1637,19 +1637,39 @@ function addStairs(grp, R, mat, ang, steps, topY){
   /* 记下台阶朝向：放灯 / 火盆这类落地摆件时要避开这条走廊，
      否则灯会正正立在拾级而上的路上（这是实测到最常见的一类「灯挡路」）。 */
   (grp.userData.stairAngs || (grp.userData.stairAngs = [])).push(ang);
+  var ca = Math.cos(ang), sa = Math.sin(ang);
+  var ox = grp.position.x || 0, oz = grp.position.z || 0, oy = grp.position.y || 0;
+  var gap = R*0.06 + 0.45;                          // 级间距
+  /* 踏面高度直接取「真实站立面」standHeightAt，而不是纯几何的 podiumSurfaceY：
+     后者只算理想化的锥台/铺面，不含地形起伏 —— 遇到地形高于设计面的位置，
+     踏面就会陷进地里（实测最大 0.46m）。用站立面才与角色脚底真正对齐。 */
+  function groundAt(d){ return standHeightAt(ox + ca*d, oz + sa*d) - oy; }
   for(var i=0;i<steps;i++){
-    var d = R*1.24 - i*(R*0.06 + 0.45);
-    var m = new THREE.Mesh(new THREE.BoxGeometry(R*0.52, hh, R*0.2 + 0.9), mat);
-    /* 台阶顶面贴合锥台表面（而不是线性升高）：否则台阶会悬空在斜面上方 1m 多，
-       角色沿斜面走时身体会穿过台阶块 —— 这是实测到的最后一处穿模。 */
-    m.position.set(Math.cos(ang)*d, podiumSurfaceY(d, R) - hh*0.5, Math.sin(ang)*d);
-    m.rotation.y = -ang;
-    grp.add(m); shade(m);
+    var d = R*1.24 - i*gap;
+    var surf = groundAt(d);
+    /* 踏面必须「平行于锥台斜面」，而不能是一块水平板：
+       这里坡度约 0.48（≈26°），而踏板沿径向长达 R*0.52≈13.5m ——
+       一块水平板的两端相对斜面会差 ±3.25m，可板厚只有 hh≈0.82m，
+       于是一头整个翘在空中挡路、另一头完全埋进台基。这就是「走上去就穿模」的根因。
+       修法：把踏面绕本地 z 轴转到与斜面同坡度，顶面恰与站立面齐平。 */
+    var eps = gap*0.5;                              // 用站立面的数值导数，与上面同一套基准
+    var slope = (groundAt(d - eps) - groundAt(d + eps)) / (2*eps);
+    if(!isFinite(slope)) slope = 0;
+    if(slope > 1.2) slope = 1.2; else if(slope < -1.2) slope = -1.2;   // 台阶不会陡于 50°
+    var g = new THREE.Group();
+    g.position.set(Math.cos(ang)*d, surf, Math.sin(ang)*d);
+    g.rotation.y = -ang;                            // 转到这里后：本地 +x = 径向朝外，+z = 切向
+    g.userData.stairTread = true;                   // 供回归断言核对「踏面是否贴合站立面」
+    grp.add(g);
+    /* 尺寸沿「本地」轴理解：x = 沿径向的踏面进深，z = 切向的踏面宽度 */
+    var m = new THREE.Mesh(new THREE.BoxGeometry(gap*0.82, hh, R*0.52), mat);
+    m.rotation.z = -Math.atan(slope);               // 负值：让径向外端随斜面下沉
+    m.position.y = -hh*0.5;                         // 顶面与站立面齐平，板体向斜面下方延伸
+    g.add(m); shade(m);
     /* 这里原本每级台阶还推两个「侧面碰撞柱」，但它们是错的，已移除：
        1) 坐标算的是局部坐标却没加 n.x/n.z —— 12 座建筑的台阶碰撞柱全部堆在世界原点，
           而每根半径达 R*0.22≈5.7m、5 级台阶又互相重叠成一堵墙，把中央一带堵得严严实实；
-       2) 台阶顶面已经贴合锥台表面（podiumSurfaceY），站立面由锥台提供 ——
-          脚底恒在锥台面上，不存在「从侧面斜穿台阶」的穿模，根本不需要这圈阻挡。 */
+       2) 站立面由锥台提供 —— 脚底恒在锥台面上，不需要这圈阻挡。 */
   }
   /* 台阶只作视觉引导。真正的可站立面是台基锥台（见 standHeightAt）——
      若让台阶斜坡独立提供高度，它的高度-距离曲线与锥台的半径-高度曲线不一致，
