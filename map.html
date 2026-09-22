@@ -757,7 +757,7 @@ var NODES = [
    lore:'战利品并非凭空而生，而是被衡环碎片托住、暂存在此 —— 领取即是从环中取回属于你的那部分。',
    m:['领取奖励','EH / USDT 双模式','实时余额']},
 
-  {k:'boss',   tab:'boss',   name:'巨龙巢穴', icon:'🐉', el:'fire', ring:3, a:-100, r:255, h:46, R:34, type:'dragon',
+  {k:'boss',   tab:'boss',   name:'巨龙巢穴', icon:'🐉', el:'fire', ring:3, a:-100, r:228, h:46, R:34, type:'dragon',
    d:'7 天一轮的世界 BOSS。全服合力攻击，击破分走 100% 奖池，未击破按伤害占比分 50%。攻击需押奖池 5% 的保证金，揭示后退还。',
    lore:'黯烬之龙 · 烛幽盘踞之处，也是衡环被咬开的那道伤口。每一轮讨伐，都是往伤口上再撕一块。',
    m:['7 天一轮','押金 = 奖池 5%','按伤害占比分奖']}
@@ -1925,11 +1925,12 @@ function buildNode(n){
   /* 台面高度：不能低于台地圆周上的地形 —— 否则草地会盖掉铺面外圈，
      台地看起来凹陷、像被草地吃掉一圈（实测 fight +0.95m、forge +0.82m）。
      沿圆周采样 16 个点，取最高地形 + 0.15 余量。 */
-  var plazaY = 0.62;
+  var plazaY = 0.62, edgeMin = 0;
   for(var pe=0; pe<16; pe++){
     var pa = pe/16*6.2832;
     var ey = heightAt(n.x + Math.cos(pa)*plazaR, n.z + Math.sin(pa)*plazaR) - n.baseY;
     if(ey + 0.15 > plazaY) plazaY = ey + 0.15;
+    if(pe === 0 || ey < edgeMin) edgeMin = ey;            // 圆周最低点，决定护沿要多深
   }
   grp.userData.plazaY = plazaY;                     // 台阶踏面等要以同一高度为台面基准
   n.plazaY = plazaY;                                // 供回归诊断按节点读取
@@ -1939,8 +1940,11 @@ function buildNode(n){
   );
   plaza.rotation.x = -Math.PI/2; plaza.position.y = plazaY;
   grp.add(plaza); shade(plaza, false, true);
-  var curb = new THREE.Mesh(new THREE.CylinderGeometry(plazaR, plazaR*1.03, 3.2, 40, 1, true), stoneD);
-  curb.position.y = plazaY - 1.6; grp.add(curb); shade(curb, false, true);   // 护沿顶始终与铺面齐平
+  /* 护沿高度不再写死 3.2m：台地圆周一圈的地形高差可能远超 3m，
+     固定高度会让低的一侧底部悬空、露出台地下面的空洞。按最低点向下多埋 2m。 */
+  var curbH = Math.max(3.2, plazaY - edgeMin + 2);
+  var curb = new THREE.Mesh(new THREE.CylinderGeometry(plazaR, plazaR*1.03, curbH, 40, 1, true), stoneD);
+  curb.position.y = plazaY - curbH/2; grp.add(curb); shade(curb, false, true);   // 顶始终与铺面齐平
 
   /* 三层台基 */
   var tiers = [[R*1.06, R*1.18, 1.5], [R*0.93, R*1.04, 1.4], [R*0.80, R*0.90, 1.2]];
@@ -2254,7 +2258,10 @@ function buildNode(n){
     doorGlow.position.set(0, top + h*0.22, -R*0.5 + 0.2); hallG.add(doorGlow);
     for(var co=0; co<5; co++){
       var coinPile = new THREE.Mesh(new THREE.CylinderGeometry(1.9 - co*0.22, 2.1 - co*0.22, 0.34, 18), matC(0xfbbf24, .28, .9, 0x6a4a0c, .3));
-      coinPile.position.set((co-2)*0.9, top + 0.2 + co*0.32, 0); grp.add(coinPile); shade(coinPile);
+      /* 金币堆是「叠」起来的：底下那盘的底面必须贴着厅堂地面（原来写死 top+0.2，
+         等于整堆悬空 0.2m 起），往上每层再叠 0.32。 */
+      var pileX = (co-2)*0.9;
+      coinPile.position.set(pileX, propGroundY(grp, pileX, 0, 0) + 0.17 + co*0.32, 0); grp.add(coinPile); shade(coinPile);
       OBSTACLES.push({cx:n.x+(co-2)*0.9, cz:n.z, r:1.6});
     }
     var coin = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.7, 24), matC(0xfbbf24, .25, .95, 0x8a5f10, .5));
