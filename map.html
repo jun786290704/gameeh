@@ -2072,7 +2072,9 @@ function buildNode(n){
     BANNERS.push({mesh:topFlag, base:Float32Array.from(topFlag.geometry.attributes.position.array), ph:Math.random()*6.28});
     for(var st2=0; st2<3; st2++){
       var sa = st2/3*6.2832 + 0.4, sx = Math.cos(sa)*R*1.32, sz = Math.sin(sa)*R*1.32;
-      var sg = new THREE.Group(); sg.position.set(sx, top, sz); sg.rotation.y = -sa + Math.PI/2;
+      /* 摊位摆在 r=1.32R —— 那里已是台地铺面(0.62)，不是台基顶面；
+         原来 y 写死 top(4.1)，腿长 3.2m 的摊位悬空 0.28m。改为贴合真实站立面。 */
+      var sg = new THREE.Group(); sg.position.set(sx, propGroundY(grp, sx, sz, 0), sz); sg.rotation.y = -sa + Math.PI/2;
       var leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.2, 0.22), wood); put(sg, leg1, -1.5, 1.6, 0); shade(leg1);
       var leg2 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.2, 0.22), wood); put(sg, leg2, 1.5, 1.6, 0); shade(leg2);
       var beam = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.2, 0.2), wood); put(sg, beam, 0, 3.2, 0); shade(beam);
@@ -2088,13 +2090,16 @@ function buildNode(n){
       grp.add(sg);
       OBSTACLES.push({cx:n.x+sx, cz:n.z+sz, r:1.6});
     }
-    /* 水面（浮市） */
-    var water = new THREE.Mesh(new THREE.CircleGeometry(R*0.62, 28), new THREE.MeshStandardMaterial({
+    /* 水面（浮市）—— 原来中心在 r=1.11R，正好横跨台基斜面：
+       圆盘是平的、锥面是斜的，中心区域比锥面低 3m 多，大半个水面埋在台基里
+       （画面上只剩斜坡上一块深色补丁）。移到台基顶面内（全程 < 0.8R），贴着顶面铺。 */
+    var poolX = R*0.36, poolZ = -R*0.26, poolY = top + 0.04;
+    var water = new THREE.Mesh(new THREE.CircleGeometry(R*0.30, 28), new THREE.MeshStandardMaterial({
       map:texOf('water', 3, 3), color:0x4aa8d8, transparent:true, opacity:.74, roughness:.2, metalness:.6
     }));
-    water.rotation.x = -Math.PI/2; water.position.set(R*0.92, 0.78, -R*0.62); grp.add(water);
-    var poolRim = new THREE.Mesh(new THREE.TorusGeometry(R*0.62, 0.3, 6, 26), stoneD);
-    poolRim.rotation.x = Math.PI/2; poolRim.position.set(R*0.92, 0.72, -R*0.62); grp.add(poolRim); shade(poolRim, false, true);
+    water.rotation.x = -Math.PI/2; water.position.set(poolX, poolY, poolZ); grp.add(water);
+    var poolRim = new THREE.Mesh(new THREE.TorusGeometry(R*0.30, 0.22, 6, 26), stoneD);
+    poolRim.rotation.x = Math.PI/2; poolRim.position.set(poolX, poolY - 0.06, poolZ); grp.add(poolRim); shade(poolRim, false, true);
     n.water = water;
     for(var lan=0; lan<(IS_TOUCH?3:6); lan++){
       var lx = Math.cos(lan/6*6.2832)*R*1.5, lz = Math.sin(lan/6*6.2832)*R*1.5;
