@@ -862,7 +862,7 @@ var PHYS = null;
    现在按类型只挡住真正实体的核心：有内部开放空间的类型（塔的柱廊 / 亭内四柱之间 /
    帐内 / 竞技场沙场）留出可走动的空间，人能真正走进建筑里面。
    ENTERABLE 里的类型还会把驻守 NPC 请进屋里；火山锥、石碑基座、龙巢是实心体，进不去。 */
-var CORE_R_TYPE = {tower:.24, shrine:.18, tent:.66, arena:.66, forge:.26, vault:.28, obelisk:.60, volcano:.60, dragon:.52};
+var CORE_R_TYPE = {tower:.24, shrine:.18, tent:.10, arena:.08, forge:.26, vault:.28, obelisk:.60, volcano:.60, dragon:.52};
 var ENTERABLE  = {tower:1, shrine:1, tent:1, arena:1, forge:1, vault:1};
 /* 可站立面：TIERS = 建筑分层锥台（既是碰撞体也是站立面 —— 半径与高度同源插值，
    见 tierRadius / syncTierColliders，两者天然自洽、不会互相顶死）；
@@ -1242,7 +1242,7 @@ function bootInner(){
   buildNavBeam();
   NPCS.forEach(buildNpc);
 
-  // buildPhysics 已禁用：物理引擎挡住角色跑上台基
+  buildPhysics();   // 物理世界（碰撞 / 防穿模）
 
   hero.y = heightAt(hero.x, hero.z);
 
@@ -1569,7 +1569,7 @@ function podiumSurfaceY(d, R){
 function addHall(grp, n, W, D, H, y0, mat, doorAng, doorW){
   var t = 1.0;                                    // 墙厚
   var g = new THREE.Group();
-  g.rotation.y = Math.atan2(Math.cos(doorAng), Math.sin(doorAng));   // 让局部 -z 指向门的方向
+  g.rotation.y = Math.atan2(-Math.cos(doorAng), -Math.sin(doorAng));  // 让局部 -z（门洞侧）指向 doorAng（来路）方向
   grp.add(g);
 
   function wall(lx, lz, w, d){
@@ -1591,7 +1591,7 @@ function addHall(grp, n, W, D, H, y0, mat, doorAng, doorW){
     for(var i = 0; i <= cnt; i++){
       var k = i / cnt;
       var lx = x0 + (x1 - x0) * k, lz = z0 + (z1 - z0) * k;
-      OBSTACLES.push({cx: n.x + lx*cs + lz*sn, cz: n.z - lx*sn + lz*cs, r: 0.9});
+      OBSTACLES.push({cx: n.x + lx*cs + lz*sn, cz: n.z - lx*sn + lz*cs, r: 0.9, camBlock: true});
     }
   }
   rail(-W/2, D/2,  W/2, D/2);
@@ -1599,11 +1599,32 @@ function addHall(grp, n, W, D, H, y0, mat, doorAng, doorW){
   rail( doorW/2, -D/2,  W/2, -D/2);
   rail(-W/2, -(D/2 - t), -W/2, D/2 - t);
   rail( W/2, -(D/2 - t),  W/2, D/2 - t);
+  return g;
 }
 
 /* 台阶：由外向内拾级而上 */
 function addStairs(grp, R, mat, ang, steps, topY){
-  // 台阶模型已删除：台基锥台斜面（standHeightAt）已提供站立面，台阶模型反而挡住路
+  steps = steps || 5;
+  var hh = (topY || 4.1) / steps;
+  for(var i=0;i<steps;i++){
+    var d = R*1.24 - i*(R*0.06 + 0.45);
+    var m = new THREE.Mesh(new THREE.BoxGeometry(R*0.52, hh, R*0.2 + 0.9), mat);
+    /* 台阶顶面贴合锥台表面（而不是线性升高）：否则台阶会悬空在斜面上方 1m 多，
+       角色沿斜面走时身体会穿过台阶块 —— 这是实测到的最后一处穿模。 */
+    m.position.set(Math.cos(ang)*d, podiumSurfaceY(d, R) - hh*0.5, Math.sin(ang)*d);
+    m.rotation.y = -ang;
+    grp.add(m); shade(m);
+    // 台阶侧面碰撞：小圆柱挡穿模，留中心通道能拾级而上
+    var cx = Math.cos(ang)*d, cz = Math.sin(ang)*d;
+    var cr = R * 0.22;
+    /* 偏移必须沿「垂直于台阶」的方向 (-sin, cos)；写成 (-sin,-cos)/(sin,cos) 会让两个圆柱
+       落在台阶中线的前后，正好堵死「留中心通道拾级而上」的设计。 */
+    OBSTACLES.push({cx:cx - Math.sin(ang)*R*0.32, cz:cz + Math.cos(ang)*R*0.32, r:cr});
+    OBSTACLES.push({cx:cx + Math.sin(ang)*R*0.32, cz:cz - Math.cos(ang)*R*0.32, r:cr});
+  }
+  /* 台阶只作视觉引导。真正的可站立面是台基锥台（见 standHeightAt）——
+     若让台阶斜坡独立提供高度，它的高度-距离曲线与锥台的半径-高度曲线不一致，
+     会出现「斜坡把角色送进去、锥台立刻把他推出来」的死锁，永远登不了顶。 */
 }
 /* 石柱：柱础 + 柱身 + 柱头 */
 function addColumn(grp, r, hh, matBody, matCap, x, z, y0){
@@ -1613,9 +1634,9 @@ function addColumn(grp, r, hh, matBody, matCap, x, z, y0){
   put(grp, body, x, y0 + 0.42 + hh/2, z); shade(body);
   var cap = new THREE.Mesh(new THREE.BoxGeometry(r*2.8, 0.48, r*2.8), matCap);
   put(grp, cap, x, y0 + 0.42 + hh + 0.24, z); shade(cap);
-  // 柱子碰撞体已删除：挡住角色跑上台基
+  // 注册柱子碰撞体（世界坐标 = grp.position + 局部 x,z）
   if(typeof OBSTACLES !== 'undefined'){
-    // 不注册柱子碰撞
+    OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:r*1.6});
   }
   return y0 + 0.42 + hh + 0.48;
 }
@@ -1811,14 +1832,18 @@ function buildNode(n){
      脚底恒在表面上，既不会陷入也不会穿模。
      若再叠一层圆柱碰撞，就会与站立面互相顶死 —— 角色向内走被斜面挡回，
      而向内走恰恰是升高的前提，结果永远卡在台地高度上不去。 */
-  // TIERS 已删除：台基斜面挡住角色跑上去，改成平面 PLATFORMS
   var tierDef = tierDefOf(R);
+  for(var qi=0; qi<tierDef.length; qi++){
+    var td = tierDef[qi];
+    TIERS.push({cx:n.x, cz:n.z, rBot:td[0], rTop:td[1],
+                yBot:n.baseY + td[2], yTop:n.baseY + td[3]});
+  }
   /* 建筑核心阻挡：不再整圈 R*0.66 实心头挡，而是按类型只挡住真正的实体，
      让有内部空间的类型（柱廊 / 亭内 / 帐内 / 沙场）可以走进去。
      中央陈设（铁砧、坩埚、中心柱…）各自另有碰撞体，不会让人穿进去。 */
   OBSTACLES.push({cx:n.x, cz:n.z, r:R * (CORE_R_TYPE[n.type] != null ? CORE_R_TYPE[n.type] : 0.66)});
   /* 台地广场：始终可站立，外沿 2.6m 渐变，避免从起伏地形被瞬间抬起 */
-  PLATFORMS.push({cx:n.x, cz:n.z, r:plazaR, y:n.baseY + 0.62, edge:0});
+  PLATFORMS.push({cx:n.x, cz:n.z, r:plazaR, y:n.baseY + 0.62, edge:2.6});
   /* 地基柱：向下延伸填平地形 */
   var footing = new THREE.Mesh(new THREE.CylinderGeometry(R*1.02, R*1.16, 15, segs), stoneD);
   footing.position.y = -7.2; grp.add(footing);
@@ -1858,9 +1883,10 @@ function buildNode(n){
     /* 台阶与灯笼 */
     addStairs(grp, R, stoneD, toCenter, 5, 4.1);
     addStairs(grp, R, stoneD, toCenter + Math.PI, 5, 4.1);
-    // 灯笼只在 x 轴方向（台阶两侧），不和台阶重合
-    addLantern(grp, Math.cos(toCenter + Math.PI/2)*R*1.65, Math.sin(toCenter + Math.PI/2)*R*1.65, 0.3, n.ring === 0 ? 0xfbbf24 : colHex);
-    addLantern(grp, Math.cos(toCenter - Math.PI/2)*R*1.65, Math.sin(toCenter - Math.PI/2)*R*1.65, 0.3, n.ring === 0 ? 0xfbbf24 : colHex);
+    for(var L=0;L<(IS_TOUCH?2:4);L++){
+      var la = toCenter + Math.PI/2 + L*Math.PI/2;
+      addLantern(grp, Math.cos(la)*R*1.34, Math.sin(la)*R*1.34, 0.3, n.ring === 0 ? 0xfbbf24 : colHex);
+    }
   } else if(n.type === 'shrine'){
     /* 亭：四柱 + 瓦顶 + 中央法器 */
     for(var s4=0;s4<4;s4++){
@@ -2039,8 +2065,9 @@ function buildNode(n){
     top = top + h*0.42 + 11;
   } else if(n.type === 'forge'){
     /* 兵器库：石木屋 + 烟囱 + 兵器架 + 熔炉 */
-    /* 石木屋改为「四面墙 + 门洞」（原来是一整块实心 Box，人进不去），门宽与门板一致 */
-    addHall(grp, n, R*1.5, R*1.2, h*0.42, top, stone, toCenter, R*0.44);
+    /* 石木屋改为「四面墙 + 门洞」（原来是一整块实心 Box，人进不去），门宽与门板一致。
+       W/D 收进台基顶面（半对角线 < 0.80R），避免四角悬空、侧面也留得出环廊。 */
+    var hallG = addHall(grp, n, R*1.1, R*1.0, h*0.42, top, stone, toCenter, R*0.44);
     var beamW = new THREE.Mesh(new THREE.BoxGeometry(R*1.56, 0.4, R*1.26), wood);
     beamW.position.y = top + h*0.42; grp.add(beamW); shade(beamW);
     var roofA = new THREE.Mesh(new THREE.BoxGeometry(R*1.7, 0.35, R*0.78), roofM);
@@ -2053,10 +2080,10 @@ function buildNode(n){
     chim.position.set(R*0.5, top + h*0.68, -R*0.35); grp.add(chim); shade(chim);
     addSmoke(grp, R*0.5, top + h*0.95, -R*0.35, 0xb9c6d8, IS_TOUCH ? 10 : 24, 1.2, 26, 11);
     var door = new THREE.Mesh(new THREE.BoxGeometry(R*0.44, h*0.26, 0.4), matOf('wood', 1, 1));
-    door.position.set(0, top + h*0.13, R*0.61); grp.add(door); shade(door);
+    door.position.set(0, top + h*0.13, -R*0.5 - 0.2); hallG.add(door); shade(door);
     var win1 = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 0.3), matC(0xffb347, .3, 0, 0xff9a1a, 1.5));
-    win1.position.set(-R*0.45, top + h*0.26, R*0.62); grp.add(win1);
-    var win2 = win1.clone(); win2.position.x = R*0.45; grp.add(win2);
+    win1.position.set(-R*0.45, top + h*0.26, -R*0.5 + 0.2); hallG.add(win1);
+    var win2 = win1.clone(); win2.position.x = R*0.45; hallG.add(win2);
     addWeaponRack(grp, -R*0.95, R*0.55, top, toCenter + 1.4, colHex);
     addWeaponRack(grp, R*0.95, R*0.55, top, toCenter - 1.4, colHex);
     addBrazier(grp, R*0.95, -R*0.6, top, colHex, 1.1);
@@ -2070,7 +2097,7 @@ function buildNode(n){
   } else if(n.type === 'vault'){
     /* 金库：石殿 + 圆门 + 金币堆 + 守卫石像 */
     /* 石殿改为「四面墙 + 门洞」（原来是一整块实心 Box），门宽与圆门直径一致 */
-    addHall(grp, n, R*1.5, R*1.25, h*0.5, top, stone, toCenter, 7.2);
+    var hallG = addHall(grp, n, R*1.1, R*1.0, h*0.5, top, stone, toCenter, 7.2);
     var architrave = new THREE.Mesh(new THREE.BoxGeometry(R*1.62, 0.6, R*1.36), stoneD);
     architrave.position.y = top + h*0.5 + 0.3; grp.add(architrave); shade(architrave);
     var ped = new THREE.Mesh(new THREE.ConeGeometry(R*1.05, 3.6, 4), stoneD);
@@ -2080,17 +2107,17 @@ function buildNode(n){
       addColumn(grp, 0.78, h*0.42, stone, stoneD, Math.cos(va)*R*0.72, Math.sin(va)*R*0.72, top);
     }
     var door = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.6, 1.1, 20), matC(0xfbbf24, .3, .9, 0x7a5410, .35));
-    door.rotation.x = Math.PI/2; door.position.set(0, top + h*0.22, R*0.64); grp.add(door); shade(door);
+    door.rotation.x = Math.PI/2; door.position.set(0, top + h*0.22, -R*0.5 - 0.55); hallG.add(door); shade(door);
     var doorGlow = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.22, 8, 22), matC(colHex, .35, .5, colHex, 1.1));
-    doorGlow.rotation.x = 0; doorGlow.position.set(0, top + h*0.22, R*0.7); grp.add(doorGlow);
+    doorGlow.position.set(0, top + h*0.22, -R*0.5 + 0.2); hallG.add(doorGlow);
     for(var co=0; co<5; co++){
       var coinPile = new THREE.Mesh(new THREE.CylinderGeometry(1.9 - co*0.22, 2.1 - co*0.22, 0.34, 18), matC(0xfbbf24, .28, .9, 0x6a4a0c, .3));
-      coinPile.position.set((co-2)*0.9, top + 0.2 + co*0.32, R*0.95 + 1.2); grp.add(coinPile); shade(coinPile);
-      OBSTACLES.push({cx:n.x+(co-2)*0.9, cz:n.z+R*0.95+1.2, r:1.6});
+      coinPile.position.set((co-2)*0.9, top + 0.2 + co*0.32, 0); grp.add(coinPile); shade(coinPile);
+      OBSTACLES.push({cx:n.x+(co-2)*0.9, cz:n.z, r:1.6});
     }
     var coin = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.7, 24), matC(0xfbbf24, .25, .95, 0x8a5f10, .5));
     coin.rotation.x = Math.PI/2; coin.position.y = top + h*0.5 + 5.2; grp.add(coin);
-    OBSTACLES.push({cx:n.x, cz:n.z, r:3.0});
+    /* 中心金币悬在屋顶上方，纯装饰 —— 不再在地面留 r=3 的碰撞（那会凭空挡一个圈） */
     SPINS.push({mesh:coin, spd:0.9});
     n.rune = coin;
     addStatue(grp, -R*0.95, R*0.78, top, toCenter + 0.9, colHex);
@@ -2354,7 +2381,7 @@ function buildHero(elKey){
   scene.add(g);
 }
 
-var heroSprite = null;
+/* heroSprite（2D 立绘精灵）是历史遗留死代码：声明后从未被赋值，角色始终是程序化 3D 人形，已移除 */
 var HERO_LOOKS = {
   0:{armor:0x7c8aa4, armorR:.4, armorM:.82, cloth:0x8f1d2d, cape:0x8f1d2d, accent:0xfbbf24, accent2:0xffd777, dark:0x1d2942, skin:0xf0c49c, hair:0x2a1f36, glow:0xfbbf24, prop:'sword', crest:true, hood:false},
   1:{armor:0x3d6b3d, armorR:.7, armorM:.15, cloth:0x166534, cape:0x14532d, accent:0x4ade80, accent2:0x86efac, dark:0x0f2a17, skin:0xf2c89a, hair:0x2b3a1a, glow:0x22c55e, prop:'bow', crest:false, hood:true},
@@ -2607,15 +2634,19 @@ var NPC_SEEN = (function(){
   try{ return JSON.parse(localStorage.getItem('eh_npc_seen') || '[]') || []; }catch(e){ return []; }
 })();
 
+/* 驻守 NPC 进屋后的站位系数（相对建筑半径 R）—— 按类型给：
+   柱子 / 中央陈设 / 厅堂墙的碰撞体各不相同，统一系数会让 NPC 与它们重叠、把过道封死
+   （实测锻造工坊的亭柱只差 0.24m 就重叠了）。 */
+var NPC_INNER = {tower:.45, shrine:.72, tent:.45, arena:.45, forge:.28, vault:.28};
 NPCS.forEach(function(q){
   /* 驻守者搬进屋里：建筑内部有开放空间时，站位从「建筑外」改到「建筑内」。
      R*0.45 既在核心阻挡半径之外，也不会跟中央陈设（铁砧/坩埚/中心柱）重叠。
      实心建筑（火山、石碑、龙巢）进不去，对应的 NPC 仍留在外面。 */
   var _b = q.at ? nodeByKey(q.at) : null;
-  var p = q.at ? npcAnchor(q.at, q.a, (_b && ENTERABLE[_b.type]) ? _b.R * 0.45 : q.d) : null;
+  var p = q.at ? npcAnchor(q.at, q.a, (_b && ENTERABLE[_b.type]) ? _b.R * (NPC_INNER[_b.type] || .45) : q.d) : null;
   if(p){ q.x = p.x; q.z = p.z; }
   else if(q.patrol){ q.x = q.patrol.cx + Math.cos(q.patrol.ph)*q.patrol.rad; q.z = q.patrol.cz + Math.sin(q.patrol.ph)*q.patrol.rad; }
-  q.y = heightAt(q.x, q.z);
+  q.y = standHeightAt(q.x, q.z);   // 与角色同源（此处 TIERS/PLATFORMS 尚未建好，等价于 heightAt，buildNpc 里会再算一次）
   q.yaw = Math.atan2(q.x, q.z);
   q.pa = q.patrol ? q.patrol.ph : 0;
   q.topY = 2.9;
@@ -2627,7 +2658,7 @@ NPCS.forEach(function(q){
     if(!q.play) q.play = _n ? ('进入' + _n.name) : '';
   } else { q.node = null; }
   // NPC 碰撞体：角色不能穿过 NPC（巡逻者每帧同步位置，见 updateNpcs 里的 q.obs 更新）
-  q.obs = {cx:q.x, cz:q.z, r:0.5, npc:true};
+  q.obs = {cx:q.x, cz:q.z, r:0.6, npc:true};
   OBSTACLES.push(q.obs);
 });
 
@@ -2667,6 +2698,25 @@ function attachNpcModel(q, g, body){
   }, undefined, function(){ /* 静默降级：保留程序化模型 */ });
 }
 function buildNpc(q){
+  /* 站位避让：把 NPC 从任何重叠的碰撞体里推出来 —— 随机植被（树/岩石）恰好长在
+     站位上时，两者碰撞体重叠会把 NPC 连同过道一起封死。比逐个调系数更稳。 */
+  for(var pass = 0; pass < 8; pass++){
+    var hit = null;
+    for(var oi = 0; oi < OBSTACLES.length; oi++){
+      var o = OBSTACLES[oi];
+      if(o.npc) continue;                                  // 跳过其它 NPC 的碰撞体
+      var dd = Math.hypot(q.x - o.cx, q.z - o.cz);
+      if(dd < o.r + 1.0){ hit = {o: o, d: dd}; break; }
+    }
+    if(!hit) break;
+    var ux = q.x - hit.o.cx, uz = q.z - hit.o.cz;
+    var ul = Math.hypot(ux, uz);
+    if(ul < 1e-3){ ux = 1; uz = 0; ul = 1; }
+    var push = (hit.o.r + 1.0) - hit.d + 0.05;
+    q.x += ux / ul * push; q.z += uz / ul * push;
+  }
+  if(q.obs){ q.obs.cx = q.x; q.obs.cz = q.z; }
+
   /* 站立面与角色同源（地形 / 台基 / 台地）。NPCS 的坐标在脚本加载时就已算出 q.y，
      但那时台地 / 台基数据还没构建（PLATFORMS 为空），必须在这里重算 ——
      否则走进台地范围的 NPC（如行商·荞的巡逻圆最近点距中心仅 40m）会陷进铺面 0.62m，即穿模。 */
@@ -3146,8 +3196,7 @@ function bindMini(){
     var pz = (e.clientY - r.top) / r.height;
     var wx = (px * 2 - 1) * HALF;
     var wz = (pz * 2 - 1) * HALF;
-    hero.tx = clamp(wx, -LIMIT, LIMIT);
-    hero.tz = clamp(wz, -LIMIT, LIMIT);
+    setNavTarget(wx, wz);
   });
 }
 
@@ -3178,8 +3227,7 @@ function onClick(e){
     var th = raycaster.intersectObject(terrainMesh, false);
     if(th.length){
       var p = th[0].point;
-      hero.tx = clamp(p.x, -LIMIT, LIMIT);
-      hero.tz = clamp(p.z, -LIMIT, LIMIT);
+      setNavTarget(p.x, p.z);
       hero.approach = null;
       closeInfo();
     }
@@ -3187,11 +3235,17 @@ function onClick(e){
 }
 
 /* 自动寻路：走到 NPC 身旁后自动开启对话 */
+/* 设定寻路目标并重置卡住判定：否则上一段导航受阻累积的 navStuck 会残留到新目标上，
+   若旧值已接近阈值，可能在新目标上瞬间误判「到达」而弹出对话。 */
+function setNavTarget(x, z){
+  hero.tx = clamp(x, -LIMIT, LIMIT);
+  hero.tz = clamp(z, -LIMIT, LIMIT);
+  hero.navLastD = null; hero.navStuck = 0;
+}
 function goToNpc(k){
   var q = npcByKey(k); if(!q) return;
   var ang = Math.atan2(hero.z - q.z, hero.x - q.x);
-  hero.tx = clamp(q.x + Math.cos(ang)*2.8, -LIMIT, LIMIT);
-  hero.tz = clamp(q.z + Math.sin(ang)*2.8, -LIMIT, LIMIT);
+  setNavTarget(q.x + Math.cos(ang)*2.8, q.z + Math.sin(ang)*2.8);
   hero.approach = 'npc:' + k;
   showNavBeam(q.x, q.z);
   npcToast('正在走向 ' + q.name + '…');
@@ -3203,8 +3257,7 @@ function routeTo(k){
   var n = nodeByKey(k); if(!n) return;
   var ang = Math.atan2(hero.z - n.z, hero.x - n.x);
   var dd = n.R + 6;
-  hero.tx = clamp(n.x + Math.cos(ang)*dd, -LIMIT, LIMIT);
-  hero.tz = clamp(n.z + Math.sin(ang)*dd, -LIMIT, LIMIT);
+  setNavTarget(n.x + Math.cos(ang)*dd, n.z + Math.sin(ang)*dd);
   hero.approach = null;
   showNavBeam(n.x, n.z);
   npcToast('正在前往 ' + n.name + '…');
@@ -3450,8 +3503,17 @@ function tryMove(nx, nz){
   var total = Math.hypot(dx, dz);
   var seg = 0.4;
   var steps = Math.max(1, Math.ceil(total / seg));
-  // 碰撞检测已禁用：避免挡住角色跑上台基
-  var cx = nx, cz = nz;
+  for(var k=1;k<=steps;k++){
+    var cx = sx + dx * k / steps;
+    var cz = sz + dz * k / steps;
+    for(var j=0;j<OBSTACLES.length;j++){
+      var o = OBSTACLES[j], cr = o.r + 1.0;
+      if(Math.hypot(cx - o.cx, cz - o.cz) < cr){
+        var ddx = cx - o.cx, ddz = cz - o.cz, dd = Math.hypot(ddx, ddz) || 1e-4;
+        cx = o.cx + ddx/dd * cr; cz = o.cz + ddz/dd * cr;
+      }
+    }
+  }
   hero.x = clamp(cx, -LIMIT, LIMIT); hero.z = clamp(cz, -LIMIT, LIMIT);
 }
 
@@ -3469,7 +3531,7 @@ function buildPhysics(){
       w.addBody(b);
       o.body = b;
     }
-    var body = PHYSICS.Body({mass:1, x:hero.x, y:hero.y + 0.5, z:hero.z, shape:{type:'sphere', r:0.5}});
+    var body = PHYSICS.Body({mass:1, x:hero.x, y:hero.y + 0.85, z:hero.z, shape:{type:'sphere', r:0.85}});
     w.addBody(body);
     PHYS = {world:w, body:body, ready:true};
     window.__physicsReady = true;
@@ -3586,7 +3648,7 @@ function updateHero(dt){
     heroParts.foreL.rotation.x = -0.45; heroParts.foreR.rotation.x = -0.35;
     heroParts.body.position.y = 0 - landDip;
     heroParts.body.rotation.x = -0.1 + bodyLunge;
-    if(heroSprite){ heroSprite.rotation.z = 0.16; heroSprite.position.y = 0.276 + Math.sin(performance.now()*0.004)*0.06; }
+    /* （原 heroSprite 跳跃摆动逻辑已随死代码移除） */
   } else {
     heroParts.legL.rotation.x = sw;
     heroParts.legR.rotation.x = sw2;
@@ -3598,11 +3660,7 @@ function updateHero(dt){
     heroParts.foreR.rotation.x = -0.22 - Math.max(0, Math.sin(hero.walk + Math.PI)) * gait * 0.38;
     heroParts.body.position.y = Math.abs(Math.sin(hero.walk)) * 0.05 * gait + Math.sin(performance.now()*0.0016) * 0.013 - landDip;
     heroParts.body.rotation.x = gait * 0.085 + bodyLunge;
-    if(heroSprite){
-      heroSprite.position.y = 0.276 + Math.abs(Math.sin(hero.walk)) * 0.09 * gait + Math.sin(performance.now()*0.0016) * 0.018 - landDip * 0.5;
-      heroSprite.rotation.z = Math.sin(hero.walk * 0.5) * 0.06;
-      heroSprite.scale.x = 1.7 * (1 + Math.sin(hero.walk * 2) * 0.012 * gait);
-    }
+    /* （原 heroSprite 走路摆动逻辑已随死代码移除） */
   }
   // 待机重心转移（gait 小时左右晃）
   var idleSway = (1 - clamp(gait,0,1)) * Math.sin(performance.now()*0.0009) * 0.022;
@@ -3810,11 +3868,12 @@ function animate(){
     var cp = Math.cos(cam.pitch), sp2 = Math.sin(cam.pitch);
     var dirx = cp * Math.sin(cam.yaw), dirz = cp * Math.cos(cam.yaw);
     var useD = cam.dist;
-    /* 相机避让一：视线被建筑主体挡住 → 缩到墙前，否则镜头会穿进塔身看到模型内部。
-       只对「大障碍」（建筑主体，半径 ≥5）生效，小装饰不参与，避免镜头抖动。 */
+    /* 相机避让一：视线被建筑主体/实心墙挡住 → 缩到墙前，否则镜头会穿进塔身看到模型内部。
+       只对「大障碍」（半径 ≥5）和带 camBlock 标记的实心墙（addHall 的墙体）生效，
+       小装饰不参与，避免镜头抖动。 */
     for(var oi=0; oi<OBSTACLES.length; oi++){
       var ob = OBSTACLES[oi];
-      if(!ob.r || ob.r < 5) continue;
+      if(!ob.r || (ob.r < 5 && !ob.camBlock)) continue;
       var ox = ob.cx - hero.x, oz = ob.cz - hero.z;
       var proj = ox * dirx + oz * dirz;
       if(proj <= 0) continue;
