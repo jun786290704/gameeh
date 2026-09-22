@@ -1390,6 +1390,26 @@ function nearBuilding(x, z, pad){
   }
   return false;
 }
+/* 是否落在「辐射道路」的走廊里 —— 植被生长前要用它排除，否则树和岩石会直接长在路中间。
+   buildRoads 把每条路画成从中央圣殿外围(38m)到目标建筑的射线，宽度按环不同：12 / 9 / 7。
+   pad = 路肩余量：紧贴路边的树虽然不在路面内，但行人贴边绕过时会被它挤住。 */
+function nearRoad(x, z, pad){
+  pad = pad || 3;
+  var d0 = Math.hypot(x, z), ang = Math.atan2(z, x);
+  for(var i=0;i<NODES.length;i++){
+    var n = NODES[i];
+    if(n.r < 1) continue;                                   // 这串 node 没铺路
+    var nd = Math.hypot(n.x, n.z);
+    if(nd - 38 <= 4) continue;                              // 离得太近，没铺
+    var diff = Math.atan2(Math.sin(ang - Math.atan2(n.z, n.x)), Math.cos(ang - Math.atan2(n.z, n.x)));
+    var along = d0 * Math.cos(diff);                        // 沿路方向的投影长度
+    if(along < 38 - pad || along > nd + pad) continue;      // 不在这条路的区间内
+    var lateral = Math.abs(d0 * Math.sin(diff));            // 到路中心线的垂距
+    var w = (n.ring >= 3 ? 12 : (n.ring === 1 ? 9 : 7));
+    if(lateral < w/2 + pad) return true;
+  }
+  return false;
+}
 
 /* 道路（分段贴合地形，用 InstancedMesh 合并） */
 function buildRoads(){
@@ -1456,8 +1476,9 @@ function buildProps(){
     x = (Math.random()*2-1) * (HALF - 22);
     z = (Math.random()*2-1) * (HALF - 22);
     if(Math.abs(x) > LIMIT - 4 || Math.abs(z) > LIMIT - 4) continue;
-    if(nearBuilding(x, z, 15)) continue;
-    if(Math.hypot(x, z) < 34) continue;              // 出生点留空
+    if(nearBuilding(x, z, 18)) continue;                  // 建筑台地周边留环道
+    if(nearRoad(x, z, 3.5)) continue;                     // 不能长在路中央
+    if(Math.hypot(x, z) < 34) continue;                   // 出生点留空
     y = heightAt(x, z);
     if(y < -6) continue;                             // 悬崖上不种树
     s = 0.7 + Math.random()*0.9; r = Math.random()*Math.PI*2;
@@ -1480,11 +1501,16 @@ function buildProps(){
     grass.push({x:x, y:y, z:z, s:0.6 + Math.random()*0.8, r:Math.random()*6.2832});
   }
 
-  /* 碰撞体：树（针叶 / 阔叶）与岩石按位置登记，角色不再能穿过去 */
-  pine.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:0.9 * p.s}); });
-  broad.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:0.9 * p.s}); });
-  rockA.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:1.5 * p.s}); });
-  rockB.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:1.3 * p.s}); });
+  /* 碰撞体：树（针叶 / 阔叶）与岩石按位置登记，角色不再能穿过去。
+     半径一律按「实际视觉尺寸」取，而不是过去一律写的 0.9·s：
+       针叶树干 Cylinder(0.5, 0.8)          → 底半径 0.80·s
+       阔叶树干 Cylinder(0.42, 0.66)        → 底半径 0.66·s   （原来 0.9·s 凭空多一圈看不见的墙）
+       岩石 Icosahedron(1)×1.4 / Dodeca(1)×1.25 → 略小于石头本体，允许脚尖点在石面上
+     kind 供回归断言与诊断脚本按来源统计。 */
+  pine.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:0.80 * p.s, kind:'tree'}); });
+  broad.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:0.66 * p.s, kind:'tree'}); });
+  rockA.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:1.20 * p.s, kind:'rock'}); });
+  rockB.forEach(function(p){ OBSTACLES.push({cx:p.x, cz:p.z, r:1.05 * p.s, kind:'rock'}); });
 
   var woodM      = matOf('wood', 1, 2);
   var pineCrown  = matC(0x2f7a4f, .92, .02, 0x0c2418, .28, true);
@@ -1527,8 +1553,10 @@ function buildProps(){
   fill(broadTrunk, woodM,      broad, 2.3, 1);
   fill(broadGeo,   broadCrown, broad, 6.5, 1, 0.78);
   fill(bushGeo,    bushM,      bush,  0.85, 1, 0.72);
-  fill(rockAGeo,   rockM,      rockA, 0.5, 2.4, 1, true);
-  fill(rockBGeo,   rockM,      rockB, 0.42, 2.0, 1, true);
+  /* 岩石的 mul 原本是 2.4 / 2.0 —— Icosahedron(1) 被放大到半径最大 3.84m，
+     跟针叶树树冠(3.0·s)一样大：一块石头顶一棵树，又大又挡路。收到 1.4 / 1.25。 */
+  fill(rockAGeo,   rockM,      rockA, 0.5, 1.4, 1, true);
+  fill(rockBGeo,   rockM,      rockB, 0.42, 1.25, 1, true);
   fill(grassGeo,   grassM,     grass, 0.5, 1, 1, false, true);
 }
 
@@ -1614,13 +1642,11 @@ function addStairs(grp, R, mat, ang, steps, topY){
     m.position.set(Math.cos(ang)*d, podiumSurfaceY(d, R) - hh*0.5, Math.sin(ang)*d);
     m.rotation.y = -ang;
     grp.add(m); shade(m);
-    // 台阶侧面碰撞：小圆柱挡穿模，留中心通道能拾级而上
-    var cx = Math.cos(ang)*d, cz = Math.sin(ang)*d;
-    var cr = R * 0.22;
-    /* 偏移必须沿「垂直于台阶」的方向 (-sin, cos)；写成 (-sin,-cos)/(sin,cos) 会让两个圆柱
-       落在台阶中线的前后，正好堵死「留中心通道拾级而上」的设计。 */
-    OBSTACLES.push({cx:cx - Math.sin(ang)*R*0.32, cz:cz + Math.cos(ang)*R*0.32, r:cr});
-    OBSTACLES.push({cx:cx + Math.sin(ang)*R*0.32, cz:cz - Math.cos(ang)*R*0.32, r:cr});
+    /* 这里原本每级台阶还推两个「侧面碰撞柱」，但它们是错的，已移除：
+       1) 坐标算的是局部坐标却没加 n.x/n.z —— 12 座建筑的台阶碰撞柱全部堆在世界原点，
+          而每根半径达 R*0.22≈5.7m、5 级台阶又互相重叠成一堵墙，把中央一带堵得严严实实；
+       2) 台阶顶面已经贴合锥台表面（podiumSurfaceY），站立面由锥台提供 ——
+          脚底恒在锥台面上，不存在「从侧面斜穿台阶」的穿模，根本不需要这圈阻挡。 */
   }
   /* 台阶只作视觉引导。真正的可站立面是台基锥台（见 standHeightAt）——
      若让台阶斜坡独立提供高度，它的高度-距离曲线与锥台的半径-高度曲线不一致，
@@ -1668,7 +1694,9 @@ function addLantern(grp, x, z, y0, colHex){
   var sp = glowMesh(colHex, 1.8, .62); put(g, sp, 0, 2.98, 0);
   FLAMES.push({sp:sp, base:.55, amp:.22, spd:1.9, ph:Math.random()*6.28});
   grp.add(g);
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.6});
+  /* 这是一盏贴地的装饰路灯，杆径不到 0.5m —— 碰撞取 0.45 即可。
+     摆这么小还给出 0.6 的大圈，加上角色自身的 0.85，等于凭空多出一圈走的过去的空气墙。 */
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.45, kind:'prop'});
   return g;
 }
 /* 火盆 */
@@ -1687,7 +1715,7 @@ function addBrazier(grp, x, z, y0, colHex, sc){
   var sp = glowMesh(colHex, 2.6*sc, .75); put(g, sp, 0, 2.6*sc, 0);
   FLAMES.push({sp:sp, mesh:fire, base:.62, amp:.3, spd:2.7, ph:Math.random()*6.28});
   grp.add(g);
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.9*sc});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.6*sc, kind:'prop'});
   return g;
 }
 /* 旗帜（带飘动） */
@@ -1715,7 +1743,7 @@ function addCrate(grp, x, y, z, s, ry){
   var band = new THREE.Mesh(new THREE.BoxGeometry(1.57*s, 0.13*s, 1.57*s), matOf('metal', 1, 1, {roughness:.5, metalness:.8}));
   band.position.set(x, y + 1.08*s, z); band.rotation.y = ry || 0; grp.add(band);
   m.userData.propGround = y;
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.9*s});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.6*s, kind:'prop'});
   return m;
 }
 function addBarrel(grp, x, y, z, s){
@@ -1726,7 +1754,7 @@ function addBarrel(grp, x, y, z, s){
   h1.rotation.x = Math.PI/2; put(grp, h1, x, y + 1.12*s, z);
   var h2 = h1.clone(); h2.position.y = y + 0.38*s; grp.add(h2);
   m.userData.propGround = y;
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.7*s});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.5*s, kind:'prop'});
   return m;
 }
 /* 碎石 */
@@ -1764,7 +1792,7 @@ function addWeaponRack(grp, x, z, y0, ry, colHex){
   var tip = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.44, 6), matC(colHex, .35, .5, colHex, .55));
   tip.rotation.z = 0.2; put(g, tip, 1.58, 2.72, 0.1);
   grp.add(g);
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:1.2});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.75, kind:'prop'});
   return g;
 }
 /* 守卫石像 */
@@ -1785,7 +1813,7 @@ function addStatue(grp, x, z, y0, ry, colHex){
   var spear = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 3.2, 6), matOf('wood', 1, 2));
   put(g, spear, 0.72, 1.6, 0.1); shade(spear);
   grp.add(g);
-  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.9});
+  if(typeof OBSTACLES !== 'undefined') OBSTACLES.push({cx:(grp.position.x||0)+x, cz:(grp.position.z||0)+z, r:0.7, kind:'prop'});
   return g;
 }
 /* 上升烟 / 火星柱 */
