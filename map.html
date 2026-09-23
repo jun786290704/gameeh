@@ -1940,11 +1940,10 @@ function buildNode(n){
   );
   plaza.rotation.x = -Math.PI/2; plaza.position.y = plazaY;
   grp.add(plaza); shade(plaza, false, true);
-  /* 护沿高度不再写死 3.2m：台地圆周一圈的地形高差可能远超 3m，
-     固定高度会让低的一侧底部悬空、露出台地下面的空洞。按最低点向下多埋 2m。 */
-  var curbH = Math.max(3.2, plazaY - edgeMin + 2);
-  var curb = new THREE.Mesh(new THREE.CylinderGeometry(plazaR, plazaR*1.03, curbH, 40, 1, true), stoneD);
-  curb.position.y = plazaY - curbH/2; grp.add(curb); shade(curb, false, true);   // 顶始终与铺面齐平
+  /* 护沿：实心圆柱体，从地下深处一直延伸到台地广场顶面，彻底消除悬空 */
+  var curbH = 25;
+  var curb = new THREE.Mesh(new THREE.CylinderGeometry(plazaR, plazaR*1.08, curbH, 40, 1, false), stoneD);
+  curb.position.y = -curbH/2 + plazaY; grp.add(curb); shade(curb, false, true);
 
   /* 三层台基 */
   var tiers = [[R*1.06, R*1.18, 1.5], [R*0.93, R*1.04, 1.4], [R*0.80, R*0.90, 1.2]];
@@ -1973,9 +1972,8 @@ function buildNode(n){
   /* 台地广场：始终可站立，外沿 2.6m 渐变，避免从起伏地形被瞬间抬起。
      y 用抬高后的 plazaY —— 与铺面视觉高度严格一致。 */
   PLATFORMS.push({cx:n.x, cz:n.z, r:plazaR, y:n.baseY + plazaY, edge:2.6});
-  /* 地基柱：向下延伸填平地形 */
-  var footing = new THREE.Mesh(new THREE.CylinderGeometry(R*1.02, R*1.16, 15, segs), stoneD);
-  footing.position.y = -7.2; grp.add(footing);
+  /* 地基柱：已被护沿替代，不再单独创建 */
+  // var footing = new THREE.Mesh(...);
 
   var toCenter = Math.atan2(-n.z, -n.x);            // 朝向地图中心（路来的方向）
   if(n.ring === 0) toCenter = Math.PI/2;
@@ -2802,7 +2800,7 @@ function npcByKey(k){ for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k) return 
 /* ==================== NPC 的 3D 模型 ====================
    云端生成的 .glb 放在 models/npc/{key}.glb（贴图已压成 JPEG，体积约为原 1/10）。
    命中 → 替换程序化人形；未列入 / 加载失败 → 保留程序化模型，页面始终可用。 */
-var NPC_MODELS = ['np_lamp', 'np_smith', 'np_ash', 'np_peng', 'np_ling', 'np_yan', 'np_xun'];
+var NPC_MODELS = ['np_lamp', 'np_smith', 'np_ash', 'np_peng', 'np_ling', 'np_yan', 'np_xun', 'np_xing', 'np_echo', 'np_ye', 'np_qiao', 'np_jian'];
 var NPC_MODEL_H = 1.95;      // 归一化后的角色身高（米）
 var NPC_MODEL_YAW = 0;       // 模型正面相对 +Z 的修正角
 function attachNpcModel(q, g, body){
