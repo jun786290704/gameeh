@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>英雄 3D 模型预览 · 元素英雄</title>
+<style>
+html,body{margin:0;height:100%;background:#0e1116;color:#e5e7eb;font:14px/1.5 system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden}
+#c{display:block;width:100vw;height:100vh}
+#hud{position:fixed;left:18px;top:16px;pointer-events:none}
+#hud h1{margin:0 0 6px;font-size:16px;font-weight:600;color:#fbbf24}
+#hud p{margin:0;font-size:12px;color:#94a3b8}
+#tag{position:fixed;right:16px;top:16px;font-size:12px;color:#64748b}
+#names{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:18px;font-size:12px;color:#cbd5e1;flex-wrap:wrap}
+#names span.pending{color:#64748b;text-decoration:line-through}
+#err{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:#f87171;white-space:pre-wrap;text-align:center;font-size:13px;max-width:80vw}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <h1>英雄 3D 模型预览</h1>
+  <p>拖拽旋转 · 滚轮缩放 — 载入 models/hero/*.glb（未生成的显示灰色占位）</p>
+</div>
+<div id="tag">元素英雄 · 衡洲</div>
+<div id="names"></div>
+<div id="err"></div>
+<script src="./vendor/three.min.js"></script>
+<script src="./vendor/GLTFLoader.js"></script>
+<script>
+(function(){
+  /* 键与立绘同名：img/hero_{g}_{e}.png ↔ models/hero/hero_{g}_{e}.glb
+     e: 0金 1木 2土 3水 4火 ; g: m 男 / f 女（tokenId 奇偶决定，见 js/utils.js） */
+  var ELEM = ['金','木','土','水','火'];
+  var names = ['hero_m_0','hero_m_1','hero_m_2','hero_m_3','hero_m_4',
+               'hero_f_0','hero_f_1','hero_f_2','hero_f_3','hero_f_4'];
+  function label(k){
+    var p = k.split('_');             // ['hero','m','0']
+    return ELEM[Number(p[2])] + ' · ' + (p[1] === 'f' ? '女' : '男');
+  }
+  var COLS = 5, STEP_X = 2.3, STEP_Z = 3.1;
+
+  var canvas = document.getElementById('c');
+  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  if('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
+
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0e1116);
+  scene.fog = new THREE.Fog(0x0e1116, 24, 54);
+  var cam = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 200);
+
+  var root = new THREE.Group(); scene.add(root);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x3a3f52, 1.05));
+  var d1 = new THREE.DirectionalLight(0xffffff, 1.5); d1.position.set(6, 10, 8);  scene.add(d1);
+  var d2 = new THREE.DirectionalLight(0x88aaff, .6); d2.position.set(-8, 5, -7); scene.add(d2);
+  root.add(new THREE.GridHelper(26, 26, 0x334155, 0x1c2534));
+
+  function slot(i){
+    var col = i % COLS, row = Math.floor(i / COLS);
+    return { x: (col - (COLS-1)/2) * STEP_X, z: (row - 0.5) * STEP_Z };
+  }
+  function placeholder(s){
+    var geo = THREE.CapsuleGeometry
+      ? new THREE.CapsuleGeometry(0.34, 1.1, 4, 10)
+      : new THREE.CylinderGeometry(0.34, 0.34, 1.8, 10);
+    var m = new THREE.Mesh(geo,
+      new THREE.MeshStandardMaterial({color:0x334155, roughness:.9, metalness:0, transparent:true, opacity:.42})
+    );
+    m.position.set(s.x, 0.95, s.z);
+    root.add(m);
+  }
+
+  /* 先全部标记为「未生成」，加载成功再摘掉 —— 避免首帧误显示为已生成 */
+  var pending = names.slice(), loaded = 0;
+  names.forEach(function(n, i){
+    var s = slot(i);
+    new THREE.GLTFLoader().load('models/hero/'+n+'.glb', function(g){
+      var m = g.scene || (g.scenes && g.scenes[0]);
+      var b = new THREE.Box3().setFromObject(m), sz = new THREE.Vector3(); b.getSize(sz);
+      m.scale.multiplyScalar(1.85/(sz.y||1));
+      b.setFromObject(m);
+      var c = new THREE.Vector3(); b.getCenter(c);
+      m.position.set(s.x - c.x, -b.min.y, s.z - c.z);
+      root.add(m);
+      loaded++;
+      pending = pending.filter(function(x){ return x !== n; });
+      paint();
+    }, undefined, function(){ placeholder(s); paint(); });
+  });
+
+  function paint(){
+    document.getElementById('names').innerHTML = names.map(function(k){
+      return '<span class="'+(pending.indexOf(k)>=0?'pending':'')+'">'+label(k)+'</span>';
+    }).join('');
+    if(pending.length === names.length){
+      document.getElementById('err').textContent =
+        '暂无已生成的英雄模型\n（生成后放到 models/hero/*.glb；请通过本地 http 服务打开，file:// 会被浏览器拦截）';
+    }
+  }
+  paint();
+
+  var yaw = 0, pitch = .18, dist = 15, drag = false, px = 0, py = 0;
+  canvas.addEventListener('pointerdown', function(e){ drag = true; px = e.clientX; py = e.clientY; });
+  window.addEventListener('pointerup', function(){ drag = false; });
+  window.addEventListener('pointermove', function(e){
+    if(!drag) return;
+    yaw -= (e.clientX - px) * .006;
+    pitch = Math.max(-.5, Math.min(1.0, pitch + (e.clientY - py) * .005));
+    px = e.clientX; py = e.clientY;
+  });
+  canvas.addEventListener('wheel', function(e){
+    e.preventDefault();
+    dist = Math.max(4, Math.min(40, dist + e.deltaY * .014));
+  }, {passive:false});
+  window.addEventListener('resize', function(){
+    cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  (function tick(){
+    var cy = Math.cos(pitch);
+    cam.position.set(Math.sin(yaw)*dist*cy, 2.6 + Math.sin(pitch)*dist, Math.cos(yaw)*dist*cy);
+    cam.lookAt(0, 1.0, 0);
+    renderer.render(scene, cam);
+    requestAnimationFrame(tick);
+  })();
+})();
+</script>
+</body>
+</html>

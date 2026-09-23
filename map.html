@@ -2566,8 +2566,10 @@ var heroLookEl = null;
 function applyHeroLook(){
   var h = (typeof currentHero === 'function') ? currentHero() : null;
   var k = (h && h.element != null) ? (Number(h.element) % 5) : 0;
-  if(k === heroLookEl && heroObj) return;
-  heroLookEl = k;
+  /* 缓存键含性别与元素：同一元素换男女英雄时也要重建，否则 3D 模型不会跟着换 */
+  var hk = heroModelKey(k, h);
+  if(hk === heroLookEl && heroObj) return;
+  heroLookEl = hk;
   if(heroObj){
     scene.remove(heroObj);
     /* matOf / clothMat 走全局缓存 MATC，是共享材质 —— 绝不能 dispose，
@@ -2585,6 +2587,7 @@ function applyHeroLook(){
   }
   buildHero(k);
   hero.y = standHeightAt(hero.x, hero.z);   // 与角色同源，避免切换瞬间在台基上掉半米
+  attachHeroModel(heroObj, hk);             // 命中白名单则用 3D 模型替换程序化人形
 }
 /* ==================== NPC ====================
    12 位衡洲遗民：10 位驻守各圣域、2 位沿途巡行。
@@ -2803,6 +2806,12 @@ function npcByKey(k){ for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k) return 
 var NPC_MODELS = ['np_lamp', 'np_smith', 'np_ash', 'np_peng', 'np_ling', 'np_yan', 'np_xun', 'np_xing', 'np_echo', 'np_ye', 'np_qiao', 'np_jian'];
 var NPC_MODEL_H = 1.95;      // 归一化后的角色身高（米）
 var NPC_MODEL_YAW = 0;       // 模型正面相对 +Z 的修正角
+
+/* 玩家英雄 3D 模型白名单：键 = 立绘同名 hero_{性别}_{元素}（见 js/utils.js heroImg）。
+   只有列在这里、且 models/hero/<键>.glb 真的存在的英雄才替换程序化人形；
+   数组为空时地图角色行为与改造前完全一致（程序化人形兜底）。 */
+var HERO_MODELS = [];
+var HERO_MODEL_H = 1.85;     // 归一化后的英雄身高（米）
 function attachNpcModel(q, g, body){
   if(NPC_MODELS.indexOf(q.k) < 0) return;
   if(!window.THREE || !THREE.GLTFLoader) return;
@@ -2830,6 +2839,46 @@ function attachNpcModel(q, g, body){
     window.__npcModelsLoaded = (window.__npcModelsLoaded || 0) + 1;
   }, undefined, function(){ /* 静默降级：保留程序化模型 */ });
 }
+/* ==================== 玩家英雄 3D 模型 ====================
+   与 NPC 同一套做法：命中白名单就加载 models/hero/<键>.glb，归一化身高、水平居中、
+   脚底贴地，并隐藏程序化人形；未命中 / 加载失败自动保留程序化人形。
+
+   注意：生成出来的 glb 是静态网格（无骨骼）。程序化人形的关节仍由原有动画代码照常
+   驱动，只是 hips 整体隐藏 —— 动画函数不会因为关节找不到而报错，也无需改动任何动画逻辑。
+   hips 之外只有脚下光环 ring 与假阴影，它们保持可见。 */
+function heroModelGender(h){ return (h && h.id != null && Number(h.id) % 2 === 1) ? 'f' : 'm'; }
+function heroModelKey(k, h){ return 'hero_' + heroModelGender(h) + '_' + (Number(k) % 5); }
+
+function attachHeroModel(g, key){
+  if(!g || !key) return;
+  if(HERO_MODELS.indexOf(key) < 0) return;
+  if(!window.THREE || !THREE.GLTFLoader) return;
+  var loader = new THREE.GLTFLoader();
+  loader.load('models/hero/' + key + '.glb', function(gltf){
+    var m = gltf.scene || (gltf.scenes && gltf.scenes[0]);
+    if(!m) return;
+    /* 归一化：缩放到统一身高，水平居中、脚底贴地 */
+    var box = new THREE.Box3().setFromObject(m);
+    var size = new THREE.Vector3(); box.getSize(size);
+    m.scale.multiplyScalar(HERO_MODEL_H / (size.y || 1));
+    box.setFromObject(m);
+    var ctr = new THREE.Vector3(); box.getCenter(ctr);
+    m.position.set(-ctr.x, -box.min.y, -ctr.z);
+    m.traverse(function(o){
+      if(o.isMesh){
+        o.castShadow = true; o.receiveShadow = false;
+        o.frustumCulled = false;      // 避免走位后整体消失
+      }
+    });
+    var holder = new THREE.Group();
+    holder.add(m);
+    if(heroParts.hips) heroParts.hips.visible = false;   // 隐藏程序化人形（含其武器）
+    heroParts.modelHolder = holder;
+    g.add(holder);
+    window.__heroModelsLoaded = (window.__heroModelsLoaded || 0) + 1;
+  }, undefined, function(){ /* 静默降级：保留程序化模型 */ });
+}
+
 function buildNpc(q){
   /* 站位避让：把 NPC 从任何重叠的碰撞体里推出来 —— 随机植被（树/岩石）恰好长在
      站位上时，两者碰撞体重叠会把 NPC 连同过道一起封死。比逐个调系数更稳。 */

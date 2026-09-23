@@ -1,2 +1,3 @@
 .workbuddy/
 models/npc/*.raw.glb
+models/hero/*.raw.glb
