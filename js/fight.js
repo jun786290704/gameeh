@@ -5,7 +5,7 @@ async function fetchMonsters(){
   for(let attempt=0; attempt<3; attempt++){
     try{
       const v3 = mustC('v3');
-      const n = Number(await v3.monstersCount());
+      const n = Number(await v3.monstersLength());
       const ids = Array.from({length:n},(_,i)=>i);
       const arr = await Promise.all(ids.map(async i=>{
         try{
@@ -44,8 +44,8 @@ async function renderFight(){
       const active = S.fight.heroId===h.id;
       const e = ELEMENTS[h.element]||ELEMENTS[0];
       const staminaPct = Math.min(100, (h.stamina/5)*100);
-      return `<button onclick="selectFightHero(${h.id})" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
-        <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${heroImg(h.element)}" alt="英雄#${h.id}"></span>
+      return `<button onclick="selectFightHero(${h.id}, this)" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
+        <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${heroImg(h.element, h.id)}" alt="英雄#${h.id}"></span>
         <span class="pick-body">
           <span class="pick-title"><b>#${h.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
           <span class="pick-sub"><b class="text-gold">⚔${fmt(h.power,0)}</b><i class="text-muted">Lv.${h.level} 体力${h.stamina}/${h.staminaMax||5}${h.staminaNext>0?' 恢复中':''}</i></span>
@@ -73,7 +73,7 @@ async function renderFight(){
       const active = S.fight.weaponId===w.id;
       const e = ELEMENTS[w.element]||ELEMENTS[0];
       const stars = '★'.repeat(w.stars)+'☆'.repeat(5-w.stars);
-      return `<button onclick="selectFightWeapon(${w.id})" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
+      return `<button onclick="selectFightWeapon(${w.id}, this)" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
         <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};">🗡️</span>
         <span class="pick-body">
           <span class="pick-title"><b>#${w.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
@@ -85,13 +85,19 @@ async function renderFight(){
     }).join('');
   }
   if(S.fight.monsterId===null && S.monsters.length) S.fight.monsterId = S.monsters[0].id;
+  // 为每个怪物随机生成五行属性（每次进入战斗页面都随机刷新）
+  if(!S.monsterRandomElements || S.monsterRandomElements.length !== S.monsters.length){
+    S.monsterRandomElements = S.monsters.map(() => Math.floor(Math.random() * 5));
+  }
   const mg = $('#monsterGrid');
-  mg.innerHTML = S.monsters.map(m=>{
+  mg.innerHTML = S.monsters.map((m, idx)=>{
     const active = S.fight.monsterId===m.id;
-    const e = ELEMENTS[m.element]||ELEMENTS[0];
+    // 用随机生成的五行属性显示
+    const randomEl = S.monsterRandomElements[idx];
+    const e = ELEMENTS[randomEl]||ELEMENTS[0];
     const icon = monsterIcons[m.id % monsterIcons.length] || '👾';
     const difficulty = m.power < 500 ? {label:'简单',color:'#22c55e'} : m.power < 2000 ? {label:'普通',color:'#eab308'} : m.power < 8000 ? {label:'困难',color:'#f97316'} : {label:'噩梦',color:'#ef4444'};
-    return `<button onclick="selectMonster(${m.id})" class="pick-chip monster-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
+    return `<button onclick="selectMonster(${m.id}, this)" class="pick-chip monster-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
       <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${monImg(m.id)}" alt="${m.name}"></span>
       <span class="pick-body">
         <span class="pick-title"><b style="${active?`color:${e.color};`:''}">${m.name}</b><em class="pick-tag" style="color:${difficulty.color};">${difficulty.label}</em></span>
@@ -102,9 +108,77 @@ async function renderFight(){
   }).join('');
   autoPreviewFight();
 }
-function selectFightHero(id){ S.fight.heroId = id; renderFight(); }
-function selectFightWeapon(id){ S.fight.weaponId = id; renderFight(); }
-function selectMonster(id){ S.fight.monsterId = id; renderFight(); }
+function selectFightHero(id, el){ 
+  S.fight.heroId = id; 
+  // 完整更新英雄选中状态和预览
+  const hero = S.heroes.find(x=>x.id===id);
+  const e = hero ? (ELEMENTS[hero.element]||ELEMENTS[0]) : ELEMENTS[0];
+  document.querySelectorAll('#fightHeroSel .pick-chip').forEach(chip=>{
+    chip.classList.remove('pick-active');
+    chip.style.borderColor = '';
+    chip.style.background = '';
+    const radio = chip.querySelector('.pick-radio');
+    if(radio){ radio.classList.remove('pick-radio-on'); radio.textContent=''; }
+  });
+  if(el){
+    el.classList.add('pick-active');
+    el.style.borderColor = e.border;
+    el.style.background = e.soft;
+    const radio = el.querySelector('.pick-radio');
+    if(radio){ radio.classList.add('pick-radio-on'); radio.textContent='✓'; }
+  }
+  autoPreviewFight();
+}
+function selectFightWeapon(id, el){ 
+  S.fight.weaponId = id; 
+  // 完整更新武器选中状态和预览
+  const wpn = S.weapons.find(x=>x.id===id);
+  const e = wpn ? (ELEMENTS[wpn.element]||ELEMENTS[0]) : ELEMENTS[0];
+  document.querySelectorAll('#fightWeaponSel .pick-chip').forEach(chip=>{
+    chip.classList.remove('pick-active');
+    chip.style.borderColor = '';
+    chip.style.background = '';
+    const radio = chip.querySelector('.pick-radio');
+    if(radio){ radio.classList.remove('pick-radio-on'); radio.textContent=''; }
+  });
+  if(el){
+    el.classList.add('pick-active');
+    el.style.borderColor = e.border;
+    el.style.background = e.soft;
+    const radio = el.querySelector('.pick-radio');
+    if(radio){ radio.classList.add('pick-radio-on'); radio.textContent='✓'; }
+  }
+  autoPreviewFight();
+}
+function selectMonster(id, el){ 
+  S.fight.monsterId = id; 
+  // 完整更新怪物选中状态和预览
+  const monIdx = S.monsters.findIndex(x=>x.id===id);
+  const randomEl = (S.monsterRandomElements && S.monsterRandomElements[monIdx] !== undefined) 
+    ? S.monsterRandomElements[monIdx] 
+    : 0;
+  const e = ELEMENTS[randomEl]||ELEMENTS[0];
+  document.querySelectorAll('#monsterGrid .monster-chip').forEach(chip=>{
+    chip.classList.remove('pick-active');
+    chip.style.borderColor = '';
+    chip.style.background = '';
+    const radio = chip.querySelector('.pick-radio');
+    if(radio){ radio.classList.remove('pick-radio-on'); radio.textContent=''; }
+  });
+  if(el){
+    el.classList.add('pick-active');
+    el.style.borderColor = e.border;
+    el.style.background = e.soft;
+    const radio = el.querySelector('.pick-radio');
+    if(radio){ radio.classList.add('pick-radio-on'); radio.textContent='✓'; }
+  }
+  autoPreviewFight();
+}
+// 重新刷新怪物五行属性（战斗后或切换英雄后调用）
+function refreshMonsterElements(){
+  S.monsterRandomElements = S.monsters.map(() => Math.floor(Math.random() * 5));
+  renderFight();
+}
 function refreshFight(){ renderFight(); }
 async function autoPreviewFight(){
   const h = S.fight.heroId, w = S.fight.weaponId, m = S.fight.monsterId;
@@ -127,14 +201,29 @@ async function autoPreviewFight(){
   if(box) box.innerHTML = '<div class="text-center py-4"><span class="spinner"></span><div class="text-[12px] text-muted mt-2">分析中…</div></div>';
   try{
     let eff, chance, basePower, monPower, heroEl, wEl, monEl, heroLv, elMult;
+    // 获取选中怪物的随机五行属性
+    const monIdx = S.monsters.findIndex(x=>x.id===m);
+    const randomMonsterElement = (S.monsterRandomElements && S.monsterRandomElements[monIdx] !== undefined) 
+      ? S.monsterRandomElements[monIdx] 
+      : 0;
     if(c.viewHelper){
-      const r = await readCall('viewHelper', cc=>cc.previewFight(addrOf('v3'), h, w, m));
-      eff = Number(r.eff); chance = Number(r.chance);
+      // viewHelper 不支持传 monsterElement，我们手动计算
+      const r = await readCall('v3', cc=>cc.getFightPower(h, w));
       const hero = S.heroes.find(x=>x.id===h)||{};
       const wpn = S.weapons.find(x=>x.id===w)||{};
       const mon = S.monsters.find(x=>x.id===m)||{power:0,element:0};
-      basePower = hero.power||0; monPower = mon.power; heroEl=hero.element; wEl=wpn.element; monEl=mon.element; heroLv=hero.level||1;
-      elMult = basePower>0 ? Math.round(eff/basePower*10000) : 10000;
+      basePower = Number(r); monPower = mon.power; heroEl=hero.element; wEl=wpn.element; monEl=randomMonsterElement; heroLv=hero.level||1;
+      // 手动计算元素克制
+      elMult = 10000;
+      if((wEl + 1) % 5 === monEl) elMult = 13000;
+      else if((monEl + 1) % 5 === wEl) elMult = 7500;
+      eff = Math.floor(basePower * elMult / 10000);
+      if((heroEl + 1) % 5 === monEl) eff = Math.floor(eff * 110 / 100);
+      // 怪物战力随等级缩放 —— 与合约 _monsterPowerMultBp 同型（二次，bp 基准 10000）
+      const tier = Math.floor(heroLv / 10);
+      const monMult = 10000 + tier * (tier + 1) * 561;
+      monPower = Math.floor(Number(mon.power) * monMult / 10000);
+      chance = Math.max(1000, Math.min(9500, Math.floor(eff * 10000 / (eff + monPower + 1))));
     } else {
       const power = await readCall('v3', cc=>cc.getFightPower(h, w));
       const mon = S.monsters.find(x=>x.id===m) || {power:0, element:0};
@@ -143,10 +232,10 @@ async function autoPreviewFight(){
       heroLv = Number(hero.level); heroEl = Number(hero.element);
       const weaponsCt = new ethers.Contract(addrOf('weapons'), ABIs.weapons, getReadProvider());
       const wpn = await weaponsCt.weapons(w);
-      wEl = Number(wpn.element); monEl = mon.element;
+      wEl = Number(wpn.element); monEl = randomMonsterElement;  // 用随机五行属性
       const tier = Math.floor(heroLv / 10);
-      const monMult = 100 + 15 * tier;
-      monPower = Math.floor(Number(mon.power) * monMult / 100);
+      const monMult = 10000 + tier * (tier + 1) * 561;   // 同 _monsterPowerMultBp
+      monPower = Math.floor(Number(mon.power) * monMult / 10000);
       elMult = 10000;
       if((wEl + 1) % 5 === monEl) elMult = 13000;
       else if((monEl + 1) % 5 === wEl) elMult = 7500;
@@ -158,6 +247,8 @@ async function autoPreviewFight(){
     const heroData = S.heroes.find(x=>x.id===h)||{element:heroEl||0,level:heroLv||1};
     const wpnData = S.weapons.find(x=>x.id===w)||{element:wEl||0,stars:1};
     const monData = S.monsters.find(x=>x.id===m)||{name:'怪物',element:monEl||0,power:monPower};
+    // 覆盖 monData.element 为随机五行属性
+    monData.element = monEl;
     const he = ELEMENTS[heroData.element]||{icon:'❓',name:'?',color:'#94a3b8',soft:'rgba(148,163,184,.1)'};
     const we = ELEMENTS[wpnData.element]||{icon:'❓',name:'?',color:'#94a3b8'};
     const me = ELEMENTS[monData.element]||{icon:'❓',name:'?',color:'#94a3b8',soft:'rgba(148,163,184,.1)'};
@@ -185,7 +276,7 @@ async function autoPreviewFight(){
       <div class="space-y-3">
         <div class="flex items-center justify-between gap-2">
           <div class="flex-1 text-center">
-            <div class="w-14 h-14 mx-auto rounded-2xl overflow-hidden mb-1" style="background:${he.soft};border:2px solid ${he.color}44;"><img src="${heroImg(heroData.element)}" alt="英雄#${h}" class="w-full h-full object-cover"></div>
+            <div class="w-14 h-14 mx-auto rounded-2xl overflow-hidden mb-1" style="background:${he.soft};border:2px solid ${he.color}44;"><img src="${heroImg(heroData.element, heroData.id)}" alt="英雄#${h}" class="w-full h-full object-cover"></div>
             <div class="font-black text-[13px]" style="color:${he.color};">英雄 #${h}</div>
             <div class="text-[10px] text-muted">${he.name}系 · Lv.${heroData.level}</div>
             <div class="text-[10px] text-muted mt-0.5">🗡️ #${w} · ${'★'.repeat(wpnData.stars||1)}</div>
@@ -238,20 +329,38 @@ async function fightFlow(){
   const btns = [...document.querySelectorAll('#fightBtn,#fightBtnBar')];
   try{
     btns.forEach(b=>{ b.disabled = true; });
-    withBusy('fightBtn', true, '战斗结算中…');
-    const tx = await sendRevealTx(mustC('v3').connect(S.signer), 'fight', [heroId, weaponId, monsterId]);
-    toast('战斗已上链，等待确认…','info');
+    withBusy('fightBtn', true, '战斗中…');
+    
+    // 单次交易直接战斗（调用 v3.fightOnce）
+    const eh = mustC('v3').connect(S.signer);
+    // 获取选中怪物的随机五行属性
+    const monsterIdx = S.monsters.findIndex(m=>m.id===monsterId);
+    const monsterElement = S.monsterRandomElements && S.monsterRandomElements[monsterIdx] !== undefined 
+      ? S.monsterRandomElements[monsterIdx] 
+      : Math.floor(Math.random() * 5);
+    const tx = await sendRevealTx(eh, 'fightOnce', [heroId, weaponId, monsterId, monsterElement]);
+    toast('战斗中…','info');
     const rec = await tx.wait();
-    const rec2 = extractFightResult(rec);
-    await playBattleAnimation(rec2);
-    toast('战斗完成','success');
+    
+    // 提取战斗结果
+    const rec3 = extractFightResult(rec);
+    if(rec3){
+      await playBattleAnimation(rec3);
+      toast('战斗完成','success');
+    } else {
+      toast('战斗完成','success');
+    }
   }catch(e){ toast(errMsg(e),'error'); }
   finally{
     withBusy('fightBtn', false);
     btns.forEach(b=>{ b.disabled = false; });
-    try{ autoPreviewFight(); }catch(e){}
+    try{ 
+      // 战斗完成后，重新刷新怪物五行属性
+      refreshMonsterElements();
+    }catch(e){}
   }
 }
+
 async function parseFightResult(rec, p){
   const rec2 = extractFightResult(rec);
   if(rec2){ await playBattleAnimation(rec2); return; }
@@ -273,7 +382,7 @@ function extractFightResult(rec){
   if(!ev) return null;
   const rec2 = { ts:Date.now(), heroId:Number(ev.heroId), monsterId:Number(ev.monsterId), win:ev.win,
     reward: ev.reward.toString(), xp:Number(ev.xpGained),
-    effPower:Number(ev.effPower), winChanceBp:Number(ev.winChanceBp), roll:Number(ev.roll) };
+    effPower:Number(ev.eff), winChanceBp:Number(ev.chance), roll:Number(ev.roll) };
   S.battleRecords.unshift(rec2); if(S.battleRecords.length>20)S.battleRecords.length=20;
   try{ localStorage.setItem('eh_battles', JSON.stringify(S.battleRecords)); }catch(e){}
   return rec2;
@@ -311,7 +420,7 @@ async function playBattleAnimation(rec2){
       </div>
       <div class="battle-ground">
         <div class="battle-fighter battle-hero" id="bfHero" style="border-color:${he.border};background:radial-gradient(circle at 50% 35%, ${he.soft}, transparent 75%);">
-          <div class="battle-fighter-emoji"><img src="${heroImg(hero.element)}" alt="英雄#${rec2.heroId}"></div>
+          <div class="battle-fighter-emoji"><img src="${heroImg(hero.element, rec2.heroId)}" alt="英雄#${rec2.heroId}"></div>
           <div class="battle-fighter-name">英雄 #${rec2.heroId}</div>
         </div>
         <div class="battle-fighter battle-monster" id="bfMon" style="border-color:${me.border};background:radial-gradient(circle at 50% 35%, ${me.soft}, transparent 75%);">
