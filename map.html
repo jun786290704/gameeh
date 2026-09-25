@@ -2810,7 +2810,7 @@ var NPC_MODEL_YAW = 0;       // 模型正面相对 +Z 的修正角
 /* 玩家英雄 3D 模型白名单：键 = 立绘同名 hero_{性别}_{元素}（见 js/utils.js heroImg）。
    只有列在这里、且 models/hero/<键>.glb 真的存在的英雄才替换程序化人形；
    数组为空时地图角色行为与改造前完全一致（程序化人形兜底）。 */
-var HERO_MODELS = ['hero_m_0', 'hero_m_1', 'hero_m_2', 'hero_m_3', 'hero_m_4'];
+var HERO_MODELS = ['hero_m_0', 'hero_m_1', 'hero_m_2', 'hero_m_3', 'hero_m_4', 'hero_f_0', 'hero_f_1', 'hero_f_2', 'hero_f_3', 'hero_f_4'];
 var HERO_MODEL_H = 1.85;     // 归一化后的英雄身高（米）
 function attachNpcModel(q, g, body){
   if(NPC_MODELS.indexOf(q.k) < 0) return;
