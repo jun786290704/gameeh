@@ -3192,7 +3192,11 @@ function updateAnimMixer(mixer, g, dt){
   var w = Math.max(0, Math.min(1, g));
   var idle = mixer._acts['idle'], walk = mixer._acts['walk'];
   if(idle) idle.setEffectiveWeight(1 - w);
-  if(walk) walk.setEffectiveWeight(w);
+  if(walk){
+    walk.setEffectiveWeight(w);
+    /* 步频跟着移动速度走（慢走 0.75 倍速 / 全速 1.3 倍速），不然快跑时脚明显打滑 */
+    walk.timeScale = 0.75 + w * 0.55;
+  }
   mixer.update(dt || 0.016);
 }
 
