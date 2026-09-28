@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>角色骨骼动画验收 · 撕裂修复对比</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#0b1017;color:#dfe6f2;
+    font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  #wrap{display:flex;height:100%;overflow:hidden}
+  #side{width:300px;flex:0 0 300px;border-right:1px solid #1e293b;overflow-y:auto;background:#0d1526}
+  #side h1{font-size:14px;margin:0;padding:14px 14px 6px;letter-spacing:.5px}
+  #side p.note{font-size:11px;line-height:1.6;color:#8b96ab;margin:0;padding:0 14px 10px}
+  .item{padding:8px 14px;cursor:pointer;border-left:3px solid transparent;font-size:12px}
+  .item:hover{background:#132039}
+  .item.on{background:#14263f;border-left-color:#f0b429}
+  .item .k{font-weight:600}
+  .item .meta{color:#8b96ab;font-size:10.5px;margin-top:3px;display:flex;gap:8px}
+  .bar{height:4px;border-radius:2px;background:#1e293b;margin-top:5px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#eab308)}
+  #view{flex:1;position:relative;min-width:0}
+  canvas{display:block;width:100%;height:100%}
+  #hud{position:absolute;left:14px;top:12px;font-size:12px;background:#0d1526cc;
+    border:1px solid #1e293b;border-radius:8px;padding:8px 12px;line-height:1.7;pointer-events:none}
+  #hud b{color:#f0b429}
+  #ctl{position:absolute;left:14px;bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  #ctl button{background:#132039;color:#dfe6f2;border:1px solid #24354f;border-radius:8px;
+    padding:6px 12px;font-size:12px;cursor:pointer}
+  #ctl button.on{background:#f0b429;color:#20160a;border-color:#f0b429;font-weight:700}
+  #ctl label{font-size:11px;color:#8b96ab}
+  #legend{position:absolute;right:14px;bottom:14px;font-size:11px;color:#8b96ab;text-align:right;line-height:1.7}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <aside id="side">
+    <h1>角色骨骼动画验收</h1>
+    <p class="note">
+      权重场改为「位置的连续函数」后重新生成。<br>
+      撕裂量 = 同一条网格边在动画中两端点的位移差（占身高比例）。<br>
+      参考：修复前 <b style="color:#ef4444">36.9%</b>（一条 0.9 米的边被扯开 33 厘米）。
+    </p>
+    <div id="list"></div>
+  </aside>
+  <section id="view">
+    <canvas id="cv"></canvas>
+    <div id="hud"></div>
+    <div id="ctl">
+      <button id="bWalk" class="on">走路 walk</button>
+      <button id="bIdle">待机 idle</button>
+      <button id="bSpin">自动旋转</button>
+      <label>步频 <input id="spd" type="range" min="0.4" max="1.6" step="0.1" value="1" style="vertical-align:middle"></label>
+    </div>
+    <div id="legend">拖拽旋转 · 滚轮缩放</div>
+  </section>
+</div>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/GLTFLoader.js"></script>
+<script>
+/* 撕裂量来自 .workbuddy/tools/rig_all.cjs 的自适应循环实测（阈值 4% 身高）。
+   amp = 该模型四肢摆幅的自动缩放系数：形状越不利于自动蒙皮，摆幅收得越小，
+   走路感主要由 Hips 的整体上下起伏承担（根骨骼位移是刚性的，不产生撕裂）。 */
+var DATA = [
+  { k:'np_ash',   dir:'npc',  tear:3.56, amp:0.65 },
+  { k:'np_echo',  dir:'npc',  tear:4.07, amp:0.27 },
+  { k:'np_jian',  dir:'npc',  tear:3.55, amp:0.65 },
+  { k:'np_lamp',  dir:'npc',  tear:3.60, amp:0.42 },
+  { k:'np_ling',  dir:'npc',  tear:2.81, amp:0.65 },
+  { k:'np_peng',  dir:'npc',  tear:3.95, amp:1.00 },
+  { k:'np_qiao',  dir:'npc',  tear:2.52, amp:1.00 },
+  { k:'np_smith', dir:'npc',  tear:2.44, amp:1.00 },
+  { k:'np_xing',  dir:'npc',  tear:3.11, amp:0.42 },
+  { k:'np_xun',   dir:'npc',  tear:3.15, amp:0.42 },
+  { k:'np_yan',   dir:'npc',  tear:2.83, amp:0.65 },
+  { k:'np_ye',    dir:'npc',  tear:2.16, amp:1.00 },
+  { k:'hero_m_0', dir:'hero', tear:3.27, amp:0.65 },
+  { k:'hero_m_1', dir:'hero', tear:3.66, amp:1.00 },
+  { k:'hero_m_2', dir:'hero', tear:2.82, amp:0.65 },
+  { k:'hero_m_3', dir:'hero', tear:4.49, amp:0.27 },
+  { k:'hero_m_4', dir:'hero', tear:3.22, amp:0.42 },
+  { k:'hero_f_0', dir:'hero', tear:3.75, amp:1.00 },
+  { k:'hero_f_1', dir:'hero', tear:2.26, amp:1.00 },
+  { k:'hero_f_2', dir:'hero', tear:1.52, amp:1.00 },
+  { k:'hero_f_3', dir:'hero', tear:3.34, amp:0.42 },
+  { k:'hero_f_4', dir:'hero', tear:3.25, amp:0.42 }
+];
+var ELNAME = ['金','木','土','水','火'];
+var labelOf = function(k){
+  if (k.indexOf('hero_') === 0) {
+    var p = k.split('_');  /* hero_{m|f}_{e} */
+    return (p[1] === 'm' ? '男' : '女') + '·' + (ELNAME[+p[2]] || '?') + '系英雄';
+  }
+  return k;
+};
+
+var canvas = document.getElementById('cv');
+var hud = document.getElementById('hud');
+var listEl = document.getElementById('list');
+
+var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1017);
+var cam = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
+cam.position.set(0, 1.25, 3.6);
+cam.lookAt(0, 0.95, 0);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x2a3648, 1.15));
+var dl = new THREE.DirectionalLight(0xffffff, 1.25); dl.position.set(3, 6, 4); scene.add(dl);
+var dl2 = new THREE.DirectionalLight(0x9fc6ff, 0.55); dl2.position.set(-4, 2, -5); scene.add(dl2);
+var grid = new THREE.GridHelper(6, 12, 0x1e293b, 0x141d2c); grid.position.y = 0; scene.add(grid);
+
+var root = null, mixer = null, acts = {}, curKey = null;
+var clock = new THREE.Clock();
+var yaw = 0, spin = false, dragging = false, lastX = 0, camZ = 3.6;
+
+var loader = new THREE.GLTFLoader();
+function loadItem(item){
+  curKey = item.k;
+  if (root) {
+    scene.remove(root);
+    root.traverse(function(o){ if (o.geometry) o.geometry.dispose(); });
+    root = null; mixer = null; acts = {};
+  }
+  hud.innerHTML = '<b>' + labelOf(item.k) + '</b>　加载中…';
+  loader.load('models/' + item.dir + '/' + item.k + '_rig.glb', function(gltf){
+    var m = gltf.scene;
+    var box = new THREE.Box3().setFromObject(m);
+    var s = 1.8 / Math.max(1e-6, box.max.y - box.min.y);
+    m.scale.setScalar(s);
+    var b2 = new THREE.Box3().setFromObject(m);
+    m.position.x -= (b2.min.x + b2.max.x) / 2;
+    m.position.z -= (b2.min.z + b2.max.z) / 2;
+    m.position.y -= b2.min.y;
+    var g = new THREE.Group();
+    g.add(m);
+    g.rotation.y = Math.PI;   /* 模型默认背对镜头，转过来 */
+    root = g;
+    yaw = 0;
+    scene.add(g);
+    mixer = new THREE.AnimationMixer(m);
+    (gltf.animations || []).forEach(function(c){
+      var a = mixer.clipAction(c);
+      a.setLoop(THREE.LoopRepeat, Infinity);
+      a.enabled = true; a.play();
+      a.setEffectiveWeight(c.name === 'walk' ? 1 : 0);
+      acts[c.name] = a;
+    });
+    var fps = (gltf.animations || []).length;
+    var ski = 0, bones = 0;
+    gltf.scene.traverse(function(o){
+      if (o.isSkinnedMesh) { ski++; bones = Math.max(bones, o.skeleton.bones.length); }
+    });
+    hud.innerHTML =
+      '<b>' + labelOf(item.k) + '</b><br>' +
+      '最大撕裂 <b style="color:' + (item.tear <= 4 ? '#22c55e' : '#ef4444') + '">' + item.tear.toFixed(2) + '%</b> 身高' +
+      '（修复前 36.9%）<br>' +
+      '四肢摆幅系数 amp ' + item.amp.toFixed(2) + '　蒙皮网格 ' + ski + ' / 骨骼 ' + bones + '<br>' +
+      '动画片段 ' + (fps ? (gltf.animations || []).map(function(a){ return a.name; }).join(', ') : '<span style="color:#ef4444">无</span>');
+  }, undefined, function(){
+    hud.innerHTML = '<b>' + labelOf(item.k) + '</b><br><span style="color:#ef4444">模型加载失败</span>' +
+      '<br><span style="color:#8b96ab">请用一个静态服务器打开本页（不能用 file:// 直接双击）</span>';
+  });
+}
+
+DATA.forEach(function(d, i){
+  var el = document.createElement('div');
+  el.className = 'item' + (i === 0 ? ' on' : '');
+  el.setAttribute('data-k', d.k);
+  el.innerHTML =
+    '<div class="k">' + labelOf(d.k) + '</div>' +
+    '<div class="meta"><span>撕裂 ' + d.tear.toFixed(2) + '%</span><span>amp ' + d.amp.toFixed(2) + '</span></div>' +
+    '<div class="bar"><i style="width:' + Math.min(100, d.tear / 5 * 100).toFixed(0) + '%"></i></div>';
+  el.addEventListener('click', function(){
+    Array.prototype.forEach.call(listEl.children, function(c){ c.classList.remove('on'); });
+    el.classList.add('on');
+    loadItem(d);
+  });
+  listEl.appendChild(el);
+});
+
+document.getElementById('bWalk').addEventListener('click', function(){
+  this.classList.add('on'); document.getElementById('bIdle').classList.remove('on');
+  if (acts.walk) acts.walk.setEffectiveWeight(1);
+  if (acts.idle) acts.idle.setEffectiveWeight(0);
+});
+document.getElementById('bIdle').addEventListener('click', function(){
+  this.classList.add('on'); document.getElementById('bWalk').classList.remove('on');
+  if (acts.walk) acts.walk.setEffectiveWeight(0);
+  if (acts.idle) acts.idle.setEffectiveWeight(1);
+});
+document.getElementById('bSpin').addEventListener('click', function(){
+  spin = !spin; this.classList.toggle('on', spin);
+});
+document.getElementById('spd').addEventListener('input', function(){
+  var v = parseFloat(this.value) || 1;
+  if (acts.walk) acts.walk.timeScale = v;
+  if (acts.idle) acts.idle.timeScale = v;
+});
+
+canvas.addEventListener('pointerdown', function(e){ dragging = true; lastX = e.clientX; });
+window.addEventListener('pointerup', function(){ dragging = false; });
+window.addEventListener('pointermove', function(e){
+  if (!dragging || !root) return;
+  yaw += (e.clientX - lastX) * 0.01;
+  lastX = e.clientX;
+});
+canvas.addEventListener('wheel', function(e){
+  e.preventDefault();
+  camZ = Math.max(1.6, Math.min(8, camZ + (e.deltaY > 0 ? 0.3 : -0.3)));
+  cam.position.z = camZ;
+  cam.lookAt(0, 0.95, 0);
+}, { passive: false });
+
+function resize(){
+  var v = document.getElementById('view');
+  var w = v.clientWidth, h = v.clientHeight;
+  renderer.setSize(w, h, false);
+  cam.aspect = w / Math.max(1, h);
+  cam.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+function tick(){
+  requestAnimationFrame(tick);
+  var dt = Math.min(0.05, clock.getDelta());
+  if (root) {
+    if (spin) yaw += dt * 0.6;
+    root.rotation.y = Math.PI + yaw;
+  }
+  if (mixer) mixer.update(dt);
+  renderer.render(scene, cam);
+}
+tick();
+loadItem(DATA[0]);
+</script>
+</body>
+</html>
