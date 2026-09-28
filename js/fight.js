@@ -213,6 +213,10 @@ async function autoPreviewFight(){
       const wpn = S.weapons.find(x=>x.id===w)||{};
       const mon = S.monsters.find(x=>x.id===m)||{power:0,element:0};
       basePower = Number(r); monPower = mon.power; heroEl=hero.element; wEl=wpn.element; monEl=randomMonsterElement; heroLv=hero.level||1;
+      /* 链上 getFightPower = 英雄战力×(1+武器加成)，若英雄与武器【同元素】还额外 ×1.1；
+         但真正结算用的 _calcFight 里并没有这条同元素加成 —— 不除掉它，同元素配置下
+         预览胜率会比链上高约 1.7%。反推误差 ≤1 战力（17 万量级下可忽略）。 */
+      if(heroEl === wEl) basePower = Math.floor(basePower * 100 / 110);
       // 手动计算元素克制
       elMult = 10000;
       if((wEl + 1) % 5 === monEl) elMult = 13000;
@@ -239,9 +243,11 @@ async function autoPreviewFight(){
       elMult = 10000;
       if((wEl + 1) % 5 === monEl) elMult = 13000;
       else if((monEl + 1) % 5 === wEl) elMult = 7500;
-      eff = Math.floor(Number(power) * elMult / 10000);
+      /* 同元素加成只存在于 getFightPower（面板口径），链上结算 _calcFight 里没有 → 除掉 */
+      const rawPower = (heroEl === wEl) ? Math.floor(Number(power) * 100 / 110) : Number(power);
+      eff = Math.floor(rawPower * elMult / 10000);
       if((heroEl + 1) % 5 === monEl) eff = Math.floor(eff * 110 / 100);
-      basePower = Number(power);
+      basePower = rawPower;
       chance = Math.max(1000, Math.min(9500, Math.floor(eff * 10000 / (eff + monPower + 1))));
     }
     const heroData = S.heroes.find(x=>x.id===h)||{element:heroEl||0,level:heroLv||1};
