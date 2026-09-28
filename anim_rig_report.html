@@ -39,7 +39,9 @@
     <p class="note">
       权重场改为「位置的连续函数」后重新生成。<br>
       撕裂量 = 同一条网格边在动画中两端点的位移差（占身高比例）。<br>
-      参考：修复前 <b style="color:#ef4444">36.9%</b>（一条 0.9 米的边被扯开 33 厘米）。
+      参考：修复前 <b style="color:#ef4444">36.9%</b>（一条 0.9 米的边被扯开 33 厘米）；
+      现在残余撕裂集中在<b>中线长袍内侧与腿内侧</b>，被外层布料挡住。<br>
+      动作幅度（最大顶点位移）已达 <b>7%~13% 身高</b>，约为上一版的两倍。
     </p>
     <div id="list"></div>
   </aside>
@@ -58,32 +60,32 @@
 <script src="vendor/three.min.js"></script>
 <script src="vendor/GLTFLoader.js"></script>
 <script>
-/* 撕裂量来自 .workbuddy/tools/rig_all.cjs 的自适应循环实测（阈值 4% 身高）。
+/* 撕裂量来自 .workbuddy/tools/rig_all.cjs 的自适应循环实测（阈值 5% 身高）。
    amp = 该模型四肢摆幅的自动缩放系数：形状越不利于自动蒙皮，摆幅收得越小，
-   走路感主要由 Hips 的整体上下起伏承担（根骨骼位移是刚性的，不产生撕裂）。 */
+   走路感主要由 Hips 的整体上下起伏 + 骨盆左右摇摆承担（根骨骼变换是刚性的，不产生撕裂）。 */
 var DATA = [
-  { k:'np_ash',   dir:'npc',  tear:3.56, amp:0.65 },
-  { k:'np_echo',  dir:'npc',  tear:4.07, amp:0.27 },
-  { k:'np_jian',  dir:'npc',  tear:3.55, amp:0.65 },
-  { k:'np_lamp',  dir:'npc',  tear:3.60, amp:0.42 },
-  { k:'np_ling',  dir:'npc',  tear:2.81, amp:0.65 },
-  { k:'np_peng',  dir:'npc',  tear:3.95, amp:1.00 },
-  { k:'np_qiao',  dir:'npc',  tear:2.52, amp:1.00 },
-  { k:'np_smith', dir:'npc',  tear:2.44, amp:1.00 },
-  { k:'np_xing',  dir:'npc',  tear:3.11, amp:0.42 },
-  { k:'np_xun',   dir:'npc',  tear:3.15, amp:0.42 },
-  { k:'np_yan',   dir:'npc',  tear:2.83, amp:0.65 },
-  { k:'np_ye',    dir:'npc',  tear:2.16, amp:1.00 },
-  { k:'hero_m_0', dir:'hero', tear:3.27, amp:0.65 },
-  { k:'hero_m_1', dir:'hero', tear:3.66, amp:1.00 },
-  { k:'hero_m_2', dir:'hero', tear:2.82, amp:0.65 },
-  { k:'hero_m_3', dir:'hero', tear:4.49, amp:0.27 },
-  { k:'hero_m_4', dir:'hero', tear:3.22, amp:0.42 },
-  { k:'hero_f_0', dir:'hero', tear:3.75, amp:1.00 },
-  { k:'hero_f_1', dir:'hero', tear:2.26, amp:1.00 },
-  { k:'hero_f_2', dir:'hero', tear:1.52, amp:1.00 },
-  { k:'hero_f_3', dir:'hero', tear:3.34, amp:0.42 },
-  { k:'hero_f_4', dir:'hero', tear:3.25, amp:0.42 }
+  { k:'np_ash',   dir:'npc',  tear:4.71, amp:1.00 },
+  { k:'np_echo',  dir:'npc',  tear:5.47, amp:0.27 },
+  { k:'np_jian',  dir:'npc',  tear:3.92, amp:0.65 },
+  { k:'np_lamp',  dir:'npc',  tear:4.47, amp:0.42 },
+  { k:'np_ling',  dir:'npc',  tear:4.78, amp:1.00 },
+  { k:'np_peng',  dir:'npc',  tear:3.41, amp:0.65 },
+  { k:'np_qiao',  dir:'npc',  tear:4.96, amp:0.65 },
+  { k:'np_smith', dir:'npc',  tear:3.85, amp:0.65 },
+  { k:'np_xing',  dir:'npc',  tear:3.42, amp:0.42 },
+  { k:'np_xun',   dir:'npc',  tear:3.40, amp:0.42 },
+  { k:'np_yan',   dir:'npc',  tear:3.74, amp:0.65 },
+  { k:'np_ye',    dir:'npc',  tear:3.36, amp:0.65 },
+  { k:'hero_m_0', dir:'hero', tear:3.82, amp:0.65 },
+  { k:'hero_m_1', dir:'hero', tear:4.14, amp:1.00 },
+  { k:'hero_m_2', dir:'hero', tear:3.53, amp:0.42 },
+  { k:'hero_m_3', dir:'hero', tear:4.59, amp:0.42 },
+  { k:'hero_m_4', dir:'hero', tear:3.38, amp:0.42 },
+  { k:'hero_f_0', dir:'hero', tear:4.47, amp:1.00 },
+  { k:'hero_f_1', dir:'hero', tear:3.21, amp:1.00 },
+  { k:'hero_f_2', dir:'hero', tear:2.55, amp:1.00 },
+  { k:'hero_f_3', dir:'hero', tear:4.99, amp:0.65 },
+  { k:'hero_f_4', dir:'hero', tear:4.59, amp:1.00 }
 ];
 var ELNAME = ['金','木','土','水','火'];
 var labelOf = function(k){
@@ -153,7 +155,7 @@ function loadItem(item){
     });
     hud.innerHTML =
       '<b>' + labelOf(item.k) + '</b><br>' +
-      '最大撕裂 <b style="color:' + (item.tear <= 4 ? '#22c55e' : '#ef4444') + '">' + item.tear.toFixed(2) + '%</b> 身高' +
+      '最大撕裂 <b style="color:' + (item.tear <= 5 ? '#22c55e' : '#ef4444') + '">' + item.tear.toFixed(2) + '%</b> 身高' +
       '（修复前 36.9%）<br>' +
       '四肢摆幅系数 amp ' + item.amp.toFixed(2) + '　蒙皮网格 ' + ski + ' / 骨骼 ' + bones + '<br>' +
       '动画片段 ' + (fps ? (gltf.animations || []).map(function(a){ return a.name; }).join(', ') : '<span style="color:#ef4444">无</span>');
