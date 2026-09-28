@@ -124,6 +124,32 @@ a{color:var(--gold);text-decoration:none}
 .fb-card .lore{font-size:11.8px;color:#d8c79b;line-height:1.6;margin-bottom:8px;padding-left:9px;border-left:2px solid rgba(251,191,36,.45)}
 .fb-card .m{margin-top:10px;font-size:11.5px;font-weight:700}
 
+/* ================= 地图事件 ================= */
+/* 事件悬浮标签：活着=金边，冷却中=暗灰 */
+.mlabel.ev{border-color:rgba(251,191,36,.32);background:rgba(11,18,32,.78);color:#e8eef7}
+.mlabel.ev.alive{border-color:var(--gold);box-shadow:0 0 14px rgba(251,191,36,.22)}
+.mlabel.ev.cd{opacity:.55;border-color:rgba(148,163,184,.32)}
+.mlabel.ev .mi{font-size:13px}
+.mlabel.ev .en{font-size:11.5px}
+.mlabel.ev .cd{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-style:normal;font-size:9.5px;font-weight:800;background:rgba(148,163,184,.16);color:var(--muted)}
+.mlabel.ev.alive .cd{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305}
+#evDlg{position:fixed;left:0;right:0;bottom:0;z-index:135;display:none;justify-content:center;padding:0 16px calc(18px + env(safe-area-inset-bottom))}
+#evDlg.show{display:flex}
+.ev-card{position:relative;width:min(440px,96vw);padding:18px 18px 16px;border-radius:18px;background:linear-gradient(180deg,rgba(15,24,42,.98),rgba(9,15,28,.98));border:1px solid rgba(251,191,36,.4);box-shadow:0 24px 64px rgba(0,0,0,.66);animation:dlgIn .18s ease-out}
+.ev-x{position:absolute;right:11px;top:11px;width:28px;height:28px;border-radius:9px;border:1px solid var(--line2);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(11,18,32,.7)}
+.ev-x:hover{color:#fff;border-color:var(--gold)}
+.evIc{font-size:36px;text-align:center;margin-bottom:8px}
+.evName{font-size:17px;font-weight:900;color:#fff;text-align:center;margin-bottom:4px}
+.evHint{font-size:12.5px;color:#d8c79b;line-height:1.7;text-align:center;padding:8px 12px;border-left:2px solid rgba(251,191,36,.5);background:rgba(251,191,36,.06);border-radius:0 10px 10px 0;margin-bottom:14px}
+.evReward{font-size:13px;color:#e8eef7;margin-bottom:14px;text-align:center}
+.evReward b{color:var(--muted);font-weight:600;font-size:12px;display:block;margin-bottom:4px}
+.btn-go{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;border:0;cursor:pointer;box-shadow:0 8px 22px rgba(251,191,36,.18)}
+.btn-go:hover{filter:brightness(1.07)}
+@media(max-width:820px){
+  #evDlg{padding:0 8px calc(8px + env(safe-area-inset-bottom))}
+  .ev-card{width:100%;padding:16px 14px 14px}
+}
+
 /* 移动端布局 / 触控样式统一放在文件末尾（媒体查询需晚于组件规则才能覆盖） */
 
 /* ================= 游戏交互层 ================= */
@@ -641,6 +667,14 @@ body.touch .touch-hint{display:block}
   </div>
 </div>
 
+<!-- ============ 地图事件浮层（宝箱 / 采集 / 野怪） ============ -->
+<div id="evDlg">
+  <div class="ev-card">
+    <div class="ev-x" onclick="closeEvDlg()"><i class="fa-solid fa-xmark"></i></div>
+    <div id="evDlgBody"></div>
+  </div>
+</div>
+
 <!-- ============ NPC 对话 ============ -->
 <div id="dlg">
   <div class="dlg-card">
@@ -886,7 +920,7 @@ function enableTouchUI(){
 }
 var mode = 'follow';           // follow = 第三人称 | orbit = 俯瞰全局
 var autoRotate = true, lastInteract = 0;
-var hoverKey = null, selKey = null, nearKey = null, nearNpcKey = null;
+var hoverKey = null, selKey = null, nearKey = null, nearNpcKey = null, nearEvKey = null;
 
 /* 相机状态 */
 var cam = {yaw:0, pitch:0.34, dist:15, tYaw:0, tPitch:0.34, tDist:15,
@@ -1240,6 +1274,10 @@ function bootInner(){
   buildLabels();
   buildMotes();
   buildNavBeam();
+  /* 事件系统：先恢复持久状态、再生成世界坐标、最后构建立体模型与标签 */
+  applyEventsState(loadEventsState());
+  placeEvents();
+  buildEvents();
   NPCS.forEach(buildNpc);
 
   buildPhysics();   // 物理世界（碰撞 / 防穿模）
@@ -1263,10 +1301,10 @@ window.addEventListener('error', function(e){
 });
 
 /* 光照：主光带阴影（阴影相机跟着角色走，保证近处清晰），另有冷暖补光与环心金光 */
-var sun, sunTarget;
+var sun, sunTarget, amb, hemi, fillL, rimL, coreL;
 function buildLights(){
-  scene.add(new THREE.AmbientLight(0x30405f, 0.55));
-  scene.add(new THREE.HemisphereLight(0x5b82c8, 0x121a2c, 0.85));
+  amb = new THREE.AmbientLight(0x30405f, 0.55); scene.add(amb);
+  hemi = new THREE.HemisphereLight(0x5b82c8, 0x121a2c, 0.85); scene.add(hemi);
 
   sun = new THREE.DirectionalLight(0xffe3b0, 1.25);
   sun.position.set(120, 180, 90);
@@ -1283,16 +1321,38 @@ function buildLights(){
   scene.add(sunTarget);
   sun.target = sunTarget;
 
-  var fill = new THREE.DirectionalLight(0x4aa8ff, 0.42); fill.position.set(-180, 130, -150); scene.add(fill);
-  var rim  = new THREE.DirectionalLight(0xff9d5c, 0.26); rim.position.set(60, 40, -220); scene.add(rim);
-  var core = new THREE.PointLight(0xfbbf24, 1.5, 300, 1.6); core.position.set(0, 46, 0); scene.add(core);
+  fillL = new THREE.DirectionalLight(0x4aa8ff, 0.42); fillL.position.set(-180, 130, -150); scene.add(fillL);
+  rimL  = new THREE.DirectionalLight(0xff9d5c, 0.26); rimL.position.set(60, 40, -220); scene.add(rimL);
+  coreL = new THREE.PointLight(0xfbbf24, 1.5, 300, 1.6); coreL.position.set(0, 46, 0); scene.add(coreL);
 }
-/* 阴影相机跟随角色 */
+/* 阴影相机跟随角色；顺手接管昼夜循环（5 分钟一轮，慢到不会让人晕） */
+var DAY_CYCLE_S = 300;     // 周期
+var DAY_NIGHT_FADE = 0.42; // 夜最暗时主光衰减系数（≠0，避免夜间变成纯黑无法看清）
 function updateSun(){
-  if(!sun || !sun.castShadow) return;
+  if(!sun) return;
   sun.position.set(hero.x + 110, hero.y + 165, hero.z + 80);
   sunTarget.position.set(hero.x, hero.y, hero.z);
   sunTarget.updateMatrixWorld();
+  if(sun.castShadow) return;
+  /* 移动端关阴影了，昼夜过渡在这里做；桌面端阴影常亮时也走同一逻辑（视觉效果小，但逻辑统一） */
+  applyDayNight(clock.elapsedTime);
+}
+/* 昼夜：0=正午，0.25=黄昏，0.5=深夜，0.75=黎明。强度通过 sin² 曲线变化 */
+function applyDayNight(t){
+  var p = (t / DAY_CYCLE_S) % 1;        // [0, 1)
+  var day = Math.cos(p * Math.PI * 2);  // [-1, 1], 正=昼 负=夜
+  var d01 = (day + 1) * 0.5;            // [0, 1]
+  var dEase = d01 * d01 * (3 - 2*d01);  // 平滑
+  var k = DAY_NIGHT_FADE + (1 - DAY_NIGHT_FADE) * dEase;
+  sun.intensity = 1.25 * k;
+  amb.intensity = 0.18 + 0.55 * dEase;
+  hemi.intensity = 0.4 + 0.55 * dEase;
+  /* 夜间火盆/灯笼自动变亮（视觉补偿）：FLAMES[*].sp.material.opacity 已经在 updateWorldFx 里算，
+     这里再 * 一下夜间系数，让火焰真正"亮起来" */
+  var nightBoost = 1 + (1 - dEase) * 0.8;
+  for(var i=0;i<FLAMES.length;i++) FLAMES[i].nightMul = nightBoost;
+  /* 雾气随夜晚变浓（让远处的灯与火盆更显眼） */
+  if(scene.fog) scene.fog.density = 0.0016 + (1 - dEase) * 0.0012;
 }
 
 /* 渐变天穹：底部暖橙 → 顶部深蓝，压住地平线的空 */
@@ -1465,24 +1525,22 @@ function buildRoads(){
   });
 }
 
+/* 巡逻路径（全局：buildProps 与 placeEvents 共用；NPC 巡逻圆周上不能长树/石头） */
+var PATROL_RINGS = [{cx:0, cz:0, rad:70}, {cx:0, cz:60, rad:20}];
+function onPatrol(px, pz){
+  for(var k=0;k<PATROL_RINGS.length;k++){
+    var p = PATROL_RINGS[k];
+    if(Math.abs(Math.hypot(px - p.cx, pz - p.cz) - p.rad) < 2.5) return true;
+  }
+  return false;
+}
+
 /* 树木 / 灌木 / 岩石 / 草丛 */
 function buildProps(){
   var dummy = new THREE.Object3D();
   var propN = IS_TOUCH ? 300 : 520;
   var pine = [], broad = [], bush = [], rockA = [], rockB = [], grass = [];
   var i, x, z, y, s, r, d;
-  /* 巡逻 NPC 的圆周路径上不能长树 / 石头：NPC 的初始位置可以自动避让，
-     但巡逻时会走回这条路径 —— 撞上带碰撞的植被就是肉眼可见的穿模
-     （实测移动端行商·荞在 (20,60) 附近与一棵 r=1.23 的树重叠）。
-     与 NPCS 的 patrol 字段保持同步（buildProps 调用时 NPCS 还没定义，只能在此列一份）。 */
-  var PATROL_RINGS = [{cx:0, cz:0, rad:70}, {cx:0, cz:60, rad:20}];
-  function onPatrol(px, pz){
-    for(var k=0;k<PATROL_RINGS.length;k++){
-      var p = PATROL_RINGS[k];
-      if(Math.abs(Math.hypot(px - p.cx, pz - p.cz) - p.rad) < 2.5) return true;
-    }
-    return false;
-  }
 
   for(i=0;i<propN;i++){
     x = (Math.random()*2-1) * (HALF - 22);
@@ -1787,12 +1845,16 @@ function addBanner(grp, x, z, y0, colHex, hh, ry){
   var g = new THREE.Group(); g.position.set(x, y0, z);
   var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, hh, 6), matOf('wood', 1, 2));
   put(g, pole, 0, hh/2, 0); shade(pole);
-  var geo = new THREE.BoxGeometry(2.0, hh*0.5, 0.08, 8, 4, 1);
+  var geo = new THREE.BoxGeometry(2.0, hh*0.5, 0.08, 6, 3, 1);     // 6×3 段 = 56 顶点，已够飘动质感（原来 8×4 = 90）
   var flag = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
     map:texOf('cloth', 1, 1), color:colHex, side:THREE.DoubleSide, roughness:.95, metalness:.02
   }));
   put(g, flag, 1.0, hh - hh*0.25 - 0.4, 0);
-  BANNERS.push({mesh:flag, base:Float32Array.from(geo.attributes.position.array), ph:Math.random()*6.28});
+  /* 缓存的是"顶面 / 底面"的原始 X、Y（用于正弦摆动），不复制整张 vertex buffer */
+  var pos = geo.attributes.position;
+  var baseXY = new Float32Array(pos.count * 2);
+  for(var _bi=0; _bi<pos.count; _bi++){ baseXY[_bi*2] = pos.getX(_bi); baseXY[_bi*2+1] = pos.getY(_bi); }
+  BANNERS.push({mesh:flag, base:baseXY, ph:Math.random()*6.28});
   var fin = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), matC(0xfbbf24, .35, .85, 0x3a2606, .5));
   put(g, fin, 0, hh + 0.18, 0);
   g.rotation.y = ry || 0;
@@ -2599,6 +2661,294 @@ function npcAnchor(k, deg, d){
   return {x: n.x + Math.cos(a)*d, z: n.z + Math.sin(a)*d};
 }
 
+/* ==================== 地图可玩小事件 ====================
+   与"建筑 + NPC + 玩法 tab"三件套并列的另一层世界内容 —— 玩家走到跟前按 E 即可触发。
+   设计目标：
+     · 不占用 tab（玩法本体依然挂 NPC）—— 加新内容不动 game.html
+     · 奖励通过 vault 领取：触发时入账"待领奖"队列，去金库就能领（避免直接改前端伪造 EH）
+     · 视觉与建筑融合：宝箱 / 采集点 / 野怪 各自配色；野怪可攻击，宝箱可开，采集点可采
+     · 持久化：状态写 localStorage，重启后保留；刷新间隔由 TYPE 决定 */
+var EVENTS = [
+  /* 五行碎片宝箱：开一个得少量碎片，5 分钟重生 */
+  {k:'chest_metal',  type:'chest',     el:'metal', icon:'🪙', name:'金匣',     x:0,    z:0,   respawnS:300,  reward:{kind:'shard', min:2, max:5, stars:1}, hint:'白帝旧物之匣 —— 偶尔漏出几片碎金'},
+  {k:'chest_wood',   type:'chest',     el:'wood',  icon:'🌿', name:'木匣',     x:0,    z:0,   respawnS:300,  reward:{kind:'shard', min:2, max:5, stars:2}, hint:'句芒留下的种子匣，摇一摇有碎片响'},
+  {k:'chest_water',  type:'chest',     el:'water', icon:'🫧', name:'水匣',     x:0,    z:0,   respawnS:300,  reward:{kind:'shard', min:3, max:6, stars:2}, hint:'玄冥的浮囊，里面是海的碎片'},
+  {k:'chest_fire',   type:'chest',     el:'fire',  icon:'🔥', name:'火匣',     x:0,    z:0,   respawnS:300,  reward:{kind:'shard', min:3, max:6, stars:3}, hint:'祝融余烬封住的匣子，热得烫手'},
+  {k:'chest_earth',  type:'chest',     el:'earth', icon:'🪨', name:'土匣',     x:0,    z:0,   respawnS:360,  reward:{kind:'shard', min:4, max:8, stars:3}, hint:'后土压在地底的匣子 —— 要有耐心'},
+  /* 精粹采集点：12 分钟重生，给 1 阶精粹 */
+  {k:'gather_moss',  type:'gather',    el:'wood',  icon:'🌱', name:'苔藓精粹', x:0,    z:0,   respawnS:720,  reward:{kind:'essence', tier:1, min:1, max:2}, hint:'青苔下的露水 —— 提纯得 1 阶精粹'},
+  {k:'gather_ember', type:'gather',    el:'fire',  icon:'♨️', name:'余烬精粹', x:0,    z:0,   respawnS:900,  reward:{kind:'essence', tier:1, min:1, max:3}, hint:'祝融最后一口火的残渣，提纯可得精粹'},
+  {k:'gather_mist',  type:'gather',    el:'water', icon:'💧', name:'雾露精粹', x:0,    z:0,   respawnS:900,  reward:{kind:'essence', tier:2, min:1, max:1}, hint:'玄冥之雾凝成的露，2 阶精粹'},
+  /* 野怪：8 分钟重生；打一次得碎片 + 经验 */
+  {k:'mob_fox',      type:'mob',       el:'wood',  icon:'🦊', name:'林中狐',   x:0,    z:0,   respawnS:480,  reward:{kind:'shard', min:3, max:6, stars:2, xp:12}, hint:'偷走句芒种子的狐狸 —— 教训它'},
+  {k:'mob_ironbeet', type:'mob',       el:'earth', icon:'🪲', name:'铁甲虫',   x:0,    z:0,   respawnS:540,  reward:{kind:'shard', min:4, max:8, stars:2, xp:18}, hint:'后土的甲虫 —— 硬但值钱'},
+  {k:'mob_wisp',     type:'mob',       el:'water', icon:'🌀', name:'水灵',     x:0,    z:0,   respawnS:600,  reward:{kind:'shard', min:2, max:5, stars:3, xp:14}, hint:'玄冥的使者，碰一下会碎成碎片'},
+  {k:'mob_imp',      type:'mob',       el:'fire',  icon:'👹', name:'黯烬小鬼', x:0,    z:0,   respawnS:720,  reward:{kind:'shard', min:5, max:8, stars:3, xp:22}, hint:'被烛幽腐蚀的小鬼 —— 打跑它'}
+];
+/* --- 事件持久化（localStorage）：alive 与 cooldownAt 两个字段就够 ---
+   · alive=false 表示正在冷却中，cooldownAt 是可以再次触发的时间戳（ms）
+   · alive=true  表示可触发 */
+function loadEventsState(){
+  try{
+    var raw = localStorage.getItem('eh_events_state');
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function saveEventsState(){
+  try{
+    var s = {};
+    for(var i=0;i<EVENTS.length;i++){
+      s[EVENTS[i].k] = {a: !!EVENTS[i].alive, c: EVENTS[i].cooldownAt || 0};
+    }
+    localStorage.setItem('eh_events_state', JSON.stringify(s));
+  }catch(e){}
+}
+function applyEventsState(st){
+  if(!st) { for(var i=0;i<EVENTS.length;i++){ EVENTS[i].alive = true; EVENTS[i].cooldownAt = 0; } return; }
+  var now = Date.now();
+  for(var j=0;j<EVENTS.length;j++){
+    var ev = EVENTS[j], stt = st[ev.k];
+    if(!stt){ ev.alive = true; ev.cooldownAt = 0; continue; }
+    if(stt.a){ ev.alive = true; ev.cooldownAt = 0; }
+    else {
+      /* 冷却到了没？过了就复活（无需重连服务端） */
+      if(stt.c && now >= stt.c){ ev.alive = true; ev.cooldownAt = 0; }
+      else { ev.alive = false; ev.cooldownAt = stt.c || 0; }
+    }
+  }
+}
+
+/* --- 事件入账（待领奖队列） ---
+   不动 game.html 也不动链上：往 localStorage 推一条记录，vault 的"领取"按钮后续可以择机认领
+   （这次不接 vault，仅留钩子；玩家会在金库面板的"待揭示"提示下看到）。 */
+function pushEventReward(ev, qty){
+  try{
+    var list = JSON.parse(localStorage.getItem('eh_event_rewards') || '[]') || [];
+    list.push({k: ev.k, name: ev.name, type: ev.type, reward: ev.reward, qty: qty, at: Date.now()});
+    if(list.length > 64) list.splice(0, list.length - 64);
+    localStorage.setItem('eh_event_rewards', JSON.stringify(list));
+  }catch(e){}
+}
+/* 事件世界坐标生成器：把上面的占位 (0,0) 真正散到 12 个方位（外环偏多，因为近处是驻守者/建筑的活动空间）。
+   选址规则：
+     · 不在建筑/路/巡路径上（沿用 nearBuilding/nearRoad/onPatrol）
+     · 距离其它事件 ≥ 22m（避免堆叠）
+     · 距边界 ≥ 24m
+   用确定性 PRNG（mulberry32），保证每次加载位置一致，但调换顺序 / 数量时可立刻生效。 */
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = a; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function seedFrom(s){ var h = 0; for(var i=0;i<s.length;i++){ h = (h * 31 + s.charCodeAt(i)) | 0; } return h; }
+function placeEvents(){
+  var rnd = mulberry32(seedFrom('eh-events-2026-09-28'));
+  var placed = [];
+  for(var i=0;i<EVENTS.length;i++){
+    var ev = EVENTS[i];
+    var ringR = (ev.type === 'chest') ? (110 + rnd()*60)
+              : (ev.type === 'gather') ? (160 + rnd()*70)
+              : (190 + rnd()*60);
+    var found = null;
+    for(var t=0; t<220 && !found; t++){
+      var ang = rnd() * Math.PI * 2;
+      var x = Math.cos(ang) * ringR;
+      var z = Math.sin(ang) * ringR;
+      if(Math.abs(x) > LIMIT - 24 || Math.abs(z) > LIMIT - 24) continue;
+      if(nearBuilding(x, z, 20)) continue;
+      if(nearRoad(x, z, 4)) continue;
+      if(onPatrol(x, z)) continue;
+      var tooClose = false;
+      for(var j=0;j<placed.length;j++){
+        if(Math.hypot(x - placed[j].x, z - placed[j].z) < 22){ tooClose = true; break; }
+      }
+      if(tooClose) continue;
+      if(Math.hypot(x, z - 52) < 35) continue;
+      found = {x:x, z:z};
+    }
+    if(!found) found = {x:ringR, z:0};
+    ev.x = found.x; ev.z = found.z;
+    ev.y = standHeightAt(ev.x, ev.z);
+    placed.push(ev);
+  }
+}
+
+/* --- 事件视觉构造 --- */
+var EVENTS_GRP = null;
+function buildEvents(){
+  EVENTS_GRP = new THREE.Group(); scene.add(EVENTS_GRP);
+  var elColors = {metal:0xf59e0b, wood:0x22c55e, water:0x38bdf8, fire:0xef4444, earth:0xc2703a};
+  for(var i=0;i<EVENTS.length;i++){
+    var ev = EVENTS[i];
+    var col = elColors[ev.el] || 0xfbbf24;
+    var g = new THREE.Group();
+    g.position.set(ev.x, ev.y, ev.z);
+    var ringGeo = new THREE.RingGeometry(1.4, 1.7, 18);
+    var ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
+      color:col, transparent:true, opacity:.55, side:THREE.DoubleSide,
+      blending:THREE.AdditiveBlending, depthWrite:false, fog:false
+    }));
+    ring.rotation.x = -Math.PI/2; ring.position.y = 0.05;
+    g.add(ring);
+    var glow = glowMesh(col, 2.4, .5); glow.position.y = 1.2; g.add(glow);
+    var mono = null;
+    if(ev.type === 'chest'){
+      var body = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.9, 1.0), matC(col, .85, .25, 0x1a0e02, .4, true));
+      body.position.y = 0.7; g.add(body); shade(body);
+      var lid = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.32, 1.1), matC(col, .9, .2, 0x1a0e02, .35, true));
+      lid.position.y = 1.28; g.add(lid); shade(lid);
+      mono = lid;
+    } else if(ev.type === 'gather'){
+      var stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.7, 0), matC(col, .88, .12, 0x1a0e02, .3, true));
+      stone.position.y = 0.85; g.add(stone); shade(stone);
+      mono = stone;
+    } else if(ev.type === 'mob'){
+      var body = new THREE.Mesh(new THREE.SphereGeometry(0.7, 12, 10), matC(col, .85, .12, 0x1a0e02, .3, true));
+      body.position.y = 0.9; g.add(body); shade(body);
+      var eye1 = new THREE.Mesh(new THREE.SphereGeometry(.13, 8, 6), matC(0xffe070, .4, 0, 0xffe070, 1.6));
+      eye1.position.set(-0.27, 1.05, 0.55); g.add(eye1);
+      var eye2 = eye1.clone(); eye2.position.x = 0.27; g.add(eye2);
+      mono = body;
+    }
+    EVENTS_GRP.add(g);
+    ev.grp = g;
+    ev.ring = ring;
+    ev.glow = glow;
+    ev.mono = mono;
+    ev.topY = (mono ? (mono.position.y + 0.4) : 1.4);
+    /* 选入 raycaster（点击事件模型也可触发） */
+    if(mono){
+      pickables.push(mono);
+      mono.userData.k = ev.k;
+      mono.userData.event = true;
+    }
+    /* 悬浮标签（事件名 + 倒计时/就绪） */
+    if(!labels[ev.k]){
+      var d = document.createElement('div');
+      d.className = 'mlabel ev';
+      d.innerHTML = '<span class="mi">' + ev.icon + '</span><span class="en">' + ev.name + '</span><em class="cd"></em>';
+      (function(kk){ d.onclick = function(e){ e.stopPropagation(); if(typeof interactEvent === 'function') interactEvent(kk); }; })(ev.k);
+      document.getElementById('labels').appendChild(d);
+      labels[ev.k] = d;
+    }
+    ev.alive = (ev.cooldownAt || 0) <= Date.now() && (ev.alive !== false);
+  }
+}
+
+/* --- 事件每帧：动画 + 自动复活 + 标签倒计时 --- */
+function updateEvents(t){
+  if(!EVENTS_GRP) return;
+  var changed = false;
+  for(var i=0;i<EVENTS.length;i++){
+    var ev = EVENTS[i];
+    if(!ev.grp) continue;
+    var alive = ev.alive !== false;
+    if(alive){
+      if(ev.mono){
+        ev.mono.rotation.y = t * (ev.type === 'mob' ? 2.2 : 0.9);
+        var sc = 1 + Math.sin(t * 2.4 + i) * 0.05;
+        ev.mono.scale.setScalar(sc);
+      }
+      if(ev.ring){
+        ev.ring.material.opacity = .42 + Math.sin(t * 2.0 + i) * .18;
+        ev.ringScale = ((ev.ringScale || 0) + 0.012);
+        if(ev.ringScale > 1) ev.ringScale = 0;
+        ev.ring.scale.setScalar(0.9 + ev.ringScale * 0.45);
+      }
+      if(ev.glow) ev.glow.material.opacity = .5 + Math.sin(t * 2.2 + i) * .15;
+    } else {
+      if(ev.mono) ev.mono.scale.setScalar(0.7);
+      if(ev.ring){ ev.ring.material.opacity = .12; ev.ring.scale.setScalar(0.85); }
+      if(ev.glow) ev.glow.material.opacity = .12;
+    }
+    if(!alive && ev.cooldownAt && Date.now() >= ev.cooldownAt){
+      ev.alive = true; ev.cooldownAt = 0; changed = true;
+      /* 复活：把弹起动画遗留的半透明复位 */
+      if(ev.mono && ev.mono.material){ ev.mono.material.transparent = false; ev.mono.material.opacity = 1; }
+      if(ev.mono){
+        ev.mono.position.y = (ev.type === 'mob' ? 0.9 : (ev.type === 'gather' ? 0.85 : 1.28));
+        ev.mono.scale.setScalar(1);
+      }
+      try{ toast(ev.name + ' 已刷新，可以再触发', 'success'); }catch(e){}
+    }
+    var lab = labels[ev.k];
+    if(lab){
+      var em = lab.querySelector('.cd');
+      if(alive){
+        em.textContent = '已就绪';
+        lab.classList.remove('cd'); lab.classList.add('alive');
+      } else {
+        var left = Math.max(0, ev.cooldownAt - Date.now());
+        var mm = Math.floor(left/60000), ss = Math.floor(left/1000) % 60;
+        em.textContent = (mm > 0 ? mm + '分' : '') + ss + '秒';
+        lab.classList.add('cd'); lab.classList.remove('alive');
+      }
+    }
+  }
+  if(changed) saveEventsState();
+}
+
+/* --- 玩家走近触发：开 / 采 / 打 ---
+   与 NPC 共用 updateNear / interact 的入口，但事件有自己的浮层（避免和 NPC 对话混在一起） */
+function interactEvent(k){
+  var ev = eventByKey(k); if(!ev || ev.alive === false) return;
+  var dlg = document.getElementById('evDlg');
+  if(!dlg) return;
+  var d = document.getElementById('evDlgBody');
+  var r = ev.reward;
+  var qty = r.min + Math.floor(Math.random() * (r.max - r.min + 1));
+  var rewardTxt = (r.kind === 'shard')
+    ? (qty + ' 片' + (r.stars ? ' ' + r.stars + '星碎片' : '碎片'))
+    : (qty + ' 阶' + r.tier + '精粹');
+  d.innerHTML =
+    '<div class="evIc">' + ev.icon + '</div>' +
+    '<div class="evName">' + ev.name + '</div>' +
+    '<div class="evHint">' + (ev.hint || '') + '</div>' +
+    '<div class="evReward"><b>本次可获：</b>' + rewardTxt + (r.xp ? ' + ' + r.xp + ' 经验' : '') + '</div>' +
+    '<div class="evBtns">' +
+      '<button class="btn-go" onclick="commitEvent(\'' + ev.k + '\',' + qty + ')"><i class="fa-solid fa-hand-fist"></i> ' +
+        (ev.type === 'mob' ? '出手' : (ev.type === 'chest' ? '打开匣子' : '采集')) +
+      '</button>' +
+    '</div>';
+  dlg.classList.add('show');
+}
+function eventByKey(k){ for(var i=0;i<EVENTS.length;i++) if(EVENTS[i].k === k) return EVENTS[i]; return null; }
+function closeEvDlg(){ var d = document.getElementById('evDlg'); if(d) d.classList.remove('show'); }
+
+/* --- 真正触发：进入冷却 + 入账奖励队列 --- */
+function commitEvent(k, qty){
+  var ev = eventByKey(k); if(!ev || ev.alive === false) return;
+  /* 入账（链外，待金库领取） */
+  pushEventReward(ev, qty);
+  try{
+    var txt = ev.type === 'mob' ? '击败' : (ev.type === 'chest' ? '开启' : '采集');
+    var r = ev.reward;
+    var rewardTxt = (r.kind === 'shard')
+      ? (qty + ' 片' + (r.stars ? ' ' + r.stars + '星碎片' : '碎片'))
+      : (qty + ' 阶' + r.tier + '精粹');
+    toast(txt + ' ' + ev.name + ' · 获得 ' + rewardTxt + (r.xp ? ' + ' + r.xp + ' 经验' : '') + '（金库领取）', 'success');
+  }catch(e){}
+  ev.alive = false;
+  ev.cooldownAt = Date.now() + (ev.respawnS || 300) * 1000;
+  saveEventsState();
+  closeEvDlg();
+  /* 给点轻量动效：模型上抛并淡出 */
+  if(ev.mono){
+    var mo = ev.mono;
+    var ring = ev.ring;
+    var ph = 0;
+    var t0 = performance.now();
+    var dur = 380;
+    function animPop(){
+      var t = (performance.now() - t0) / dur;
+      if(t >= 1){ ev.grp.visible = true; mo.position.y = (ev.type === 'mob' ? 0.9 : (ev.type === 'gather' ? 0.85 : 1.28)); mo.scale.setScalar(0.7); mo.material.opacity = 0.7; return; }
+      mo.position.y += 0.06;
+      mo.rotation.y += 0.4;
+      mo.scale.setScalar(1 + t * 0.6);
+      if(mo.material){ mo.material.transparent = true; mo.material.opacity = 1 - t; }
+      if(ring){ ring.scale.setScalar(1 + t * 1.6); ring.material.opacity = (1 - t) * 0.6; }
+      requestAnimationFrame(animPop);
+    }
+    animPop();
+  }
+}
 var NPCS = [
   { k:'np_lamp', name:'守灯人 · 燧', icon:'🕯️', role:'引路者 · 最后一批守灯人', look:'sage', color:'#fbbf24',
     at:'heroes', a:78, d:46, tab:'heroes', play:'召唤英雄',
@@ -2815,6 +3165,7 @@ var HERO_MODEL_H = 1.85;     // 归一化后的英雄身高（米）
 function attachNpcModel(q, g, body){
   if(NPC_MODELS.indexOf(q.k) < 0) return;
   if(!window.THREE || !THREE.GLTFLoader) return;
+  if(window.__gltfFailed) return;     // 全局失败后不再发起新请求，省 CPU 与控制台噪音
   var loader = new THREE.GLTFLoader();
   loader.load('models/npc/' + q.k + '.glb', function(gltf){
     var m = gltf.scene || (gltf.scenes && gltf.scenes[0]);
@@ -2833,11 +3184,15 @@ function attachNpcModel(q, g, body){
         o.frustumCulled = false;      // 避免走位后整体消失
       }
     });
+    /* 套一层 holder：模型自身的 position 带「脚底贴地 + 水平居中」的偏移，
+       每帧驱动动作时若直接改它就会把偏移冲掉。holder 的基准是 0，专供动画使用。 */
+    var holder = new THREE.Group();
+    holder.add(m);
     if(body) body.visible = false;    // 隐藏程序化人形
-    g.add(m);
-    q.model = m;
+    g.add(holder);
+    q.model = holder;
     window.__npcModelsLoaded = (window.__npcModelsLoaded || 0) + 1;
-  }, undefined, function(){ /* 静默降级：保留程序化模型 */ });
+  }, undefined, function(){ window.__gltfFailed = true; });
 }
 /* ==================== 玩家英雄 3D 模型 ====================
    与 NPC 同一套做法：命中白名单就加载 models/hero/<键>.glb，归一化身高、水平居中、
@@ -2853,6 +3208,7 @@ function attachHeroModel(g, key){
   if(!g || !key) return;
   if(HERO_MODELS.indexOf(key) < 0) return;
   if(!window.THREE || !THREE.GLTFLoader) return;
+  if(window.__gltfFailed) return;
   var loader = new THREE.GLTFLoader();
   loader.load('models/hero/' + key + '.glb', function(gltf){
     var m = gltf.scene || (gltf.scenes && gltf.scenes[0]);
@@ -2876,7 +3232,7 @@ function attachHeroModel(g, key){
     heroParts.modelHolder = holder;
     g.add(holder);
     window.__heroModelsLoaded = (window.__heroModelsLoaded || 0) + 1;
-  }, undefined, function(){ /* 静默降级：保留程序化模型 */ });
+  }, undefined, function(){ window.__gltfFailed = true; });
 }
 
 function buildNpc(q){
@@ -3094,6 +3450,18 @@ function updateNpcs(dt, t){
       var br = Math.sin(t*1.5 + i*1.3);
       p.body.position.y = Math.abs(Math.sin(q.walk)) * 0.03 * (0.3 + sp) + br * 0.012;
       p.head.position.y = 1.86 * (q.look === 'shade' ? 1.12 : (q.look === 'hunter' ? 1.05 : 1)) + br * 0.02;
+    }
+    /* 用 3D 模型时（程序化人形已隐藏）：glb 是静态网格、不含骨骼动画，
+       若不叠加补偿，角色看上去就是「贴着地面平移」。这里对 holder 做程序化动作：
+       走动上下起伏 + 躯干左右摇摆 + 跑动前倾 + 待机呼吸。 */
+    if(q.model){
+      var spm = Math.min(moving / 9, 1);
+      var wk = q.walk || 0;
+      q.model.position.y = Math.abs(Math.sin(wk)) * 0.06 * (0.25 + spm)
+                         + Math.sin(t*1.5 + i*1.3) * 0.013 * (1 - spm);
+      q.model.rotation.x = spm * 0.07;                                  // 走/跑时前倾
+      q.model.rotation.z = Math.sin(wk * 0.5) * 0.05 * (0.3 + spm);     // 左右摇摆
+      q.model.rotation.y = Math.sin(wk) * 0.07 * spm;                   // 躯干扭转
     }
     if(q.gem) q.gem.rotation.y += dt*1.2;
     if(q.cloak) q.cloak.rotation.x = -0.1 + Math.sin(t*2.2 + i)*0.05;
@@ -3328,9 +3696,10 @@ function uiBlocked(){
   return false;
 }
 
-/* 统一交互入口：就近的 NPC 优先，其次建筑 */
+/* 统一交互入口：NPC 优先 → 事件 → 建筑 */
 function interact(){
   if(nearNpcKey) openDialog(nearNpcKey);
+  else if(nearEvKey) interactEvent(nearEvKey);
   else if(nearKey){
     var n = nodeByKey(nearKey);
     var q = n ? npcOfTab(n.tab) : null;
@@ -3540,6 +3909,7 @@ function closeDialog(){
   var d = document.getElementById('dlg'); if(d) d.classList.remove('show');
   DLG.npc = null;
   if(_typeTimer){ clearInterval(_typeTimer); _typeTimer = null; }
+  closeEvDlg();
 }
 
 function renderDialog(){
@@ -3856,12 +4226,30 @@ function updateHero(dt){
   heroParts.sword.rotation.z = (hero.attackT > 0) ? swordSwing : (0.5 + Math.sin(hero.walk * 0.7) * 0.05);
   heroParts.ring.material.opacity = 0.35 + Math.sin(performance.now()*0.003)*0.15;
 
+  /* 用 3D 模型时（程序化人形 hips 已隐藏）：glb 是静态网格、没有骨骼，
+       关节动画全在看不见的地方跑 —— 角色就像在贴地滑行。
+       这里对模型容器 holder 叠加程序化动作，复用上面同一套节奏变量。 */
+  if(heroParts.modelHolder){
+    var hb = heroParts.modelHolder;
+    var bob     = Math.abs(Math.sin(hero.walk)) * 0.075 * gait;                        // 跑动起伏
+    var breathe = Math.sin(performance.now()*0.0016) * 0.014 * (1 - clamp(gait,0,1));  // 待机呼吸
+    hb.position.y = bob + breathe - landDip;                                           // 落地缓冲
+    if(hero.air){
+      hb.rotation.x = -0.16;                                                           // 腾空后仰
+    } else {
+      hb.rotation.x = gait * 0.10 + bodyLunge * 0.55;                                  // 跑动前倾 + 攻击前冲
+    }
+    hb.rotation.z = Math.sin(hero.walk * 0.5) * 0.055 * gait + idleSway;               // 左右摇摆 + 待机重心
+    hb.rotation.y = Math.sin(hero.walk) * 0.075 * gait;                                // 躯干随步伐扭转
+  }
+
   heroObj.position.set(hero.x, hero.y, hero.z);
   heroObj.rotation.y = hero.yaw;
 }
 
 /* 靠近检测：玩法挂在人身上，所以 NPC 永远优先；
-   建筑只作为「地点」提示，点了也是去找到驻守它的人。 */
+   建筑只作为「地点」提示，点了也是去找到驻守它的人。
+   事件（宝箱 / 采集 / 野怪）也参与近距提示，但比 NPC 优先级低 —— NPC 永远是「事由人经手」。 */
 function updateNear(){
   var best = null, bd = 1e9;
   for(var i=0;i<NODES.length;i++){
@@ -3875,26 +4263,37 @@ function updateNear(){
     var qd = Math.hypot(hero.x - q.x, hero.z - q.z) - 1.0;
     if(qd < 10 && qd < nd){ nd = qd; bestNpc = q; }
   }
+  var bestEv = null, ed = 1e9;
+  for(var ei=0;ei<EVENTS.length;ei++){
+    var ev = EVENTS[ei];
+    if(ev.alive === false) continue;
+    var eed = Math.hypot(hero.x - ev.x, hero.z - ev.z) - 1.6;
+    if(eed < 3.5 && eed < ed){ ed = eed; bestEv = ev; }
+  }
 
+  var useEv = !!bestEv;
   var useNpc = !!bestNpc;
-  var tgt = useNpc ? bestNpc : best;
-  nearKey    = (!useNpc && best) ? best.k : null;
+  var tgt = useNpc ? bestNpc : (useEv ? bestEv : best);
+  nearKey    = (!useNpc && !useEv && best) ? best.k : null;
   nearNpcKey = useNpc ? bestNpc.k : null;
+  nearEvKey  = useEv ? bestEv.k : null;
 
   var bar = document.getElementById('nearBar');
   if(tgt){
-    var key = (useNpc ? 'npc:' : 'nd:') + tgt.k;
+    var key = (useNpc ? 'npc:' : (useEv ? 'ev:' : 'nd:')) + tgt.k;
     var guard = useNpc ? null : npcOfTab(tgt.tab);
     var sub = useNpc
       ? (tgt.play ? '按 E 或点击交谈 · ' + tgt.play : '按 E 或点击交谈')
-      : (guard ? '驻守者 ' + guard.name + ' · 点击去找他' : '按 E 或点击查看');
+      : (useEv
+          ? (tgt.type === 'mob' ? '按 E 或点击 · 出手' : (tgt.type === 'chest' ? '按 E 或点击 · 打开' : '按 E 或点击 · 采集'))
+          : (guard ? '驻守者 ' + guard.name + ' · 点击去找他' : '按 E 或点击查看'));
     if(bar.dataset.k !== key || bar.dataset.sub !== sub){
       bar.dataset.k = key;
       bar.dataset.sub = sub;
-      document.getElementById('nbIcon').textContent = useNpc ? tgt.icon : (guard ? guard.icon : tgt.icon);
-      document.getElementById('nbName').textContent = useNpc ? tgt.name : tgt.name;
-      var sb = document.getElementById('nbSub');
-      if(sb) sb.textContent = sub;
+      document.getElementById('nbIcon').textContent = tgt.icon || (guard ? guard.icon : '');
+      document.getElementById('nbName').textContent = tgt.name;
+      var sbEl = document.getElementById('nbSub');
+      if(sbEl) sbEl.textContent = sub;
     }
     bar.classList.add('show');
   } else {
@@ -3964,6 +4363,22 @@ function drawMini(){
       c.beginPath(); c.arc(px, py, 5.2, 0, Math.PI*2); c.stroke();
     }
   }
+  /* 事件：小三角（宝箱 / 采集 / 野怪），活着=实心，冷却中=灰空心 */
+  for(var ei=0;ei<EVENTS.length;ei++){
+    var ev = EVENTS[ei];
+    var ex2 = toX(ev.x), ey2 = toY(ev.z);
+    var alive2 = ev.alive !== false;
+    c.save();
+    c.translate(ex2, ey2);
+    c.beginPath();
+    if(ev.type === 'chest'){ c.rect(-2.2, -1.7, 4.4, 3.4); }
+    else if(ev.type === 'gather'){ c.arc(0, 0, 2.3, 0, Math.PI*2); }
+    else { c.moveTo(0, -2.6); c.lineTo(2.4, 1.6); c.lineTo(-2.4, 1.6); c.closePath(); }
+    c.fillStyle = alive2 ? (ev.el === 'metal' ? '#fbbf24' : ev.el === 'wood' ? '#22c55e' : ev.el === 'water' ? '#38bdf8' : ev.el === 'fire' ? '#ef4444' : '#c2703a') : 'rgba(140,150,170,.5)';
+    c.fill();
+    if(ev.k === nearEvKey){ c.lineWidth = 1.6; c.strokeStyle = '#fff'; c.stroke(); }
+    c.restore();
+  }
 
   // 角色（朝向三角）
   var hx = toX(hero.x), hy = toY(hero.z);
@@ -3990,7 +4405,8 @@ function updateWorldFx(dt, t){
   var i, p;
   for(i=0;i<FLAMES.length;i++){
     var f = FLAMES[i];
-    f.sp.material.opacity = f.base + Math.sin(t*f.spd + f.ph) * f.amp;
+    var nm = f.nightMul || 1;
+    f.sp.material.opacity = clamp((f.base + Math.sin(t*f.spd + f.ph) * f.amp) * nm, 0, 1);
     if(f.mesh){
       var sc = 1 + Math.sin(t*f.spd*1.3 + f.ph) * 0.12;
       f.mesh.scale.set(sc, 1 + Math.sin(t*f.spd + f.ph) * 0.24, sc);
@@ -3999,9 +4415,10 @@ function updateWorldFx(dt, t){
   for(i=0;i<BANNERS.length;i++){
     var bn = BANNERS[i];
     var pos = bn.mesh.geometry.attributes.position, base = bn.base;
+    var ph = bn.ph;
     for(p=0;p<pos.count;p++){
-      var bx = base[p*3], by = base[p*3+1];
-      pos.setZ(p, Math.sin(bx*2.4 + t*4.2 + bn.ph) * (bx + 1.0) * 0.09 + Math.sin(by*1.7 + t*2.6) * 0.04);
+      var bx = base[p*2], by = base[p*2+1];
+      pos.setZ(p, Math.sin(bx*2.4 + t*4.2 + ph) * (bx + 1.0) * 0.09 + Math.sin(by*1.7 + t*2.6) * 0.04);
     }
     pos.needsUpdate = true;
   }
@@ -4040,6 +4457,7 @@ function animate(){
   updateNear();
   updateNpcs(dt, t);
   updateSun();
+  updateEvents(t);
   updateWorldFx(dt, t);
   updateNavBeam(dt, t);
 
@@ -4052,16 +4470,21 @@ function animate(){
     var useD = cam.dist;
     /* 相机避让一：视线被建筑主体/实心墙挡住 → 缩到墙前，否则镜头会穿进塔身看到模型内部。
        只对「大障碍」（半径 ≥5）和带 camBlock 标记的实心墙（addHall 的墙体）生效，
-       小装饰不参与，避免镜头抖动。 */
+       小装饰不参与，避免镜头抖动。
+       性能：先按"相机前方夹角 + 距离 ≤ useD+半径"预筛，把每帧 1000+ OBSTACLES 减到几十。 */
+    var maxObsR = useD + 8;
+    var maxObsR2 = maxObsR * maxObsR;
     for(var oi=0; oi<OBSTACLES.length; oi++){
       var ob = OBSTACLES[oi];
       if(!ob.r || (ob.r < 5 && !ob.camBlock)) continue;
       var ox = ob.cx - hero.x, oz = ob.cz - hero.z;
+      var d2 = ox*ox + oz*oz;
+      if(d2 > maxObsR2) continue;                       // 远了根本进不了画面
       var proj = ox * dirx + oz * dirz;
-      if(proj <= 0) continue;
+      if(proj <= 0) continue;                           // 在相机背后
       var rr = ob.r + 1.1;
       if(proj - rr >= useD) continue;
-      var perp2 = ox*ox + oz*oz - proj*proj;
+      var perp2 = d2 - proj*proj;
       if(perp2 < rr*rr){
         var hitD = proj - Math.sqrt(rr*rr - perp2);
         if(hitD > 1.6 && hitD < useD) useD = hitD;
@@ -4106,8 +4529,8 @@ function animate(){
        等于每帧白跑 12×6=72 次无效属性查找，已移除。 */
   }
 
-  // 光点
-  if(motes){
+  // 光点（隔帧更新，降低 attribute 上传频率，肉眼几乎察觉不到 30→15fps 的差）
+  if(motes && (frame & 1) === 0){
     var p = motes.geometry.attributes.position, spd = motes.userData.spd, base = motes.userData.base;
     for(var q=0;q<spd.length;q++){
       var y = p.getY(q) + spd[q]*dt;
@@ -4118,7 +4541,7 @@ function animate(){
   }
 
   updateLabels();
-  if(frame % 3 === 0) drawMini();
+  if((frame & 3) === 0) drawMini();
   renderer.render(scene, camera);
 }
 
@@ -4149,6 +4572,20 @@ function updateLabels(){
     ne.style.transform = 'translate(-50%,-100%) translate(' + nx.toFixed(1) + 'px,' + ny.toFixed(1) + 'px) scale(' + ns.toFixed(2) + ')';
     ne.classList.toggle('on', q.k === nearNpcKey);
     ne.classList.toggle('talked', !!q.talked);
+  }
+
+  /* 事件标签（标签里的"倒计时/已就绪"由 updateEvents 更新，这里只投影位置） */
+  for(var ei=0;ei<EVENTS.length;ei++){
+    var ev = EVENTS[ei], le = labels[ev.k]; if(!le) continue;
+    var ed = Math.hypot(hero.x - ev.x, hero.z - ev.z);
+    if(ed > 120){ le.style.display = 'none'; continue; }
+    _v.set(ev.x, ev.y + (ev.topY || 1.4) + 0.6, ev.z).project(camera);
+    if(_v.z > 1){ le.style.display = 'none'; continue; }
+    le.style.display = 'flex';
+    var ex = (_v.x*0.5+0.5)*W, ey = (-_v.y*0.5+0.5)*H;
+    var esc = clamp(1.1 - ed/220, 0.62, 1.0);
+    le.style.transform = 'translate(-50%,-100%) translate(' + ex.toFixed(1) + 'px,' + ey.toFixed(1) + 'px) scale(' + esc.toFixed(2) + ')';
+    le.classList.toggle('on', ev.k === nearEvKey);
   }
 }
 

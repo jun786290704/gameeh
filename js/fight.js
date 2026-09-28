@@ -270,6 +270,17 @@ async function autoPreviewFight(){
       estReward = BigInt(monData.reward||0) * BigInt(monMult) * 10000000000000000n / 100n * BigInt(starBonus) / 10000n * BigInt(lvBonus) / 10000n;
       if(S.vaultMode === 1){ estDec = 6; estSym = 'USDT'; estReward = estReward / 1000000000000n; }
     }catch(e){ estReward = null; }
+    /* 本次战斗销毁（按代币价格阶梯，转账到黑洞） */
+    let burnAmt = 0n;
+    try{
+      if(S.signer){
+        const burn = await mustC('v3').getFightBurnAmount().catch(()=>0n);
+        burnAmt = BigInt(burn) || 0n;
+      }
+    }catch(e){}
+    const burnLine = burnAmt > 0n
+      ? `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">本次战斗销毁（转账黑洞）</span><div class="font-bold text-red-400 num-mono">🔥 ${fmtUnits(burnAmt, S.tokenDecimals, 0)} ${S.tokenSymbol||TOKEN_SYMBOL}</div></div>`
+      : '';
     if(barWin) barWin.textContent = chancePct + '%';
     if(barSum) barSum.textContent = `英雄 #${h} vs ${monData.name} · 战力 ${fmt(eff,0)} VS ${fmt(monPower,0)}`;
     if(box) box.innerHTML = `
@@ -312,6 +323,7 @@ async function autoPreviewFight(){
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5"><span class="text-muted">基础战力</span><div class="font-bold text-gold num-mono">${fmt(basePower,0)}</div></div>
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5"><span class="text-muted">元素加成</span><div class="font-bold num-mono" style="color:${elAdvColor};">${(elMult/100).toFixed(0)}%</div></div>
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">预计奖励（胜利时，含加成）</span><div class="font-bold text-gold num-mono">${estReward===null?'--':'+ '+fmtUnits(estReward, estDec, 2)+' '+estSym}</div></div>
+          ${burnLine}
         </div>
       </div>`;
   }catch(e){
@@ -333,6 +345,25 @@ async function fightFlow(){
     
     // 单次交易直接战斗（调用 v3.fightOnce）
     const eh = mustC('v3').connect(S.signer);
+    
+    // 战斗销毁：按代币价格阶梯转账到黑洞（需玩家授权，首次自动引导一次性大额授权）
+    let burnAmt = 0n;
+    try{ burnAmt = BigInt(await eh.getFightBurnAmount()) || 0n; }catch(e){}
+    if(burnAmt > 0n){
+      const tk = mustC('gameToken').connect(S.signer);
+      const al = await tk.allowance(S.account, CONTRACTS.v3).catch(()=>0n);
+      if(al < burnAmt){
+        toast(`首次战斗需授权 ${S.tokenSymbol||TOKEN_SYMBOL}（用于战斗销毁）`,'info');
+        await ensureTokenAllowance(CONTRACTS.v3, ethers.MaxUint256);
+      }
+      const bal = await tk.balanceOf(S.account).catch(()=>0n);
+      if(bal === 0n){
+        toast(`钱包无 ${S.tokenSymbol||TOKEN_SYMBOL}，本次销毁 0 枚，奖励到账后自动生效`,'warn');
+      } else if(bal < burnAmt){
+        toast(`代币余额不足 ${fmtUnits(burnAmt,18,0)} 枚，本次将销毁全部余额 ${fmtUnits(bal,18,2)} 枚`,'warn');
+      }
+    }
+    
     // 获取选中怪物的随机五行属性
     const monsterIdx = S.monsters.findIndex(m=>m.id===monsterId);
     const monsterElement = S.monsterRandomElements && S.monsterRandomElements[monsterIdx] !== undefined 
@@ -442,10 +473,18 @@ async function playBattleAnimation(rec2){
           <div class="battle-reward-note"><i class="fa-solid fa-vault mr-1"></i>奖励已存入金库，可前往「金库」页领取</div>
           <div class="battle-reward-item xp"><i class="fa-solid fa-star"></i>+${rec2.xp} XP</div>
         </div>`:''}
-        <button onclick="closeBattleStage()" class="btn ${win?'btn-gold':'btn-ghost'} w-full text-base py-3 mt-3">${win?'继续冒险':'再战一次'}</button>
+        <button id="battleContinueBtn" onclick="closeBattleStage()" class="btn ${win?'btn-gold':'btn-ghost'} w-full text-base py-3 mt-3">${win?'继续冒险':'再战一次'}</button>
       </div>
     </div>`;
   document.body.appendChild(stage);
+
+  // 动画期间强制锁定结果按钮（JS 层兜底，不依赖 CSS 是否生效/缓存）
+  const resBtn = stage.querySelector('#battleContinueBtn');
+  if(resBtn){
+    resBtn.disabled = true;
+    resBtn.style.pointerEvents = 'none';
+    resBtn.setAttribute('aria-disabled','true');
+  }
 
   const hEl = stage.querySelector('#bfHero');
   const mEl = stage.querySelector('#bfMon');
@@ -549,6 +588,12 @@ async function playBattleAnimation(rec2){
   if(banner) banner.classList.add('battle-banner-in');
   await sleep2(300);
   stage.classList.add('battle-rewards-in');
+  // 动画完全结束，解锁结果按钮
+  if(resBtn){
+    resBtn.disabled = false;
+    resBtn.style.pointerEvents = '';
+    resBtn.removeAttribute('aria-disabled');
+  }
 }
 
 function closeBattleStage(){

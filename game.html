@@ -16,7 +16,7 @@ if(!window.ethers){
 }
 </script>
 <link rel="stylesheet" href="./vendor/fontawesome/css/all.min.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'" data-page-node-id="NPgwuOLXe4TdfMaSjqEADx">
-<link rel="stylesheet" href="./styles.css" data-page-node-id="qA8u54aM0w37ERSMbqRxOS">
+<link rel="stylesheet" href="./styles.css?v=20260928" data-page-node-id="qA8u54aM0w37ERSMbqRxOS">
 <style>
   /* 被地图页以 iframe 嵌入时，隐藏自己的页头与页签栏，避免出现两套导航。
      放在 game.html 自己身上做（而不是让父页面跨域改写 DOM），
@@ -24,6 +24,93 @@ if(!window.ethers){
   html.embedded header,
   html.embedded #tabBar{display:none !important}
   html.embedded #mainArea{padding-top:8px !important;max-width:100% !important}
+
+  /* ===== 移动端全面优化 ===== */
+  @media(max-width:640px){
+    /* 顶栏紧凑 */
+    header .max-w-7xl{gap:6px;padding-top:8px;padding-bottom:8px}
+    header .w-9{width:30px;height:30px;font-size:16px;border-radius:9px}
+    header .font-black.text-\[15px\]{font-size:13.5px}
+    #tabBar{top:50px;padding:6px 8px;gap:6px}
+    #tabBar .tab-btn{padding:.42rem .62rem;font-size:.72rem;border-radius:10px}
+    .btn-sm{min-height:30px;padding:.4rem .65rem;font-size:.74rem}
+    #mainArea{padding-top:12px}
+    .panel{border-radius:15px}
+    .panel p-4{ }
+
+    /* 面板标题行 */
+    .panel h2.text-lg{font-size:1.06rem}
+    .panel h2.text-lg .badge{font-size:.62rem}
+
+    /* 英雄卡：更紧凑 */
+    #heroGrid{gap:10px}
+    #heroGrid .char3d-wrap.h-52{height:170px}
+    #heroGrid .p-3{padding:.7rem .65rem .75rem}
+    #heroGrid .p-3 .text-\[12px\]{font-size:11px}
+    #heroGrid .btn{padding:.38rem .4rem;font-size:.72rem;border-radius:10px;min-height:32px}
+
+    /* 武器/列表卡片 */
+    #weaponGrid,#meltWeaponGrid,#listGrid,#myListGrid{gap:10px}
+    .game-card .p-4{padding:.85rem}
+
+    /* 战斗页 */
+    #panel-fight .game-card{padding:.8rem .7rem}
+    .pick-row{gap:8px;padding-bottom:6px}
+    .pick-chip{min-width:148px;padding:.5rem}
+    .pick-avatar{width:52px;height:52px;border-radius:12px}
+    .pick-avatar img{width:52px;height:52px}
+    .pick-title b{font-size:.74rem}
+    .pick-tag{font-size:.58rem;padding:1px 6px}
+    .pick-sub{font-size:.62rem;gap:6px;margin-top:2px}
+    .pick-bar{height:4px;margin-top:4px}
+    .pick-radio{width:18px;height:18px;font-size:.6rem;border-radius:50%}
+    #fightActionBar{bottom:64px}
+    #fightActionBar .panel{padding:.7rem .8rem;border-radius:15px}
+    #fightBtnBar{min-height:44px;padding:.6rem 1.2rem;font-size:.95rem}
+
+    /* 战前分析 */
+    #fightPreview .p-4{padding:1rem .85rem}
+    #previewBody.text-\[13px\]{font-size:12px;padding:1rem .4rem}
+
+    /* 怪物选择行 */
+    .monster-chip .pick-avatar{width:56px;height:56px;border-radius:13px}
+
+    /* 锻造/熔炼/合成卡片 */
+    #panel-forge .game-card{padding:.85rem .7rem}
+    #panel-forge .grid.gap-4{gap:.7rem}
+    #panel-compose .game-card{padding:.9rem .8rem}
+
+    /* 市场 */
+    .market-tab{padding:.45rem .7rem;font-size:.76rem;border-radius:10px}
+    #listPager .btn{padding:.4rem .8rem;font-size:.78rem;min-height:32px}
+
+    /* 排行表 */
+    #rankTableWrap{border-radius:12px}
+
+    /* 图鉴 */
+    .gallery-card{border-radius:14px}
+    .gallery-info{padding:.55rem .6rem .65rem}
+
+    /* 金库 */
+    #vaultReward.text-3xl{font-size:1.6rem}
+
+    /* 管理页 */
+    #adminBody .btn{padding:.45rem .7rem;font-size:.76rem;border-radius:10px;min-height:34px}
+    #adminBody .flex.flex-wrap.gap-1\.5{gap:.4rem}
+
+    /* 待揭示面板 */
+    #pendingPanel{right:.7rem;bottom:60px;width:min(96vw,360px)}
+    #pendingPanel .panel{padding:.8rem}
+
+    /* modal 移动端底部抽屉 */
+    #modalRoot .mbody{padding:1rem !important;border-radius:18px;width:min(96vw,520px)}
+    #modalRoot .mask{padding:.6rem;align-items:flex-end}
+    #modalRoot .mbody{max-height:88vh}
+
+    /* 召唤动画 */
+    .summon-stage{transform:scale(.88)}
+  }
+
 </style>
 <script>
   try{ if(window.self !== window.top) document.documentElement.classList.add('embedded'); }catch(e){}
@@ -323,7 +410,7 @@ if(!window.ethers){
 <script src="./js/i18n_dict.js" defer></script>
 <script src="./js/i18n.js" defer></script>
 <!-- app.js 已按功能拆分为 js/*.js（顺序即依赖顺序） -->
-<script src="./js/core.js" defer></script>
+<script src="./js/core.js?v=20260921" defer></script>
 <script src="./js/utils.js" defer></script>
 <script src="./js/wallet.js" defer></script>
 <script src="./js/pending.js" defer></script>
@@ -332,12 +419,13 @@ if(!window.ethers){
 <script src="./js/heroes.js" defer></script>
 <script src="./js/weapons.js" defer></script>
 <script src="./js/forge.js" defer></script>
-<script src="./js/fight.js" defer></script>
+<script src="./js/fight.js?v=20260928" defer></script>
 <script src="./js/boss.js" defer></script>
 <script src="./js/market.js" defer></script>
 <script src="./js/stats.js" defer></script>
 <script src="./js/gallery.js" defer></script>
-<script src="./js/admin.js" defer></script>
+<script src="./js/admin.js?v=20260921" defer></script>
+<script src="./js/admin-governance.js?v=20260921" defer></script>
 <script src="./js/init.js" defer></script>
 <!-- 锚点直达页签：game.html#boss（来自 3D 世界地图等入口） -->
 <script>
