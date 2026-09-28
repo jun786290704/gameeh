@@ -3188,19 +3188,19 @@ function makeAnimMixer(root, gltf){
   mixer._acts = acts;
   return mixer;
 }
-/* g: 0=静止 1=全速；dt 为本帧时长 */
+/* g: 0=静止 1=全速；dt 为本帧时长。
+   动作来自标准人形骨架的动作库（idle / walk / run 三套真实关键帧），
+   按移动强度做三态混合：低速走路、超过一半速度逐渐交给跑步。
+   注意 run 的时长（0.70s）本身就比 walk（0.97s）短，是动作库自带的节奏，不用再额外加速。 */
 function updateAnimMixer(mixer, g, dt){
   if(!mixer || !mixer._acts) return;
   var w = Math.max(0, Math.min(1, g));
-  var idle = mixer._acts['idle'], walk = mixer._acts['walk'];
+  var idle = mixer._acts['idle'], walk = mixer._acts['walk'], run = mixer._acts['run'];
+  var runW  = run ? Math.max(0, Math.min(1, (w - 0.55) / 0.45)) : 0;
+  var walkW = w * (1 - runW);
   if(idle) idle.setEffectiveWeight(1 - w);
-  if(walk){
-    walk.setEffectiveWeight(w);
-    /* 步频跟着移动速度走。地图里 WALK=16 / RUN=30 单位每秒而角色才 1.95 单位高
-       （＝8~15 身高/秒，真人的 10 倍），步幅再大也追不上位移，只能让步频尽量跟上，
-       让「腿在快速交替」这个信号足够强；上限从 1.3 提到 2.4 倍速。 */
-    walk.timeScale = 0.8 + w * 1.6;
-  }
+  if(walk){ walk.setEffectiveWeight(walkW); walk.timeScale = 1 + w * 0.5; }
+  if(run)  { run.setEffectiveWeight(runW);   run.timeScale  = 1 + (w - 0.55) * 0.8; }
   mixer.update(dt || 0.016);
 }
 

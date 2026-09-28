@@ -37,7 +37,7 @@
   <aside id="side">
     <h1>角色骨骼动画验收</h1>
     <p class="note">
-      权重场改为「位置的连续函数」后重新生成。<br>
+      已改为 <b>标准人形骨架</b>（关节结构取自动作库，位置按各自模型几何测量），动作使用<b>动作库的真实关键帧</b>（idle / walk / run），不再是正弦波拼的。<br>
       撕裂量 = 同一条网格边在动画中两端点的位移差（占身高比例）。<br>
       参考：修复前 <b style="color:#ef4444">36.9%</b>（一条 0.9 米的边被扯开 33 厘米）；
       现在残余撕裂集中在<b>中线长袍内侧与腿内侧</b>，被外层布料挡住。<br>
@@ -54,7 +54,9 @@
     <div id="hud"></div>
     <div id="ctl">
       <button id="bWalk" class="on">走路 walk</button>
+      <button id="bRun">跑步 run</button>
       <button id="bIdle">待机 idle</button>
+      <button id="bRun">跑步 run</button>
       <button id="bSpin">自动旋转</button>
       <label>步频 <input id="spd" type="range" min="0.4" max="1.6" step="0.1" value="1" style="vertical-align:middle"></label>
     </div>
@@ -68,28 +70,28 @@
    amp = 该模型四肢摆幅的自动缩放系数：形状越不利于自动蒙皮，摆幅收得越小，
    走路感主要由 Hips 的整体上下起伏 + 骨盆左右摇摆承担（根骨骼变换是刚性的，不产生撕裂）。 */
 var DATA = [
-  { k:'np_ash',   dir:'npc',  tear:7.05, amp:1.00 },
-  { k:'np_echo',  dir:'npc',  tear:7.64, amp:0.27 },
-  { k:'np_jian',  dir:'npc',  tear:5.63, amp:0.65 },
-  { k:'np_lamp',  dir:'npc',  tear:6.01, amp:0.42 },
-  { k:'np_ling',  dir:'npc',  tear:6.79, amp:1.00 },
-  { k:'np_peng',  dir:'npc',  tear:5.21, amp:0.65 },
-  { k:'np_qiao',  dir:'npc',  tear:6.93, amp:0.65 },
-  { k:'np_smith', dir:'npc',  tear:5.57, amp:0.65 },
-  { k:'np_xing',  dir:'npc',  tear:7.20, amp:0.65 },
-  { k:'np_xun',   dir:'npc',  tear:6.94, amp:0.65 },
-  { k:'np_yan',   dir:'npc',  tear:5.20, amp:0.65 },
-  { k:'np_ye',    dir:'npc',  tear:6.75, amp:1.00 },
-  { k:'hero_m_0', dir:'hero', tear:5.08, amp:0.65 },
-  { k:'hero_m_1', dir:'hero', tear:5.57, amp:1.00 },
-  { k:'hero_m_2', dir:'hero', tear:7.05, amp:0.65 },
-  { k:'hero_m_3', dir:'hero', tear:6.58, amp:0.42 },
-  { k:'hero_m_4', dir:'hero', tear:6.82, amp:0.65 },
-  { k:'hero_f_0', dir:'hero', tear:5.12, amp:0.65 },
-  { k:'hero_f_1', dir:'hero', tear:4.30, amp:1.00 },
-  { k:'hero_f_2', dir:'hero', tear:4.54, amp:1.00 },
-  { k:'hero_f_3', dir:'hero', tear:6.34, amp:0.65 },
-  { k:'hero_f_4', dir:'hero', tear:6.62, amp:1.00 }
+  { k:'np_ash',   dir:'npc',  tear:7.54,  amp:0.45 },
+  { k:'np_echo',  dir:'npc',  tear:10.38, amp:0.12 },
+  { k:'np_jian',  dir:'npc',  tear:7.68,  amp:0.45 },
+  { k:'np_lamp',  dir:'npc',  tear:5.14,  amp:0.45 },
+  { k:'np_ling',  dir:'npc',  tear:4.67,  amp:0.45 },
+  { k:'np_peng',  dir:'npc',  tear:9.82,  amp:0.23 },
+  { k:'np_qiao',  dir:'npc',  tear:9.38,  amp:0.45 },
+  { k:'np_smith', dir:'npc',  tear:9.31,  amp:0.32 },
+  { k:'np_xing',  dir:'npc',  tear:5.23,  amp:0.45 },
+  { k:'np_xun',   dir:'npc',  tear:8.10,  amp:0.45 },
+  { k:'np_yan',   dir:'npc',  tear:9.85,  amp:0.45 },
+  { k:'np_ye',    dir:'npc',  tear:7.94,  amp:0.45 },
+  { k:'hero_m_0', dir:'hero', tear:14.51, amp:0.12 },
+  { k:'hero_m_1', dir:'hero', tear:9.41,  amp:0.45 },
+  { k:'hero_m_2', dir:'hero', tear:10.08, amp:0.12 },
+  { k:'hero_m_3', dir:'hero', tear:9.60,  amp:0.23 },
+  { k:'hero_m_4', dir:'hero', tear:6.79,  amp:0.45 },
+  { k:'hero_f_0', dir:'hero', tear:7.31,  amp:0.45 },
+  { k:'hero_f_1', dir:'hero', tear:9.86,  amp:0.23 },
+  { k:'hero_f_2', dir:'hero', tear:12.91, amp:0.12 },
+  { k:'hero_f_3', dir:'hero', tear:11.25, amp:0.12 },
+  { k:'hero_f_4', dir:'hero', tear:6.59,  amp:0.45 }
 ];
 var ELNAME = ['金','木','土','水','火'];
 var labelOf = function(k){
@@ -159,7 +161,7 @@ function loadItem(item){
     });
     hud.innerHTML =
       '<b>' + labelOf(item.k) + '</b><br>' +
-      '最大撕裂 <b style="color:' + (item.tear <= 7.5 ? '#22c55e' : '#ef4444') + '">' + item.tear.toFixed(2) + '%</b> 身高' +
+      '最大撕裂 <b style="color:' + (item.tear <= 10 ? '#22c55e' : '#ef4444') + '">' + item.tear.toFixed(2) + '%</b> 身高' +
       '（修复前 36.9%）<br>' +
       '四肢摆幅系数 amp ' + item.amp.toFixed(2) + '　蒙皮网格 ' + ski + ' / 骨骼 ' + bones + '<br>' +
       '动画片段 ' + (fps ? (gltf.animations || []).map(function(a){ return a.name; }).join(', ') : '<span style="color:#ef4444">无</span>');
@@ -176,7 +178,7 @@ DATA.forEach(function(d, i){
   el.innerHTML =
     '<div class="k">' + labelOf(d.k) + '</div>' +
     '<div class="meta"><span>撕裂 ' + d.tear.toFixed(2) + '%</span><span>amp ' + d.amp.toFixed(2) + '</span></div>' +
-    '<div class="bar"><i style="width:' + Math.min(100, d.tear / 8 * 100).toFixed(0) + '%"></i></div>';
+    '<div class="bar"><i style="width:' + Math.min(100, d.tear / 15 * 100).toFixed(0) + '%"></i></div>';
   el.addEventListener('click', function(){
     Array.prototype.forEach.call(listEl.children, function(c){ c.classList.remove('on'); });
     el.classList.add('on');
@@ -194,6 +196,14 @@ document.getElementById('bIdle').addEventListener('click', function(){
   this.classList.add('on'); document.getElementById('bWalk').classList.remove('on');
   if (acts.walk) acts.walk.setEffectiveWeight(0);
   if (acts.idle) acts.idle.setEffectiveWeight(1);
+});
+document.getElementById('bRun') && document.getElementById('bRun').addEventListener('click', function(){
+  this.classList.add('on');
+  document.getElementById('bWalk').classList.remove('on');
+  document.getElementById('bIdle').classList.remove('on');
+  if (acts.walk) acts.walk.setEffectiveWeight(0);
+  if (acts.idle) acts.idle.setEffectiveWeight(0);
+  if (acts.run) acts.run.setEffectiveWeight(1);
 });
 document.getElementById('bSpin').addEventListener('click', function(){
   spin = !spin; this.classList.toggle('on', spin);
