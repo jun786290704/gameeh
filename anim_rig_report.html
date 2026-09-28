@@ -42,8 +42,9 @@
       参考：修复前 <b style="color:#ef4444">36.9%</b>（一条 0.9 米的边被扯开 33 厘米）；
       现在残余撕裂集中在<b>中线长袍内侧与腿内侧</b>，被外层布料挡住。<br>
       动作幅度（最大顶点位移）已达 <b>7%~13% 身高</b>。<br>
-      本轮另修了两处会让「走路一瘸一拐」的问题：骨架相对网格横向错位（12% 身高）、
-      骨盆前后倾的相位偏袒单侧腿 —— 修后左右肢体的前后行程已完全镜像（脚 19.93% = 19.93%）。
+      本轮修正：骨架相对网格的横向错位（12% 身高）、骨盆前后倾偏袒单侧腿、以及<b>膝盖折向</b>
+      （原来朝前折＝反关节，现改为朝后收，峰值约 12°，静止帧严格归零）。<br>
+      左右完全镜像（左右脚的前后行程数值互为镜像）。
     </p>
     <div id="list"></div>
   </aside>
@@ -66,28 +67,28 @@
    amp = 该模型四肢摆幅的自动缩放系数：形状越不利于自动蒙皮，摆幅收得越小，
    走路感主要由 Hips 的整体上下起伏 + 骨盆左右摇摆承担（根骨骼变换是刚性的，不产生撕裂）。 */
 var DATA = [
-  { k:'np_ash',   dir:'npc',  tear:3.69, amp:0.65 },
-  { k:'np_echo',  dir:'npc',  tear:6.01, amp:0.27 },
-  { k:'np_jian',  dir:'npc',  tear:3.93, amp:0.65 },
-  { k:'np_lamp',  dir:'npc',  tear:4.50, amp:0.42 },
-  { k:'np_ling',  dir:'npc',  tear:4.92, amp:1.00 },
-  { k:'np_peng',  dir:'npc',  tear:3.97, amp:0.65 },
-  { k:'np_qiao',  dir:'npc',  tear:3.56, amp:0.42 },
-  { k:'np_smith', dir:'npc',  tear:4.92, amp:0.65 },
-  { k:'np_xing',  dir:'npc',  tear:3.43, amp:0.42 },
-  { k:'np_xun',   dir:'npc',  tear:3.51, amp:0.42 },
-  { k:'np_yan',   dir:'npc',  tear:4.10, amp:0.65 },
-  { k:'np_ye',    dir:'npc',  tear:3.71, amp:0.65 },
-  { k:'hero_m_0', dir:'hero', tear:4.02, amp:0.65 },
-  { k:'hero_m_1', dir:'hero', tear:4.34, amp:1.00 },
-  { k:'hero_m_2', dir:'hero', tear:3.96, amp:0.42 },
-  { k:'hero_m_3', dir:'hero', tear:4.94, amp:0.42 },
-  { k:'hero_m_4', dir:'hero', tear:3.39, amp:0.42 },
-  { k:'hero_f_0', dir:'hero', tear:3.97, amp:0.65 },
-  { k:'hero_f_1', dir:'hero', tear:2.47, amp:1.00 },
-  { k:'hero_f_2', dir:'hero', tear:2.75, amp:1.00 },
-  { k:'hero_f_3', dir:'hero', tear:3.70, amp:0.42 },
-  { k:'hero_f_4', dir:'hero', tear:3.46, amp:0.65 }
+  { k:'np_ash',   dir:'npc',  tear:4.52, amp:1.00 },
+  { k:'np_echo',  dir:'npc',  tear:3.96, amp:0.42 },
+  { k:'np_jian',  dir:'npc',  tear:4.56, amp:1.00 },
+  { k:'np_lamp',  dir:'npc',  tear:4.45, amp:0.65 },
+  { k:'np_ling',  dir:'npc',  tear:3.25, amp:1.00 },
+  { k:'np_peng',  dir:'npc',  tear:4.07, amp:1.00 },
+  { k:'np_qiao',  dir:'npc',  tear:3.78, amp:0.65 },
+  { k:'np_smith', dir:'npc',  tear:3.33, amp:0.65 },
+  { k:'np_xing',  dir:'npc',  tear:3.46, amp:0.65 },
+  { k:'np_xun',   dir:'npc',  tear:3.48, amp:0.65 },
+  { k:'np_yan',   dir:'npc',  tear:4.30, amp:1.00 },
+  { k:'np_ye',    dir:'npc',  tear:3.89, amp:1.00 },
+  { k:'hero_m_0', dir:'hero', tear:4.74, amp:1.00 },
+  { k:'hero_m_1', dir:'hero', tear:3.67, amp:1.00 },
+  { k:'hero_m_2', dir:'hero', tear:3.91, amp:0.65 },
+  { k:'hero_m_3', dir:'hero', tear:4.73, amp:0.65 },
+  { k:'hero_m_4', dir:'hero', tear:3.99, amp:0.65 },
+  { k:'hero_f_0', dir:'hero', tear:3.61, amp:0.65 },
+  { k:'hero_f_1', dir:'hero', tear:2.68, amp:1.00 },
+  { k:'hero_f_2', dir:'hero', tear:2.52, amp:1.00 },
+  { k:'hero_f_3', dir:'hero', tear:3.71, amp:0.65 },
+  { k:'hero_f_4', dir:'hero', tear:3.56, amp:0.65 }
 ];
 var ELNAME = ['金','木','土','水','火'];
 var labelOf = function(k){
