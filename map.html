@@ -3156,6 +3156,9 @@ function npcByKey(k){ for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k) return 
 var NPC_MODELS = ['np_lamp', 'np_smith', 'np_ash', 'np_peng', 'np_ling', 'np_yan', 'np_xun', 'np_xing', 'np_echo', 'np_ye', 'np_qiao', 'np_jian'];
 var NPC_MODEL_H = 1.95;      // 归一化后的角色身高（米）
 var NPC_MODEL_YAW = 0;       // 模型正面相对 +Z 的修正角
+/* 骨骼动画总开关：改成 false 就不播放 glb 里的 walk/idle，退回「程序化整体补偿」（只起伏摆动、
+   四肢不动）。用来快速对比 —— 一旦觉得自动蒙皮的动作还是别扭，改这一行即可，不用重新生成模型。 */
+var USE_SKIN_ANIM = true;
 
 /* 玩家英雄 3D 模型白名单：键 = 立绘同名 hero_{性别}_{元素}（见 js/utils.js heroImg）。
    只有列在这里、且 models/hero/<键>.glb 真的存在的英雄才替换程序化人形；
@@ -3167,6 +3170,7 @@ var HERO_MODEL_H = 1.85;     // 归一化后的英雄身高（米）
    这里建一个 AnimationMixer，按「移动强度」在 idle / walk 之间交叉淡入淡出 ——
    这样四肢会真的交替摆动，而不是像纯程序化补偿那样只有整体躯干在动。 */
 function makeAnimMixer(root, gltf){
+  if(!USE_SKIN_ANIM) return null;          // 总开关：关掉则退回程序化补偿
   if(!gltf || !gltf.animations || !gltf.animations.length) return null;
   if(!window.THREE || !THREE.AnimationMixer) return null;
   var mixer = new THREE.AnimationMixer(root);
