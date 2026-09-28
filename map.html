@@ -3162,12 +3162,43 @@ var NPC_MODEL_YAW = 0;       // 模型正面相对 +Z 的修正角
    数组为空时地图角色行为与改造前完全一致（程序化人形兜底）。 */
 var HERO_MODELS = ['hero_m_0', 'hero_m_1', 'hero_m_2', 'hero_m_3', 'hero_m_4', 'hero_f_0', 'hero_f_1', 'hero_f_2', 'hero_f_3', 'hero_f_4'];
 var HERO_MODEL_H = 1.85;     // 归一化后的英雄身高（米）
+/* ============ 骨骼动画（rig 版 glb） ============
+   由 .workbuddy/tools/rig_glb.cjs 给静态模型自动蒙皮生成，带 walk 与 idle 两条片段。
+   这里建一个 AnimationMixer，按「移动强度」在 idle / walk 之间交叉淡入淡出 ——
+   这样四肢会真的交替摆动，而不是像纯程序化补偿那样只有整体躯干在动。 */
+function makeAnimMixer(root, gltf){
+  if(!gltf || !gltf.animations || !gltf.animations.length) return null;
+  if(!window.THREE || !THREE.AnimationMixer) return null;
+  var mixer = new THREE.AnimationMixer(root);
+  var acts = {};
+  gltf.animations.forEach(function(clip){
+    var a = mixer.clipAction(clip);
+    a.setLoop(THREE.LoopRepeat, Infinity);
+    a.enabled = true;
+    a.play();
+    a.setEffectiveWeight(0);          // 权重由 updateAnimMixer 每帧设定
+    acts[clip.name] = a;
+  });
+  mixer._acts = acts;
+  return mixer;
+}
+/* g: 0=静止 1=全速；dt 为本帧时长 */
+function updateAnimMixer(mixer, g, dt){
+  if(!mixer || !mixer._acts) return;
+  var w = Math.max(0, Math.min(1, g));
+  var idle = mixer._acts['idle'], walk = mixer._acts['walk'];
+  if(idle) idle.setEffectiveWeight(1 - w);
+  if(walk) walk.setEffectiveWeight(w);
+  mixer.update(dt || 0.016);
+}
+
 function attachNpcModel(q, g, body){
   if(NPC_MODELS.indexOf(q.k) < 0) return;
   if(!window.THREE || !THREE.GLTFLoader) return;
   if(window.__gltfFailed) return;     // 全局失败后不再发起新请求，省 CPU 与控制台噪音
   var loader = new THREE.GLTFLoader();
-  loader.load('models/npc/' + q.k + '.glb', function(gltf){
+  /* 优先加载带骨骼动画的 rig 版；失败（比如还没生成）自动回退静态版，页面始终可用。 */
+  function place(gltf){
     var m = gltf.scene || (gltf.scenes && gltf.scenes[0]);
     if(!m) return;
     /* 归一化：缩放到统一身高，水平居中、脚底贴地 */
@@ -3188,11 +3219,16 @@ function attachNpcModel(q, g, body){
        每帧驱动动作时若直接改它就会把偏移冲掉。holder 的基准是 0，专供动画使用。 */
     var holder = new THREE.Group();
     holder.add(m);
-    if(body) body.visible = false;    // 隐藏程序化人形
+    q.mixer = makeAnimMixer(m, gltf);   // 有骨骼则接管动画
+    if(body) body.visible = false;      // 隐藏程序化人形
     g.add(holder);
     q.model = holder;
     window.__npcModelsLoaded = (window.__npcModelsLoaded || 0) + 1;
-  }, undefined, function(){ window.__gltfFailed = true; });
+    if(q.mixer) window.__npcAnimLoaded = (window.__npcAnimLoaded || 0) + 1;
+  }
+  loader.load('models/npc/' + q.k + '_rig.glb', place, undefined, function(){
+    loader.load('models/npc/' + q.k + '.glb', place, undefined, function(){ window.__gltfFailed = true; });
+  });
 }
 /* ==================== 玩家英雄 3D 模型 ====================
    与 NPC 同一套做法：命中白名单就加载 models/hero/<键>.glb，归一化身高、水平居中、
@@ -3210,7 +3246,7 @@ function attachHeroModel(g, key){
   if(!window.THREE || !THREE.GLTFLoader) return;
   if(window.__gltfFailed) return;
   var loader = new THREE.GLTFLoader();
-  loader.load('models/hero/' + key + '.glb', function(gltf){
+  function place(gltf){
     var m = gltf.scene || (gltf.scenes && gltf.scenes[0]);
     if(!m) return;
     /* 归一化：缩放到统一身高，水平居中、脚底贴地 */
@@ -3228,11 +3264,17 @@ function attachHeroModel(g, key){
     });
     var holder = new THREE.Group();
     holder.add(m);
+    heroParts.mixer = makeAnimMixer(m, gltf);   // 有骨骼则接管动画
     if(heroParts.hips) heroParts.hips.visible = false;   // 隐藏程序化人形（含其武器）
     heroParts.modelHolder = holder;
     g.add(holder);
     window.__heroModelsLoaded = (window.__heroModelsLoaded || 0) + 1;
-  }, undefined, function(){ window.__gltfFailed = true; });
+    if(heroParts.mixer) window.__heroAnimLoaded = (window.__heroAnimLoaded || 0) + 1;
+  }
+  /* 优先 rig 版（带骨骼动画），失败回退静态版 */
+  loader.load('models/hero/' + key + '_rig.glb', place, undefined, function(){
+    loader.load('models/hero/' + key + '.glb', place, undefined, function(){ window.__gltfFailed = true; });
+  });
 }
 
 function buildNpc(q){
@@ -3451,10 +3493,11 @@ function updateNpcs(dt, t){
       p.body.position.y = Math.abs(Math.sin(q.walk)) * 0.03 * (0.3 + sp) + br * 0.012;
       p.head.position.y = 1.86 * (q.look === 'shade' ? 1.12 : (q.look === 'hunter' ? 1.05 : 1)) + br * 0.02;
     }
-    /* 用 3D 模型时（程序化人形已隐藏）：glb 是静态网格、不含骨骼动画，
-       若不叠加补偿，角色看上去就是「贴着地面平移」。这里对 holder 做程序化动作：
-       走动上下起伏 + 躯干左右摇摆 + 跑动前倾 + 待机呼吸。 */
-    if(q.model){
+    /* 有骨骼动画就交给 AnimationMixer（四肢会真的交替摆动）；
+       否则（仍是静态 glb）才用程序化补偿撑住「贴地滑行」的观感。 */
+    if(q.mixer){
+      updateAnimMixer(q.mixer, Math.min(moving / 9, 1), dt);
+    } else if(q.model){
       var spm = Math.min(moving / 9, 1);
       var wk = q.walk || 0;
       q.model.position.y = Math.abs(Math.sin(wk)) * 0.06 * (0.25 + spm)
@@ -4226,10 +4269,10 @@ function updateHero(dt){
   heroParts.sword.rotation.z = (hero.attackT > 0) ? swordSwing : (0.5 + Math.sin(hero.walk * 0.7) * 0.05);
   heroParts.ring.material.opacity = 0.35 + Math.sin(performance.now()*0.003)*0.15;
 
-  /* 用 3D 模型时（程序化人形 hips 已隐藏）：glb 是静态网格、没有骨骼，
-       关节动画全在看不见的地方跑 —— 角色就像在贴地滑行。
-       这里对模型容器 holder 叠加程序化动作，复用上面同一套节奏变量。 */
-  if(heroParts.modelHolder){
+  /* 有骨骼动画 → AnimationMixer 接管；否则（静态 glb）才叠加程序化补偿。 */
+  if(heroParts.mixer){
+    updateAnimMixer(heroParts.mixer, clamp(gait, 0, 1), dt);
+  } else if(heroParts.modelHolder){
     var hb = heroParts.modelHolder;
     var bob     = Math.abs(Math.sin(hero.walk)) * 0.075 * gait;                        // 跑动起伏
     var breathe = Math.sin(performance.now()*0.0016) * 0.014 * (1 - clamp(gait,0,1));  // 待机呼吸
