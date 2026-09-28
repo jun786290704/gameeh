@@ -2459,8 +2459,10 @@ function buildHero(elKey){
     var shin = new THREE.Group(); shin.position.y = -0.48; leg.add(shin);
     var calf = C(0.12, 0.36, cloth2); calf.position.y = -0.18; shin.add(calf);
     var greave = CY(0.13, 0.1, 0.3, armor); greave.position.y = -0.18; shin.add(greave);
-    var boot = CY(0.1, 0.08, 0.15, dark); boot.position.y = -0.4; shin.add(boot);
-    return {leg:leg, shin:shin};
+    /* 鑴氳笣鍏宠妭锛氬皬鑴氱嫭绔嬩簬灏忚吙锛岃蛋璺椂鍋?鎿﹀湴/鐐瑰湴"琛ュ伩锛岃繄姝ユ洿鐪熷疄 */
+    var foot = new THREE.Group(); foot.position.y = -0.4; shin.add(foot);
+    var boot = CY(0.1, 0.08, 0.15, dark); boot.position.y = 0; foot.add(boot);
+    return {leg:leg, shin:shin, foot:foot};
   }
   var legL = buildLeg(1), legR = buildLeg(-1);
 
@@ -2569,7 +2571,7 @@ function buildHero(elKey){
   heroParts = {
     body:g, torso:chestG, head:head, cape:cape,
     armL:aL.arm, armR:aR.arm, foreL:aL.fore, foreR:aR.fore,
-    legL:legL.leg, legR:legR.leg, shinL:legL.shin, shinR:legR.shin,
+    legL:legL.leg, legR:legR.leg, shinL:legL.shin, shinR:legR.shin, footL:legL.foot, footR:legR.foot,
     ring:ring, sword:sword, hips:hips, crest:crestG
   };
   heroObj = g;
@@ -3194,8 +3196,10 @@ function updateAnimMixer(mixer, g, dt){
   if(idle) idle.setEffectiveWeight(1 - w);
   if(walk){
     walk.setEffectiveWeight(w);
-    /* 步频跟着移动速度走（慢走 0.75 倍速 / 全速 1.3 倍速），不然快跑时脚明显打滑 */
-    walk.timeScale = 0.75 + w * 0.55;
+    /* 步频跟着移动速度走。地图里 WALK=16 / RUN=30 单位每秒而角色才 1.95 单位高
+       （＝8~15 身高/秒，真人的 10 倍），步幅再大也追不上位移，只能让步频尽量跟上，
+       让「腿在快速交替」这个信号足够强；上限从 1.3 提到 2.4 倍速。 */
+    walk.timeScale = 0.8 + w * 1.6;
   }
   mixer.update(dt || 0.016);
 }
@@ -3493,8 +3497,8 @@ function updateNpcs(dt, t){
       p.legL.rotation.x = sw;
       p.legR.rotation.x = -sw;
       p.legL.rotation.z = 0; p.legR.rotation.z = 0;
-      p.shinL.rotation.x = Math.max(0, Math.sin(q.walk + 1.1)) * (0.1 + sp*0.5);
-      p.shinR.rotation.x = Math.max(0, Math.sin(q.walk + 1.1 + Math.PI)) * (0.1 + sp*0.5);
+      p.shinL.rotation.x = -sw * 0.35 + Math.max(0, Math.sin(q.walk + 1.1)) * (0.1 + sp*0.5);
+      p.shinR.rotation.x =  sw * 0.35 + Math.max(0, Math.sin(q.walk + 1.1 + Math.PI)) * (0.1 + sp*0.5);
       p.armL.rotation.x = -sw * 0.75;
       p.armR.rotation.x = sw * 0.75;
       var br = Math.sin(t*1.5 + i*1.3);
@@ -4247,6 +4251,7 @@ function updateHero(dt){
   if(hero.air){
     heroParts.legL.rotation.x = -0.85; heroParts.legR.rotation.x = -0.3;
     heroParts.shinL.rotation.x = 1.15;  heroParts.shinR.rotation.x = 0.45;
+    heroParts.footL.rotation.x = 0.55;  heroParts.footR.rotation.x = 0.55;   /* 鑵剧┖鑴氬皷寰瀭 */
     heroParts.armL.rotation.x = -1.15;  heroParts.armR.rotation.x = -0.95 - bodyLunge;
     heroParts.foreL.rotation.x = -0.45; heroParts.foreR.rotation.x = -0.35;
     heroParts.body.position.y = 0 - landDip;
@@ -4255,8 +4260,13 @@ function updateHero(dt){
   } else {
     heroParts.legL.rotation.x = sw;
     heroParts.legR.rotation.x = sw2;
-    heroParts.shinL.rotation.x = Math.max(0, Math.sin(hero.walk + 1.05)) * gait * 0.72;
-    heroParts.shinR.rotation.x = Math.max(0, Math.sin(hero.walk + 1.05 + Math.PI)) * gait * 0.72;
+    /* 姝ユ€佸崌绾э細澶ц吙鍓嶆憜鏃跺皬鑵跨浉瀵瑰悜鍚庝几灞曪紙鑴氬悜鍓嶆帰鍑鸿笍鍦帮級锛屽悗鎽嗘椂鑶濇姌鍙犳姮鑴氳窡锛?       灏忚剼鍐嶅姞鑴氳笣琛ュ伩锛岃剼鎺屽儚鐪熻蛋璺竴鏍?鎿﹀湴/鐐瑰湴"銆?*/
+    var bendL = Math.max(0, Math.sin(hero.walk + 1.05)) * gait * 0.85;
+    var bendR = Math.max(0, Math.sin(hero.walk + 1.05 + Math.PI)) * gait * 0.85;
+    heroParts.shinL.rotation.x = -sw * 0.38 + bendL;
+    heroParts.shinR.rotation.x = -sw2 * 0.38 + bendR;
+    heroParts.footL.rotation.x = -heroParts.shinL.rotation.x * 0.55;
+    heroParts.footR.rotation.x = -heroParts.shinR.rotation.x * 0.55;
     heroParts.armL.rotation.x = -sw * 0.85;
     heroParts.armR.rotation.x = -sw2 * 0.85 - bodyLunge * 1.6;
     heroParts.foreL.rotation.x = -0.22 - Math.max(0, Math.sin(hero.walk)) * gait * 0.38;
