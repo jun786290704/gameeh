@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>衡洲 · 像素卷轴（我的世界版）</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231a2418'/%3E%3Crect x='10' y='10' width='12' height='12' fill='%2356a85a'/%3E%3Crect x='22' y='10' width='12' height='12' fill='%237b5a3e'/%3E%3Crect x='34' y='10' width='12' height='12' fill='%2356a85a'/%3E%3Crect x='10' y='22' width='12' height='12' fill='%237b5a3e'/%3E%3Crect x='22' y='22' width='12' height='12' fill='%23c2a268'/%3E%3Crect x='34' y='22' width='12' height='12' fill='%237b5a3e'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./vendor/fontawesome/css/all.min.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'">
+<style>
+:root{
+  --bg:#0a0e18; --panel:#0d1526; --line:#1c2a44; --line2:#24304a;
+  --gold:#fbbf24; --gold2:#f59e0b; --text:#e8eef7; --muted:#8ea0bd;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overscroll-behavior:none}
+body{position:fixed;inset:0;width:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;overflow:hidden;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  image-rendering:pixelated;image-rendering:-moz-crisp-edges;
+}
+input{font-family:inherit}
+a{color:var(--gold);text-decoration:none}
+
+.top{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(10,14,24,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+  padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+.top-in{max-width:1400px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:900;font-size:15px;color:#fff}
+.brand .logo{width:28px;height:28px;border-radius:6px;background:#1a2418;image-rendering:pixelated;
+  background:
+    linear-gradient(#56a85a 0 33%, transparent 33%) 0 0/9px 9px,
+    linear-gradient(#7b5a3e 33% 66%, transparent 66%) 9px 0/9px 9px,
+    linear-gradient(#56a85a 66% 100%, transparent 100%) 18px 0/9px 9px,
+    #1a2418;}
+.brand small{color:var(--muted);font-weight:500;font-size:11px;letter-spacing:.12em}
+.top-links{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tlink{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);color:var(--text);font-size:12.5px;font-weight:600;background:rgba(13,21,38,.6);white-space:nowrap;font-family:ui-monospace,monospace}
+.tlink:hover{border-color:rgba(168,200,120,.55);color:#a8c878;text-decoration:none}
+.tlink.primary{background:linear-gradient(135deg,#a8c878,#5fa35a);color:#0d1a0a;border-color:transparent}
+
+#stage{position:fixed;inset:0;top:50px;overflow:hidden;background:#0e1320}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+#cv.fp{cursor:none}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+
+/* HUD */
+.hud-tl{position:absolute;left:16px;top:14px;max-width:min(52vw,430px);pointer-events:none}
+.hud-tl .eyebrow{display:inline-block;padding:3px 10px;border-radius:6px;border:1px solid rgba(122,154,90,.5);background:rgba(122,154,90,.12);color:#a8c878;font-size:10.5px;letter-spacing:.18em;margin-bottom:8px;font-family:ui-monospace,monospace}
+.hud-tl h1{font-size:clamp(18px,2.5vw,26px);font-weight:900;line-height:1.2;margin:6px 0 8px;color:#fff;text-shadow:2px 2px 0 #1a2418;font-family:ui-monospace,monospace;letter-spacing:.04em}
+.hud-tl p{font-size:12px;color:var(--muted);line-height:1.65;margin-top:2px;max-width:min(52vw,430px);font-family:ui-monospace,monospace}
+.coords{position:absolute;left:16px;top:14px;display:none;font-family:ui-monospace,monospace;font-size:11px;color:#a8c878;text-shadow:1px 1px 0 #000;background:rgba(10,14,24,.5);padding:4px 8px;border-radius:6px;border:1px solid rgba(168,200,120,.3)}
+.coords.show{display:block}
+.coords b{color:#fff}
+
+.tools{position:absolute;right:16px;top:14px;display:flex;flex-direction:column;gap:7px}
+.tool{width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);background:rgba(13,21,38,.86);color:#c6d3e6;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(6px)}
+.tool:hover{border-color:#a8c878;color:#a8c878}
+.tool.on{background:rgba(168,200,120,.16);border-color:#a8c878;color:#a8c878}
+
+/* 准心（FP 模式用） */
+#cross{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;display:none;pointer-events:none}
+#cross.show{display:block}
+#cross::before, #cross::after{content:"";position:absolute;background:#fff;opacity:.85;mix-blend-mode:difference}
+#cross::before{left:50%;top:0;width:2px;height:24px;transform:translateX(-50%)}
+#cross::after{left:0;top:50%;width:24px;height:2px;transform:translateY(-50%)}
+
+/* 提示 / 破坏进度条 */
+#actionBar{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);width:200px;height:6px;border-radius:3px;background:rgba(0,0,0,.4);display:none;pointer-events:none;border:1px solid rgba(255,255,255,.15)}
+#actionBar.show{display:block}
+#actionBar i{display:block;height:100%;background:#a8c878;border-radius:3px;width:0%;transition:width .1s linear}
+
+/* Hotbar */
+#hotbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:4px;padding:4px;background:rgba(10,14,24,.78);border:1px solid rgba(168,200,120,.3);border-radius:6px;backdrop-filter:blur(8px);font-family:ui-monospace,monospace}
+#hotbar .slot{width:46px;height:46px;border-radius:4px;background:rgba(20,28,46,.9);border:2px solid rgba(168,200,120,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;font-size:9px;color:var(--muted)}
+#hotbar .slot.on{border-color:#a8c878;box-shadow:0 0 12px rgba(168,200,120,.4)}
+#hotbar .slot .bi{font-size:18px;line-height:1}
+#hotbar .slot .lbl{font-size:8px;margin-top:1px;color:#a8c878;font-weight:700}
+#hotbar .slot .num{position:absolute;top:1px;left:3px;font-size:9px;color:var(--muted)}
+
+/* 加载 */
+#loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg);z-index:20}
+.spin{width:38px;height:38px;border-radius:0;border:3px solid rgba(168,200,120,.22);border-top-color:#a8c878;animation:sp 1s steps(8) infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loading p{font-size:12.5px;color:var(--muted);font-family:ui-monospace,monospace}
+#loading .lbrand{font-size:20px;font-weight:900;letter-spacing:.18em;color:#a8c878;font-family:ui-monospace,monospace}
+#loading .llore{max-width:420px;text-align:center;font-size:12px;color:#8a7d5c;line-height:1.8;padding:0 22px;font-family:ui-monospace,monospace}
+
+/* Toast */
+#toastStack{position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none}
+.toast{padding:10px 13px;border-radius:10px;background:#121a2b;border:1px solid var(--line2);color:#e8eef7;font-size:12.5px;box-shadow:0 12px 30px rgba(0,0,0,.5);pointer-events:auto;cursor:pointer;font-family:ui-monospace,monospace}
+
+/* 对话 */
+#dlg{position:fixed;left:0;right:0;bottom:0;z-index:140;display:none;justify-content:center;padding:0 16px calc(18px + env(safe-area-inset-bottom))}
+#dlg.show{display:flex}
+.dlg-card{position:relative;width:min(680px,96vw);display:flex;gap:14px;padding:16px 18px;border-radius:14px;background:linear-gradient(180deg,rgba(20,28,46,.98),rgba(10,16,28,.98));border:1px solid var(--line2);box-shadow:0 24px 64px rgba(0,0,0,.66);animation:dlgIn .18s ease-out;font-family:ui-monospace,'Noto Sans SC',monospace}
+@keyframes dlgIn{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+.dlg-av{width:76px;height:76px;flex-shrink:0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:34px;border:1px solid var(--line2);background:radial-gradient(circle at 50% 30%,rgba(168,200,120,.16),#0d1526 82%)}
+.dlg-main{flex:1;min-width:0}
+.dlg-name{font-size:15.5px;font-weight:900;color:#fff;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-right:30px}
+.dlg-role{font-size:10.5px;padding:2px 8px;border-radius:6px;border:1px solid rgba(168,200,120,.45);color:#a8c878;background:rgba(168,200,120,.09);font-weight:700}
+.dlg-txt{margin-top:8px;font-size:13.5px;line-height:1.85;color:#dbe4f2;min-height:50px}
+.dlg-foot{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:11px;flex-wrap:wrap}
+.btn-o{padding:9px 12px;border-radius:8px;border:1px solid var(--line2);background:rgba(13,21,38,.8);color:#dbe4f2;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-o:hover{border-color:#a8c878;color:#a8c878}
+.btn-o.gold{background:linear-gradient(135deg,#a8c878,#5fa35a);color:#0d1a0a;border-color:transparent}
+.dlg-x{position:absolute;right:11px;top:11px;width:28px;height:28px;border-radius:8px;border:1px solid var(--line2);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(11,18,32,.7)}
+.dlg-x:hover{color:#fff;border-color:#a8c878}
+
+/* 移动端 */
+@media(max-width:820px){
+  .top-in{padding:7px 10px;gap:8px}
+  .brand{font-size:13px}
+  .brand small{display:none}
+  .top-links a[href^="https"]{display:none}
+  .hud-tl{left:10px;top:8px;max-width:64vw}
+  .hud-tl .eyebrow{font-size:9.5px;padding:2px 8px;margin-bottom:4px}
+  .hud-tl h1{font-size:15px}
+  .hud-tl p{display:none}
+  .tools{right:10px;left:auto;top:auto;bottom:104px;flex-direction:row;gap:6px}
+  .tool{width:34px;height:34px;border-radius:8px;font-size:13px}
+  #hotbar{bottom:14px}
+  #hotbar .slot{width:40px;height:40px}
+  #hotbar .slot .lbl{display:none}
+  #cross{width:18px;height:18px}
+  #cross::before{height:18px}
+  #cross::after{width:18px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="logo"></span>像素卷轴<small>2km × 2km × 1500m</small></div>
+    <nav class="top-links">
+      <a class="tlink primary" href="./map.html"><i class="fa-solid fa-globe"></i>主世界</a>
+      <a class="tlink" href="./index.html"><i class="fa-solid fa-house"></i>官网</a>
+      <a class="tlink" href="./docs.html"><i class="fa-solid fa-book"></i>Docs</a>
+      <a class="tlink" href="./game.html"><i class="fa-solid fa-gamepad"></i>玩法</a>
+    </nav>
+  </div>
+</header>
+
+<div id="stage">
+  <canvas id="cv"></canvas>
+  <div id="labels"></div>
+
+  <div class="hud-tl" id="hudIntro">
+    <span class="eyebrow">HENGZHOU · VOXEL · 2KM</span>
+    <h1>衡洲 · 我的世界版</h1>
+    <p>2 千米见方，地面下 1000 米到天空中 500 米。六座圣域散落在世界各处。<br>
+      <b>WASD</b> 走 · <b>空格</b> 跳 · <b>滚轮/上下</b> 选方块 · <b>左键</b> 破 · <b>右键</b> 放 · <b>F5</b> 切视角 · <b>E</b> 交谈</p>
+  </div>
+
+  <div class="coords" id="coords"><b>X</b> 0 · <b>Y</b> 0 · <b>Z</b> 0</div>
+
+  <div class="tools">
+    <div class="tool" id="tView" title="切换第一人称 / 第三人称（F5）"><i class="fa-solid fa-eye"></i></div>
+    <div class="tool" id="tReset" title="回出生点"><i class="fa-solid fa-house"></i></div>
+    <div class="tool" id="tHelp" title="帮助"><i class="fa-solid fa-circle-question"></i></div>
+  </div>
+
+  <div id="cross"></div>
+  <div id="actionBar"><i></i></div>
+  <div id="hotbar"></div>
+
+  <div id="loading">
+    <div class="lbrand">HENGZHOU · VOXEL · 2KM</div>
+    <div class="spin"></div>
+    <p id="loadTxt">正在载入 3D 引擎…</p>
+    <p id="loadSub" style="font-size:10.5px;color:var(--muted);margin-top:-4px;font-family:ui-monospace,monospace"></p>
+    <div class="llore">2000 米见方 · 地表到 +500m · 基岩到 -1000m · 你正踏入的世界比衡洲更大</div>
+  </div>
+</div>
+
+<!-- 对话浮层 -->
+<div id="dlg">
+  <div class="dlg-card">
+    <div class="dlg-x" onclick="closeDialog()"><i class="fa-solid fa-xmark"></i></div>
+    <div class="dlg-av" id="dlgAv">🕯️</div>
+    <div class="dlg-main">
+      <div class="dlg-name"><span id="dlgName">旅人</span><span class="dlg-role" id="dlgRole">衡洲</span></div>
+      <div class="dlg-txt" id="dlgTxt"></div>
+      <div class="dlg-foot">
+        <button class="btn-o" onclick="closeDialog()">关闭</button>
+        <button class="btn-o gold" onclick="dlgNext()">继续</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toastStack"></div>
+
+<script>
+/* ====================================================================
+   衡洲 · 我的世界版（体素）
+   - 2km × 2km 平面 · 500m 高 / 1000m 深
+   - 16×16×16 chunked 存储 / 视距 6 chunks 动态加载
+   - 第一人称 + 第三人称视角
+   - 玩家体素碰撞 / 跳跃 / 重力
+   - 方块破坏（长按左键）/ 放置（右键）/ 滚轮 + 数字键切方块类型
+   - 6 座标志性建筑 + 6 个 NPC 嵌入体素世界
+   ==================================================================== */
+var HALF = 1000;                        // 平面半边长 = 2000m
+var CHUNK_SIZE = 16;
+var CHUNK_H = 16;                       // 每 chunk 16m 高
+var VIEW_DIST = 6;                      // 视距（chunks）→ 96m 半径
+var VIEW_DIST_Y = 4;                    // 垂直方向加载 chunks（避免远处高/低看不见）
+var WORLD_TOP = 500;
+var WORLD_BOT = -1000;
+var WORLD_SLICES = Math.ceil((WORLD_TOP - WORLD_BOT + 1) / CHUNK_H);  // 94
+var SLICE_TOP = WORLD_BOT + WORLD_SLICES * CHUNK_H;                  // = 504
+
+/* —— 块类型 —— 0 = 空气
+   与地图 atlas 完全复用；数字 ID 直接对应之前像素版 tileId */
+var B_AIR = 0, B_GRASS = 1, B_DIRT = 2, B_STONE = 3, B_BRICK = 4, B_PLANK = 5,
+    B_LEAVES = 6, B_WATER = 7, B_SAND = 8, B_SNOW = 9, B_PATH = 10, B_OBSIDIAN = 11,
+    B_RGOLD = 12, B_RWOOD = 13, B_RWATER = 14, B_RFIRE = 15, B_REARTH = 16,
+    B_BEDROCK = 17, B_DRAGON = 18, B_COIN = 19, B_CLGOLD = 20, B_CLWOOD = 21,
+    B_CLWATER = 22, B_CLFIRE = 23, B_CLGRAY = 24, B_CLEARTH = 25, B_CLPURPLE = 26,
+    B_CLDARK = 27, B_SKIN = 28, B_HAIRBLK = 29, B_HAIRGRY = 30, B_EYEYEL = 31,
+    B_FIRE = 32, B_LANTERN = 33, B_GLOW = 34;
+
+/* —— 像素 atlas —— 与之前完全相同的逻辑，只画更多 tile —— */
+var CDNS = [
+  './vendor/three.min.js',
+  'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',
+  'https://unpkg.com/three@0.128.0/build/three.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.128.0/three.min.js'
+];
+var CDN_TIMEOUT_MS = 8000;
+function paintLoad(txt, sub){
+  var el = document.getElementById('loadTxt'); if(el) el.textContent = txt;
+  var el2 = document.getElementById('loadSub'); if(el2 && sub !== undefined) el2.textContent = sub;
+}
+function showEngineOffline(reason){
+  var ld = document.getElementById('loading');
+  if(!ld) return;
+  ld.innerHTML =
+    '<div class="lbrand">ENGINE OFFLINE</div>' +
+    '<p style="color:#fb5a3a;font-size:13px">Three.js 加载失败</p>' +
+    '<p style="color:var(--muted);font-size:11px;max-width:460px;text-align:center;line-height:1.75">' + reason + '</p>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px">' +
+      '<button onclick="location.reload()" style="padding:9px 18px;border-radius:8px;background:linear-gradient(135deg,#a8c878,#5fa35a);color:#0d1a0a;border:0;font-weight:900;cursor:pointer;font-family:inherit">重新加载</button>' +
+      '<button onclick="loadThree(0)" style="padding:9px 18px;border-radius:8px;border:1px solid var(--line2);background:rgba(13,21,38,.85);color:#e8eef7;font-weight:700;cursor:pointer;font-family:inherit">重试 Three.js</button>' +
+    '</div>' +
+    '<div style="color:var(--muted);font-size:10.5px;margin-top:14px;text-align:center;line-height:1.7;max-width:460px">' +
+      '<b style="color:#a8c878">常见原因：</b><br>' +
+      '① <b>file:// 协议</b> —— 浏览器禁止本地脚本<br>' +
+      '② CDN 全被墙<br>' +
+      '③ vendor/three.min.js 路径错（603 KB）<br>' +
+      '④ 静态服务器 MIME 错' +
+    '</div>';
+}
+function loadThree(i){
+  if(i >= CDNS.length){ showEngineOffline('本地 + 4 个 CDN 全部超时或失败'); return; }
+  paintLoad('正在载入 3D 引擎…', '源 ' + (i+1) + '/' + CDNS.length);
+  var s = document.createElement('script');
+  s.src = CDNS[i] + '?t=' + Date.now();
+  var done = false;
+  function fail(reason){
+    if(done) return; done = true;
+    console.warn('[map2] three.js source failed:', CDNS[i], reason);
+    setTimeout(function(){ loadThree(i+1); }, 200);
+  }
+  var timer = setTimeout(function(){ fail('timeout ' + CDN_TIMEOUT_MS + 'ms'); }, CDN_TIMEOUT_MS);
+  s.onload = function(){
+    if(done) return; done = true; clearTimeout(timer);
+    if(window.THREE && typeof window.THREE.WebGLRenderer === 'function'){
+      paintLoad('正在生成方块世界…', '源 ' + (i+1) + ' OK · 引擎版本 ' + (THREE.REVISION || '?'));
+      boot();
+    } else fail('THREE missing');
+  };
+  s.onerror = function(){ fail('onerror'); };
+  document.head.appendChild(s);
+}
+
+/* —— 与 map.html / map2.html 同源 heightAt，但放大到 2km 范围 —— */
+function heightAt(x, z){
+  var h = Math.sin(x*0.0028)*Math.cos(z*0.0024)*120
+        + Math.sin(x*0.0095+1.7)*Math.cos(z*0.0082+0.6)*60
+        + Math.sin(x*0.0018-0.4)*Math.cos(z*0.0020+1.1)*80;
+  var d = Math.max(Math.abs(x), Math.abs(z));
+  if(d > 850){ var t = (d - 850) / 100; h -= t*t*220; }
+  return h;     // 范围 ≈ [-260, +260]，落地 y=0 上下铺
+}
+/* 地表高度记忆化：同一列 (wx,wz) 会被 9 个垂直切片重复计算
+   （generateChunk 一遍 + buildChunkMesh 剔除扫描一遍 = 50 万次以上 heightAt，
+   每次都是 6 个 sin/cos）。heightAt 是纯函数，缓存即可。 */
+/* 用定长 Int16Array 而不是对象/字符串 key：surfOf 在启动时会被调用几十万次，
+   字符串拼接 + 哈希查表的开销很可观（实测约 1 秒）。HALF=1000 ⇒ 2001×2001 ≈ 8MB。
+   -32768 表示"还没算过"（地表高度实际范围 ±260，不会撞上这个哨兵值）。 */
+var SURF_W = HALF * 2 + 1;
+var SURF_MEMO = new Int16Array(SURF_W * SURF_W);
+SURF_MEMO.fill(-32768);
+function surfOf(wx, wz){
+  var ix = wx + HALF, iz = wz + HALF;
+  if(ix < 0 || ix >= SURF_W || iz < 0 || iz >= SURF_W) return Math.floor(heightAt(wx, wz));
+  var k = ix * SURF_W + iz;
+  var v = SURF_MEMO[k];
+  if(v === -32768){ v = Math.floor(heightAt(wx, wz)); SURF_MEMO[k] = v; }
+  return v;
+}
+
+/* 3D 哈希 —— 让相同种子产生一致地形 */
+function hash3(x, y, z){
+  var h = (x * 73856093) ^ (y * 19349663) ^ (z * 83492791);
+  h = (h ^ (h >>> 13)) * 1274126177;
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+}
+
+/* —— 6 座建筑（在 world 坐标上）—— 由 buildStructure() 写入对应 chunk 的 blocks[] */
+var STRUCTURES = [
+  {k:'heroes',  x:0,    z:0,    name:'英雄圣殿', palette:[B_PLANK, B_BRICK, B_PATH, B_RGOLD, B_COIN]},
+  {k:'forge',   x:120,  z:-30,  name:'锻造工坊', palette:[B_STONE, B_BRICK, B_OBSIDIAN, B_RGOLD, B_FIRE]},
+  {k:'volcano', x:-180, z:140,  name:'熔炼火山', palette:[B_STONE, B_OBSIDIAN, B_RFIRE, B_DRAGON, B_FIRE]},
+  {k:'market',  x:160,  z:160,  name:'水上市集', palette:[B_WATER, B_PLANK, B_RGOLD, B_RWOOD, B_RWATER, B_RFIRE]},
+  {k:'gallery', x:-150, z:-180, name:'图鉴石碑', palette:[B_STONE, B_CLEARTH, B_LANTERN, B_EYEYEL]},
+  {k:'dragon',  x:220,  z:-230, name:'巨龙巢穴', palette:[B_STONE, B_DRAGON, B_FIRE, B_EYEYEL]}
+];
+
+/* —— 6 个 NPC —— 与原版同名 —— 玩家走近时按 E 触发对话（FP 模式更直接） */
+var NPCS = [
+  {k:'np_lamp',  name:'守灯人 · 燧', icon:'🕯️', role:'引路者', x:0,    z:18,    color:0xfbe070, head:0xe8b890, hair:0x2a1e14, cloth:B_CLGRAY,
+   lines:['你来得正好。灯就要灭了。','我是燧，最后一批守灯人。','找到守着的同事，他们才替你开门。']},
+  {k:'np_smith', name:'锻徒 · 钺', icon:'⚒️', role:'白帝之徒', x:120,  z:-44,   color:0xa8804a, head:0xe8b890, hair:0x2a1e14, cloth:B_CLGOLD,
+   lines:['站住。靴子上全是泥。','我是钺，炉子还在，名字也还在。']},
+  {k:'np_ash',   name:'守炉者 · 炎', icon:'🔥', role:'祝融余烬', x:-180, z:158,   color:0xd83a1a, head:0xe8b890, hair:0x2a1e14, cloth:B_CLFIRE,
+   lines:['别站那么近，头发会焦。','火不认旧情，只认轻重。']},
+  {k:'np_ling',  name:'渡者 · 舲', icon:'⛵', role:'玄冥麾下', x:160,  z:178,   color:0x3e7aac, head:0xe8b890, hair:0x2a1e14, cloth:B_CLWATER,
+   lines:['上船吗？……这里没有船，只有市集。','挂单不问来历，成交通知链上。']},
+  {k:'np_yan',   name:'记名者 · 砚', icon:'📖', role:'后土之石', x:-150, z:-198,  color:0xa8784a, head:0xe8b890, hair:0xa8a8a8, cloth:B_CLEARTH,
+   lines:['名字。你叫什么？……不必说。','相克多打三成。']},
+  {k:'np_echo',  name:'黯烬低语 · 残响', icon:'🕳️', role:'被腐蚀者', x:220,  z:-248,  color:0xaa3a3a, head:0x9a8080, hair:0x1a0e14, cloth:B_CLDARK,
+   lines:['……你也听见了？它在底下翻身。','七天一循环。']}
+];
+
+/* —— 玩家状态 —— */
+var hero = {
+  x: 4, y: 50, z: 4,           // 出生：地面上方一点（落地后 hero.y ≈ surfFloor + 1）
+  vx: 0, vy: 0, vz: 0,
+  yaw: 0.7, pitch: -0.25,     // 默认看向地下（pitch 负值 = 向下看），否则玩家一开始对着天空看不见任何方块
+  onGround: false,
+  height: 1.8, width: 0.6, depth: 0.6,  // 玩家碰撞盒
+  hp: 20,
+  selectedSlot: 0
+};
+var cam = { mode: 'fp', shake: 0 };     // 'fp' = 第一人称 / 'tp' = 第三人称
+var keys = {};
+var HOTBAR = [
+  {id:B_GRASS,  icon:'🟩', lbl:'草'},
+  {id:B_DIRT,   icon:'🟫', lbl:'土'},
+  {id:B_STONE,  icon:'⬜', lbl:'石'},
+  {id:B_BRICK,  icon:'🧱', lbl:'砖'},
+  {id:B_PLANK,  icon:'🪵', lbl:'木'},
+  {id:B_WATER,  icon:'🟦', lbl:'水'}
+];
+
+/* —— chunks 存储 —— */
+var chunks = {};     // key -> {blocks: Uint8Array, slices: Uint8Array, meshes: Group|null, dirty: bool}
+function chunkKey(cx, cy, cz){ return cx + ',' + cy + ',' + cz; }
+function getChunk(cx, cy, cz){
+  var k = chunkKey(cx, cy, cz);
+  var c = chunks[k];
+  if(c) return c;
+  /* userEdited：玩家挖/放过的标记。被编辑过的 chunk 不能走 buildChunkMesh 的
+     「整块被埋/整块空气」快速剔除，否则挖开的洞不会重新生成可见面。 */
+  c = { cx:cx, cy:cy, cz:cz, blocks: null, meshes: null, dirty: false, userEdited: false };
+  chunks[k] = c;
+  return c;
+}
+
+/* —— 世界块读取（运行时） —— */
+function getBlock(wx, wy, wz){
+  if(wy < WORLD_BOT || wy > WORLD_TOP) return B_AIR;
+  if(Math.abs(wx) > HALF || Math.abs(wz) > HALF) return B_AIR;
+  var cx = Math.floor(wx / CHUNK_SIZE);
+  var cz = Math.floor(wz / CHUNK_SIZE);
+  var cy = Math.floor((wy - WORLD_BOT) / CHUNK_H);
+  /* lx / lz / ly 都必须是整数（Uint8Array 索引会按 toUint32 截断）——
+     之前没 floor，让 0.3 % 16 = 0.3 参与索引导致读错 5 个格子 */
+  var lx = Math.floor(((wx % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE);
+  var lz = Math.floor(((wz % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE);
+  var ly = Math.floor(wy - WORLD_BOT - cy * CHUNK_H);
+  if(ly < 0 || ly >= CHUNK_H) return B_AIR;
+  var c = chunks[chunkKey(cx, cy, cz)];
+  if(!c || !c.blocks) return B_AIR;
+  return c.blocks[(ly * CHUNK_SIZE + lz) * CHUNK_SIZE + lx];
+}
+function setBlock(wx, wy, wz, t){
+  if(wy < WORLD_BOT || wy > WORLD_TOP) return false;
+  if(Math.abs(wx) > HALF || Math.abs(wz) > HALF) return false;
+  var cx = Math.floor(wx / CHUNK_SIZE);
+  var cz = Math.floor(wz / CHUNK_SIZE);
+  var cy = Math.floor((wy - WORLD_BOT) / CHUNK_H);
+  var lx = Math.floor(((wx % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE);
+  var lz = Math.floor(((wz % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE);
+  var ly = Math.floor(wy - WORLD_BOT - cy * CHUNK_H);
+  var c = getChunk(cx, cy, cz);
+  if(!c.blocks) c.blocks = new Uint8Array(CHUNK_SIZE * CHUNK_SIZE * CHUNK_H);
+  c.blocks[(ly * CHUNK_SIZE + lz) * CHUNK_SIZE + lx] = t;
+  c.dirty = true;
+  c.userEdited = true;          // 见 getChunk 的注释：编辑过就不再走快速剔除
+  /* 标记邻接 6 个面所在的 chunk 也需要重建（因为可见性可能变了） */
+  var adj = [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+  for(var i=0;i<6;i++){
+    var ncx = cx + adj[i][0], ncy = cy + adj[i][1], ncz = cz + adj[i][2];
+    if(ncy < 0 || ncy >= WORLD_SLICES) continue;
+    var nc = chunks[chunkKey(ncx, ncy, ncz)];
+    if(nc){ nc.dirty = true; nc.userEdited = true; }   // 邻接面也要重新判定可见性
+  }
+  return true;
+}
+
+/* —— chunk 生成 —— */
+/* 优先级：
+   1. bedrock (WORLD_BOT)
+   2. 高度图 surface -> grass/dirt/stone/snow
+   3. 地下 stone with rare ores
+   4. 水位面（y=10 以下自动填水）
+   5. 建筑结构（STRUCTURES）放在 surface 上方 */
+function generateChunk(c){
+  if(c.blocks) return;
+  c.blocks = new Uint8Array(CHUNK_SIZE * CHUNK_SIZE * CHUNK_H);
+  var x0 = c.cx * CHUNK_SIZE;
+  var z0 = c.cz * CHUNK_SIZE;
+  var y0 = WORLD_BOT + c.cy * CHUNK_H;
+  /* 快速填充：整块深埋在地表 6 格以下时，按下面原逻辑必然全是石头，
+     直接 fill 掉 4096 次逐块分支 —— 生成是启动耗时的大头（实测 1017 个 chunk 约 9 秒）。
+     条件 y0+CHUNK_H-1 < mnS-6 与原逻辑的 "wy < surf-6 ⇒ B_STONE" 完全等价；
+     再加 y0 > -50 是因为矿脉只生成在 wy<-50，整块都在矿脉深度之上时 fill 不会丢矿。 */
+  var mnS = Infinity, mxS = -Infinity;
+  for(var fx=0; fx<CHUNK_SIZE; fx++){
+    for(var fz=0; fz<CHUNK_SIZE; fz++){
+      var s0 = surfOf(x0 + fx, z0 + fz);
+      if(s0 < mnS) mnS = s0;
+      if(s0 > mxS) mxS = s0;
+    }
+  }
+  var hasSt = false;
+  for(var si0=0; si0<STRUCTURES.length; si0++){
+    var st0 = STRUCTURES[si0], sw0 = 12;
+    if(Math.abs(c.cx * CHUNK_SIZE + CHUNK_SIZE/2 - st0.x) > sw0) continue;
+    if(Math.abs(c.cz * CHUNK_SIZE + CHUNK_SIZE/2 - st0.z) > sw0) continue;
+    hasSt = true; break;
+  }
+  /* 整块都在地表之上（且在水位 8 之上、没有建筑塔楼）：全是空气 ——
+     Uint8Array 初值就是 0(B_AIR)，直接返回，省掉 4096 次分支 */
+  if(!hasSt && y0 > mxS && y0 >= 8){
+    c.dirty = true;
+    return;
+  }
+  if(y0 + CHUNK_H - 1 < mnS - 6 && y0 > -50){
+    c.blocks.fill(B_STONE);
+    if(y0 <= WORLD_BOT){        // 世界最底一层才是基岩
+      for(var fz2=0; fz2<CHUNK_SIZE; fz2++)
+        for(var fx2=0; fx2<CHUNK_SIZE; fx2++)
+          c.blocks[(0 * CHUNK_SIZE + fz2) * CHUNK_SIZE + fx2] = B_BEDROCK;
+    }
+    c.dirty = true;
+    return;
+  }
+  for(var lx=0; lx<CHUNK_SIZE; lx++){
+    var wx = x0 + lx;
+    for(var lz=0; lz<CHUNK_SIZE; lz++){
+      var wz = z0 + lz;
+      /* surface 取 floor —— 让"地表最高的 solid block"在整数 wy 上，
+         这样 wy = floor(surf) 是 grass，wy = floor(surf)+1 是 air，玩家站在地表上时正好站在 grass 上方 */
+      var surf = surfOf(wx, wz);
+      for(var ly=0; ly<CHUNK_H; ly++){
+        var wy = y0 + ly;
+        var idx = (ly * CHUNK_SIZE + lz) * CHUNK_SIZE + lx;
+        var t = B_AIR;
+        if(wy <= WORLD_BOT){
+          t = B_BEDROCK;
+        } else if(wy <= WORLD_BOT + 4 && wy > WORLD_BOT){
+          t = B_STONE;                   // 4 层基岩上方的硬石头
+        } else if(wy < surf - 6){
+          t = B_STONE;
+          /* 简单矿脉：深层有少量金/砖 */
+          if(wy < -50 && hash3(wx, wy, wz) > 0.985) t = B_BRICK;
+          if(wy < -200 && hash3(wx, wy, wz) > 0.997) t = B_OBSIDIAN;
+        } else if(wy < surf - 1){
+          t = B_DIRT;
+        } else if(wy <= surf){
+          /* 顶层：根据高度决定草/沙/雪 */
+          if(surf < -5) t = B_SAND;
+          else if(surf > 200) t = B_SNOW;
+          else t = B_GRASS;
+        } else {
+          /* 水位（y<8 时若此格是空气且邻格 surface 低于 y，自动填水） */
+          if(wy < 8 && wy > surf) t = B_WATER;
+        }
+        c.blocks[idx] = t;
+      }
+    }
+  }
+  /* 建筑生成（如果建筑 bbox 落在本 chunk 上） */
+  for(var si=0; si<STRUCTURES.length; si++){
+    var st = STRUCTURES[si];
+    var sw = 12;            // 建筑占地方块边长
+    if(Math.abs(c.cx * CHUNK_SIZE + CHUNK_SIZE/2 - st.x) > sw) continue;
+    if(Math.abs(c.cz * CHUNK_SIZE + CHUNK_SIZE/2 - st.z) > sw) continue;
+    buildStructureInChunk(c, st);
+  }
+}
+
+/* —— 在 chunk 内生成简化建筑 —— */
+function buildStructureInChunk(c, st){
+  var idx = function(lx, ly, lz){
+    return (ly * CHUNK_SIZE + lz) * CHUNK_SIZE + lx;
+  };
+  var x0 = c.cx * CHUNK_SIZE;
+  var z0 = c.cz * CHUNK_SIZE;
+  var y0 = WORLD_BOT + c.cy * CHUNK_H;
+  /* 把 (sx, sy, sz) 局部坐标（中心为 st.x, ground, st.z）的方块落到 chunk */
+  function put(sx, sy, sz, t){
+    var wx = st.x + sx, wy = sy, wz = st.z + sz;
+    if(wx < x0 || wx >= x0 + CHUNK_SIZE) return;
+    if(wz < z0 || wz >= z0 + CHUNK_SIZE) return;
+    if(wy < y0 || wy >= y0 + CHUNK_H) return;
+    var lx = wx - x0, lz = wz - z0, ly = wy - y0;
+    c.blocks[idx(lx, ly, lz)] = t;
+  }
+  var ground = Math.round(heightAt(st.x, st.z));
+  if(st.k === 'heroes'){
+    var b = B_PLANK;
+    for(var dx=-2; dx<=2; dx++) for(var dz=-2; dz<=2; dz++){
+      if(Math.abs(dx)+Math.abs(dz) > 3) continue;
+      put(dx, ground, dz, B_PATH);
+    }
+    for(var dx=-1; dx<=1; dx++) for(var dz=-1; dz<=1; dz++) put(dx, ground+1, dz, B_PATH);
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(p){
+      put(p[0], ground+2, p[1], B_PLANK); put(p[0], ground+3, p[1], B_PLANK);
+    });
+    for(var dx=-1; dx<=1; dx++) for(var dz=-1; dz<=1; dz++) put(dx, ground+4, dz, B_RGOLD);
+    put(0, ground+5, 0, B_COIN);
+  } else if(st.k === 'forge'){
+    for(var dx=-1; dx<=1; dx++) for(var dz=-1; dz<=2; dz++) put(dx, ground, dz, B_STONE);
+    for(var dx=-1; dx<=1; dx++) for(var dz=-1; dz<=2; dz++){
+      if(dx !== 0 || dz !== 2){ put(dx, ground+1, dz, B_BRICK); put(dx, ground+2, dz, B_BRICK); }
+    }
+    for(var dx=-1; dx<=1; dx++) for(var dz=-1; dz<=2; dz++) put(dx, ground+3, dz, B_RGOLD);
+    put(1, ground+4, 0, B_BRICK); put(1, ground+5, 0, B_BRICK); put(1, ground+6, 0, B_STONE);
+    put(-1, ground+1, 2, B_FIRE);
+  } else if(st.k === 'volcano'){
+    for(var dy=0; dy<5; dy++){
+      var r = 4 - dy;
+      for(var dx=-r; dx<=r; dx++) for(var dz=-r; dz<=r; dz++){
+        if(Math.abs(dx)+Math.abs(dz) > r*1.5) continue;
+        var tt = (dy >= 4) ? B_RFIRE : (Math.abs(dx)+Math.abs(dz) >= r ? B_STONE : B_OBSIDIAN);
+        put(dx, ground+dy, dz, tt);
+      }
+    }
+    put(0, ground+5, 0, B_FIRE);
+    put(0, ground+5, 0, B_DRAGON);
+  } else if(st.k === 'market'){
+    for(var dx=-2; dx<=2; dx++) for(var dz=-1; dz<=1; dz++) put(dx, ground-1, dz, B_WATER);
+    var tColors = [B_RGOLD, B_RWOOD, B_RWATER, B_RFIRE];
+    [[-2,0],[2,0],[-2,2],[2,2]].forEach(function(p, i){
+      put(p[0], ground, p[1], B_PLANK); put(p[0], ground+1, p[1], B_PLANK);
+      put(p[0], ground+2, p[1], tColors[i]);
+    });
+  } else if(st.k === 'gallery'){
+    for(var dx=-1; dx<=1; dx++) for(var dz=-1; dz<=1; dz++) put(dx, ground, dz, B_STONE);
+    put(0, ground+1, 0, B_CLEARTH); put(0, ground+2, 0, B_CLEARTH); put(0, ground+3, 0, B_CLEARTH); put(0, ground+4, 0, B_CLEARTH);
+    put(0, ground+5, 0, B_REARTH);
+    put(1, ground+1, 1, B_LANTERN); put(-1, ground+1, 1, B_LANTERN);
+  } else if(st.k === 'dragon'){
+    for(var dy=0; dy<4; dy++){
+      var r = 5 - dy;
+      for(var dx=-r; dx<=r; dx++) for(var dz=-r; dz<=r; dz++){
+        if(Math.abs(dx)+Math.abs(dz) > r*1.7) continue;
+        put(dx, ground+dy, dz, B_STONE);
+      }
+    }
+    put(0, ground+2, 1, B_DRAGON); put(0, ground+3, 1, B_DRAGON);
+    put(0, ground+4, 0, B_DRAGON); put(0, ground+4, -1, B_DRAGON);
+    put(1, ground+4, 0, B_EYEYEL); put(-1, ground+4, 0, B_EYEYEL);
+  }
+}
+
+/* —— chunk 网格构建 —— face culling，按块类型合并到 InstancedMesh —— */
+var CUBE_GEOM = null;       // 1×1×1 BoxGeometry（共享）
+var TILE_GEOMS = {};         // tileId -> BoxGeometry（UV 已切到 atlas）
+var SCENE = null, BLOCK_GROUPS = {};  // tileId -> InstancedMesh（所有可见 chunk 的块）
+
+function buildChunkMesh(c){
+  if(!CUBE_GEOM) CUBE_GEOM = new THREE.BoxGeometry(1, 1, 1);
+  /* 释放旧 mesh */
+  if(c.meshes){ SCENE.remove(c.meshes); c.meshes = null; }
+  if(!c.blocks) return;
+  var grp = new THREE.Group();
+  /* face culling：仅在邻居是空气/未生成时生成面 */
+  var x0 = c.cx * CHUNK_SIZE;
+  var z0 = c.cz * CHUNK_SIZE;
+  var y0 = WORLD_BOT + c.cy * CHUNK_H;
+
+  /* —— 启动耗时优化（实测：没有这段时 bootInner 要 98 秒，页面表现为"进去什么都没有看到"）——
+     原实现的开销：1017 个 chunk × 4096 块 × 6 次邻居查询 ≈ 2500 万次 getBlock()，
+     而 getBlock 每次都要拼字符串 key 再查表，主线程被完全阻塞。
+     两步优化：
+     ① 整块被埋（每列地表都高于本 chunk 顶）/ 整块空气（每列地表都低于底且在水位之上）
+        时没有任何可见面，直接跳过 —— 地下切片几乎全被这一步砍掉；
+     ② 邻居查询优先读本 chunk 的数组，只有跨界才走 getBlock。
+     ⚠ 玩家挖/放过的 chunk 不能用 ①（挖开的洞必须看得见），用 userEdited 标记排除。 */
+  var minSurf = Infinity, maxSurf = -Infinity;
+  for(var sx=0; sx<CHUNK_SIZE; sx++){
+    for(var sz=0; sz<CHUNK_SIZE; sz++){
+      var sv = surfOf(x0 + sx, z0 + sz);
+      if(sv < minSurf) minSurf = sv;
+      if(sv > maxSurf) maxSurf = sv;
+    }
+  }
+  var hasStruct = false;
+  for(var si0=0; si0<STRUCTURES.length; si0++){
+    var st0 = STRUCTURES[si0], sw0 = 12;
+    if(Math.abs(c.cx * CHUNK_SIZE + CHUNK_SIZE/2 - st0.x) > sw0) continue;
+    if(Math.abs(c.cz * CHUNK_SIZE + CHUNK_SIZE/2 - st0.z) > sw0) continue;
+    hasStruct = true; break;
+  }
+  if(!c.userEdited){
+    /* 注意用严格小于：若 chunk 顶正好等于地表，那一层就是可见的草地表层，不能跳过 */
+    if(y0 + CHUNK_H - 1 < minSurf || (!hasStruct && y0 > maxSurf && y0 >= 8)){
+      c.dirty = false;
+      var emptyGrp = new THREE.Group();
+      SCENE.add(emptyGrp);
+      c.meshes = emptyGrp;     // 占位：否则 !c.meshes 会让它每 16 帧被重建一次
+      return;
+    }
+  }
+  /* 只扫地表附近的层（建筑/被编辑的 chunk 例外：塔楼或挖出的洞可能远离地表）。
+     maxSurf+2 之外再并上水位 8，避免低洼处的水面被裁掉。 */
+  var lyFrom = (hasStruct || c.userEdited) ? 0 : Math.max(0, minSurf - 2 - y0);
+  var lyTo   = (hasStruct || c.userEdited) ? CHUNK_H - 1
+             : Math.min(CHUNK_H - 1, Math.max(maxSurf + 2 - y0, 8 - y0));
+
+  /* 邻居查询：块内直接读数组（快），跨界才走 getBlock（慢） */
+  var _lx = 0, _ly = 0, _lz = 0, _wx = 0, _wy = 0, _wz = 0;
+  function nb(dx, dy, dz){
+    var nx = _lx + dx, ny = _ly + dy, nz = _lz + dz;
+    if(nx < 0 || nx >= CHUNK_SIZE || ny < 0 || ny >= CHUNK_H || nz < 0 || nz >= CHUNK_SIZE)
+      return getBlock(_wx + dx, _wy + dy, _wz + dz);
+    return c.blocks[(ny * CHUNK_SIZE + nz) * CHUNK_SIZE + nx];
+  }
+
+  var perType = {};
+  for(var lx=0; lx<CHUNK_SIZE; lx++){
+    var wx = x0 + lx;
+    for(var ly=lyFrom; ly<=lyTo; ly++){
+      var wy = y0 + ly;
+      for(var lz=0; lz<CHUNK_SIZE; lz++){
+        var wz = z0 + lz;
+        var t = c.blocks[(ly * CHUNK_SIZE + lz) * CHUNK_SIZE + lx];
+        if(!t) continue;
+        _lx = lx; _ly = ly; _lz = lz; _wx = wx; _wy = wy; _wz = wz;
+        /* 检查 6 个邻居 */
+        var n = nb(1,0,0) === 0 || nb(-1,0,0) === 0 ||
+                nb(0,1,0) === 0 || nb(0,-1,0) === 0 ||
+                nb(0,0,1) === 0 || nb(0,0,-1) === 0;
+        if(!n) continue;
+        (perType[t] = perType[t] || []).push([wx, wy, wz]);
+      }
+    }
+  }
+  /* 按类型建 InstancedMesh —— 但要注意：所有 chunk 共享同一个 tile mesh pool
+     为了简化：每个 chunk 自己持有 mesh，但全部 add 到同一个 SCENE 的 root group */
+  var dummy = new THREE.Object3D();
+  for(var tt in perType){
+    var arr = perType[tt];
+    var geom = TILE_GEOMS[tt] || (TILE_GEOMS[tt] = makeTileGeom(tt));
+    var mat = tileMat(tt);
+    var im = new THREE.InstancedMesh(geom, mat, arr.length);
+    for(var i=0;i<arr.length;i++){
+      dummy.position.set(arr[i][0], arr[i][1], arr[i][2]);
+      dummy.updateMatrix();
+      im.setMatrixAt(i, dummy.matrix);
+    }
+    im.instanceMatrix.needsUpdate = true;
+    im.frustumCulled = false;
+    grp.add(im);
+  }
+  SCENE.add(grp);
+  c.meshes = grp;
+  c.dirty = false;
+}
+
+function disposeChunk(c){
+  if(c.meshes){ SCENE.remove(c.meshes); c.meshes = null; }
+}
+
+/* —— 像素 atlas —— 256x256 canvas, 8x8 tile (32x32 each) —— */
+var ATLAS = null;
+function makeAtlas(){
+  var c = document.createElement('canvas');
+  c.width = c.height = 256;
+  var g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  function tile(idx, fn){
+    var tx = (idx % 8) * 32, ty = ((idx / 8)|0) * 32;
+    fn(g, tx, ty, 32);
+  }
+  function sq(x, y, w, h, c){ g.fillStyle = c; g.fillRect(x, y, w, h); }
+  function rng(seed){ var s = seed|0 || 1; return function(){ s = (s * 1664525 + 1013904223) | 0; return ((s>>>0) % 1000) / 1000; }; }
+  function speck(x, y, w, h, base, dots, seed){
+    var r = rng(seed);
+    for(var i=0;i<dots;i++) sq(x + (r()*w)|0, y + (r()*h)|0, 1, 1, base);
+  }
+  // 0: 草顶（带露珠斑）
+  tile(0, function(g,x,y){ sq(x,y,32,32,'#5fa35a'); speck(x,y,32,32,'#7bc26f',14,11); speck(x,y,32,32,'#3f7d3a',6,12); });
+  // 1: 草边
+  tile(1, function(g,x,y){ sq(x,y,32,8,'#5fa35a'); speck(x,0,32,8,'#7bc26f',8,13); sq(x,8,32,24,'#7b5a3e'); speck(x,8,32,24,'#9b7a5e',16,14); });
+  // 2: 泥土
+  tile(2, function(g,x,y){ sq(x,y,32,32,'#7b5a3e'); speck(x,y,32,32,'#9b7a5e',22,21); speck(x,y,32,32,'#5a3e26',14,22); });
+  // 3: 石头
+  tile(3, function(g,x,y){ sq(x,y,32,32,'#7d8896'); speck(x,y,32,32,'#a3aebc',18,31); speck(x,y,32,32,'#5d6876',12,32); });
+  // 4: 砖
+  tile(4, function(g,x,y){ sq(x,y,32,32,'#a3523a'); speck(x,y,32,32,'#c26846',14,41); speck(x,y,32,32,'#7d3e2a',10,42); g.fillStyle='#5a2a1e'; g.fillRect(x,y+16,32,1); g.fillRect(x+16,y,1,16); g.fillRect(x+8,y+16,1,16); g.fillRect(x+24,y+16,1,16); });
+  // 5: 木板
+  tile(5, function(g,x,y){ sq(x,y,32,32,'#8b6a3e'); speck(x,y,32,32,'#a88054',18,51); speck(x,y,32,32,'#5e4626',10,52); g.fillStyle='#4a3520'; for(var i=1;i<3;i++) g.fillRect(x,y+(32*i/3)|0,32,1); });
+  // 6: 树叶
+  tile(6, function(g,x,y){ sq(x,y,32,32,'#3f7d3a'); speck(x,y,32,32,'#5fa35a',22,61); speck(x,y,32,32,'#2a5826',14,62); });
+  // 7: 水
+  tile(7, function(g,x,y){ sq(x,y,32,32,'#2a5a8c'); speck(x,y,32,32,'#3e7aac',16,71); speck(x,y,32,32,'#1e3e60',8,72); g.fillStyle='#a8c8e8'; g.fillRect(x+4,y+14,4,1); g.fillRect(x+20,y+26,6,1); });
+  // 8: 沙
+  tile(8, function(g,x,y){ sq(x,y,32,32,'#d8c082'); speck(x,y,32,32,'#b89c64',16,81); });
+  // 9: 雪
+  tile(9, function(g,x,y){ sq(x,y,32,32,'#e8eef2'); speck(x,y,32,32,'#c8d2dc',18,91); speck(x,y,32,32,'#fff',8,92); });
+  // 10: 路径石板
+  tile(10, function(g,x,y){ sq(x,y,32,32,'#5d6876'); speck(x,y,32,32,'#7d8896',14,101); g.fillStyle='#3a4250'; g.fillRect(x,y+16,32,1); g.fillRect(x+16,y,1,32); });
+  // 11: 黑曜石
+  tile(11, function(g,x,y){ sq(x,y,32,32,'#1a1422'); speck(x,y,32,32,'#3a2842',10,111); speck(x,y,32,32,'#4a3a6a',6,112); });
+  // 12-16: 5 种瓦顶
+  function roofTile(idx, base, hi, lo){ tile(idx, function(g,x,y){ sq(x,y,32,32,base); speck(x,y,32,32,hi,18,120+idx); speck(x,y,32,32,lo,12,130+idx); g.fillStyle=lo; for(var i=0;i<4;i++) g.fillRect(x+i*8,y+20,6,1); }); }
+  roofTile(12,'#a8804a','#d8b06a','#5e4626');
+  roofTile(13,'#3f7d3a','#5fa35a','#1a3818');
+  roofTile(14,'#2a5a8c','#3e7aac','#1a3a60');
+  roofTile(15,'#a83a2a','#d8623a','#5a1e14');
+  roofTile(16,'#7d5a3a','#a87a5a','#3a2a1a');
+  // 17: bedrock（基岩）
+  tile(17, function(g,x,y){ sq(x,y,32,32,'#1a1a22'); speck(x,y,32,32,'#2a2a32',16,171); speck(x,y,32,32,'#3a3a42',10,172); g.fillStyle='#0a0a12'; for(var i=0;i<3;i++) g.fillRect(x+i*10,y+(i*8+5)|0,8,1); });
+  // 18: 龙鳞
+  tile(18, function(g,x,y){ sq(x,y,32,32,'#5a2a1e'); speck(x,y,32,32,'#a83a2a',16,181); speck(x,y,32,32,'#2a1408',8,182); });
+  // 19: 金
+  tile(19, function(g,x,y){ sq(x,y,32,32,'#c2a268'); speck(x,y,32,32,'#fbd96a',12,191); speck(x,y,32,32,'#8b6a3e',8,192); });
+  // 20-23: 五行 NPC 衣
+  function clothTile(idx, c, dark){ tile(idx, function(g,x,y){ sq(x,y,32,32,c); speck(x,y,32,32,dark,14,200+idx); }); }
+  clothTile(20,'#c2a268','#8b6a3e'); clothTile(21,'#3f7d3a','#1a3818'); clothTile(22,'#3e7aac','#1a3a60'); clothTile(23,'#a83a2a','#5a1e14');
+  // 24: 灰袍
+  tile(24, function(g,x,y){ sq(x,y,32,32,'#6a7282'); speck(x,y,32,32,'#8a92a2',14,241); });
+  // 25: 土袍
+  tile(25, function(g,x,y){ sq(x,y,32,32,'#a8784a'); speck(x,y,32,32,'#7d5a3a',14,251); });
+  // 26: 紫袍
+  tile(26, function(g,x,y){ sq(x,y,32,32,'#6a3a8c'); speck(x,y,32,32,'#4a2a6c',14,261); });
+  // 27: 暗袍
+  tile(27, function(g,x,y){ sq(x,y,32,32,'#5a2a3a'); speck(x,y,32,32,'#3a1828',14,271); speck(x,y,32,32,'#aa3a3a',6,272); });
+  // 28: 皮肤
+  tile(28, function(g,x,y){ sq(x,y,32,32,'#e8b890'); speck(x,y,32,32,'#c89070',12,281); });
+  // 29: 黑发
+  tile(29, function(g,x,y){ sq(x,y,32,32,'#2a1e14'); speck(x,y,32,32,'#4a3e2a',10,291); });
+  // 30: 灰发
+  tile(30, function(g,x,y){ sq(x,y,32,32,'#a8a8a8'); speck(x,y,32,32,'#8a8a8a',10,301); });
+  // 31: 亮黄眼
+  tile(31, function(g,x,y){ sq(x,y,32,32,'#fbe070'); });
+  // 32: 火盆
+  tile(32, function(g,x,y){ sq(x,y,32,32,'#3a1a14'); sq(x+8,y+10,16,14,'#d83a1a'); sq(x+10,y+6,12,6,'#fbbe3a'); sq(x+12,y+2,8,4,'#fbe070'); });
+  // 33: 灯笼
+  tile(33, function(g,x,y){ sq(x,y,32,32,'#1a1410'); sq(x+10,y+8,12,16,'#fbe070'); sq(x+12,y+10,8,12,'#fff7c8'); });
+  // 34: glow
+  tile(34, function(g,x,y){ sq(x,y,32,32,'#fff7d6'); sq(x+12,y+12,8,8,'#fff'); });
+  var tex = new THREE.CanvasTexture(c);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  tex.generateMipmaps = false;
+  if(THREE.sRGBEncoding !== undefined) tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+
+function makeTileGeom(t){
+  var geo = new THREE.BoxGeometry(1, 1, 1);
+  var cols = 8;
+  var tx = (t % cols) / cols;
+  var ty = (((t / cols)|0) + 1) / cols;
+  var w = 1/cols, h = 1/cols;
+  var uvs = geo.attributes.uv.array;
+  for(var f=0;f<6;f++){
+    for(var v=0;v<4;v++){
+      var idx = (f*4 + v) * 2;
+      uvs[idx]   = uvs[idx]   * w + tx;
+      uvs[idx+1] = uvs[idx+1] * h + (ty - h);
+    }
+  }
+  geo.attributes.uv.needsUpdate = true;
+  return geo;
+}
+
+var TILE_MATS = {};
+function tileMat(t){
+  if(TILE_MATS[t]) return TILE_MATS[t];
+  var mat = new THREE.MeshLambertMaterial({ map: ATLAS, alphaTest: 0.05 });
+  TILE_MATS[t] = mat;
+  return mat;
+}
+
+/* —— 视距管理 —— 玩家位置变化时加载/卸载 chunk —— */
+function updateChunksAroundPlayer(){
+  var cx = Math.floor(hero.x / CHUNK_SIZE);
+  var cz = Math.floor(hero.z / CHUNK_SIZE);
+  var cys = Math.floor((hero.y - WORLD_BOT) / CHUNK_H);
+  var cyMin = Math.max(0, cys - VIEW_DIST_Y);
+  var cyMax = Math.min(WORLD_SLICES - 1, cys + VIEW_DIST_Y);
+  var needed = {};
+  var toBuild = [];
+  for(var dx=-VIEW_DIST; dx<=VIEW_DIST; dx++){
+    for(var dz=-VIEW_DIST; dz<=VIEW_DIST; dz++){
+      if(dx*dx + dz*dz > VIEW_DIST*VIEW_DIST) continue;
+      for(var cy=cyMin; cy<=cyMax; cy++){
+        var k = chunkKey(cx+dx, cy, cz+dz);
+        if(needed[k]) continue;
+        needed[k] = true;
+        var c = chunks[k] || getChunk(cx+dx, cy, cz+dz);
+        generateChunk(c);
+        toBuild.push(c);
+      }
+    }
+  }
+  /* 先全部生成、再统一建 mesh。原来是"生成一个就建一个"，建 A 的 mesh 时相邻的 B 可能
+     还没生成，getBlock 会把未生成的邻块当成空气(B_AIR) ⇒ 每个 chunk 的侧面都被误判为
+     暴露面，多渲染一整层"壳"（实测因此多出约 26 万个实例）。两趟走完就没有这个假面了。 */
+  for(var bi=0; bi<toBuild.length; bi++){
+    var bc = toBuild[bi];
+    if(bc.dirty || !bc.meshes) buildChunkMesh(bc);
+  }
+  /* 卸载超出视距的 chunk */
+  for(var k2 in chunks){
+    if(needed[k2]) continue;
+    disposeChunk(chunks[k2]);
+    /* 不删除 c.blocks —— 重入视距可复用；但用 (c.dirty && c.meshes) 检测重新构建 */
+  }
+  /* 视距外但 blocks 仍占内存 —— 5 分钟后回收（此处不实现，定期自动 GC） */
+}
+
+/* —— 玩家移动 + 体素碰撞 —— AABB on 8 corners —— */
+var WALK = 5.5, RUN = 9, GRAV = 28, JUMP = 9.5;
+function isSolid(b){ return b !== B_AIR && b !== B_WATER; }
+function collideAt(wx, wy, wz){
+  return isSolid(getBlock(wx, wy, wz));
+}
+function tryMoveAxis(axis, delta){
+  var nx = hero.x + (axis === 'x' ? delta : 0);
+  var nz = hero.z + (axis === 'z' ? delta : 0);
+  /* 玩家碰撞盒：feet = hero.y, head = hero.y + height。
+     水平移动只需检查身体范围 [feet, head]，**不**检查脚下（脚下是地面，水平移动本应能滑过） */
+  var hw = hero.width / 2, hd = hero.depth / 2;
+  var yCheck = [
+    hero.y,                              // 脚底
+    hero.y + 0.5,                        // 腰部
+    hero.y + hero.height - 0.05          // 头顶
+  ];
+  for(var yi=0; yi<yCheck.length; yi++){
+    var yy = yCheck[yi];
+    var corners = [
+      [nx + hw, yy, nz + hd],
+      [nx + hw, yy, nz - hd],
+      [nx - hw, yy, nz + hd],
+      [nx - hw, yy, nz - hd]
+    ];
+    for(var i=0;i<4;i++){
+      if(collideAt(corners[i][0], corners[i][1], corners[i][2])) return false;
+    }
+  }
+  if(axis === 'x') hero.x = nx;
+  else hero.z = nz;
+  return true;
+}
+
+function updateHero(dt){
+  /* 水平移动 */
+  var ix = 0, iz = 0;
+  if(!uiBlocked()){
+    if(keys['w'] || keys['arrowup'])    iz += 1;
+    if(keys['s'] || keys['arrowdown'])  iz -= 1;
+    if(keys['a'] || keys['arrowleft'])  ix -= 1;
+    if(keys['d'] || keys['arrowright']) ix += 1;
+  }
+  var mx = 0, mz = 0;
+  if(ix || iz){
+    var len = Math.hypot(ix, iz) || 1;
+    ix /= len; iz /= len;
+    var byaw = cam.mode === 'fp' ? hero.yaw : (cam.mode === 'tp' ? hero.yaw + Math.PI : hero.yaw);
+    var f = {x:-Math.sin(byaw), z:-Math.cos(byaw)};
+    var r = {x:Math.cos(byaw), z:-Math.sin(byaw)};
+    mx = f.x * iz + r.x * ix;
+    mz = f.z * iz + r.z * ix;
+  }
+  var sp = (keys['shift'] ? RUN : WALK);
+  var stepX = mx * sp * dt;
+  var stepZ = mz * sp * dt;
+  if(stepX !== 0) tryMoveAxis('x', stepX);
+  if(stepZ !== 0) tryMoveAxis('z', stepZ);
+
+  /* 重力与跳跃 —— hero.y 是 FEET 位置（脚下）
+   碰撞盒：脚下 = hero.y， 头顶 = hero.y + hero.height */
+  if((keys[' '] || keys['space']) && hero.onGround && !uiBlocked()){
+    hero.vy = JUMP; hero.onGround = false;
+  }
+  hero.vy -= GRAV * dt;
+  var ny = hero.y + hero.vy * dt;
+  /* 检查脚下（脚下 - 0.05，找脚下最近的 solid block） */
+  var footY = ny - 0.05;
+  var footCorners = [
+    [hero.x + hero.width/2, footY, hero.z + hero.depth/2],
+    [hero.x + hero.width/2, footY, hero.z - hero.depth/2],
+    [hero.x - hero.width/2, footY, hero.z + hero.depth/2],
+    [hero.x - hero.width/2, footY, hero.z - hero.depth/2]
+  ];
+  var blocked = false;
+  for(var i=0;i<4;i++) if(collideAt(footCorners[i][0], footCorners[i][1], footCorners[i][2])) blocked = true;
+  /* 检查头顶（hero.y + hero.height - 0.05 = 头顶下方 5cm） */
+  var headY = ny + hero.height - 0.05;
+  var headCorners = [
+    [hero.x + hero.width/2, headY, hero.z + hero.depth/2],
+    [hero.x + hero.width/2, headY, hero.z - hero.depth/2],
+    [hero.x - hero.width/2, headY, hero.z + hero.depth/2],
+    [hero.x - hero.width/2, headY, hero.z - hero.depth/2]
+  ];
+  var headBlocked = false;
+  for(var j=0;j<4;j++) if(collideAt(headCorners[j][0], headCorners[j][1], headCorners[j][2])) headBlocked = true;
+  if(blocked && hero.vy < 0){
+    /* 落地：找脚下 block 的 top = blockY + 1，把 ny 设为这个值（feet 在 block 顶部） */
+    var blockY = Math.floor(footY);
+    ny = blockY + 1;
+    hero.vy = 0;
+    hero.onGround = true;
+  } else if(headBlocked && hero.vy > 0){
+    /* 顶头：ny 落到 headY - height 之下 */
+    ny = Math.floor(headY) - hero.height;
+    hero.vy = 0;
+  } else {
+    hero.onGround = false;
+  }
+  hero.y = ny;
+  if(hero.y < WORLD_BOT + 2){ hero.y = WORLD_BOT + 2; hero.vy = 0; hero.onGround = true; }
+  if(hero.y > WORLD_TOP - 2){ hero.y = WORLD_TOP - 2; hero.vy = 0; }
+}
+
+/* —— 视角（FP / TP） —— */
+function applyCamera(){
+  /* hero.y = 脚下；眼睛 = 脚下 + 1.65m（标准人眼高） */
+  var eyeY = hero.y + 1.65;
+  if(cam.mode === 'fp'){
+    CAMERA.position.set(hero.x, eyeY, hero.z);
+    var cp = Math.cos(hero.pitch), sp = Math.sin(hero.pitch);
+    var dirx = cp * Math.sin(hero.yaw), dirz = cp * Math.cos(hero.yaw);
+    CAMERA.lookAt(hero.x + dirx, eyeY + sp, hero.z + dirz);
+  } else {
+    /* 第三人称：相机在玩家身后 4m */
+    var cp2 = Math.cos(hero.pitch), sp2 = Math.sin(hero.pitch);
+    var dirx2 = cp2 * Math.sin(hero.yaw), dirz2 = cp2 * Math.cos(hero.yaw);
+    CAMERA.position.set(hero.x - dirx2 * 4, eyeY - sp2 * 4, hero.z - dirz2 * 4);
+    CAMERA.lookAt(hero.x, hero.y + 1.0, hero.z);
+  }
+}
+
+/* —— 方块交互 —— 左键破 / 右键放 / 滚轮选 / 数字键选 ——
+   注意：lookRay 顶层只声明，THREE 不可用。等 bootInner() 里 THREE 可用后再 new。 */
+var lookRay = null;
+var hitTarget = null;        // {x, y, z, prevX, prevY, prevZ, face}
+function castLookRay(){
+  /* FP：从眼睛位置往视线方向打 6m（标准 MC 距离） */
+  lookRay.set(
+    Math.sin(hero.yaw) * Math.cos(hero.pitch),
+    Math.sin(hero.pitch),
+    Math.cos(hero.yaw) * Math.cos(hero.pitch)
+  );
+  var ox = hero.x, oy = hero.y + 1.65, oz = hero.z;
+  /* DDA voxel raycast */
+  var t = 0, step = 0.05, maxT = 6;
+  var prevX = 0, prevY = 0, prevZ = 0;
+  while(t < maxT){
+    var px = ox + lookRay.x * t, py = oy + lookRay.y * t, pz = oz + lookRay.z * t;
+    var bx = Math.floor(px), by = Math.floor(py), bz = Math.floor(pz);
+    if(collideAt(bx, by, bz)){
+      return { x: bx, y: by, z: bz, prevX: prevX, prevY: prevY, prevZ: prevZ, face: null };
+    }
+    prevX = bx; prevY = by; prevZ = bz;
+    t += step;
+  }
+  return null;
+}
+
+var breakProgress = 0;
+var breakTarget = null;
+function tickBreak(dt){
+  var hit = castLookRay();
+  hitTarget = hit;
+  var bar = document.getElementById('actionBar');
+  if(hit){
+    var b = getBlock(hit.x, hit.y, hit.z);
+    if(b === B_BEDROCK){       // 基岩不可破
+      breakTarget = null;
+      bar.classList.remove('show');
+      return;
+    }
+    if(breakTarget && breakTarget.x === hit.x && breakTarget.y === hit.y && breakTarget.z === hit.z){
+      breakProgress += dt * 3;
+      if(breakProgress >= 1){
+        setBlock(hit.x, hit.y, hit.z, B_AIR);
+        breakTarget = null;
+        breakProgress = 0;
+        bar.classList.remove('show');
+      } else {
+        bar.classList.add('show');
+        bar.querySelector('i').style.width = (breakProgress * 100) + '%';
+      }
+    } else {
+      breakTarget = hit;
+      breakProgress = 0;
+    }
+  } else {
+    breakTarget = null;
+    breakProgress = 0;
+    bar.classList.remove('show');
+  }
+}
+function tryPlace(){
+  var hit = castLookRay();
+  if(!hit) return;
+  var b = HOTBAR[hero.selectedSlot].id;
+  if(getBlock(hit.prevX, hit.prevY, hit.prevZ) === B_AIR){
+    /* 不能放进玩家身体 */
+    var phx = hero.x, phz = hero.z;
+    if(Math.abs(hit.prevX + 0.5 - phx) < hero.width/2 + 0.5 && Math.abs(hit.prevZ + 0.5 - phz) < hero.depth/2 + 0.5){
+      toast('位置被自己挡住', 'warn'); return;
+    }
+    setBlock(hit.prevX, hit.prevY, hit.prevZ, b);
+  }
+}
+function selectSlot(n){
+  if(n < 0 || n >= HOTBAR.length) return;
+  hero.selectedSlot = n;
+  for(var i=0;i<HOTBAR.length;i++){
+    var s = document.getElementById('hb' + i);
+    if(s) s.classList.toggle('on', i === n);
+  }
+}
+
+/* —— 输入 —— */
+var IS_TOUCH = false;
+function bindControls(){
+  var cv = document.getElementById('cv');
+  cv.requestPointerLock = cv.requestPointerLock || cv.mozRequestPointerLock || cv.webkitRequestPointerLock;
+  var lastInteract = 0;
+  cv.addEventListener('pointerdown', function(e){
+    if(cam.mode === 'fp' && document.pointerLockElement !== cv){
+      try{ cv.requestPointerLock(); }catch(ex){}
+      return;
+    }
+    if(e.button === 0){ tickBreak(0.0001); }      // 左键开始破
+    if(e.button === 2){ tryPlace(); }              // 右键放
+  });
+  cv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  /* 鼠标移动 = 转视角（仅 FP 模式） */
+  document.addEventListener('mousemove', function(e){
+    if(document.pointerLockElement !== cv) return;
+    hero.yaw -= e.movementX * 0.0025;
+    hero.pitch -= e.movementY * 0.0025;
+    if(hero.pitch > 1.4) hero.pitch = 1.4;
+    if(hero.pitch < -1.4) hero.pitch = -1.4;
+  });
+  /* 滚轮 = 选块 */
+  cv.addEventListener('wheel', function(e){
+    e.preventDefault();
+    var n = hero.selectedSlot + (e.deltaY > 0 ? 1 : -1);
+    if(n < 0) n = HOTBAR.length - 1;
+    if(n >= HOTBAR.length) n = 0;
+    selectSlot(n);
+  }, {passive:false});
+  /* 键盘 */
+  window.addEventListener('keydown', function(e){
+    var k = e.key.toLowerCase();
+    keys[k] = true;
+    if(k === ' ' || k === 'space'){ e.preventDefault(); }
+    if(k === 'f5'){ e.preventDefault(); toggleView(); }
+    if(k === 'r'){
+      /* 跳到出生点 */
+      hero.x = 4; hero.z = 4; hero.y = 50; hero.vy = 0;
+    }
+    if(k === 'e' && !uiBlocked()) interact();
+    if(k === 'escape'){ if(DLG.npc) closeDialog(); }
+    if(k >= '1' && k <= '9') selectSlot(Number(k) - 1);
+  });
+  window.addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = false; });
+  window.addEventListener('resize', onResize);
+  /* 工具按钮 */
+  document.getElementById('tView').onclick = toggleView;
+  document.getElementById('tReset').onclick = function(){
+    hero.x = 4; hero.z = 4; hero.y = 50; hero.vy = 0;
+  };
+  document.getElementById('tHelp').onclick = function(){
+    toast('WASD 走 · 空格 跳 · 左键破 · 右键放 · 滚轮/1-6 选块 · F5 切视角 · E 交谈 · R 回出生点', 'info');
+  };
+}
+function onResize(){
+  var w = window.innerWidth, h = window.innerHeight - 50;
+  RENDERER.setSize(w, h, false);
+  CAMERA.aspect = w / h;
+  CAMERA.updateProjectionMatrix();
+}
+function clamp(v, a, b){ return v < a ? a : v > b ? b : v; }
+
+function toggleView(){
+  cam.mode = (cam.mode === 'fp') ? 'tp' : 'fp';
+  document.getElementById('tView').classList.toggle('on', cam.mode === 'tp');
+  document.getElementById('cross').classList.toggle('show', cam.mode === 'fp');
+  document.getElementById('hudIntro').style.display = cam.mode === 'tp' ? 'block' : 'none';
+  if(cam.mode === 'fp' && document.body.requestPointerLock){
+    try{ document.getElementById('cv').requestPointerLock(); }catch(e){}
+  } else if(document.exitPointerLock){
+    try{ document.exitPointerLock(); }catch(e){}
+  }
+}
+
+/* —— NPC 对话 —— */
+var DLG = {npc:null, i:0};
+function openDialog(k){
+  var q = null; for(var i=0;i<NPCS.length;i++) if(NPCS[i].k === k){ q = NPCS[i]; break; }
+  if(!q) return;
+  DLG.npc = q; DLG.i = 0;
+  document.getElementById('dlg').classList.add('show');
+  renderDialog();
+}
+function closeDialog(){ document.getElementById('dlg').classList.remove('show'); DLG.npc = null; }
+function renderDialog(){
+  var q = DLG.npc; if(!q) return;
+  var lines = q.lines;
+  document.getElementById('dlgAv').textContent = q.icon;
+  document.getElementById('dlgName').textContent = q.name;
+  document.getElementById('dlgRole').textContent = q.role;
+  document.getElementById('dlgTxt').textContent = lines[DLG.i];
+}
+function dlgNext(){
+  if(!DLG.npc) return;
+  if(DLG.i < DLG.npc.lines.length - 1){ DLG.i++; renderDialog(); }
+  else closeDialog();
+}
+function interact(){
+  /* E：找最近的 NPC（< 6m） */
+  var best = null, bd = 1e9;
+  for(var i=0;i<NPCS.length;i++){
+    var q = NPCS[i];
+    var d = Math.hypot(hero.x - q.x, hero.z - q.z);
+    if(d < 6 && d < bd){ bd = d; best = q; }
+  }
+  if(best) openDialog(best.k);
+}
+function uiBlocked(){
+  var d = document.getElementById('dlg');
+  return !!(d && d.classList.contains('show'));
+}
+
+/* —— Toast —— */
+function toast(msg){
+  var s = document.getElementById('toastStack');
+  if(!s) return;
+  var el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  el.onclick = function(){ if(el.parentNode) el.parentNode.removeChild(el); };
+  s.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 4200);
+}
+
+/* —— 主循环 —— */
+var RENDERER, SCENE_C, CAMERA, clock;
+function boot(){
+  try{ bootInner(); }catch(e){
+    document.getElementById('loading').innerHTML =
+      '<div class="lbrand">BUILD FAIL</div>' +
+      '<p style="color:#fb5a3a;font-size:13px">世界初始化异常</p>' +
+      '<p style="color:var(--muted);font-size:11px;max-width:460px;text-align:center">' + ((e && e.message) || e) + '</p>' +
+      '<button onclick="location.reload()" style="padding:9px 18px;border-radius:8px;background:linear-gradient(135deg,#a8c878,#5fa35a);color:#0d1a0a;border:0;font-weight:900;cursor:pointer;font-family:inherit">重新加载</button>';
+  }
+}
+function bootInner(){
+  var cv = document.getElementById('cv');
+  try {
+    RENDERER = new THREE.WebGLRenderer({canvas:cv, antialias:false});
+  } catch(e){
+    document.getElementById('loading').innerHTML =
+      '<div class="lbrand">WEBGL OFFLINE</div>' +
+      '<p style="color:#fb5a3a;font-size:13px">浏览器未能初始化 WebGL</p>' +
+      '<p style="color:var(--muted);font-size:11px;max-width:460px;text-align:center">可能是隐私模式 / 显卡驱动过旧 / WebGL 被禁用</p>' +
+      '<button onclick="location.reload()" style="padding:9px 18px;border-radius:8px;background:linear-gradient(135deg,#a8c878,#5fa35a);color:#0d1a0a;border:0;font-weight:900;cursor:pointer;font-family:inherit">重新加载</button>';
+    return;
+  }
+  var vw = window.innerWidth || 1024;
+  var vh = Math.max(200, (window.innerHeight || 768) - 50);
+  RENDERER.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  RENDERER.setSize(vw, vh, false);
+  if(THREE.sRGBEncoding !== undefined) RENDERER.outputEncoding = THREE.sRGBEncoding;
+  RENDERER.setClearColor(0x9bbce8, 1);
+
+  SCENE_C = new THREE.Scene();
+  SCENE_C.background = new THREE.Color(0x9bbce8);
+  /* 雾：起雾拉到 60m（避免远景过早糊掉），远雾拉到 200m（看到视距极限） */
+  SCENE_C.fog = new THREE.Fog(0x9bbce8, 60, 200);
+
+  CAMERA = new THREE.PerspectiveCamera(75, vw / vh, 0.1, 500);
+  clock = new THREE.Clock();
+
+  /* 光照：双光源 + 半光，让任何角度都不会出现"全黑面" */
+  SCENE_C.add(new THREE.AmbientLight(0xc0d8f0, 1.4));
+  SCENE_C.add(new THREE.HemisphereLight(0xfff0d8, 0x4a5a3e, 0.85));   // 天蓝 → 地绿
+  var sun = new THREE.DirectionalLight(0xfff0d0, 1.1);
+  sun.position.set(120, 400, 80);
+  SCENE_C.add(sun);
+
+  /* THREE 已就绪 —— 创建 atlas + 全局场景引用 */
+  ATLAS = makeAtlas();
+  SCENE = SCENE_C;          // 全局引用，给 buildChunkMesh 用
+  lookRay = new THREE.Vector3();   // 至此 THREE 可用，补建
+
+  /* 玩家出生：地面上方 50m（脚下位置 = hero.y） */
+  hero.x = 4; hero.z = 4; hero.y = 50;
+  hero.vx = 0; hero.vy = 0;
+  hero.onGround = false;
+
+  /* 触发视距加载 */
+  updateChunksAroundPlayer();
+
+  /* 设置 hotbar UI */
+  var hb = document.getElementById('hotbar');
+  hb.innerHTML = HOTBAR.map(function(s, i){
+    return '<div class="slot' + (i === hero.selectedSlot ? ' on' : '') + '" id="hb' + i + '"><span class="num">' + (i+1) + '</span><span class="bi">' + s.icon + '</span><span class="lbl">' + s.lbl + '</span></div>';
+  }).join('');
+  selectSlot(0);
+
+  document.getElementById('loading').style.display = 'none';
+  window.__booted = true;
+  bindControls();
+
+  setTimeout(function(){ try{ toast('欢迎来到衡洲 · 我的世界版 · WASD 走 / 空格 跳 / 左键破 / 右键放', 'info'); }catch(e){} }, 600);
+  animate();
+}
+
+var frame = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  var dt = Math.min(clock.getDelta(), 0.05);
+  frame++;
+
+  updateHero(dt);
+  if(cam.mode === 'fp' && document.pointerLockElement === document.getElementById('cv')){
+    tickBreak(dt);
+  }
+  /* 每 16 帧重建一次视距 chunk（避免每帧重建） */
+  if((frame & 15) === 0) updateChunksAroundPlayer();
+
+  applyCamera();
+
+  /* 坐标 HUD */
+  var coords = document.getElementById('coords');
+  if(coords && (frame & 7) === 0){
+    coords.classList.add('show');
+    coords.innerHTML = '<b>X</b> ' + Math.floor(hero.x) + ' · <b>Y</b> ' + Math.floor(hero.y) + ' · <b>Z</b> ' + Math.floor(hero.z);
+  }
+  RENDERER.render(SCENE_C, CAMERA);
+}
+
+loadThree(0);
+</script>
+</body>
+</html>
