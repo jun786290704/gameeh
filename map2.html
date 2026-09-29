@@ -780,17 +780,31 @@ function makeAtlas(){
 }
 
 function makeTileGeom(t){
+  t = +t;                      // ⚠ 调用方传的是 perType 的对象键（字符串 "1"），必须转数字，
+                               //   否则 t === B_GRASS 永远为假，草顶特判静默失效
   var geo = new THREE.BoxGeometry(1, 1, 1);
   var cols = 8;
   var tx = (t % cols) / cols;
-  var ty = (((t / cols)|0) + 1) / cols;
+  /* ⚠ CanvasTexture 默认 flipY=true：v=0 对应图集的【底边】，v=1 对应顶边。
+     原来按"不翻转"算（v ∈ [row/8, (row+1)/8]），结果所有常用方块（草/土/石/砖/木/水，
+     都画在图集第 0~4 行）全部采到图集下方第 3~7 行的空白纹素，
+     alphaTest:0.05 把整个面片剔掉 ⇒ 世界整片隐形（实测浏览器里只有天蓝底色，
+     把 alphaTest 置 0 后地形以纯黑出现，证实采样落在了空白区）。
+     正确区间是 [1-(row+1)/8, 1-row/8]。 */
+  var v0 = 1 - (((t / cols)|0) + 1) / cols;
   var w = 1/cols, h = 1/cols;
   var uvs = geo.attributes.uv.array;
+  /* BoxGeometry 的面顺序：+x, -x, +y(顶), -y, +z, -z。
+     草方块顶面用「草顶」tile 0，侧面/底面用「草边」tile 1 ——
+     图集第 0 格本来就是为此准备的（B_GRASS=1 只能对到草边，tile 0 一直是死的）。 */
   for(var f=0;f<6;f++){
+    var tt = (t === B_GRASS && f === 2) ? 0 : t;
+    var tx2 = (tt % cols) / cols;
+    var v02 = 1 - (((tt / cols)|0) + 1) / cols;
     for(var v=0;v<4;v++){
       var idx = (f*4 + v) * 2;
-      uvs[idx]   = uvs[idx]   * w + tx;
-      uvs[idx+1] = uvs[idx+1] * h + (ty - h);
+      uvs[idx]   = uvs[idx]   * w + tx2;
+      uvs[idx+1] = uvs[idx+1] * h + v02;
     }
   }
   geo.attributes.uv.needsUpdate = true;
