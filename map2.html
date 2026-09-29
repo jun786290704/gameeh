@@ -670,7 +670,12 @@ function buildChunkMesh(c){
     var mat = tileMat(tt);
     var im = new THREE.InstancedMesh(geom, mat, arr.length);
     for(var i=0;i<arr.length;i++){
-      dummy.position.set(arr[i][0], arr[i][1], arr[i][2]);
+      /* ⚠ 必须 +0.5：方块 (wx,wy,wz) 在碰撞里占据 [wx,wx+1]×[wy,wy+1]×[wz,wz+1]
+         （见 updateHero 的 blockY = Math.floor(footY); ny = blockY + 1），
+         即中心在 +0.5 处。而 BoxGeometry(1,1,1) 以自身中心定位，
+         直接 set(wx,wy,wz) 会让整块几何相对物理偏移半格 —— 表现为"角色悬空半格、
+         不在地上"，准星指向的方块也和看到的差半格。 */
+      dummy.position.set(arr[i][0] + 0.5, arr[i][1] + 0.5, arr[i][2] + 0.5);
       dummy.updateMatrix();
       im.setMatrixAt(i, dummy.matrix);
     }
