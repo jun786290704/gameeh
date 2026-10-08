@@ -13,6 +13,12 @@ function bpToPct(bp, digits=2){
   const p = Number(bp) / 100;
   return p.toLocaleString('zh-CN',{maximumFractionDigits:digits}) + '%';
 }
+// 武器星级 → 奖励加成（与链上 _starBonusBp 一致：3星+10% / 4星+25% / 5星+50% / 其余+0%）
+function rewardBonusOf(stars){
+  const s = Number(stars)||1;
+  const bp = s===3 ? 11000 : s===4 ? 12500 : s===5 ? 15000 : 10000;
+  return Math.round((bp - 10000) / 100); // 返回百分比整数：0/10/25/50
+}
 function shortAddr(a){ if(!a) return '--'; a = String(a); return a.slice(0,6)+'…'+a.slice(-4); }
 function heroImg(el, id, skin){
   const e = Number(el)%5;

@@ -27,7 +27,8 @@ function weaponCardHtml(w){
     </div>
     <div class="p-3">
       <div class="flex items-center justify-between mb-1"><div class="text-[13px] text-muted">强化加成</div>${elBadge(w.element)}</div>
-      <div class="text-[16px] font-black text-green-400 num-mono mb-2">+${bpToPct(w.bonusBp)} <span class="text-[10px] font-bold text-muted">战力</span></div>
+      <div class="text-[16px] font-black text-green-400 num-mono mb-1">+${bpToPct(w.bonusBp)} <span class="text-[10px] font-bold text-muted">战力</span></div>
+      <div class="text-[13px] font-bold text-gold num-mono mb-2">奖励 +${rewardBonusOf(w.stars)}% <span class="text-[10px] font-bold text-muted">USDT</span></div>
       <div class="flex gap-2">
         <button onclick="enhanceSelect(${w.id})" class="btn btn-sm btn-ghost flex-1"><i class="fa-solid fa-gem"></i>强化</button>
         <button onclick="meltSelectFromWeapon(${w.id})" class="btn btn-sm btn-danger flex-1"><i class="fa-solid fa-fire"></i>熔炼</button>
@@ -67,7 +68,7 @@ async function renderWeapons(){
   const enh = `<div class="col-span-full game-card p-4 elbg-0 anim-fade">
       <div class="font-bold mb-1 flex items-center gap-2"><i class="fa-solid fa-gem text-gold"></i>精粹强化武器</div>
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-3">
-        <div><div class="lbl">选择武器</div><select id="enhWeaponSel" class="input">${S.weapons.map(w=>`<option value="${w.id}">#${w.id} · ${w.stars}星 · +${bpToPct(w.bonusBp)}</option>`).join('')||'<option value="">暂无武器</option>'}</select></div>
+        <div><div class="lbl">选择武器</div><select id="enhWeaponSel" class="input">${S.weapons.map(w=>`<option value="${w.id}">#${w.id} · ${w.stars}星 · +${bpToPct(w.bonusBp)} · 奖+${rewardBonusOf(w.stars)}%</option>`).join('')||'<option value="">暂无武器</option>'}</select></div>
         <div><div class="lbl">精粹阶</div><select id="enhEssenceSel" class="input">${[1,2,3,4].map(i=>`<option value="${i}">精粹 ${i} 阶（持有 ${eb[i]||0}）</option>`).join('')}</select></div>
         <div><div class="lbl">数量</div><input id="enhAmountInp" type="number" min="1" step="1" value="1" class="input"></div>
         <div class="flex items-end"><button onclick="enhanceFlow()" id="enhBtn" class="btn btn-gold w-full" ${S.weapons.length?'':'disabled'}><i class="fa-solid fa-wand-magic-sparkles"></i>强化</button></div>
