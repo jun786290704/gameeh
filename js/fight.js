@@ -1,18 +1,35 @@
 'use strict';
 
 /* ============ 战斗 ============ */
+const MONSTER_REG_ABI = [
+  "function monstersLength() view returns (uint256)",
+  "function getMonster(uint256) view returns (string name,uint8 element,uint32 power,uint32 reward,uint32 xp)"
+];
 async function fetchMonsters(){
   for(let attempt=0; attempt<3; attempt++){
     try{
       const v3 = mustC('v3');
-      const n = Number(await v3.monstersLength());
-      const ids = Array.from({length:n},(_,i)=>i);
-      const arr = await Promise.all(ids.map(async i=>{
-        try{
-          const m = await v3.monsters(i);
-          return {id:i, name: String(m.name).trim()||('怪物'+i), element:Number(m.element), power:Number(m.power), reward:Number(m.reward), xp:Number(m.xp)};
-        }catch(e){ return null; }
-      }));
+      // 优先读 MonsterRegistry（与链上结算同源）；未设置时回退 V3 本地数组
+      let n = 0, arr = [];
+      const regAddr = await v3.monsterRegistry().catch(()=>ethers.ZeroAddress);
+      if(regAddr && regAddr !== ethers.ZeroAddress){
+        const reg = new ethers.Contract(regAddr, MONSTER_REG_ABI, getReadProvider());
+        n = Number(await reg.monstersLength());
+        arr = await Promise.all(Array.from({length:n},(_,i)=>i).map(async i=>{
+          try{
+            const m = await reg.getMonster(i);
+            return {id:i, name: String(m.name).trim()||('怪物'+i), element:Number(m.element), power:Number(m.power), reward:Number(m.reward), xp:Number(m.xp)};
+          }catch(e){ return null; }
+        }));
+      } else {
+        n = Number(await v3.monstersLength());
+        arr = await Promise.all(Array.from({length:n},(_,i)=>i).map(async i=>{
+          try{
+            const m = await v3.monsters(i);
+            return {id:i, name: String(m.name).trim()||('怪物'+i), element:Number(m.element), power:Number(m.power), reward:Number(m.reward), xp:Number(m.xp)};
+          }catch(e){ return null; }
+        }));
+      }
       const ok = arr.filter(Boolean);
       if(ok.length){ S.monsters = ok; return ok; }
     }catch(e){}
@@ -45,7 +62,7 @@ async function renderFight(){
       const e = ELEMENTS[h.element]||ELEMENTS[0];
       const staminaPct = Math.min(100, (h.stamina/5)*100);
       return `<button onclick="selectFightHero(${h.id}, this)" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
-        <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${heroImg(h.element, h.id)}" alt="英雄#${h.id}"></span>
+        <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${heroImg(h.element, h.id, h.skin)}" alt="英雄#${h.id}"></span>
         <span class="pick-body">
           <span class="pick-title"><b>#${h.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
           <span class="pick-sub"><b class="text-gold">⚔${fmt(h.power,0)}</b><i class="text-muted">Lv.${h.level} 体力${h.stamina}/${h.staminaMax||5}${h.staminaNext>0?' 恢复中':''}</i></span>
@@ -101,7 +118,7 @@ async function renderFight(){
       <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${monImg(m.id)}" alt="${m.name}"></span>
       <span class="pick-body">
         <span class="pick-title"><b style="${active?`color:${e.color};`:''}">${m.name}</b><em class="pick-tag" style="color:${difficulty.color};">${difficulty.label}</em></span>
-        <span class="pick-sub"><b class="text-red-400">⚔${fmt(m.power,0)}</b><i class="text-gold" title="胜利奖励 ≈ ${fmt(m.reward*0.01,2)} EH（按英雄星级/等级加成，存入金库待领取）">💰${fmt(m.reward*0.01,2)}</i></span>
+        <span class="pick-sub"><b class="text-red-400">⚔${fmt(m.power,0)}</b><i class="text-gold" title="胜利基础奖励（USDT，按英雄星级/等级加成后更高，存入金库待领取）">💰${fmt(m.reward*0.01,2)} USDT</i></span>
       </span>
       <span class="pick-radio ${active?'pick-radio-on':''}">${active?'✓':''}</span>
     </button>`;
@@ -293,7 +310,7 @@ async function autoPreviewFight(){
       <div class="space-y-3">
         <div class="flex items-center justify-between gap-2">
           <div class="flex-1 text-center">
-            <div class="w-14 h-14 mx-auto rounded-2xl overflow-hidden mb-1" style="background:${he.soft};border:2px solid ${he.color}44;"><img src="${heroImg(heroData.element, heroData.id)}" alt="英雄#${h}" class="w-full h-full object-cover"></div>
+            <div class="w-14 h-14 mx-auto rounded-2xl overflow-hidden mb-1" style="background:${he.soft};border:2px solid ${he.color}44;"><img src="${heroImg(heroData.element, heroData.id, heroData.skin)}" alt="英雄#${h}" class="w-full h-full object-cover"></div>
             <div class="font-black text-[13px]" style="color:${he.color};">英雄 #${h}</div>
             <div class="text-[10px] text-muted">${he.name}系 · Lv.${heroData.level}</div>
             <div class="text-[10px] text-muted mt-0.5">🗡️ #${w} · ${'★'.repeat(wpnData.stars||1)}</div>
@@ -457,7 +474,7 @@ async function playBattleAnimation(rec2){
       </div>
       <div class="battle-ground">
         <div class="battle-fighter battle-hero" id="bfHero" style="border-color:${he.border};background:radial-gradient(circle at 50% 35%, ${he.soft}, transparent 75%);">
-          <div class="battle-fighter-emoji"><img src="${heroImg(hero.element, rec2.heroId)}" alt="英雄#${rec2.heroId}"></div>
+          <div class="battle-fighter-emoji"><img src="${heroImg(hero.element, rec2.heroId, hero.skin)}" alt="英雄#${rec2.heroId}"></div>
           <div class="battle-fighter-name">英雄 #${rec2.heroId}</div>
         </div>
         <div class="battle-fighter battle-monster" id="bfMon" style="border-color:${me.border};background:radial-gradient(circle at 50% 35%, ${me.soft}, transparent 75%);">

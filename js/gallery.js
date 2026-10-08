@@ -6,20 +6,24 @@ async function renderGallery(){
   if(!el) return;
   try{
     // 英雄图鉴立即渲染（无需链上数据）
-    const heroCards = [0,1,2,3,4].map(elN=>{
+    const heroCards = [0,1,2,3,4].flatMap(elN=>{
       const e = ELEMENTS[elN]||ELEMENTS[0];
       const cnt = (S.heroes||[]).filter(h=>Number(h.element)===elN).length;
-      return `<div class="gallery-card char3d-card" style="border-color:${e.border}55;">
-        <div class="gallery-art char3d-wrap" style="background:radial-gradient(circle at 50% 30%, ${e.soft}, #0d1526 78%);"><img class="char3d" src="${heroImg(elN)}" alt="${e.name}系英雄"></div>
-        <div class="gallery-info">
-          <div class="gallery-name" style="color:${e.color};">${e.icon} ${e.name}系英雄</div>
-          <div class="gallery-sub">${e.name}之力的守护者 · 五行相生相克</div>
-          <div class="gallery-stats">我的英雄 <b class="text-gold">${cnt}</b> 位</div>
-        </div>
-      </div>`;
+      return ['m','f'].map(g=>{
+        const gname = g==='m' ? '男' : '女';
+        const gdesc = g==='m' ? '坚毅勇士' : '灵动女杰';
+        return `<div class="gallery-card char3d-card" style="border-color:${e.border}55;">
+          <div class="gallery-art char3d-wrap" style="background:radial-gradient(circle at 50% 30%, ${e.soft}, #0d1526 78%);"><img class="char3d" src="img/hero_${g}_${elN}.png" alt="${e.name}系${gname}英雄"></div>
+          <div class="gallery-info">
+            <div class="gallery-name" style="color:${e.color};">${e.icon} ${e.name}系${gname}英雄</div>
+            <div class="gallery-sub">${e.name}之力的守护者 · ${gdesc}</div>
+            <div class="gallery-stats">我的英雄 <b class="text-gold">${cnt}</b> 位</div>
+          </div>
+        </div>`;
+      });
     }).join('');
     el.innerHTML = `
-      <div class="gallery-sec-title"><i class="fa-solid fa-user-ninja text-gold mr-2"></i>英雄图鉴 · 五行角色</div>
+      <div class="gallery-sec-title"><i class="fa-solid fa-user-ninja text-gold mr-2"></i>英雄图鉴 · 十英雄阵容</div>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">${heroCards}</div>
       <div class="gallery-sec-title"><i class="fa-solid fa-biohazard text-gold mr-2"></i>怪物图鉴<span class="badge bg-[#1a2740] text-muted ml-2" id="galleryMonCount">…</span></div>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="galleryMons">
@@ -45,7 +49,7 @@ async function renderGallery(){
         <div class="gallery-info">
           <div class="gallery-name">${m.name}</div>
           <div class="gallery-sub">${elBadge(m.element)} <span style="color:${diff[1]};">${diff[0]}</span></div>
-          <div class="gallery-stats"><span class="text-red-400">⚔${fmt(m.power,0)}</span><span class="text-gold">💰${fmt(m.reward*0.01,2)}</span><span class="text-green-400">+${m.xp} XP</span></div>
+          <div class="gallery-stats"><span class="text-red-400">⚔${fmt(m.power,0)}</span><span class="text-gold">💰${fmt(m.reward*0.01,2)} USDT</span><span class="text-green-400">+${m.xp} XP</span></div>
         </div>
       </div>`;
     }).join('');

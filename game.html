@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-page-node-id="XAA20Um5DfCKYT59092JMX">
 <head data-page-node-id="qbdhfjGN8ZQooTQAd2dVDj">
 <meta charset="UTF-8" data-page-node-id="bjs0rLANQCg7AfS5TvfDU9">
@@ -164,6 +164,7 @@ if(!window.ethers){
   <button class="tab-btn" data-tab="boss" onclick="switchTab('boss')" data-page-node-id="Rnme4jz1QlQ2dkibpqznQ5"><i class="fa-solid fa-dragon" data-page-node-id="DTPCLPlK0aRylxt2XQL7wm"></i>世界BOSS</button>
   <button class="tab-btn" data-tab="market" onclick="switchTab('market')" data-page-node-id="tSTdbTsCuDDER12Qjk9A7U"><i class="fa-solid fa-store" data-page-node-id="YrYtC5Y9fPrBPWVkCDyd6o"></i>市场</button>
   <button class="tab-btn" data-tab="vault" onclick="switchTab('vault')" data-page-node-id="Bz1WakjSaDNVgXF7CopxAA"><i class="fa-solid fa-vault" data-page-node-id="QEXiiGUjZCEWHk8GGcRlE7"></i>金库</button>
+  <button class="tab-btn" data-tab="invite" onclick="switchTab('invite')"><i class="fa-solid fa-user-group"></i>邀请</button>
   <button class="tab-btn" data-tab="rank" onclick="switchTab('rank')" data-page-node-id="FFcuy0Bu8ScCweiheWfVy1"><i class="fa-solid fa-ranking-star" data-page-node-id="c7OmgUTSz9R2qiYSREZqZz"></i>排行</button>
   <button class="tab-btn" data-tab="gallery" onclick="switchTab('gallery')" data-page-node-id="8stwbKBb92U2NWiyFeIIKC"><i class="fa-solid fa-book-open" data-page-node-id="zbaoSAejvmA0RN7s5k2sOw"></i>图鉴</button>
   <button class="tab-btn" data-tab="admin" onclick="switchTab('admin')" data-page-node-id="pPvFYQzuUFtSoejMzLoPqG"><i class="fa-solid fa-shield-halved" data-page-node-id="NhCdg1Cj4kXFeCB50k1IKI"></i>管理</button>
@@ -175,10 +176,12 @@ if(!window.ethers){
       <h2 class="text-lg font-black flex items-center gap-2" data-page-node-id="M4oA8GmVe7bB0pEdfZWV80"><i class="fa-solid fa-user-ninja text-gold" data-page-node-id="nHLce71MKXowcPPHQjgC5V"></i>我的英雄 <span id="heroCount" class="badge bg-[#1a2740] text-muted" data-page-node-id="jPJPRn9dZwnlnsCjLS5BRp"></span></h2>
       <div class="flex gap-2 flex-wrap" data-page-node-id="7hrEGX5hnDDO0uFgJbReBA">
         <button onclick="refreshHeroes()" class="btn btn-sm btn-ghost" data-page-node-id="Q7Iq67ElYuEGKblRPmr3BI"><i class="fa-solid fa-rotate" data-page-node-id="igPaOtFFDJlOAmkTepErLD"></i>刷新</button>
+        <button onclick="copyInviteLink()" class="btn btn-sm btn-ghost" title="复制邀请链接（已注册邀请码则用短码）"><i class="fa-solid fa-link"></i>复制邀请链接</button>
+        <button onclick="registerRefCodeFlow()" class="btn btn-sm btn-ghost" title="自动生成唯一邀请码，链接更短"><i class="fa-solid fa-tag"></i>注册邀请码</button>
         <button id="mintHeroBtn" onclick="mintHeroFlow()" class="btn btn-sm btn-gold" data-page-node-id="ykZSZSgavxvKA4h78Mboua"><i class="fa-solid fa-sparkles" data-page-node-id="wQonRSDh2dE6bPuCMtgCyV"></i>召唤英雄</button>
       </div>
     </div>
-    <div class="text-[12px] text-muted mb-3" data-page-node-id="bB6vFg7cPFnySrNCYCORK0"><i class="fa-solid fa-circle-info text-info mr-1" data-page-node-id="JTjeAjThmVwEdHXx4vxNDX"></i>最多持有 <b class="text-gold" data-page-node-id="GnSzyDizSUM5AFd6A8FlpC">4</b> 个英雄。commit 后自动揭示。</div>
+    <div class="text-[12px] text-muted mb-3" data-page-node-id="bB6vFg7cPFnySrNCYCORK0"><i class="fa-solid fa-circle-info text-info mr-1" data-page-node-id="JTjeAjThmVwEdHXx4vxNDX"></i>每地址最多铸造 <b class="text-gold" data-page-node-id="GnSzyDizSUM5AFd6A8FlpC">4</b> 个英雄。持有不限，可市场交易；commit 后自动揭示。</div>
     <div id="heroGrid" class="grid grid-cols-2 lg:grid-cols-3 gap-3" data-page-node-id="7eai7aSTHMYLtFPJ28ErcE"></div>
   </section>
 
@@ -365,6 +368,11 @@ if(!window.ethers){
     </div>
   </section>
 
+  <section id="panel-invite" class="panel p-4 sm:p-5 hidden">
+    <h2 class="text-lg font-black flex items-center gap-2 mb-3"><i class="fa-solid fa-user-group text-gold"></i>邀请中心 <span class="badge bg-[#1a2740] text-muted">推荐奖励 10%</span></h2>
+    <div id="inviteRoot"></div>
+  </section>
+
   <section id="panel-rank" class="panel p-4 sm:p-5 hidden" data-page-node-id="BIDxnI7LBBTv9jQd1a5SJG">
     <h2 class="text-lg font-black flex items-center gap-2 mb-1" data-page-node-id="nBHHE4Wh2pmaOmLxz1ArCK"><i class="fa-solid fa-ranking-star text-gold" data-page-node-id="cfRA2r9NiMy3uxXzEojlSt"></i>排行榜</h2>
     <div id="rankTableWrap" class="overflow-x-auto rounded-xl border border-[#24304a]" data-page-node-id="Zgk1prvpz7NtBNrxCPwuZR">
@@ -410,22 +418,23 @@ if(!window.ethers){
 <script src="./js/i18n_dict.js" defer></script>
 <script src="./js/i18n.js" defer></script>
 <!-- app.js 已按功能拆分为 js/*.js（顺序即依赖顺序） -->
-<script src="./js/core.js?v=20260921" defer></script>
-<script src="./js/utils.js" defer></script>
-<script src="./js/wallet.js" defer></script>
+<script src="./js/core.js?v=20261010e" defer></script>
+<script src="./js/utils.js?v=20261010d" defer></script>
+<script src="./js/wallet.js?v=20261010e" defer></script>
 <script src="./js/pending.js" defer></script>
 <script src="./js/approvals.js" defer></script>
 <script src="./js/ui.js" defer></script>
-<script src="./js/heroes.js" defer></script>
+<script src="./js/heroes.js?v=20261010e" defer></script>
 <script src="./js/weapons.js" defer></script>
 <script src="./js/forge.js" defer></script>
-<script src="./js/fight.js?v=20260928" defer></script>
-<script src="./js/boss.js" defer></script>
+<script src="./js/fight.js?v=20261010d" defer></script>
+<script src="./js/boss.js?v=20261010d" defer></script>
 <script src="./js/market.js" defer></script>
 <script src="./js/stats.js" defer></script>
+<script src="./js/invite.js?v=20261009a" defer></script>
 <script src="./js/gallery.js" defer></script>
-<script src="./js/admin.js?v=20260921" defer></script>
-<script src="./js/admin-governance.js?v=20260921" defer></script>
+<script src="./js/admin.js?v=20261010b" defer></script>
+<script src="./js/admin-governance.js?v=20261006a" defer></script>
 <script src="./js/init.js" defer></script>
 <!-- 锚点直达页签：game.html#boss（来自 3D 世界地图等入口） -->
 <script>

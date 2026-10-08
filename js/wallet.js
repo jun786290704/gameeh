@@ -22,9 +22,27 @@ function getReadProvider(){
   return S.readProvider;
 }
 async function connectWallet(){
-  if(!window.ethereum){ toast('未检测到钱包插件','warn'); return; }
+  // 支持多钱包：MetaMask / TokenPocket / Coinbase / Rabby 等
+  let provider = null;
+  let walletName = '钱包';
+  
+  // 按优先级检测钱包
+  if(window.tokenpocket && window.tokenpocket.ethereum){
+    provider = window.tokenpocket.ethereum;
+    walletName = 'TokenPocket';
+  } else if(window.ethereum){
+    // MetaMask / Coinbase / Rabby 等都注入 window.ethereum
+    if(window.ethereum.isMetaMask) walletName = 'MetaMask';
+    else if(window.ethereum.isCoinbaseWallet) walletName = 'Coinbase Wallet';
+    else if(window.ethereum.isRabby) walletName = 'Rabby';
+    else walletName = '钱包';
+    provider = window.ethereum;
+  }
+  
+  if(!provider){ toast('未检测到钱包插件，请安装 MetaMask / TokenPocket','warn'); return; }
+  
   try{
-    const p = new ethers.BrowserProvider(window.ethereum);
+    const p = new ethers.BrowserProvider(provider);
     await p.send('eth_requestAccounts', []);
     const signer = await p.getSigner();
     const netInfo = await p.getNetwork();
@@ -38,7 +56,7 @@ async function connectWallet(){
     await loadOracleConfig();
     await loadTokenInfo();
     await refreshCurrentTabAsync();
-    toast('钱包已连接：'+shortAddr(S.account),'success');
+    toast(walletName+' 已连接：'+shortAddr(S.account),'success');
     setTimeout(()=>validatePending(), 500);
   }catch(e){ toast(errMsg(e),'error'); }
 }

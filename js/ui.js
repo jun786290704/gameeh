@@ -20,6 +20,7 @@ async function refreshCurrentTabAsync(){
     else if(t==='boss') await refreshBoss();
     else if(t==='market'){ await loadActiveListings(); await loadMyListings(); }
     else if(t==='vault') await refreshVault();
+    else if(t==='invite') await loadInvitePanel();
     else if(t==='rank'){ await loadLeaderboard(); await loadBattleRecords(); }
     else if(t==='gallery'){ await renderGallery(); }
     else if(t==='admin') await renderAdmin();

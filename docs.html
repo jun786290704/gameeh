@@ -107,11 +107,39 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;text-align:center;co
 footer .fl{color:var(--gold);margin:0 8px}
 
 @media(max-width:900px){
-  .layout{grid-template-columns:1fr;gap:0}
-  .side{position:static;max-height:none;padding:18px 0 0;border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;white-space:nowrap}
+  .layout{grid-template-columns:1fr;gap:0;padding:0 14px}
+  .side{position:static;max-height:none;padding:14px 0 0;border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
   .side h4{display:none}
-  .side a{border-left:0;border-bottom:2px solid transparent;padding:8px 12px;border-radius:8px}
+  .side a{border-left:0;border-bottom:2px solid transparent;padding:8px 12px;border-radius:8px;font-size:13px;flex-shrink:0}
   .side a.on{border-bottom-color:var(--gold)}
+  .main{padding:24px 0 70px}
+  .top-in{padding:10px 14px;gap:8px}
+  .brand{font-size:14.5px}
+  .brand small{display:none}
+  .tlink{padding:6px 10px;font-size:12px}
+}
+@media(max-width:640px){
+  .doc-hero{padding:22px 0 28px;margin-bottom:30px}
+  .doc-hero h1{font-size:26px}
+  .doc-hero p{font-size:13.5px;line-height:1.8}
+  section{margin-bottom:44px;scroll-margin-top:70px}
+  section h2{font-size:20px}
+  section .lead{font-size:13.5px}
+  section p,section li{font-size:13.5px;line-height:1.8}
+  section h3{font-size:16px}
+  .card{padding:16px;border-radius:14px}
+  .g2,.g3{grid-template-columns:1fr}
+  .geo{grid-template-columns:1fr;gap:10px}
+  .note,.warn{padding:11px 13px;font-size:13px}
+  .el{padding:8px 12px;font-size:13px}
+  .chips{gap:6px}
+  .chip{padding:5px 10px;font-size:12px}
+  .faq summary{padding:13px 14px;font-size:14px}
+  .faq .body{padding:0 14px 14px;font-size:13.5px}
+  code{font-size:12px;padding:1px 5px;word-break:break-all}
+  .tl{padding-left:24px}
+  .tl .it::before{left:-21px}
+  footer{padding:22px 14px 32px;font-size:12.5px}
 }
 
 /* ===== 世界观 / 纪元 ===== */

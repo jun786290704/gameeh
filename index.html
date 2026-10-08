@@ -15,7 +15,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.65;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.65;overflow-x:hidden;padding-top:32px}
 h1,h2,h3,.serif{font-family:'Noto Serif SC','Noto Sans SC',serif}
 ::selection{background:rgba(251,191,36,.3)}
 img{display:block}
@@ -33,7 +33,7 @@ img{display:block}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
 .tag{display:inline-block;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:500;letter-spacing:.06em}
 /* ===== Hero ===== */
-.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero{position:relative;min-height:calc(100vh - 32px);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background:radial-gradient(1100px 520px at 50% 12%,rgba(251,191,36,.13),transparent 62%),radial-gradient(900px 600px at 85% 90%,rgba(56,189,248,.08),transparent 60%),radial-gradient(900px 600px at 8% 80%,rgba(239,68,68,.09),transparent 60%),#070c18}
 #embers{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:.85}
 @media(prefers-reduced-motion:reduce){#embers{display:none}}
@@ -59,7 +59,7 @@ img{display:block}
 .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);color:var(--muted);font-size:12px;letter-spacing:.3em;z-index:3;animation:hint 2.2s ease-in-out infinite}
 @keyframes hint{0%,100%{opacity:.4}50%{opacity:1}}
 /* ===== 玩法 ===== */
-.play-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.play-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:18px}
 .play-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:30px 26px;transition:transform .2s,border-color .2s}
 .play-card:hover{transform:translateY(-4px);border-color:rgba(251,191,36,.35)}
 .play-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:22px}
@@ -169,6 +169,11 @@ footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
   .hero-imgs img{width:min(44vw,180px);height:min(44vw,180px)}
   .hero-imgs img:nth-child(4),.hero-imgs img:nth-child(5){display:none}
   .sec{padding:64px 0}
+  .weapon-hero{gap:28px}
+  .char-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .mon-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .deity-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .epoch-row{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 }
 .lang-sw{position:fixed;top:46px;right:18px;z-index:120}
 .lang-sw .lang-main{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:rgba(7,12,24,.72);color:#fff;font-size:13px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:all .18s;backdrop-filter:blur(8px);line-height:1}
@@ -191,18 +196,132 @@ footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
 .tk-up{color:#4ade80;font-size:12px;font-weight:600}
 .tk-down{color:#f87171;font-size:12px;font-weight:600}
 @media(max-width:640px){.ticker-track{gap:34px}.tk-item{font-size:12px}}
+
+/* ===== 移动端全面优化（<640px 手机） ===== */
+@media(max-width:640px){
+  body{padding-top:28px}
+  .crypto-ticker{height:28px}
+  .tk-item{font-size:11.5px;gap:5px}
+  .tk-price{font-size:11px}
+  .ticker-track{gap:28px;padding:0 16px}
+  .wrap{padding:0 16px}
+  .sec{padding:48px 0}
+  .sec-sub{margin-bottom:34px;font-size:13.5px;line-height:1.7}
+  .sec-title{font-size:24px;margin-bottom:8px}
+  .gold-line{margin:12px auto 0}
+
+  /* 顶部：钱包+语言 紧凑排列，避免与币价条重叠 */
+  div[style*="position:fixed;top:14px"]{top:34px !important;right:10px !important;gap:6px !important}
+  #langSw{position:static;margin-left:auto}
+  #langSw .lang-main{padding:6px 11px;font-size:12px}
+  #langSw .lang-menu{min-width:118px}
+
+  /* Hero 区 */
+  .hero{min-height:calc(100vh - 28px)}
+  .hero-in{padding:24px 16px}
+  .hero-badge{margin-bottom:18px;font-size:11.5px;padding:6px 14px}
+  .hero h1{font-size:clamp(34px,11vw,46px);letter-spacing:.06em}
+  .hero h1 .en{font-size:12px;letter-spacing:.42em;margin-top:12px}
+  .hero-tagline{font-size:14px;margin:18px auto 8px;padding:0 6px;line-height:1.75}
+  .hero-cta{margin-top:24px;gap:10px}
+  .hero-cta .btn{flex:1;min-width:0;padding:13px 16px;font-size:14.5px;justify-content:center;border-radius:13px}
+  .hero-meta{margin-top:22px;gap:10px 18px;font-size:11.5px}
+  .hero-imgs img{width:min(34vw,132px);height:min(34vw,132px);border-radius:16px}
+  .hero-shade{background:radial-gradient(82% 62% at 50% 48%,transparent 14%,rgba(7,12,24,.9) 80%)}
+  .scroll-hint{bottom:14px;font-size:11px;letter-spacing:.24em}
+
+  /* 玩法卡片 */
+  .play-card{padding:22px 18px;border-radius:16px}
+  .play-card h3{font-size:17px}
+  .play-card p{font-size:13px;line-height:1.7}
+  .play-icon{width:46px;height:46px;border-radius:12px;margin-bottom:12px;font-size:20px}
+
+  /* 五行相克：紧凑、避免 96px 最小宽导致换行过多 */
+  .wuxing{gap:8px;margin-top:30px}
+  .wx{padding:12px 10px;min-width:0;flex:1 1 calc(25% - 10px);border-radius:13px}
+  .wx svg{width:28px;height:28px}
+  .wx b{font-size:13px}
+  .wx small{font-size:10px;white-space:nowrap}
+  .wx-arrow{font-size:14px;margin-top:-4px}
+
+  /* 角色/武器/怪物卡片 */
+  .char-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .char-body{padding:12px 12px 14px}
+  .char-body h3{font-size:15px}
+  .char-role{font-size:11px;margin:3px 0 8px;line-height:1.5}
+  .char-stat{font-size:11px}
+  .char-el{top:9px;left:9px;padding:4px 10px;font-size:11px}
+  .weapon-hero{gap:26px;margin-bottom:30px}
+  .weapon-hero h3{font-size:21px;margin-bottom:12px}
+  .weapon-hero p{font-size:13.5px;line-height:1.7}
+  .weapon-feat{grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}
+  .weapon-feat .feat{padding:13px}
+  .weapon-feat .feat b{font-size:15px}
+  .star-box{width:56px;min-width:56px;height:48px;font-size:11px}
+  .star-box b{font-size:12px}
+  .mon-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .mon-card{border-radius:16px}
+  .mon-body{padding:10px 11px 12px}
+  .mon-body h3{font-size:14px}
+  .mon-body small{font-size:10.5px}
+  .mon-reward{font-size:11px;padding:3px 8px}
+
+  /* 世界观 */
+  .world-text p{font-size:14px;line-height:1.85}
+  .world-h3{margin:38px 0 18px;font-size:17px}
+  .deity-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .deity-card{padding:16px 14px 18px;border-radius:15px}
+  .deity-card h3{font-size:16px}
+  .deity-card p{font-size:12px;line-height:1.7}
+  .deity-chip{margin-bottom:10px;font-size:11px;padding:3px 9px}
+  .epoch-row{grid-template-columns:repeat(2,1fr);gap:10px}
+  .epoch{padding:13px 12px}
+  .epoch h4{font-size:14px}
+  .epoch p{font-size:11.5px;line-height:1.6}
+
+  /* BOSS */
+  .boss-wrap{gap:20px}
+  .boss-art{border-radius:16px}
+  .boss-art .lbl b{font-size:16px}
+  .boss-art .lbl span{font-size:9.5px;letter-spacing:.14em}
+  .boss-info h3{font-size:19px;margin-bottom:8px}
+  .boss-info p{font-size:13.5px;line-height:1.75}
+  .boss-info li{font-size:13px;line-height:1.65}
+
+  /* CTA */
+  .cta{padding:60px 16px}
+  .cta h2{font-size:22px;line-height:1.5}
+  .cta p{font-size:13.5px}
+  .cta .btn{width:100%;justify-content:center}
+
+  /* 社区 */
+  .comm-grid{grid-template-columns:1fr;gap:12px}
+  .comm-card{padding:20px 18px;border-radius:16px}
+  .comm-card h3{font-size:16px}
+  .comm-card p{font-size:13px;line-height:1.7}
+
+  footer .wrap{flex-direction:column;gap:10px;text-align:center;padding:18px 16px}
+  footer .foot-link{margin:0 6px}
+}
+
 </style>
 </head>
 <body data-page-node-id="4S3ethnEAzGEkzhXZtDEQQ">
 
-<!-- ===== 语言切换 ===== -->
-<div class="lang-sw" id="langSw" data-page-node-id="qvB0QPy8JNT1PavwEW5PhF">
-  <button type="button" class="lang-main" id="langMain" data-page-node-id="9q37t2et51jVNRQHg5HEIs"><span id="langMainLabel" data-page-node-id="69Orp8ZyE0fVqoczNUhnrt">中文</span><span class="caret" data-page-node-id="8KwJ2XeNfcX6IoKA5W7Nqw"></span></button>
-  <div class="lang-menu" data-page-node-id="T9Duqvu4mN0oZFiF4SbH4D">
-    <button type="button" data-lang="zh" class="active" data-page-node-id="NQNisCqjzn31Wb5n8ERiaf">中文</button>
-    <button type="button" data-lang="en" data-page-node-id="Q2TddmoLNJe9OSLEAZrtvF">EN</button>
-    <button type="button" data-lang="ja" data-page-node-id="hHJlzLNysMvaNisudPwuQL">日本語</button>
-    <button type="button" data-lang="es" data-page-node-id="CkrWQrw6t7fBpscV0is6E2">ES</button>
+<!-- ===== 语言切换 + 钱包 ===== -->
+<div style="position:fixed;top:14px;right:14px;z-index:1000;display:flex;gap:10px;align-items:center;">
+  <button onclick="connectWalletHome()" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1305;border:0;border-radius:10px;padding:8px 18px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 16px -4px rgba(251,191,36,.5);">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-2px;margin-right:6px;"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+    <span id="homeWalletTxt">连接钱包</span>
+  </button>
+  <div class="lang-sw" id="langSw">
+    <button type="button" class="lang-main" id="langMain"><span id="langMainLabel">中文</span><span class="caret"></span></button>
+    <div class="lang-menu">
+      <button type="button" data-lang="zh" class="active">中文</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="ja">日本語</button>
+      <button type="button" data-lang="es">ES</button>
+    </div>
   </div>
 </div>
 
@@ -214,11 +333,11 @@ footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
   <div class="hero-bg" data-page-node-id="mtHnNnETfweL3BURrAAaLd"></div>
   <canvas id="embers"></canvas>
   <div class="hero-imgs" data-page-node-id="jb2nlej0RcJV4r5QELf9L9">
-    <img src="img/hero_1.png" alt="木系英雄" data-page-node-id="EwbPG8lcHkLEXz2NO3xNAZ">
-    <img src="img/hero_0.png" alt="金系英雄" data-page-node-id="44modnJi39zdSFtKp5dn8B">
-    <img src="img/hero_4.png" alt="火系英雄" data-page-node-id="w5aKWdM2hmnoKqgVEedDjS">
-    <img src="img/hero_3.png" alt="水系英雄" data-page-node-id="H1VbSo3O0oucX7AYKvncUm">
-    <img src="img/hero_2.png" alt="土系英雄" data-page-node-id="3fLi5NZyGG7Ucyq0dJXVIp">
+    <img src="img/hero_m_1.png" alt="木系英雄" data-page-node-id="EwbPG8lcHkLEXz2NO3xNAZ">
+    <img src="img/hero_m_0.png" alt="金系英雄" data-page-node-id="44modnJi39zdSFtKp5dn8B">
+    <img src="img/hero_m_4.png" alt="火系英雄" data-page-node-id="w5aKWdM2hmnoKqgVEedDjS">
+    <img src="img/hero_m_3.png" alt="水系英雄" data-page-node-id="H1VbSo3O0oucX7AYKvncUm">
+    <img src="img/hero_m_2.png" alt="土系英雄" data-page-node-id="3fLi5NZyGG7Ucyq0dJXVIp">
   </div>
   <div class="hero-shade" data-page-node-id="q7Y53vOcKwkAuCKw32A8HA"></div>
   
@@ -386,31 +505,31 @@ footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
     <p class="sec-sub" data-i18n="s-heroes" data-page-node-id="8X7KRHMHU1fkO75qZGiEnf">五种元素的守护者，选择与你命格相合的英雄出战</p>
     <div class="char-grid" data-page-node-id="gVltMrGNR1Iy3kVP8pdqJV">
       <div class="char-card" data-page-node-id="2EsCUZuzYIHbavxCI5GE8k">
-        <div class="char-art" data-page-node-id="jyEV93wxDeI0ZLRvIp278r"><img src="img/hero_0.png" alt="金系英雄 金甲圣骑士" data-page-node-id="8ZR9ZOkBdAJVZ7mgGSHg1G">
+        <div class="char-art" data-page-node-id="jyEV93wxDeI0ZLRvIp278r"><img src="img/hero_m_0.png" alt="金系英雄 金甲圣骑士" data-page-node-id="8ZR9ZOkBdAJVZ7mgGSHg1G">
           <span class="char-el" style="background:rgba(245,158,11,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.35)" data-i18n="el-gold" data-page-node-id="U7FmaOwbzJnQrTPBrJmqb8">金</span></div>
         <div class="char-body" data-page-node-id="QmovSkhcyvocpqfkEEOtqG"><h3 data-i18n="h0-n" data-page-node-id="w7LpeS5yHLrk2NI0Q6uy8t">金甲圣骑士</h3><div class="char-role" data-i18n="h0-r" data-page-node-id="FrRkuDSxWOIXDCS7uOfakF">锐金之躯 · 攻守兼备的先锋</div>
           <div class="char-stat" data-page-node-id="ntRm8k8FxXB08jSXa14Hxt"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" data-page-node-id="JLJKk6RhpD36V3mkYgFkdE"><path d="M12 2l2.5 6.5L21 9l-5 4 1.5 7L12 16.5 6.5 20 8 13 3 9l6.5-.5z" data-page-node-id="MgSrze1AzmHIpYoGIbJTt2"/></svg><span data-i18n="h0-s" data-page-node-id="3ZQI4c63Idvvk4KZpCbDZg">金属性 · 高爆发</span></div></div>
       </div>
       <div class="char-card" data-page-node-id="NpzNfiOgR6ZwO4B8evl0EK">
-        <div class="char-art" data-page-node-id="wgVpkW2mhqSPVih1PcO9hx"><img src="img/hero_1.png" alt="木系英雄 精灵游侠" data-page-node-id="d40UhJs4SWuWpz2JeEHfOt">
+        <div class="char-art" data-page-node-id="wgVpkW2mhqSPVih1PcO9hx"><img src="img/hero_m_1.png" alt="木系英雄 精灵游侠" data-page-node-id="d40UhJs4SWuWpz2JeEHfOt">
           <span class="char-el" style="background:rgba(34,197,94,.2);color:#4ade80;border:1px solid rgba(34,197,94,.35)" data-i18n="el-wood" data-page-node-id="jWxDt7mDvThrC8ZLa8iQ6i">木</span></div>
         <div class="char-body" data-page-node-id="YUGyDjxhHWcBUcvvf1yFxs"><h3 data-i18n="h1-n" data-page-node-id="RKF1X5SfNLhvQUQwSN9D4z">精灵游侠</h3><div class="char-role" data-i18n="h1-r" data-page-node-id="Yb7HxslOyzkgxbYOuRc3oO">森林的守望者 · 灵巧射手</div>
           <div class="char-stat" data-page-node-id="m1GUEZr1y5TGnezQ9Dy8g6"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" data-page-node-id="cIW3BFlyPAdvPHO0DvMPhU"><path d="M12 3c4 2 6 6 5 10-1 4-5 7-9 6-3-1-4-5-3-9 0-3 2-5 3-6 1-1 2 0 2-1z" data-page-node-id="RCF4UUc7WVc9xewTFMVugH"/></svg><span data-i18n="h1-s" data-page-node-id="tJ4cdRFPUalBhEeRThuPbl">木属性 · 生生不息</span></div></div>
       </div>
       <div class="char-card" data-page-node-id="DYfiwG0DiNMniHgF0QzLTQ">
-        <div class="char-art" data-page-node-id="RnJDDKg8vYuBRgPsnPrhUG"><img src="img/hero_2.png" alt="土系英雄 岩石守护者" data-page-node-id="6rExCYZhsQshL2HPyAruvO">
+        <div class="char-art" data-page-node-id="RnJDDKg8vYuBRgPsnPrhUG"><img src="img/hero_m_2.png" alt="土系英雄 岩石守护者" data-page-node-id="6rExCYZhsQshL2HPyAruvO">
           <span class="char-el" style="background:rgba(180,83,9,.22);color:#d97706;border:1px solid rgba(180,83,9,.4)" data-i18n="el-earth" data-page-node-id="cVk6JETaQHAWkAAhWnN8T1">土</span></div>
         <div class="char-body" data-page-node-id="MG2VEpHKUbifAiqbULbsay"><h3 data-i18n="h2-n" data-page-node-id="80gASw04GZJDRBkQIRqOop">岩石守护者</h3><div class="char-role" data-i18n="h2-r" data-page-node-id="JXoIDwLGHlqY2JRHVdVAcb">大地之盾 · 坚不可摧的壁垒</div>
           <div class="char-stat" data-page-node-id="ln6h4hTQwvQ09tyzNsxu1c"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" data-page-node-id="tkXmAYriAghIM9n8gOkAYS"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z" data-page-node-id="9UGa1DEoxAHE2HA65jfcZg"/></svg><span data-i18n="h2-s" data-page-node-id="UgyXTgGfQlXhUczo9C7cvU">土属性 · 厚重防御</span></div></div>
       </div>
       <div class="char-card" data-page-node-id="HypcezBDPBq3Apx8vUxwA3">
-        <div class="char-art" data-page-node-id="k8iM9aEsCBZG1vbW7ZM8Dg"><img src="img/hero_3.png" alt="水系英雄 水灵法师" data-page-node-id="31JNbCMEpDkL30teIHyKCX">
+        <div class="char-art" data-page-node-id="k8iM9aEsCBZG1vbW7ZM8Dg"><img src="img/hero_m_3.png" alt="水系英雄 水灵法师" data-page-node-id="31JNbCMEpDkL30teIHyKCX">
           <span class="char-el" style="background:rgba(56,189,248,.2);color:#7dd3fc;border:1px solid rgba(56,189,248,.35)" data-i18n="el-water" data-page-node-id="bQO87R7xqeH73gs4evJCuo">水</span></div>
         <div class="char-body" data-page-node-id="MbUgMzVoAFGd49j3hljehx"><h3 data-i18n="h3-n" data-page-node-id="WOQdalfFj5dn5fRvjHivc7">水灵法师</h3><div class="char-role" data-i18n="h3-r" data-page-node-id="UFSLg4GhqAOapsDikEZ47L">冰晶秘术师 · 掌控战场节奏</div>
           <div class="char-stat" data-page-node-id="VwZe81afRDA0lpszODXn67"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" data-page-node-id="gDrfzhUodRCqXp7H78NE91"><path d="M12 2l7 9a7 7 0 1 1-14 0z" data-page-node-id="6L5kh6dlG2AyP9zzbohuV8"/></svg><span data-i18n="h3-s" data-page-node-id="nHNVBvN8Zs6zjrk5ACOFzZ">水属性 · 灵动续航</span></div></div>
       </div>
       <div class="char-card" data-page-node-id="nCUdxFyVYHD3QVw67VcsYk">
-        <div class="char-art" data-page-node-id="FWKCw7drsY7aBCEsgIi01O"><img src="img/hero_4.png" alt="火系英雄 烈焰斗士" data-page-node-id="9wK7vPsIg8JiFiHVYc8Nm2">
+        <div class="char-art" data-page-node-id="FWKCw7drsY7aBCEsgIi01O"><img src="img/hero_m_4.png" alt="火系英雄 烈焰斗士" data-page-node-id="9wK7vPsIg8JiFiHVYc8Nm2">
           <span class="char-el" style="background:rgba(239,68,68,.2);color:#f87171;border:1px solid rgba(239,68,68,.35)" data-i18n="el-fire" data-page-node-id="zS87qQTqGAll4hPxUvXgd5">火</span></div>
         <div class="char-body" data-page-node-id="Y9zVAYi9m8rPxUTfDMmPVt"><h3 data-i18n="h4-n" data-page-node-id="cIUZ0kI7Zj9maujUWUkvAN">烈焰斗士</h3><div class="char-role" data-i18n="h4-r" data-page-node-id="bMfTmbMytTfJpEbERQ0GkL">燃烧之魂 · 吞噬一切的怒火</div>
           <div class="char-stat" data-page-node-id="9CdydmLWYkn4BqgZF453bZ"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" data-page-node-id="Cbwn0zhVkhtTwm9IOOqUKi"><path d="M12 2c1 4-4 5-4 10a4 4 0 0 0 8 0c0-2-1-3-1-3s3 2 3 6a7 7 0 1 1-14 0C4 8 8 4 12 2z" data-page-node-id="ViDyasolt37nSH6AvwytEh"/></svg><span data-i18n="h4-s" data-page-node-id="wswDZiqmZd4c5kHnkZE6Dg">火属性 · 狂暴范围</span></div></div>
@@ -586,6 +705,28 @@ footer .foot-link{color:var(--gold);text-decoration:none;margin:0 8px}
 
 
 <script>
+// 官网钱包连接
+async function connectWalletHome(){
+  let provider = null;
+  let walletName = '钱包';
+  if(window.tokenpocket && window.tokenpocket.ethereum){
+    provider = window.tokenpocket.ethereum;
+    walletName = 'TokenPocket';
+  } else if(window.ethereum){
+    provider = window.ethereum;
+    if(window.ethereum.isMetaMask) walletName = 'MetaMask';
+    else if(window.ethereum.isCoinbaseWallet) walletName = 'Coinbase';
+  }
+  if(!provider){ alert('未检测到钱包插件，请安装 MetaMask / TokenPocket'); return; }
+  try{
+    await provider.request({method:'eth_requestAccounts'});
+    const accounts = await provider.request({method:'eth_accounts'});
+    const addr = accounts[0];
+    document.getElementById('homeWalletTxt').textContent = addr.slice(0,6)+'...'+addr.slice(-4);
+    alert(walletName+' 已连接: '+addr);
+  }catch(e){ alert('连接失败: '+e.message); }
+}
+
 /* ===== 多语言 i18n ===== */
 const I18N = {
 zh:{

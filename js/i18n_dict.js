@@ -5,7 +5,7 @@ en: {
 '一星':'1★','二星':'2★','三星':'3★','四星':'4★','五星':'5★','星':'★',
 '未知':'Unknown','全部':'All','地址':'Address','状态':'Status','名称':'Name','数量':'Amount',
 '元素':'Element','战力':'Power','奖励基数':'Reward base','经验':'EXP',
-'英雄':'Hero','武器':'Weapon','碎片':'Shards','精粹':'Essence','物品':'Item',
+'英雄':'Hero','武器':'Weapon','碎片':'Shards','精粹':'Essence','物品':'Item','邀请':'Invite',
 '简单':'Easy','普通':'Normal','困难':'Hard','噩梦':'Nightmare',
 '克制':'Counter','被克制':'Countered','中性':'Neutral',
 '未知属性':'Unknown trait','未知操作':'Unknown op',
@@ -4597,4 +4597,128 @@ window.GAME_DICT.ru = Object.assign(window.GAME_DICT.ru || {}, {
 '官网':'Официальный сайт',
 '复制地址':'Копировать адрес',
 '地址已复制':'Адрес скопирован',
+});
+
+window.GAME_DICT.en = Object.assign(window.GAME_DICT.en || {}, {
+'绑定推荐人':'Bind Referrer','推荐人':'Referrer','铸造限额':'Mint Limit',
+'每地址铸造上限':'Max mint per address','邀请系统（推荐人 10%）':'Referral System (+10%)',
+'查询地址已铸造数':'Query minted count','查询英雄推荐人':'Query hero referrer',
+'设置铸造上限':'Set mint limit','设置每地址铸造上限':'Set max mint per address',
+'输入推荐人地址：':'Enter referrer address:','输入要查询的地址：':'Enter address:','输入英雄 ID：':'Enter hero ID:',
+'战斗胜利推荐人获 10%':'Referrer earns +10% on win','可绑定推荐人，战斗胜利其获 10% 奖励':'Bind a referrer; they earn +10% on your wins',
+'已绑定推荐人：':'Referrer bound: ','绑定推荐人成功！':'Referrer bound!','不能绑定自己为推荐人':'Cannot bind yourself as referrer'
+});
+window.GAME_DICT.ja = Object.assign(window.GAME_DICT.ja || {}, {
+'绑定推荐人':'紹介者を設定','推荐人':'紹介者','铸造限额':'鋳造上限',
+'每地址铸造上限':'アドレス毎の鋳造上限','邀请系统（推荐人 10%）':'紹介システム（報酬+10%）',
+'查询地址已铸造数':'鋳造数を照会','查询英雄推荐人':'英雄の紹介者を照会',
+'设置铸造上限':'鋳造上限を設定','设置每地址铸造上限':'アドレス毎の鋳造上限を設定',
+'输入推荐人地址：':'紹介者アドレスを入力：','输入要查询的地址：':'照会するアドレスを入力：','输入英雄 ID：':'英雄IDを入力：',
+'战斗胜利推荐人获 10%':'勝利時 紹介者に+10%','可绑定推荐人，战斗胜利其获 10% 奖励':'紹介者を設定できます。勝利時に+10%報酬',
+'已绑定推荐人：':'紹介者：','绑定推荐人成功！':'紹介者を設定しました！','不能绑定自己为推荐人':'自分を紹介者に設定できません'
+});
+window.GAME_DICT.es = Object.assign(window.GAME_DICT.es || {}, {
+'绑定推荐人':'Vincular referente','推荐人':'Referente','铸造限额':'Límite de acuñación',
+'每地址铸造上限':'Máx. acuñación por dirección','邀请系统（推荐人 10%）':'Sistema de referidos (+10%)',
+'查询地址已铸造数':'Consultar acuñados','查询英雄推荐人':'Consultar referente de héroe',
+'设置铸造上限':'Establecer límite','设置每地址铸造上限':'Establecer máx. por dirección',
+'输入推荐人地址：':'Introduce dirección del referente:','输入要查询的地址：':'Introduce dirección:','输入英雄 ID：':'Introduce ID del héroe:',
+'战斗胜利推荐人获 10%':'El referente gana +10% al ganar','可绑定推荐人，战斗胜利其获 10% 奖励':'Vincular referente; gana +10% en tus victorias',
+'已绑定推荐人：':'Referente vinculado: ','绑定推荐人成功！':'¡Referente vinculado!','不能绑定自己为推荐人':'No puedes vincularte a ti mismo'
+});
+window.GAME_DICT.ko = Object.assign(window.GAME_DICT.ko || {}, {
+'绑定推荐人':'추천인 설정','推荐人':'추천인','铸造限额':'민팅 한도',
+'每地址铸造上限':'주소당 민팅 한도','邀请系统（推荐人 10%）':'추천 시스템 (+10%)',
+'查询地址已铸造数':'주소별 민팅 수 조회','查询英雄推荐人':'영웅 추천인 조회',
+'设置铸造上限':'민팅 한도 설정','设置每地址铸造上限':'주소당 민팅 한도 설정',
+'输入推荐人地址：':'추천인 주소 입력:','输入要查询的地址：':'조회할 주소 입력:','输入英雄 ID：':'영웅 ID 입력:',
+'战斗胜利推荐人获 10%':'승리 시 추천인 +10%','可绑定推荐人，战斗胜利其获 10% 奖励':'추천인 설정 가능, 승리 시 +10% 보상',
+'已绑定推荐人：':'추천인: ','绑定推荐人成功！':'추천인 설정 완료!','不能绑定自己为推荐人':'자기 자신은 추천인으로 설정 불가'
+});
+window.GAME_DICT.ru = Object.assign(window.GAME_DICT.ru || {}, {
+'绑定推荐人':'Привязать реферера','推荐人':'Реферер','铸造限额':'Лимит чеканки',
+'每地址铸造上限':'Макс. чеканки на адрес','邀请系统（推荐人 10%）':'Реферальная система (+10%)',
+'查询地址已铸造数':'Запрос чеканки адреса','查询英雄推荐人':'Запрос реферера героя',
+'设置铸造上限':'Установить лимит','设置每地址铸造上限':'Установить макс. на адрес',
+'输入推荐人地址：':'Введите адрес реферера:','输入要查询的地址：':'Введите адрес:','输入英雄 ID：':'Введите ID героя:',
+'战斗胜利推荐人获 10%':'Реферер получает +10% за победу','可绑定推荐人，战斗胜利其获 10% 奖励':'Привяжите реферера; он получает +10% за ваши победы',
+'已绑定推荐人：':'Реферер: ','绑定推荐人成功！':'Реферер привязан!','不能绑定自己为推荐人':'Нельзя привязать себя'
+});
+
+window.GAME_DICT.en = Object.assign(window.GAME_DICT.en || {}, {
+'复制邀请链接':'Copy Invite Link','注册邀请码':'Register Code','邀请链接已复制':'Invite link copied',
+'邀请码需 4~10 位字母数字':'Code must be 4-10 alphanumeric','邀请码未注册':'Code not registered',
+'正在解析邀请码…':'Resolving code…','输入推荐人地址或邀请码：':'Enter referrer address or code:',
+'注册邀请码（4~10 位，仅字母数字，注册后不可改）：':'Register code (4-10 alphanumeric, cannot change):',
+'请输入完整地址或 4~10 位邀请码':'Enter full address or 4-10 char code','邀请码':'Code',
+'复制邀请链接（已注册邀请码则用短码）':'Copy invite link (short code if registered)',
+'注册 4~10 位邀请码，链接更短':'Register 4-10 char code for shorter link'
+});
+window.GAME_DICT.ja = Object.assign(window.GAME_DICT.ja || {}, {
+'复制邀请链接':'招待リンクをコピー','注册邀请码':'招待コード登録','邀请链接已复制':'招待リンクをコピーしました',
+'邀请码需 4~10 位字母数字':'コードは4〜10桁の英数字','邀请码未注册':'コード未登録',
+'正在解析邀请码…':'コードを解析中…','输入推荐人地址或邀请码：':'紹介者アドレスまたはコード入力：',
+'注册邀请码（4~10 位，仅字母数字，注册后不可改）：':'コード登録（4〜10桁英数字、変更不可）：',
+'请输入完整地址或 4~10 位邀请码':'完全なアドレスまたは4〜10桁のコードを入力','邀请码':'招待コード',
+'复制邀请链接（已注册邀请码则用短码）':'招待リンクをコピー（登録済みなら短コード）',
+'注册 4~10 位邀请码，链接更短':'4〜10桁のコード登録で短いリンク'
+});
+window.GAME_DICT.es = Object.assign(window.GAME_DICT.es || {}, {
+'复制邀请链接':'Copiar enlace de invitación','注册邀请码':'Registrar código','邀请链接已复制':'Enlace copiado',
+'邀请码需 4~10 位字母数字':'El código debe ser 4-10 alfanumérico','邀请码未注册':'Código no registrado',
+'正在解析邀请码…':'Resolviendo código…','输入推荐人地址或邀请码：':'Introduce dirección o código:',
+'注册邀请码（4~10 位，仅字母数字，注册后不可改）：':'Registrar código (4-10 alfanumérico, no cambiable):',
+'请输入完整地址或 4~10 位邀请码':'Introduce dirección completa o código 4-10','邀请码':'Código',
+'复制邀请链接（已注册邀请码则用短码）':'Copiar enlace (código corto si está registrado)',
+'注册 4~10 位邀请码，链接更短':'Registra código 4-10 para enlace corto'
+});
+window.GAME_DICT.ko = Object.assign(window.GAME_DICT.ko || {}, {
+'复制邀请链接':'초대 링크 복사','注册邀请码':'초대코드 등록','邀请链接已复制':'초대 링크가 복사되었습니다',
+'邀请码需 4~10 位字母数字':'코드는 4~10자 영숫자','邀请码未注册':'코드 미등록',
+'正在解析邀请码…':'코드 확인 중…','输入推荐人地址或邀请码：':'추천인 주소 또는 코드 입력:',
+'注册邀请码（4~10 位，仅字母数字，注册后不可改）：':'초대코드 등록 (4~10자 영숫자, 변경 불가):',
+'请输入完整地址或 4~10 位邀请码':'전체 주소 또는 4~10자 코드 입력','邀请码':'초대코드',
+'复制邀请链接（已注册邀请码则用短码）':'초대 링크 복사 (등록 시 짧은 코드)',
+'注册 4~10 位邀请码，链接更短':'4~10자 코드 등록으로 짧은 링크'
+});
+window.GAME_DICT.ru = Object.assign(window.GAME_DICT.ru || {}, {
+'复制邀请链接':'Скопировать ссылку','注册邀请码':'Регистрация кода','邀请链接已复制':'Ссылка скопирована',
+'邀请码需 4~10 位字母数字':'Код: 4-10 букв/цифр','邀请码未注册':'Код не зарегистрирован',
+'正在解析邀请码…':'Разбор кода…','输入推荐人地址或邀请码：':'Введите адрес или код:',
+'注册邀请码（4~10 位，仅字母数字，注册后不可改）：':'Код (4-10 букв/цифр, без изменений):',
+'请输入完整地址或 4~10 位邀请码':'Введите адрес или код 4-10','邀请码':'Код',
+'复制邀请链接（已注册邀请码则用短码）':'Копировать ссылку (короткий код)',
+'注册 4~10 位邀请码，链接更短':'Регистрируйте код 4-10 для короткой ссылки'
+});
+
+window.GAME_DICT.en = Object.assign(window.GAME_DICT.en || {}, {
+'自动生成唯一邀请码，链接更短':'Auto-generate unique code for shorter link','生成失败，请重试':'Generation failed, retry'
+});
+window.GAME_DICT.ja = Object.assign(window.GAME_DICT.ja || {}, {
+'自动生成唯一邀请码，链接更短':'一意のコードを自動生成し短いリンク','生成失败，请重试':'生成失敗、再試行'
+});
+window.GAME_DICT.es = Object.assign(window.GAME_DICT.es || {}, {
+'自动生成唯一邀请码，链接更短':'Generar código único automáticamente','生成失败，请重试':'Fallo al generar, reintenta'
+});
+window.GAME_DICT.ko = Object.assign(window.GAME_DICT.ko || {}, {
+'自动生成唯一邀请码，链接更短':'고유 코드 자동 생성으로 짧은 링크','生成失败，请重试':'생성 실패, 다시 시도'
+});
+window.GAME_DICT.ru = Object.assign(window.GAME_DICT.ru || {}, {
+'自动生成唯一邀请码，链接更短':'Автогенерация уникального кода','生成失败，请重试':'Ошибка генерации, повторите'
+});
+
+window.GAME_DICT.en = Object.assign(window.GAME_DICT.en || {}, {
+'铸造英雄必须设置邀请码（推荐人）。请输入推荐人的邀请码或钱包地址：':'Minting a hero requires an invite code (referrer). Enter the referrer invite code or wallet address:'
+});
+window.GAME_DICT.ja = Object.assign(window.GAME_DICT.ja || {}, {
+'铸造英雄必须设置邀请码（推荐人）。请输入推荐人的邀请码或钱包地址：':'ヒーロー鋳造には招待コード（紹介者）が必要です。紹介者の招待コードまたはウォレットアドレスを入力してください：'
+});
+window.GAME_DICT.es = Object.assign(window.GAME_DICT.es || {}, {
+'铸造英雄必须设置邀请码（推荐人）。请输入推荐人的邀请码或钱包地址：':'Acuñar un héroe requiere un código de invitación (referente). Ingresa el código o la dirección del referente:'
+});
+window.GAME_DICT.ko = Object.assign(window.GAME_DICT.ko || {}, {
+'铸造英雄必须设置邀请码（推荐人）。请输入推荐人的邀请码或钱包地址：':'영웅 소환에는 초대 코드(추천인)가 필요합니다. 추천인의 초대 코드 또는 지갑 주소를 입력하세요:'
+});
+window.GAME_DICT.ru = Object.assign(window.GAME_DICT.ru || {}, {
+'铸造英雄必须设置邀请码（推荐人）。请输入推荐人的邀请码或钱包地址：':'Для создания героя требуется пригласительный код (реферер). Введите код или адрес реферера:'
 });

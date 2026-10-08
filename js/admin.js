@@ -19,7 +19,8 @@ const ADMIN_CONTRACTS = [
   { key:'oracle',      name:'PriceOracle', icon:'💰' },
   { key:'vault',       name:'Vault', icon:'🏦' },
   { key:'marketplace', name:'Marketplace', icon:'🏪' },
-  { key:'boss',        name:'WorldBossV2', icon:'🐉' }
+  { key:'boss',        name:'WorldBossV2', icon:'🐉' },
+  { key:'governance',  name:'Governance', icon:'🗳️' }
 ];
 
 const ADMIN_ABIS = {
@@ -34,7 +35,15 @@ const ADMIN_ABIS = {
     "function game() view returns (address)","function setGame(address)",
     "function registry() view returns (address)","function setRegistry(address)",
     "function staminaRegen() view returns (uint256)","function maxStamina() view returns (uint8)",
-    "function setStaminaRegen(uint256)","function setMaxStamina(uint8)"
+    "function setStaminaRegen(uint256)","function setMaxStamina(uint8)",
+    "function maxMintPerAddr() view returns (uint256)","function mintedOf(address) view returns (uint256)",
+    "function setMaxMintPerAddr(uint256)",
+    "function registerReferrerCode(string)","function resolveReferrerCode(string) view returns (address)",
+    "function referrerCodeOf(address) view returns (bytes32)","function codeOwnerOf(bytes32) view returns (address)",
+    "function referrerRequired() view returns (bool)","function setReferrerRequired(bool)",
+    "function setPendingReferrer(address)","function pendingReferrerOf(address) view returns (address)",
+    "function referrerOfAccount(address) view returns (address)",
+    "function bindAccountReferrer(address)"
   ],
   weapons: [
     "function owner() view returns (address)","function paused() view returns (bool)","function pause()","function unpause()",
@@ -61,7 +70,31 @@ const ADMIN_ABIS = {
     "function addMonster(string,uint8,uint32,uint32,uint32)","function updateMonster(uint256,string,uint8,uint32,uint32,uint32)",
     "function cleanupExpiredAction(uint256)","function playerCount() view returns (uint256)",
     "function monstersCount() view returns (uint256)",
-    "function monsters(uint256) view returns (string name,uint8 element,uint32 power,uint32 reward,uint32 xp)"
+    "function monsters(uint256) view returns (string name,uint8 element,uint32 power,uint32 reward,uint32 xp)",
+    // 反作弊相关
+    "function heroLocked(uint256) view returns (bool)",
+    "function heroWinStreak(uint256) view returns (uint256)",
+    "function playerLocked(address) view returns (bool)",
+    "function playerHighLevelFights(address) view returns (uint256)",
+    "function playerHighLevelWins(address) view returns (uint256)",
+    "function maxWinStreak() view returns (uint256)",
+    "function minFightsForCheck() view returns (uint256)",
+    "function maxWinRateBp() view returns (uint256)",
+    "function highLevelMonsterThreshold() view returns (uint256)",
+    "function unlockHero(uint256)",
+    "function unlockPlayer(address)",
+    "function setMaxWinStreak(uint256)",
+    "function setHighLevelMonsterThreshold(uint256)",
+    "function setWinRateCheckParams(uint256,uint256)",
+    // 战斗销毁（Burn-on-Fight）
+    "function getFightBurnAmount() view returns (uint256)",
+    "function burnThresholdLow() view returns (uint256)",
+    "function burnThresholdMid() view returns (uint256)",
+    "function burnThresholdHigh() view returns (uint256)",
+    "function burnAmountLow() view returns (uint256)",
+    "function burnAmountMid() view returns (uint256)",
+    "function burnAmountHigh() view returns (uint256)",
+    "function setBurnParams(uint256,uint256,uint256,uint256,uint256,uint256)"
   ],
   forgeShop: [
     "function owner() view returns (address)","function paused() view returns (bool)","function pause()","function unpause()",
@@ -92,7 +125,7 @@ const ADMIN_ABIS = {
   ],
   vault: [
     "function hasRole(bytes32,address) view returns (bool)","function paused() view returns (bool)","function pause()","function unpause()",
-    "function token() view returns (address)","function isTokenSet() view returns (bool)","function setToken(address)",
+    "function erc20() view returns (address)","function isERC20Set() view returns (bool)","function setERC20(address)",
     "function usdt() view returns (address)","function rewardMode() view returns (uint8)",
     "function setRewardMode(uint8,address)","function emergencySetRewardMode(uint8,address)",
     "function clearDelay() view returns (uint256)","function setClearDelay(uint256)",
@@ -100,7 +133,7 @@ const ADMIN_ABIS = {
     "function totalDistributed() view returns (uint256)","function totalDistributedUSDT() view returns (uint256)",
     "function vaultBalance() view returns (uint256)","function getPendingReward(address) view returns (uint256)",
     "function authorizedGames(address) view returns (bool)","function authorizedGameCount() view returns (uint256)","function setAuthorizedGame(address,bool)",
-    "function adminClearPlayerPending(address)","function deposit(uint256)","function depositUSDT(uint256)"
+    "function adminClearPlayerPending(address)","function deposit(uint256)","function depositUSDT(uint256)","function priceOracle() view returns (address)","function dailyLimitUSD() view returns (uint256)","function todaySpentUSD() view returns (uint256)","function spendDay() view returns (uint256)","function setDailyLimitUSD(uint256)","function setPriceOracle(address)"
   ],
   boss: [
     "function owner() view returns (address)","function paused() view returns (bool)","function pause()","function unpause()",
@@ -126,6 +159,20 @@ const ADMIN_ABIS = {
     "function owner() view returns (address)","function paused() view returns (bool)","function pause()","function unpause()",
     "function minDelayBlocks() view returns (uint256)","function maxDelayBlocks() view returns (uint256)",
     "function updateDelayConfig(uint256,uint256)","function nextCommitId() view returns (uint256)"
+  ],
+  governance: [
+    "function owner() view returns (address)","function token() view returns (address)",
+    "function votingPeriodBlocks() view returns (uint256)","function passRateBp() view returns (uint256)",
+    "function paused() view returns (bool)","function proposalCount() view returns (uint256)",
+    "function proposals(uint256) view returns (address target,address implementation,string title,string description,uint256 snapshotBlock,uint256 startBlock,uint256 endBlock,uint256 votesFor,uint256 votesAgainst,bool executed,bool canceled)",
+    "function hasVoted(uint256,address) view returns (bool)",
+    "function propose(address,address,string,string)","function vote(uint256,bool)","function execute(uint256)",
+    "function cancel(uint256)","function emergencyCancel(uint256)","function pause()","function unpause()",
+    "event ProposalCreated(uint256 indexed id,address indexed proposer,address target,address implementation,string title,uint256 endBlock)",
+    "event VoteCast(uint256 indexed id,address indexed voter,bool support,uint256 weight)",
+    "event ProposalExecuted(uint256 indexed id,address target,address implementation)",
+    "event ProposalCanceled(uint256 indexed id)","event EmergencyCancel(uint256 indexed id,address admin)",
+    "event Paused(address admin)","event Unpaused(address admin)"
   ]
 };
 
@@ -136,6 +183,8 @@ const ADMIN_SECTIONS = [
   { key:'market',    label:'市场', icon:'fa-store', desc:'手续费 / 挂单过期 / 关联设置', render: secMarket },
   { key:'boss',      label:'世界BOSS', icon:'fa-dragon', desc:'开轮 / 奖池 / 攻击待处理配置', render: secBoss },
   { key:'v3',        label:'核心玩法', icon:'fa-gamepad', desc:'怪物配置 / commit 配置 / 关联合约', render: secV3 },
+  { key:'anticheat', label:'反作弊', icon:'fa-shield-virus', desc:'连胜锁定 / 胜率监控 / 解锁 / 战斗销毁', render: secAntiCheat },
+  { key:'governance', label:'治理', icon:'fa-scale-balanced', desc:'升级提案 / 投票 / 执行 / 暂停开关', render: (el,isOwner)=>secGovernance(el,isOwner) },
   { key:'forge',     label:'锻造厂', icon:'fa-hammer', desc:'掉落概率 / 过期块数 / 清理', render: secForge },
   { key:'enhance',   label:'强化铺', icon:'fa-wand-magic-sparkles', desc:'强化过期块数 / 清理', render: secEnhance },
   { key:'rng',       label:'随机预言机', icon:'fa-dice', desc:'commit 延迟区间', render: secRandomOracle },
@@ -444,14 +493,15 @@ async function adminDoSetPairs(){
 /* ============ 金库 ============ */
 async function secVault(el, isOwner){
   const vt = adminCt('vault');
-  const [tk, set, usdt, mode, delay, tp, tpu, td, tdu, bal, cnt, mine, paused] = await Promise.all([
-    vt.token().catch(()=>null), vt.isTokenSet().catch(()=>null), vt.usdt().catch(()=>null),
+  const [tk, set, usdt, mode, delay, tp, tpu, td, tdu, bal, cnt, mine, paused, dailyLimitUSD, todaySpentUSD, priceOracle] = await Promise.all([
+    vt.erc20().catch(()=>null), vt.isERC20Set().catch(()=>null), vt.usdt().catch(()=>null),
     vt.rewardMode().catch(()=>null), vt.clearDelay().catch(()=>null),
     vt.totalPending().catch(()=>null), vt.totalPendingUSDT().catch(()=>null),
     vt.totalDistributed().catch(()=>null), vt.totalDistributedUSDT().catch(()=>null),
     vt.vaultBalance().catch(()=>null), vt.authorizedGameCount().catch(()=>null),
     S.account ? vt.getPendingReward(S.account).catch(()=>null) : Promise.resolve(null),
     vt.paused().catch(()=>false)
+    ,vt.dailyLimitUSD().catch(()=>null), vt.todaySpentUSD().catch(()=>null), vt.priceOracle().catch(()=>null)
   ]);
   const games = ['v3','boss','marketplace','forgeShop','enhanceShop'];
   const authRows = [];
@@ -463,14 +513,14 @@ async function secVault(el, isOwner){
   const tokFmt = x => x!==null ? fmtUnits(x,18,2) : '-';
   const modeTxt = mode!==null ? (Number(mode)===1?'USDT 模式':'EH 模式') : '-';
   const body = aCard('金库状态','fa-vault',
-    aRow('奖励代币', tk?shortAddr(tk):'-') + aRow('奖励模式', modeTxt) +
+    aRow('ERC20 代币', tk?shortAddr(tk):'-') + aRow('奖励模式', modeTxt) +
     aRow('USDT 地址', usdt?shortAddr(usdt):'-') + aRow('清理间隔', delay!==null?(Number(delay)/86400).toFixed(1)+' 天':'-') +
     aRow('金库余额', bal!==null?(Number(mode)===1?tokFmt(bal)+' USDT':tokFmt(bal)+' '+S.tokenSymbol):'-') +
     aRow('待发放总额(EH)', tokFmt(tp)) + aRow('待发放总额(USDT)', tokFmt(tpu)) +
     aRow('累计发放(EH)', tokFmt(td)) + aRow('累计发放(USDT)', tokFmt(tdu)) +
     aRow('授权游戏数', cnt!==null?String(cnt):'-') +
     aRow('我的待领取', mine!==null?(Number(mode)===1?tokFmt(mine)+' USDT':tokFmt(mine)+' '+S.tokenSymbol):'-'),
-    isOwner ? aAct('设置奖励代币', 'adminOpenSetToken()', 'fa-pen') + aAct('切换奖励模式', 'adminOpenSetVaultMode()', 'fa-repeat') +
+    isOwner ? aAct('写入 ERC20 代币', 'adminOpenSetToken()', 'fa-pen') + aAct('切换奖励模式', 'adminOpenSetVaultMode()', 'fa-repeat') +
              aAct('紧急切换模式', 'adminOpenEmergencyMode()', 'fa-triangle-exclamation') + aAct('设置清理间隔', 'adminOpenSetClearDelay()', 'fa-clock') : '')
     + aCard('授权游戏（负责发放奖励）','fa-gamepad', authRows.join(''),
       isOwner ? aAct('添加/移除授权', 'adminOpenSetAuthorizedGame()', 'fa-pen') : '')
@@ -482,17 +532,24 @@ async function secVault(el, isOwner){
       isOwner ? aAct('清理玩家待领取', 'adminOpenClearPlayer()', 'fa-broom') : '')
     + aCard('暂停控制','fa-pause',
       `<div class="text-[12px] text-muted">暂停后金库存入/领取全部冻结。</div>`);
-  el.innerHTML = body + (isOwner ? aCard('暂停控制','fa-toggle-on','', aPauseBtn('vault', paused)) : '');
+  const limitCard = aCard('每日支出限额（USDT 等值）','fa-hourglass-half',
+    aRow('每日限额', dl!==null&&typeof dailyLimitUSD!=='undefined' ? fmtUnits(dl,18,0)+' USDT' : '（旧版金库无此功能）') +
+    aRow('今日已支出', typeof todaySpentUSD!=='undefined'&&todaySpentUSD!==null ? fmtUnits(todaySpentUSD,18,2)+' USDT' : '-') +
+    aRow('限额剩余', (typeof dailyLimitUSD!=='undefined'&&typeof todaySpentUSD!=='undefined'&&dailyLimitUSD!==null&&todaySpentUSD!==null) ? fmtUnits(dailyLimitUSD>todaySpentUSD?dailyLimitUSD-todaySpentUSD:0n,18,2)+' USDT' : '-') +
+    aRow('价格预言机', priceOracle?shortAddr(priceOracle):'未设置（EH 模式支出需配置）') +
+    aRow('口径', 'USDT 直接计；EH 按 PriceOracle 折算。按自然日 UTC 重置。'),
+    isOwner ? aAct('设置每日限额', 'adminOpenSetDailyLimit()', 'fa-pen') + aAct('设置价格预言机', "adminPromptAddr('vault','setPriceOracle','请输入 PriceOracle 地址：')", 'fa-pen') : '');
+  el.innerHTML = body + limitCard + (isOwner ? aCard('暂停控制','fa-toggle-on','', aPauseBtn('vault', paused)) : '');
 }
 async function adminOpenSetToken(){
-  adminFormModal('设置金库奖励代币（仅一次）',[
+  adminFormModal('写入金库 ERC20 代币（代币部署后调用，仅一次）',[
     {label:'代币合约地址（GameToken）', value: addrOf('gameToken')||'', placeholder:'0x…'}
   ], 'adminDoSetToken()');
 }
 async function adminDoSetToken(){
   const v = adminFormVals(1);
-  await adminExec('设置奖励代币', async()=>{
-    await (await adminCt('vault',true).setToken(v[0].trim())).wait();
+  await adminExec('写入 ERC20 代币', async()=>{
+    await (await adminCt('vault',true).setERC20(v[0].trim())).wait();
   });
 }
 async function adminOpenSetVaultMode(){
@@ -774,8 +831,9 @@ async function secV3(el, isOwner){
       </div>` : '').join('');
   } else { monRows = '<div class="text-[12px] text-muted">暂无怪物</div>'; }
   const ch = adminCt('characters');
-  const [sRegen, sMax] = await Promise.all([
-    ch.staminaRegen().catch(()=>null), ch.maxStamina().catch(()=>null)
+  const [sRegen, sMax, mintLimit, refReq] = await Promise.all([
+    ch.staminaRegen().catch(()=>null), ch.maxStamina().catch(()=>null),
+    ch.maxMintPerAddr().catch(()=>null), ch.referrerRequired().catch(()=>null)
   ]);
   const staminaCard = aCard('英雄体力系统','fa-bolt',
     (sRegen===null || sMax===null)
@@ -785,7 +843,19 @@ async function secV3(el, isOwner){
         '<div class="text-[11px] text-muted px-1 pt-1">恢复间隔范围 60 秒 ~ 7 天；上限范围 1 ~ 20 点。修改后对所有英雄即时生效（体力按新间隔/上限计算）。</div>',
     isOwner ? aAct('设置恢复间隔', 'adminOpenSetStaminaRegen()', 'fa-clock') +
              aAct('设置体力上限', 'adminOpenSetMaxStamina()', 'fa-gauge-high') : '');
-  const body = staminaCard
+  const mintCard = aCard('铸造限额','fa-hashtag',
+    mintLimit===null
+      ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>当前链上 Characters 尚未升级到 V4，无法读取铸造限额。</div>'
+      : aRow('每地址铸造上限', Number(mintLimit)>0 ? String(Number(mintLimit)) + ' 个' : '不限制（0）') +
+        '<div class="text-[11px] text-muted px-1 pt-1">仅限制「铸造」次数；持有数量不限，市场可自由交易。设为 0 关闭限制。</div>',
+    isOwner ? aAct('设置铸造上限', 'adminOpenSetMaxMint()', 'fa-pen') + aAct('查询地址已铸造数', 'adminOpenQueryMinted()', 'fa-magnifying-glass') : '');
+  const refCard = aCard('邀请系统（推荐人 10%）','fa-user-plus',
+    '<div class="text-[12px] text-muted">铸造强制：<b class="num-mono">' + (refReq===null ? '未知' : (refReq ? '开启（首次铸造必须设置推荐人）' : '关闭')) + '</b>' +
+    (refReq ? '<div class="text-[11px] text-muted/80 mt-0.5">玩家首次铸造前须 setPendingReferrer（推荐人须已注册邀请码）；铸造时自动绑定并固化，后续铸造复用同一推荐人。</div>' : '') +
+    '<div class="text-[12px] text-muted mt-1">推荐人绑定到<b class="num-mono">玩家地址</b>（bindAccountReferrer），该地址铸造/购买的<b>所有英雄</b>战斗胜利时，推荐人额外获得奖励的 10%（金库支付，不从玩家奖励中扣）。铸造前 setPendingReferrer 会自动固化；也可铸造后手动 bindAccountReferrer 绑定（仅一次、不可改）。</div>' +
+    '<div class="text-[12px] text-muted mt-1">邀请链接：玩家可注册 4~10 位短码（<b class="num-mono">registerReferrerCode</b>），链接 <b class="num-mono">?ref=短码</b> 更短；前端 resolveReferrerCode 解析回地址再绑定。未注册时用完整地址。</div>',
+    isOwner ? aAct('查询地址短码', 'adminOpenQueryCode()', 'fa-tag') + aAct('查询账户推荐人', 'adminOpenQueryAccountRef()', 'fa-user') + (refReq!==null ? aAct(refReq?'关闭强制':'开启强制', refReq ? "adminToggleReferrerRequired(false)" : "adminToggleReferrerRequired(true)", refReq?'fa-toggle-off':'fa-toggle-on') : '') : '');
+  const body = staminaCard + mintCard + refCard
     + aCard('commit 配置','fa-hourglass-half',
     aRow('过期块数', exp!==null?String(exp):'-') + aRow('每人待处理上限', maxp!==null?String(maxp):'-') + aRow('注册玩家数', pc!==null?String(pc):'-'),
     isOwner ? aAct('修改过期块数', 'adminPromptUint(\'v3\',\'setPendingExpiryBlocks\',\'过期块数（100~450）：\',{min:100,max:450})', 'fa-pen') +
@@ -799,6 +869,154 @@ async function secV3(el, isOwner){
                aAct('排除注册地址', 'adminOpenSetExcluded()', 'fa-user-slash') : '');
   el.innerHTML = body + (isOwner ? aCard('暂停控制','fa-toggle-on','', aPauseBtn('v3', paused)) : '');
 }
+/* ========== 反作弊管理 ========== */
+async function secAntiCheat(el, isOwner){
+  const v3 = adminCt('v3');
+  const [maxStreak, minFights, maxRateBp, threshold, burnAmt] = await Promise.all([
+    v3.maxWinStreak().catch(()=>null),
+    v3.minFightsForCheck().catch(()=>null),
+    v3.maxWinRateBp().catch(()=>null),
+    v3.highLevelMonsterThreshold().catch(()=>null),
+    v3.getFightBurnAmount().catch(()=>null)
+  ]);
+  const [btl, btm, bth, abl, abm, abh] = await Promise.all([
+    v3.burnThresholdLow().catch(()=>null), v3.burnThresholdMid().catch(()=>null), v3.burnThresholdHigh().catch(()=>null),
+    v3.burnAmountLow().catch(()=>null), v3.burnAmountMid().catch(()=>null), v3.burnAmountHigh().catch(()=>null)
+  ]);
+  const usdP = x => x!==null ? '$'+fmtUnits(x,18,6) : '-';
+  const burnRow = (low, high, amt)=>`<div class="flex items-center justify-between px-3 py-1.5 bg-[#0d1526] rounded-lg border border-[#24304a]">
+    <span class="text-[12px]">${low}${high?' ~ '+high:''}</span>
+    <span class="text-[12px] font-bold text-red-400">🔥 ${amt} 枚/战</span>
+  </div>`;
+  const burnCard = aCard('战斗销毁（Burn-on-Fight）','fa-fire',
+    burnRow('0 ~ '+usdP(btl), '', abl!==null?fmtUnits(abl,18,0):'-') +
+    burnRow(usdP(btl), usdP(btm), abm!==null?fmtUnits(abm,18,0):'-') +
+    burnRow(usdP(btm), usdP(bth), abh!==null?fmtUnits(abh,18,0):'-') +
+    burnRow(usdP(bth)+' 以上', '', '0（不销毁）') +
+    aRow('当前战斗销毁', burnAmt!==null?'🔥 '+fmtUnits(burnAmt,18,0)+' 枚':'（价格 ≥0.03 时 0 枚）') +
+    '<div class="text-[11px] text-muted px-1 pt-1">按代币/USDT 价格阶梯销毁玩家代币（转账到黑洞 0xdEaD）。价格读不到/无流动池时按最低档。需玩家授权 V3 合约代币。</div>',
+    isOwner ? aAct('设置销毁阶梯', 'adminOpenSetBurn()', 'fa-pen') : '');
+
+  const body = aCard('反作弊规则','fa-shield-virus',
+    aRow('最大连胜次数', maxStreak!==null ? String(Number(maxStreak)) : '-') +
+    aRow('高等级怪物阈值', threshold!==null ? '#'+String(Number(threshold))+' 及以上' : '-') +
+    aRow('胜率检查阈值', minFights!==null ? '至少战斗 '+String(Number(minFights))+' 场' : '-') +
+    aRow('最大胜率限制', maxRateBp!==null ? (Number(maxRateBp)/100)+'%' : '-') +
+    '<div class="text-[11px] text-muted px-1 pt-1">只有高等级怪物（石头人及以上）才会触发反作弊。连胜超过限制或胜率过高将自动锁定。</div>',
+    isOwner ? aAct('设置最大连胜', 'adminPromptUint(\'v3\',\'setMaxWinStreak\',\'最大连胜次数（5~20）：\',{min:5,max:20})', 'fa-pen') +
+             aAct('设置怪物阈值', 'adminPromptUint(\'v3\',\'setHighLevelMonsterThreshold\',\'高等级怪物 ID 阈值（4~9）：\',{min:4,max:9})', 'fa-pen') +
+             aAct('设置胜率参数', 'adminOpenSetWinRate()', 'fa-percent') : '')
+    + burnCard
+    + aCard('英雄锁定管理','fa-lock',
+    '<div class="text-[12px] text-muted">输入英雄 ID 查看是否被锁定，或解锁英雄。</div>' +
+    '<div class="flex gap-2 mt-2"><input id="antiCheatHeroId" type="number" placeholder="英雄 ID" class="input flex-1"><button class="btn btn-gold" onclick="adminCheckHeroLock()">查询</button></div>' +
+    '<div id="antiCheatHeroResult" class="text-[12px] mt-2"></div>',
+    isOwner ? aAct('解锁英雄', 'adminUnlockHero()', 'fa-unlock') : '')
+    + aCard('玩家锁定管理','fa-user-lock',
+    '<div class="text-[12px] text-muted">输入玩家地址查看是否被锁定，或解锁玩家。</div>' +
+    '<div class="flex gap-2 mt-2"><input id="antiCheatPlayerAddr" type="text" placeholder="玩家地址" class="input flex-1"><button class="btn btn-gold" onclick="adminCheckPlayerLock()">查询</button></div>' +
+    '<div id="antiCheatPlayerResult" class="text-[12px] mt-2"></div>',
+    isOwner ? aAct('解锁玩家', 'adminUnlockPlayer()', 'fa-unlock') : '');
+
+  el.innerHTML = body;
+}
+
+async function adminOpenSetBurn(){
+  const v3 = adminCt('v3');
+  const [btl, btm, bth, abl, abm, abh] = await Promise.all([
+    v3.burnThresholdLow().catch(()=>null), v3.burnThresholdMid().catch(()=>null), v3.burnThresholdHigh().catch(()=>null),
+    v3.burnAmountLow().catch(()=>null), v3.burnAmountMid().catch(()=>null), v3.burnAmountHigh().catch(()=>null)
+  ]);
+  adminFormModal('设置战斗销毁阶梯',[
+    {label:'阈值1（USD，如 0.001）', value: btl!==null?fmtUnits(btl,18,6):''},
+    {label:'阈值2（USD，如 0.01）', value: btm!==null?fmtUnits(btm,18,6):''},
+    {label:'阈值3（USD，如 0.03，≥此价不销毁）', value: bth!==null?fmtUnits(bth,18,6):''},
+    {label:'低于阈值1 销毁（枚，如 50）', value: abl!==null?fmtUnits(abl,18,0):''},
+    {label:'阈值1~2 销毁（枚，如 10）', value: abm!==null?fmtUnits(abm,18,0):''},
+    {label:'阈值2~3 销毁（枚，如 1）', value: abh!==null?fmtUnits(abh,18,0):''}
+  ], 'adminDoSetBurn()');
+}
+async function adminDoSetBurn(){
+  const v = adminFormVals(6);
+  const t1 = ethers.parseUnits(String(Number(v[0])||0.001), 18);
+  const t2 = ethers.parseUnits(String(Number(v[1])||0.01), 18);
+  const t3 = ethers.parseUnits(String(Number(v[2])||0.03), 18);
+  const a1 = ethers.parseUnits(String(Math.round(Number(v[3])||50)), 18);
+  const a2 = ethers.parseUnits(String(Math.round(Number(v[4])||10)), 18);
+  const a3 = ethers.parseUnits(String(Math.round(Number(v[5])||1)), 18);
+  if(t1>=t2 || t2>=t3){ toast('阈值需递增','warn'); return; }
+  await adminExec('设置销毁阶梯', async()=>{
+    await (await adminCt('v3',true).setBurnParams(t1,t2,t3,a1,a2,a3)).wait();
+  });
+}
+
+async function adminCheckHeroLock(){
+  const id = BigInt(document.getElementById('antiCheatHeroId').value || '0');
+  const v3 = adminCt('v3');
+  const [locked, streak, wins, fights] = await Promise.all([
+    v3.heroLocked(id).catch(()=>false),
+    v3.heroWinStreak(id).catch(()=>0n),
+    v3.stats ? v3.stats('0x0000000000000000000000000000000000000000').catch(()=>null) : null
+  ]);
+  document.getElementById('antiCheatHeroResult').innerHTML =
+    (locked ? '<span class="text-red-400">🔒 已锁定</span>' : '<span class="text-green-400">✅ 未锁定</span>') +
+    ' | 连胜: '+Number(streak);
+}
+
+async function adminCheckPlayerLock(){
+  const addr = document.getElementById('antiCheatPlayerAddr').value.trim();
+  if(!addr) return;
+  const v3 = adminCt('v3');
+  const [locked, hf, hw] = await Promise.all([
+    v3.playerLocked(addr).catch(()=>false),
+    v3.playerHighLevelFights(addr).catch(()=>0n),
+    v3.playerHighLevelWins(addr).catch(()=>0n)
+  ]);
+  const rate = Number(hf) > 0 ? (Number(hw)/Number(hf)*100).toFixed(1)+'%' : '-';
+  document.getElementById('antiCheatPlayerResult').innerHTML =
+    (locked ? '<span class="text-red-400">🔒 已锁定</span>' : '<span class="text-green-400">✅ 未锁定</span>') +
+    ' | 高等级战斗: '+Number(hf)+' 场 | 胜场: '+Number(hw)+' | 胜率: '+rate;
+}
+
+async function adminUnlockHero(){
+  const id = document.getElementById('antiCheatHeroId').value;
+  if(!id){ toast('请输入英雄 ID','warn'); return; }
+  await adminExec('解锁英雄', async()=>{
+    await (await adminCt('v3',true).unlockHero(BigInt(id))).wait();
+  });
+  await adminCheckHeroLock();
+}
+
+async function adminUnlockPlayer(){
+  const addr = document.getElementById('antiCheatPlayerAddr').value.trim();
+  if(!addr){ toast('请输入玩家地址','warn'); return; }
+  await adminExec('解锁玩家', async()=>{
+    await (await adminCt('v3',true).unlockPlayer(addr)).wait();
+  });
+  await adminCheckPlayerLock();
+}
+
+async function adminOpenSetWinRate(){
+  const v3 = adminCt('v3');
+  const minFights = await v3.minFightsForCheck().catch(()=>10);
+  const maxRateBp = await v3.maxWinRateBp().catch(()=>9000);
+  adminFormModal('设置胜率检查参数',[
+    {label:'至少战斗场数（次）', value: Number(minFights)},
+    {label:'最大胜率（%）', value: Number(maxRateBp)/100}
+  ], 'adminDoSetWinRate()');
+}
+
+async function adminDoSetWinRate(){
+  const v = adminFormVals(2);
+  const minFights = BigInt(Math.max(1, Math.round(Number(v[0])||10)));
+  const maxRatePct = Math.min(100, Math.max(50, Number(v[1])||90));
+  const maxRateBp = BigInt(Math.round(maxRatePct * 100));
+  await adminExec('设置胜率参数', async()=>{
+    await (await adminCt('v3',true).setWinRateCheckParams(minFights, maxRateBp)).wait();
+  });
+  await renderAdminPanel();
+}
+
 async function adminOpenAddMonster(){
   adminFormModal('添加怪物',[
     {label:'怪物名称', placeholder:'如 火焰巨魔'},
@@ -1039,6 +1257,68 @@ async function adminDoSetMaxStamina(){
   });
 }
 
+/* ============ 铸造限额（V4） ============ */
+async function adminOpenSetMaxMint(){
+  const ch = adminCt('characters');
+  const m = await ch.maxMintPerAddr().catch(()=>0n);
+  adminFormModal('设置每地址铸造上限',[
+    {label:'每地址铸造上限（0 = 不限制；仅限制铸造，不影响持有/市场交易）', value: String(Number(m))}
+  ], 'adminDoSetMaxMint()');
+}
+async function adminDoSetMaxMint(){
+  const v = adminFormVals(1);
+  const n = Math.max(0, Math.min(50, Math.round(Number(v[0])||0)));
+  await adminExec('设置铸造上限', async()=>{
+    await (await adminCt('characters',true).setMaxMintPerAddr(BigInt(n))).wait();
+  });
+}
+async function adminOpenQueryMinted(){
+  const addr = prompt('输入要查询的地址：', S.admin.forAccount||'');
+  if(addr===null) return;
+  if(!/^0x[a-fA-F0-9]{40}$/.test(addr.trim())){ toast('地址格式不正确','warn'); return; }
+  try{
+    const n = await adminCt('characters').mintedOf(addr.trim());
+    toast('该地址已铸造 ' + Number(n) + ' 个英雄','success');
+  }catch(e){ toast(errMsg(e),'error'); }
+}
+async function adminOpenQueryCode(){
+  const addr = prompt('输入要查询的地址：', S.admin.forAccount||'');
+  if(addr===null) return;
+  if(!/^0x[a-fA-F0-9]{40}$/.test(addr.trim())){ toast('地址格式不正确','warn'); return; }
+  try{
+    const c = await adminCt('characters').referrerCodeOf(addr.trim());
+    let s = '未注册';
+    if(c && c !== ethers.ZeroHash){
+      try{ s = ethers.decodeBytes32String(c); }catch(e){ s = '0x'+c.slice(2,10); }
+    }
+    toast('该地址邀请码：'+s,'success');
+  }catch(e){ toast(errMsg(e),'error'); }
+}
+async function adminOpenQueryAccountRef(){
+  const addr = prompt('输入要查询的玩家地址：', S.admin.forAccount||'');
+  if(addr===null) return;
+  if(!/^0x[a-fA-F0-9]{40}$/.test(addr.trim())){ toast('地址格式不正确','warn'); return; }
+  try{
+    const ch = adminCt('characters');
+    const [acc, pend] = await Promise.all([
+      ch.referrerOfAccount(addr.trim()).catch(()=>null),
+      ch.pendingReferrerOf(addr.trim()).catch(()=>null)
+    ]);
+    let msg = '已固化推荐人：' + ((acc && acc!==ethers.ZeroAddress) ? acc : '无');
+    if(pend && pend!==ethers.ZeroAddress) msg += '；待设置推荐人：' + pend;
+    toast(msg,'success');
+  }catch(e){ toast(errMsg(e),'error'); }
+}
+async function adminToggleReferrerRequired(on){
+  if(!S.admin.isOwner){ toast('仅管理员可操作','warn'); return; }
+  try{
+    const tx = await adminCt('characters').connect(S.signer).setReferrerRequired(!!on);
+    await tx.wait();
+    toast(on?'铸造强制邀请码已开启':'铸造强制邀请码已关闭','success');
+    renderAdmin();
+  }catch(e){ toast(errMsg(e),'error'); }
+}
+
 /* ============ 随机预言机 ============ */
 async function secRandomOracle(el, isOwner){
   const ro = adminCt('randomOracle');
@@ -1211,5 +1491,21 @@ async function adminRevokeApprovals(){
       await (await nft.setApprovalForAll(mustC('forgeShop').target, false)).wait();
       await (await nft.setApprovalForAll(mustC('enhanceShop').target, false)).wait();
     }
+  });
+}
+
+/* ============ 金库每日限额 ============ */
+async function adminOpenSetDailyLimit(){
+  const vt = adminCt('vault');
+  const dl = await vt.dailyLimitUSD().catch(()=>null);
+  adminFormModal('设置金库每日支出限额（USDT 等值）',[
+    {label:'每日限额（USDT，0~100000，0=关闭限额）', value: dl!==null?fmtUnits(dl,18,0):''}
+  ], 'adminDoSetDailyLimit()');
+}
+async function adminDoSetDailyLimit(){
+  const v = adminFormVals(1);
+  const n = Math.max(0, Math.min(100000, Number(v[0])||0));
+  await adminExec('设置每日限额', async()=>{
+    await (await adminCt('vault',true).setDailyLimitUSD(ethers.parseUnits(String(n),18))).wait();
   });
 }

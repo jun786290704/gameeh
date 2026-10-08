@@ -14,7 +14,14 @@ function bpToPct(bp, digits=2){
   return p.toLocaleString('zh-CN',{maximumFractionDigits:digits}) + '%';
 }
 function shortAddr(a){ if(!a) return '--'; a = String(a); return a.slice(0,6)+'…'+a.slice(-4); }
-function heroImg(el){ return 'img/hero_'+(Number(el)%5)+'.png'; }
+function heroImg(el, id, skin){
+  const e = Number(el)%5;
+  // tokenId 奇偶决定男女立绘：偶数=男版，奇数=女版
+  const g = (id!==undefined && id!==null) ? (Number(id)%2===1 ? 'f' : 'm') : 'm';
+  // V13：skin 决定该 NFT 专属形象变体：skin%3=0 基础立绘，1 → _1 变体，2 → _2 变体
+  const v = Number(skin||0) % 3;
+  return v>0 ? 'img/hero_'+g+'_'+e+'_'+v+'.png' : 'img/hero_'+g+'_'+e+'.png';
+}
 function monImg(id){ return 'img/mon_'+(Number(id)%10)+'.png'; }
 const ELEMENTS = {
   0:{name:'金',icon:'🪙',color:'#f59e0b',soft:'rgba(245,158,11,.14)',border:'rgba(251,191,36,.5)'},

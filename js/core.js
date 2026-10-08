@@ -16,7 +16,8 @@ const CONTRACTS = {
   oracle:      '0xB1AD6B80FbFAFbA4C884a943e50652183Aa45E2A',
   vault:       '0xbdeC90ED2e839261538AC72078026D73b8dA2E1A',
   marketplace: '0x686E3cE4d0aa25C7CFd6D4Bbbc670b8B35d5370A',
-  boss:        '0x21316E9C757314e62d33A836b5D66A58E937e0c3'
+  boss:        '0x21316E9C757314e62d33A836b5D66A58E937e0c3',
+  governance:  '' // 治理合约（主网部署后填写，空 = 治理未启用）
 };
 const NET = { chainId: 97, chainIdHex: '0x61', rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545', rpcFallbacks: ['https://data-seed-prebsc-1-s2.bnbchain.org:8545','https://bsc-testnet.drpc.org','https://bsc-testnet.publicnode.com'], name: 'BSC 测试网' };
 const CONFIG = { confirmations: 3 };
@@ -26,7 +27,7 @@ const GAS_PRICE = 120000000n; // 0.12 gwei（BSC 测试网交易 gasPrice）
 const ABIs = {
   characters: [
     "function owner() view returns (address)",
-    "function heroes(uint256) view returns (uint8 element,uint32 basePower,uint16 level,uint64 xp,uint8 stamina,uint64 lastStamina)",
+    "function heroes(uint256) view returns (uint8 element,uint32 basePower,uint16 level,uint64 xp,uint8 stamina,uint64 lastStamina,uint8 skin)",
     "function getStamina(uint256) view returns (uint8)",
     "function getStaminaInfo(uint256) view returns (uint8 currentStamina,uint256 staminaMax,uint256 recoveryInterval,uint256 secondsUntilNext)",
     "function staminaRegen() view returns (uint256)",
@@ -38,6 +39,30 @@ const ABIs = {
     "function balanceOf(address) view returns (uint256)",
     "function isApprovedForAll(address,address) view returns (bool)",
     "function setApprovalForAll(address,bool)",
+    // 铸造限额（V4）
+    "function maxMintPerAddr() view returns (uint256)",
+    "function mintedOf(address) view returns (uint256)",
+    "function setMaxMintPerAddr(uint256)",
+    // 邀请短码（V6）
+    "function registerReferrerCode(string)",
+    "function resolveReferrerCode(string) view returns (address)",
+    "function referrerCodeOf(address) view returns (bytes32)",
+    "function codeOwnerOf(bytes32) view returns (address)",
+    // 铸造强制邀请码（V7）
+    "function referrerRequired() view returns (bool)",
+    "function setReferrerRequired(bool)",
+    "function setPendingReferrer(address)",
+    "function pendingReferrerOf(address) view returns (address)",
+    "function referrerOfAccount(address) view returns (address)",
+    // 地址级推荐人（V8）：推荐人绑定玩家地址，该地址所有英雄（含市场购买）战斗胜利均给推荐人 10%
+    "function bindAccountReferrer(address)",
+    // V9/V10：下线列表与下线贡献奖励（链上直读，不依赖事件）
+    "function downlineCount(address) view returns (uint256)",
+    "function downlineAt(address,uint256) view returns (address)",
+    "function downlineEarned(address) view returns (uint256)",
+    "event AccountReferrerBound(address indexed player,address indexed referrer)",
+    "event ReferrerRequiredSet(bool required)",
+    "event PendingReferrerSet(address indexed player,address indexed referrer)",
     "event Transfer(address indexed from,address indexed to,uint256 indexed tokenId)"
   ],
   weapons: [
@@ -78,14 +103,44 @@ const ABIs = {
   v3: [
     "function owner() view returns (address)",
     "function commitMintHero(bytes32) returns (uint256)",
-    "function fight(uint256,uint256,uint256)",
+    "function fightOnce(uint256,uint256,uint256,uint8)",
     "function levelUp(uint256)",
     "function monsters(uint256) view returns (string name,uint8 element,uint32 power,uint32 reward,uint32 xp)",
     "function monstersCount() view returns (uint256)",
+    "function monstersLength() view returns (uint256)",
+    "function monsterRegistry() view returns (address)",
     "function getFightPower(uint256,uint256) view returns (uint32)",
     "function playerCount() view returns (uint256)","function playerList(uint256) view returns (address)",
     "function stats(address) view returns (uint32 wins,uint32 fights,uint64 totalPower)",
-    "event FightResult(address indexed player,uint256 indexed heroId,uint256 indexed monsterId,uint256 weaponId,bool win,uint256 reward,uint64 xpGained,uint32 effPower,uint16 winChanceBp,uint16 roll)"
+    // 反作弊相关
+    "function heroLocked(uint256) view returns (bool)",
+    "function heroWinStreak(uint256) view returns (uint256)",
+    "function playerLocked(address) view returns (bool)",
+    "function playerHighLevelFights(address) view returns (uint256)",
+    "function playerHighLevelWins(address) view returns (uint256)",
+    "function maxWinStreak() view returns (uint256)",
+    "function minFightsForCheck() view returns (uint256)",
+    "function maxWinRateBp() view returns (uint256)",
+    "function highLevelMonsterThreshold() view returns (uint256)",
+    "function unlockHero(uint256)",
+    "function unlockPlayer(address)",
+    "function setMaxWinStreak(uint256)",
+    "function setHighLevelMonsterThreshold(uint256)",
+    // 战斗销毁（Burn-on-Fight）
+    "function getFightBurnAmount() view returns (uint256)",
+    "function burnThresholdLow() view returns (uint256)",
+    "function burnThresholdMid() view returns (uint256)",
+    "function burnThresholdHigh() view returns (uint256)",
+    "function burnAmountLow() view returns (uint256)",
+    "function burnAmountMid() view returns (uint256)",
+    "function burnAmountHigh() view returns (uint256)",
+    "function setBurnParams(uint256,uint256,uint256,uint256,uint256,uint256)",
+    "event FightResult(address indexed player,uint256 indexed heroId,uint256 indexed monsterId,uint256 weaponId,bool win,uint256 reward,uint64 xpGained,uint32 effPower,uint16 winChanceBp,uint16 roll)",
+    "event HeroLocked(uint256 indexed heroId,string reason)",
+    "event PlayerLocked(address indexed player,string reason)",
+    "event TokensBurnedForFight(address indexed player,uint256 amount,uint256 price)",
+    "event RewardAccumulated(address indexed player,uint256 amount)",
+    "event ReferralReward(address indexed referrer,uint256 indexed heroId,uint256 amount)"
   ],
   viewHelper: [
     "function previewFight(address,uint256,uint256,uint256) view returns (uint32 eff,uint16 chance)",
@@ -93,9 +148,25 @@ const ABIs = {
   ],
   vault: [
     "function getPendingReward(address) view returns (uint256)",
+    "function getPendingReferral(address) view returns (uint256)",
     "function rewardMode() view returns (uint8)",
     "function usdt() view returns (address)",
-    "function claim()"
+    "function claim()",
+    "function claimReferral()",
+    "function totalClaimed(address) view returns (uint256)",
+    "function totalClaimedUSDT(address) view returns (uint256)",
+    "function totalClaimedReferral(address) view returns (uint256)",
+    "function totalClaimedReferralUSDT(address) view returns (uint256)",
+    "function vaultBalance() view returns (uint256)",
+    "function setMyReferrerSplit(uint16)",
+    "function referrerSplitBp(address) view returns (uint16)",
+    "function getPendingCashback(address) view returns (uint256)",
+    "function claimCashback()",
+    "function totalClaimedCashback(address) view returns (uint256)",
+    "function totalClaimedCashbackUSDT(address) view returns (uint256)",
+    "function lastSplitChange(address) view returns (uint256)",
+    "function cashbackBpOf(address) view returns (uint16)",
+    "function SPLIT_COOLDOWN() view returns (uint256)"
   ],
   boss: [
     "function owner() view returns (address)",
@@ -124,6 +195,30 @@ const ABIs = {
     "function getCommit(uint256) view returns (bytes32 hash,uint64 blockNumber,address committer,bool revealed)",
     "function minDelayBlocks() view returns (uint256)",
     "function maxDelayBlocks() view returns (uint256)"
+  ],
+  governance: [
+    "function owner() view returns (address)",
+    "function token() view returns (address)",
+    "function votingPeriodBlocks() view returns (uint256)",
+    "function passRateBp() view returns (uint256)",
+    "function paused() view returns (bool)",
+    "function proposalCount() view returns (uint256)",
+    "function proposals(uint256) view returns (address target,address implementation,string title,string description,uint256 snapshotBlock,uint256 startBlock,uint256 endBlock,uint256 votesFor,uint256 votesAgainst,bool executed,bool canceled)",
+    "function hasVoted(uint256,address) view returns (bool)",
+    "function propose(address,address,string,string)",
+    "function vote(uint256,bool)",
+    "function execute(uint256)",
+    "function cancel(uint256)",
+    "function emergencyCancel(uint256)",
+    "function pause()",
+    "function unpause()",
+    "event ProposalCreated(uint256 indexed id,address indexed proposer,address target,address implementation,string title,uint256 endBlock)",
+    "event VoteCast(uint256 indexed id,address indexed voter,bool support,uint256 weight)",
+    "event ProposalExecuted(uint256 indexed id,address target,address implementation)",
+    "event ProposalCanceled(uint256 indexed id)",
+    "event EmergencyCancel(uint256 indexed id,address admin)",
+    "event Paused(address admin)",
+    "event Unpaused(address admin)"
   ]
 };
 const REVEAL_ABI = {
@@ -144,6 +239,7 @@ const S = {
   tab:'heroes',
   pending:[],
   heroes:[], weapons:[], monsters:[],
+  mintLimit:4, // 铸造限额（maxMintPerAddr，0=不限制；链上读取后覆盖）
   shardsBal:{}, essenceBal:{}, tokenBal:0n, tokenDecimals:18, tokenSymbol:TOKEN_SYMBOL,
   vaultReward:0n, vaultMode:0, vaultSym:TOKEN_SYMBOL, vaultDec:18,
   marketList:[], marketPage:0, marketPageSize:8, marketTab:'list', marketFeeBp:200,
