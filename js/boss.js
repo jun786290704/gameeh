@@ -191,7 +191,7 @@ function renderBossPicks(){
           <span class="pick-body">
             <span class="pick-title"><b>#${w.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
             <span class="pick-sub"><b class="text-gold">${stars}</b></span>
-            <span class="pick-sub"><i class="text-green-400">加成 +${bpToPct(w.bonusBp)}</i><i class="text-gold ml-2">奖励 +${rewardBonusOf(w.stars)}%</i></span>
+            <span class="pick-sub"><i class="text-green-400">加成 +${bpToPct(w.bonusBp)}</i><i class="text-gold ml-2">奖励 +${rewardBonusOf(w.stars, w.bonusBp)}%</i></span>
           </span>
           <span class="pick-radio ${active?'pick-radio-on':''}">${active?'✓':''}</span>
         </button>`;

@@ -95,7 +95,7 @@ async function renderFight(){
         <span class="pick-body">
           <span class="pick-title"><b>#${w.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
           <span class="pick-sub"><b class="text-gold">${stars}</b></span>
-          <span class="pick-sub"><i class="text-green-400">加成 +${bpToPct(w.bonusBp)}</i><i class="text-gold ml-2">奖励 +${rewardBonusOf(w.stars)}%</i></span>
+          <span class="pick-sub"><i class="text-green-400">加成 +${bpToPct(w.bonusBp)}</i><i class="text-gold ml-2">奖励 +${rewardBonusOf(w.stars, w.bonusBp)}%</i></span>
         </span>
         <span class="pick-radio ${active?'pick-radio-on':''}">${active?'✓':''}</span>
       </button>`;
@@ -287,7 +287,7 @@ async function autoPreviewFight(){
     try{
       const monTier = Math.floor(heroLv / 10);
       const monMult = 100 + 15 * monTier;
-      const starBonus = (wpnData.stars||1)===3 ? 11000 : (wpnData.stars||1)===4 ? 12500 : (wpnData.stars||1)===5 ? 15000 : 10000;
+      const starBonus = (wpnData.stars||1)<=2 ? 10000 : (10000 + Math.floor((wpnData.bonusBp||0) / 4));
       const lvT = Math.min(5, Math.floor((heroLv||1) / 10));
       const lvBonus = 10000 + lvT * 500;
       estReward = BigInt(monData.reward||0) * BigInt(monMult) * 10000000000000000n / 100n * BigInt(starBonus) / 10000n * BigInt(lvBonus) / 10000n;

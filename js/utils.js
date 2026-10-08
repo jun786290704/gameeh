@@ -13,11 +13,13 @@ function bpToPct(bp, digits=2){
   const p = Number(bp) / 100;
   return p.toLocaleString('zh-CN',{maximumFractionDigits:digits}) + '%';
 }
-// 武器星级 → 奖励加成（与链上 _starBonusBp 一致：3星+10% / 4星+25% / 5星+50% / 其余+0%）
-function rewardBonusOf(stars){
+// 武器奖励加成：随武器强化加成（bonusBp）随机派生，与链上 _starBonusBp 一致
+// 1-2星 +0%；3星(+10%~+20%) / 4星(+20%~+37.5%) / 5星(+37.5% 起，强化更高) —— 5星整体 > 4星 > 3星
+function rewardBonusOf(stars, bonusBp){
   const s = Number(stars)||1;
-  const bp = s===3 ? 11000 : s===4 ? 12500 : s===5 ? 15000 : 10000;
-  return Math.round((bp - 10000) / 100); // 返回百分比整数：0/10/25/50
+  const b = Number(bonusBp)||0;
+  if(s <= 2) return 0;
+  return (Math.floor(b/4)/100); // bp/4 → 百分比（保留至多 0.25% 粒度）
 }
 function shortAddr(a){ if(!a) return '--'; a = String(a); return a.slice(0,6)+'…'+a.slice(-4); }
 function heroImg(el, id, skin){

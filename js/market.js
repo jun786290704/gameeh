@@ -35,7 +35,7 @@ function marketCardHtml(l){
   const ic = ['fa-user-ninja','fa-khanda','fa-gem','fa-flask'][l.nftType]||'fa-box';
   const tag = ['英雄','武器','碎片','精粹'][l.nftType]||'物品';
   let meta;
-  if(l.nftType===1) meta = `${elBadge(l.element||0)}<span class="text-gold text-[12px] font-bold">${'★'.repeat(l.stars||0)}</span>${l.bonusBp!==undefined?`<span class="text-green-400 text-[12px]">+${bpToPct(l.bonusBp)}</span><span class="text-gold text-[12px]">奖+${rewardBonusOf(l.stars||1)}%</span>`:''}`;
+  if(l.nftType===1) meta = `${elBadge(l.element||0)}<span class="text-gold text-[12px] font-bold">${'★'.repeat(l.stars||0)}</span>${l.bonusBp!==undefined?`<span class="text-green-400 text-[12px]">+${bpToPct(l.bonusBp)}</span><span class="text-gold text-[12px]">奖+${rewardBonusOf(l.stars||1, l.bonusBp)}%</span>`:''}`;
   else if(l.nftType===0) meta = `${elBadge(l.element||0)}<span class="text-[12px] text-muted">Lv.${l.level||'?'}</span>`;
   else if(l.nftType===2) meta = `<span class="badge bg-purple-500/15 text-purple-300">碎片 ${l.tokenId} ×${l.amount}</span>`;
   else meta = `<span class="badge bg-emerald-500/15 text-emerald-300">精粹 ${l.tokenId} ×${l.amount}</span>`;
