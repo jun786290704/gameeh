@@ -472,7 +472,7 @@ footer .fl{color:var(--gold);margin:0 8px}
         <li><b>基础战力：</b>召唤时随机生成（区间约 300~500），是后续一切加成的基数。</li>
         <li><b>等级与经验：</b>战斗胜利获得经验（失败也有 1/4 经验），经验累积提升等级。</li>
         <li><b>等级加成：</b>每满 10 级为一个档位，奖励加成 +5%，最高 +25%（50 级以上）。</li>
-        <li><b>体力：</b>默认上限 5 点，默认每 5 分钟恢复 1 点（链上可配置）。<b>每场战斗消耗 1 点体力</b>，体力为 0 时无法出战。</li>
+        <li><b>体力：</b>上限 <b>12 点</b>，每 <b>30 分钟</b>恢复 1 点（当前链上配置，从空回满约 6 小时）。<b>每场战斗消耗 1 点体力</b>，体力为 0 时无法出战。该参数由合约控制，游戏内显示实时值与倒计时。</li>
         <li><b>持有上限：</b>每个地址最多持有 <b>4 位英雄</b>。</li>
       </ul>
       <h3>召唤规则</h3>
@@ -762,7 +762,7 @@ footer .fl{color:var(--gold);margin:0 8px}
       <div class="faq">
         <details open><summary>为什么提示链 ID 不一致？</summary><div class="body">钱包当前不在 BSC 测试网。点击连接钱包时前端会自动发起切换请求，若被拒绝请在钱包中手动添加/切换到 chainId 97 的网络。</div></details>
         <details><summary>提交交易后为什么还要再确认一次？</summary><div class="body">召唤、锻造、合成、强化、BOSS 攻击都采用 commit-reveal：第一笔提交承诺与押金，等待若干区块后前端自动发起第二笔揭示交易，随机数在揭示时生成。顶部「待揭示」气泡会显示进度。</div></details>
-        <details><summary>体力多久恢复一点？</summary><div class="body">默认上限 5 点、每 5 分钟恢复 1 点，参数可由合约调整。英雄卡片上会显示距离下一点的倒计时。</div></details>
+        <details><summary>体力多久恢复一点？</summary><div class="body">当前链上为<b>上限 12 点、每 30 分钟恢复 1 点</b>，从空回满约 6 小时。该参数由合约配置（合约源码里的默认常量是 5 点 / 5 分钟，已被管理员调整过，请以链上实际值为准），游戏中以英雄卡片上的实时进度与倒计时为准。</div></details>
         <details><summary>奖励为什么没直接到账？</summary><div class="body">奖励统一写入金库，需要到「金库」页主动 claim。这样可以把多次小额奖励合并成一笔转账，节省 gas。</div></details>
         <details><summary>官网写 USDT，游戏里显示 EH，哪个是对的？</summary><div class="body">都对。奖励以美元计价，官网按 USDT 展示；链上按金库模式发放——代币模式折算成 EH，USDT 模式直接发 USDT。游戏内显示的是实际到账的代币。</div></details>
         <details><summary>锻造/召唤的价格会变吗？</summary><div class="body">会。价格来自链上价格预言机，管理员可调整。游戏内各页面显示的金额即为当前实时价格。</div></details>

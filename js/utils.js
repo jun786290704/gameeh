@@ -44,6 +44,12 @@ const ELEMENTS = {
   4:{name:'火',icon:'🔥',color:'#ef4444',soft:'rgba(239,68,68,.14)',border:'rgba(239,68,68,.5)'}
 };
 const ELEMENT_ORDER = [0,1,2,3,4];
+/* 体力兜底值：仅当链上 getStaminaInfo 读取失败时使用（正常路径一律用链上值）。
+   链上实际配置（2026-10-09 实读 Characters 0xfE56…C3D6）：上限 12 点、每 1800 秒（30 分钟）恢复 1 点，从空回满约 6 小时。
+   ⚠ 合约源码里的常量默认值（MAX_STAMINA=5 / STAMINA_REGEN=5 minutes）已被 owner 用 setMaxStamina/setStaminaRegen 改过，
+     不要照抄源码常量 —— 判断实际值请调 staminaRegen() / maxStamina()。 */
+const STAMINA_MAX_FALLBACK = 12;
+const STAMINA_REGEN_FALLBACK = 1800;
 const STAR_LABELS = {1:'一星',2:'二星',3:'三星',4:'四星',5:'五星'};
 function starLabel(n){ return STAR_LABELS[n]||(n+'星'); }
 function elBadge(el){

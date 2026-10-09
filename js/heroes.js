@@ -18,9 +18,9 @@ async function fetchHeroes(force){
           ch.getStaminaInfo(id).catch(()=>null)
         ]);
         const stNow = Number(st);
-        const max = sti ? Number(sti.staminaMax||5) : 5;
+        const max = sti ? Number(sti.staminaMax || STAMINA_MAX_FALLBACK) : STAMINA_MAX_FALLBACK;
         return {id:Number(id), element:Number(h.element), basePower:Number(h.basePower), level:Number(h.level),
-          xp:Number(h.xp), stamina: stNow, staminaMax: max, staminaInterval: sti?Number(sti.recoveryInterval||300):300,
+          xp:Number(h.xp), stamina: stNow, staminaMax: max, staminaInterval: sti?Number(sti.recoveryInterval || STAMINA_REGEN_FALLBACK):STAMINA_REGEN_FALLBACK,
           staminaNext: stNow>=max ? 0 : Number(sti&&sti.secondsUntilNext!==undefined?sti.secondsUntilNext:0),
           staminaAt: Date.now(), power:Number(pwr), skin:Number(h.skin||0)};
       }catch(e){ return null; }
@@ -43,7 +43,7 @@ async function renderHeroes(force){
   if(!S.heroes.length){ grid.innerHTML = `<div class="col-span-full text-center text-muted py-10">还没有英雄，点击「召唤英雄」开始冒险</div>`; return; }
   grid.innerHTML = S.heroes.map(h=>{
     const pw = h.power;
-    const stPct = Math.min(100, Math.round((h.stamina/Math.max(1,(h.staminaMax||5)))*100));
+    const stPct = Math.min(100, Math.round((h.stamina/Math.max(1,(h.staminaMax || STAMINA_MAX_FALLBACK)))*100));
     const xpPct = Math.min(100, Math.round((h.xp/Math.max(1,(h.level*100)))*100));
     return `<div class="game-card char3d-card elbg-${h.element} overflow-hidden anim-fade">
       <div class="char3d-wrap relative h-52 overflow-hidden" style="background:radial-gradient(circle at 50% 26%, ${ELEMENTS[h.element].soft}, #0d1526 78%)">
@@ -57,7 +57,7 @@ async function renderHeroes(force){
           <div class="text-[12px] text-muted">战力 <b class="text-gold num-mono text-[13px]">${fmt(pw,0)}</b></div>
           ${elBadge(h.element)}
         </div>
-        <div class="mb-1.5"><div class="flex justify-between text-[10px] text-muted mb-0.5"><span>体力 ${h.stamina}/${h.staminaMax||5}</span><span class="stamina-tick text-cyan-300 not-italic" data-stamina-next="${h.staminaNext||0}" data-stamina-at="${h.staminaAt||Date.now()}"></span></div><div class="bar"><div class="bar-fill stamina" style="width:${stPct}%"></div></div></div>
+        <div class="mb-1.5"><div class="flex justify-between text-[10px] text-muted mb-0.5"><span>体力 ${h.stamina}/${h.staminaMax || STAMINA_MAX_FALLBACK}</span><span class="stamina-tick text-cyan-300 not-italic" data-stamina-next="${h.staminaNext||0}" data-stamina-at="${h.staminaAt||Date.now()}"></span></div><div class="bar"><div class="bar-fill stamina" style="width:${stPct}%"></div></div></div>
         <div class="mb-2.5"><div class="flex justify-between text-[10px] text-muted mb-0.5"><span>经验</span><span class="num-mono">${h.xp}/${h.level*100}</span></div><div class="bar"><div class="bar-fill" style="width:${xpPct}%"></div></div></div>
         <div class="flex gap-2">
           <button onclick="selectFightHero(${h.id})" class="btn btn-sm btn-gold flex-1"><i class="fa-solid fa-crosshairs"></i>出战</button>

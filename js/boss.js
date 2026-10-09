@@ -161,12 +161,12 @@ function renderBossPicks(){
       hs.innerHTML = S.heroes.map(h=>{
         const active = S.boss.heroId===h.id;
         const e = ELEMENTS[h.element]||ELEMENTS[0];
-        const staminaPct = Math.min(100, (h.stamina/Math.max(1,h.staminaMax||5))*100);
+        const staminaPct = Math.min(100, (h.stamina/Math.max(1,h.staminaMax || STAMINA_MAX_FALLBACK))*100);
         return `<button onclick="selectBossHero(${h.id})" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
           <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${heroImg(h.element, h.id, h.skin)}" alt="英雄#${h.id}"></span>
           <span class="pick-body">
             <span class="pick-title"><b>#${h.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
-            <span class="pick-sub"><b class="text-gold">⚔${fmt(h.power,0)}</b><i class="text-muted">Lv.${h.level} 体力${h.stamina}/${h.staminaMax||5}</i></span>
+            <span class="pick-sub"><b class="text-gold">⚔${fmt(h.power,0)}</b><i class="text-muted">Lv.${h.level} 体力${h.stamina}/${h.staminaMax || STAMINA_MAX_FALLBACK}</i></span>
             <span class="pick-bar"><i style="width:${staminaPct}%;background:${staminaPct>30?'#22c55e':'#ef4444'};"></i></span>
           </span>
           <span class="pick-radio ${active?'pick-radio-on':''}">${active?'✓':''}</span>
