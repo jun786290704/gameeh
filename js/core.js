@@ -34,6 +34,10 @@ const ABIs = {
     "function maxStamina() view returns (uint8)",
     "function setStaminaRegen(uint256)",
     "function setMaxStamina(uint8)",
+    // 体力消耗（V14）：每场战斗扣多少点；setStaminaParams 为三项原子批量设置
+    "function staminaCost() view returns (uint8)",
+    "function setStaminaCost(uint8)",
+    "function setStaminaParams(uint256,uint8,uint8)",
     "function heroPower(uint256) view returns (uint64)",
     "function tokensOfOwner(address) view returns (uint256[])",
     "function balanceOf(address) view returns (uint256)",

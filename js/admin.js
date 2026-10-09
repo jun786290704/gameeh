@@ -831,18 +831,29 @@ async function secV3(el, isOwner){
       </div>` : '').join('');
   } else { monRows = '<div class="text-[12px] text-muted">暂无怪物</div>'; }
   const ch = adminCt('characters');
-  const [sRegen, sMax, mintLimit, refReq] = await Promise.all([
-    ch.staminaRegen().catch(()=>null), ch.maxStamina().catch(()=>null),
+  const [sRegen, sMax, sCost, mintLimit, refReq] = await Promise.all([
+    ch.staminaRegen().catch(()=>null), ch.maxStamina().catch(()=>null), ch.staminaCost().catch(()=>null),
     ch.maxMintPerAddr().catch(()=>null), ch.referrerRequired().catch(()=>null)
   ]);
+  let paceRow = '';
+  if(sRegen && sMax){
+    const regen = Number(sRegen), cost = Number(sCost===null?1n:sCost);
+    const perHour = regen > 0 ? (3600 / regen / Math.max(1, cost)) : 0;
+    const fullHours = (regen * Number(sMax)) / 3600;
+    paceRow = '<div class="text-[11px] text-muted px-1 pt-0.5">节奏：约 <b class="num-mono text-gold">' + perHour.toFixed(2) + '</b> 场/小时 ·'
+      + ' 每天 <b class="num-mono text-gold">' + Math.round(perHour*24) + '</b> 场 · 空 → 满 <b class="num-mono text-gold">' + fullHours.toFixed(1) + '</b> 小时</div>';
+  }
   const staminaCard = aCard('英雄体力系统','fa-bolt',
     (sRegen===null || sMax===null)
-      ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>当前链上 Characters 合约尚未升级，暂无法读取/设置体力参数（需部署 V2 实现并调用 initializeV2）。</div>'
+      ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>当前链上 Characters 合约尚未升级，暂无法读取/设置体力参数。</div>'
       : aRow('体力恢复间隔', (Number(sRegen)/60)+' 分钟/点（'+String(sRegen)+' 秒）') +
         aRow('体力上限', String(Number(sMax)) + ' 点') +
-        '<div class="text-[11px] text-muted px-1 pt-1">恢复间隔范围 60 秒 ~ 7 天；上限范围 1 ~ 20 点。修改后对所有英雄即时生效（体力按新间隔/上限计算）。</div>',
+        aRow('每场战斗消耗', sCost===null ? '未知（需升级 V14）' : String(Number(sCost)) + ' 点') +
+        '<div class="text-[11px] text-muted px-1 pt-1">恢复间隔 60 秒 ~ 7 天；上限 1 ~ 200 点；单场消耗 1 ~ 50 点。修改后对所有英雄即时生效。</div>' + paceRow,
     isOwner ? aAct('设置恢复间隔', 'adminOpenSetStaminaRegen()', 'fa-clock') +
-             aAct('设置体力上限', 'adminOpenSetMaxStamina()', 'fa-gauge-high') : '');
+             aAct('设置体力上限', 'adminOpenSetMaxStamina()', 'fa-gauge-high') +
+             (sCost===null ? '' : aAct('设置体力消耗', 'adminOpenSetStaminaCost()', 'fa-bolt')) +
+             (sCost===null ? '' : aAct('一键应用 120/3分钟/10点', 'adminApplyStaminaV14()', 'fa-wand-magic-sparkles')) : '');
   const mintCard = aCard('铸造限额','fa-hashtag',
     mintLimit===null
       ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>当前链上 Characters 尚未升级到 V4，无法读取铸造限额。</div>'
@@ -1246,14 +1257,42 @@ async function adminOpenSetMaxStamina(){
   const ch = adminCt('characters');
   const m = await ch.maxStamina().catch(()=>5n);
   adminFormModal('设置英雄体力上限',[
-    {label:'体力上限（1 ~ 20）', value: String(Number(m))}
+    {label:'体力上限（1 ~ 200）', value: String(Number(m))}
   ], 'adminDoSetMaxStamina()');
 }
 async function adminDoSetMaxStamina(){
   const v = adminFormVals(1);
-  const n = Math.max(1, Math.min(20, Math.round(Number(v[0])||5)));
+  const n = Math.max(1, Math.min(200, Math.round(Number(v[0])||5)));
   await adminExec('设置体力上限', async()=>{
     await (await adminCt('characters',true).setMaxStamina(BigInt(n))).wait();
+  });
+}
+/* ============ 体力消耗（V14） ============ */
+async function adminOpenSetStaminaCost(){
+  const ch = adminCt('characters');
+  const c = await ch.staminaCost().catch(()=>1n);
+  adminFormModal('设置每场战斗体力消耗',[
+    {label:'单场消耗（1 ~ 50 点）', value: String(Number(c))}
+  ], 'adminDoSetStaminaCost()');
+}
+async function adminDoSetStaminaCost(){
+  const v = adminFormVals(1);
+  const n = Math.max(1, Math.min(50, Math.round(Number(v[0])||1)));
+  await adminExec('设置体力消耗', async()=>{
+    await (await adminCt('characters',true).setStaminaCost(BigInt(n))).wait();
+  });
+}
+/* 数值放大方案：上限 120 点 / 每 3 分钟恢复 1 点 / 每场消耗 10 点。
+   与「12 点 / 30 分钟 / 1 点」节奏完全等价（每 30 分钟攒够一场、回满 6 小时），仅放大数字与恢复粒度。 */
+async function adminApplyStaminaV14(){
+  const ch = adminCt('characters');
+  const [r, c] = await Promise.all([ch.staminaRegen().catch(()=>null), ch.staminaCost().catch(()=>null)]);
+  if(r===null || c===null){ toast('链上 Characters 尚未升级到 V14（缺少 staminaCost）','warn'); return; }
+  if(!confirm('把体力改为：上限 120 点、每 3 分钟恢复 1 点、每场消耗 10 点？\n\n节奏与当前完全等价（每 30 分钟攒够一场、空→满 6 小时）。用一次原子交易同时改三项，不会出现中间态。')) return;
+  await adminExec('应用 V14 体力参数', async()=>{
+    const ct = adminCt('characters', true);
+    // 三项一次性设置：避免「上限已变大、消耗还没变」的中间态导致产出暴增
+    await (await ct.setStaminaParams(180, 120, 10)).wait();
   });
 }
 
