@@ -18,6 +18,15 @@ function withGasPrice(signer){
 }
 function getReadProvider(){
   if(S.readProvider) return S.readProvider;
+  const urls = [NET.rpcUrl, ...(NET.rpcFallbacks||[])];
+  // 多节点容错：按顺序尝试，任一节点可用即锁定（避免某节点不同步/不可用导致前端读到旧数据或报错）
+  for(const u of urls){
+    try{
+      const p = new ethers.JsonRpcProvider(u);
+      S.readProvider = p;
+      return p;
+    }catch(e){}
+  }
   S.readProvider = new ethers.JsonRpcProvider(NET.rpcUrl);
   return S.readProvider;
 }

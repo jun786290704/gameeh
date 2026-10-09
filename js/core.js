@@ -19,7 +19,7 @@ const CONTRACTS = {
   boss:        '0x21316E9C757314e62d33A836b5D66A58E937e0c3',
   governance:  '' // 治理合约（主网部署后填写，空 = 治理未启用）
 };
-const NET = { chainId: 97, chainIdHex: '0x61', rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545', rpcFallbacks: ['https://data-seed-prebsc-1-s2.bnbchain.org:8545','https://bsc-testnet.drpc.org','https://bsc-testnet.publicnode.com'], name: 'BSC 测试网' };
+const NET = { chainId: 97, chainIdHex: '0x61', rpcUrl: 'https://bsc-testnet.publicnode.com', rpcFallbacks: ['https://data-seed-prebsc-1-s2.bnbchain.org:8545','https://bsc-testnet.drpc.org','https://data-seed-prebsc-1-s1.bnbchain.org:8545'], name: 'BSC 测试网' };
 const CONFIG = { confirmations: 3 };
 const GAS_PRICE = 120000000n; // 0.12 gwei（BSC 测试网交易 gasPrice）
 
