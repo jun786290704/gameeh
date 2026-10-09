@@ -24,6 +24,13 @@ async function fetchListings(){
       try{
         const l = await mkt.getListing(lid);
         const item = { lid:Number(lid), seller:l.seller, nftType:Number(l.category), tokenId:Number(l.tokenId), amount:Number(l.amount), price:l.price, active:l.active };
+        // 过期时间：getListing() 的 struct 不含它，且挂单过期后 active 仍为 true（要等人调 expireListing），
+        // 不读这个字段就会把「已过期」的挂单当成在售，买家点购买必然 revert(ListingAlreadyExpired)
+        try{
+          const ea = await mkt.listingExpireAt(lid);
+          item.expireAt = Number(ea);
+          item.expired = Number(ea) > 0 && Number(ea) * 1000 < Date.now();
+        }catch(e){ item.expireAt = 0; item.expired = false; }
         try{
           if(item.nftType===1){ const w = await readCall('weapons', c=>c.weapons(item.tokenId)); item.element=Number(w.element); item.stars=Number(w.stars); item.bonusBp=Number(w.bonusBp); }
           else if(item.nftType===0){ const h = await readCall('characters', c=>c.heroes(item.tokenId)); item.element=Number(h.element); item.level=Number(h.level); }
@@ -42,7 +49,7 @@ function recomputeMarketStats(){
   const counts = {0:0,1:0,2:0,3:0};
   let total = 0n, n = 0, minP = null;
   for(const l of S.marketList){
-    if(!l.active) continue;
+    if(!l.active || l.expired) continue;   // 已过期的不计入在售统计（买不了）
     counts[l.nftType] = (counts[l.nftType]||0)+1;
     total += l.price; n++;
     if(minP===null || l.price < minP) minP = l.price;
@@ -104,13 +111,20 @@ function mktCardHtml(l, opts){
   const ac = mktAccentOf(l);
   const unitPrice = (l.amount>1) ? l.price/BigInt(l.amount) : null;
   const status = mine
-    ? (l.active ? `<span class="mkt-badge on">在售</span>` : `<span class="mkt-badge">已售</span>`)
+    ? (l.active
+        ? (l.expired ? `<span class="mkt-badge exp">已过期</span>` : `<span class="mkt-badge on">在售</span>`)
+        : `<span class="mkt-badge">已售</span>`)
     : '';
   const btn = mine
-    ? (l.active ? `<button onclick="cancelListingFlow(${l.lid})" class="btn btn-sm btn-danger mkt-buy"><i class="fa-solid fa-ban"></i>取消</button>` : '')
+    ? (l.active
+        ? (l.expired
+            ? `<button onclick="expireListingFlow(${l.lid})" class="btn btn-sm btn-ghost mkt-buy"><i class="fa-solid fa-rotate-left"></i>清算</button>`
+            : `<button onclick="cancelListingFlow(${l.lid})" class="btn btn-sm btn-danger mkt-buy"><i class="fa-solid fa-ban"></i>取消</button>`)
+        : '')
     : `<button onclick="buyFlow(${l.lid})" class="btn btn-gold mkt-buy"><i class="fa-solid fa-cart-shopping"></i>购买</button>`;
+  const dimmed = mine && (!l.active || l.expired);
 
-  return `<div class="game-card mkt-card ${mine&&!l.active?'dim':''} anim-fade" style="--accent:${ac.color};--accent-soft:${ac.soft}">
+  return `<div class="game-card mkt-card ${dimmed?'dim':''} anim-fade" style="--accent:${ac.color};--accent-soft:${ac.soft}">
     <div class="mkt-card-bar"></div>
     <div class="mkt-thumb" style="border-color:${ac.color}">
       ${mktThumbHtml(l)}
@@ -178,11 +192,14 @@ function buildMarketRows(items, opts){
     const meta = MKT_TYPE_META[tt];
     const typeKey = typePrefix+'-'+tt;
     const typeOpen = !isCollapsed(typeKey);
-    const totalPrice = groupItems.reduce((s,l)=>s+l.price, 0n);
+    // 头部统计只看「真正在售」的（排除已售与已过期），与卡片状态保持一致
+    const liveOf = arr => arr.filter(l=>l.active && !l.expired);
+    const liveItems = liveOf(groupItems);
+    const totalPrice = liveItems.reduce((s,l)=>s+l.price, 0n);
 
     rows.push({kind:'head', level:1, html: mktHeadHtml({
       level:1, fa:true, icon:meta.icon, name:meta.name, color:meta.color, soft:meta.soft, border:meta.border,
-      count:groupItems.length, price:mktMinPrice(groupItems),
+      count:groupItems.length, price:mktMinPrice(liveItems),
       extra:`<span class="mkt-gh-sum">Σ ${fmtUnits(totalPrice,S.tokenDecimals,0)} ${S.tokenSymbol}</span>`,
       toggle:`${toggleTypeFn}(${tt})`, open:typeOpen
     })});
@@ -198,7 +215,7 @@ function buildMarketRows(items, opts){
         const elOpen = !isCollapsed(elKey);
         rows.push({kind:'head', level:2, html: mktHeadHtml({
           level:2, fa:false, icon:info.icon, name:`${info.name}属性`, color:info.color, soft:info.soft, border:info.border,
-          count:arr.length, price:mktMinPrice(arr),
+          count:arr.length, price:mktMinPrice(liveOf(arr)),
           toggle:`toggleMarketEl('${sortKind}',${tt},${el})`, open:elOpen
         })});
         if(!elOpen) continue;
@@ -212,7 +229,7 @@ function buildMarketRows(items, opts){
             const bOpen = !isCollapsed(bKey);
             rows.push({kind:'head', level:3, html: mktHeadHtml({
               level:3, fa:true, icon:'fa-signal', name:band.label, color:info.color, soft:info.soft, border:info.border,
-              count:sub.length, price:mktMinPrice(sub),
+              count:sub.length, price:mktMinPrice(liveOf(sub)),
               toggle:`toggleMarketSub('${sortKind}',${tt},${el},${band.id})`, open:bOpen
             })});
             if(bOpen) rows.push({kind:'cards', cards:sub});
@@ -226,7 +243,7 @@ function buildMarketRows(items, opts){
             const sOpen = !isCollapsed(sKey);
             rows.push({kind:'head', level:3, html: mktHeadHtml({
               level:3, fa:true, icon:'fa-star', name:'★'.repeat(s), color:info.color, soft:info.soft, border:info.border,
-              count:sub.length, price:mktMinPrice(sub),
+              count:sub.length, price:mktMinPrice(liveOf(sub)),
               toggle:`toggleMarketSub('${sortKind}',${tt},${el},${s})`, open:sOpen
             })});
             if(sOpen) rows.push({kind:'cards', cards:sub});
@@ -246,7 +263,7 @@ function buildMarketRows(items, opts){
         rows.push({kind:'head', level:3, html: mktHeadHtml({
           level:3, fa:false, icon:'#'+id, name:mktItemKindName(tt), roman:ROMAN[id]||String(id),
           color:meta.color, soft:meta.soft, border:meta.border,
-          count:sub.length, price:mktMinPrice(sub),
+          count:sub.length, price:mktMinPrice(liveOf(sub)),
           toggle:`toggleMarketSub('${sortKind}',${tt},null,${id})`, open:open
         })});
         if(open) rows.push({kind:'cards', cards:sub});
@@ -329,7 +346,8 @@ async function loadActiveListings(){
   await fetchListings();
   recomputeMarketStats();
 
-  const all = S.marketList.filter(l=>l.active);
+  // 过期挂单不展示：它 active 仍为 true 但购买必然 revert(ListingAlreadyExpired)
+  const all = S.marketList.filter(l=>l.active && !l.expired);
   S.marketPriceTiers = mktPriceTiersOf(all);
   const st = mktFilterState('list');
   const filtered = applyMarketFilters(all, st, S.marketPriceTiers);
@@ -369,7 +387,7 @@ async function loadMyListings(){
   let totalValue = 0n, minPrice = null;
   for(const l of mineAll){
     counts[l.nftType] = (counts[l.nftType]||0)+1;
-    if(l.active){
+    if(l.active && !l.expired){          // 过期的不计入「在售价值」
       totalValue += l.price;
       if(minPrice===null || l.price<minPrice) minPrice = l.price;
     }
@@ -377,7 +395,7 @@ async function loadMyListings(){
   S.myListTypeCounts = counts;
   S.myListTotalValue = totalValue;
   S.myListMinPrice = minPrice;
-  S.myListPriceTiers = mktPriceTiersOf(mineAll.filter(l=>l.active));
+  S.myListPriceTiers = mktPriceTiersOf(mineAll.filter(l=>l.active && !l.expired));
 
   const st = mktFilterState('mine');
   const filtered = applyMarketFilters(mineAll, st, S.myListPriceTiers);
@@ -404,6 +422,17 @@ async function buyFlow(lid){
     await (await mustC('marketplace').connect(S.signer).buyItem(lid)).wait();
     toast('购买成功！','success');
     await loadActiveListings(); await refreshBalances();
+  }catch(e){ toast(errMsg(e),'error'); }
+  finally{ withBusy(null,false); }
+}
+// 清算过期挂单：任何人都可调用，资产原路退回卖家
+async function expireListingFlow(lid){
+  if(!needWallet()) return;
+  try{
+    withBusy(null,true);
+    await (await mustC('marketplace').connect(S.signer).expireListing(lid)).wait();
+    toast('已清算，资产已退回卖家','success');
+    await loadMyListings(); await loadActiveListings();
   }catch(e){ toast(errMsg(e),'error'); }
   finally{ withBusy(null,false); }
 }

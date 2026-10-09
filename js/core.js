@@ -185,7 +185,11 @@ const ABIs = {
     "function listItem(uint8,uint256,uint256,uint256) returns (uint256)",
     "function buyItem(uint256)","function cancelListing(uint256)",
     "function getActiveListings() view returns (uint256[])",
-    "function getListing(uint256) view returns (address seller,uint8 category,uint256 tokenId,uint256 amount,uint256 price,bool active)"
+    "function getListing(uint256) view returns (address seller,uint8 category,uint256 tokenId,uint256 amount,uint256 price,bool active)",
+    // V16：getListing 不返回过期时间，前端需另读；expireListing 任何人可调（资产退回卖家）；rescueAsset 为 owner 误转救援
+    "function listingExpireAt(uint256) view returns (uint256)",
+    "function expireListing(uint256)",
+    "function rescueAsset(uint8,uint256,uint256,address)"
   ],
   oracle: [
     "function owner() view returns (address)",

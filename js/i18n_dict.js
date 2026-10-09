@@ -4829,3 +4829,32 @@ window.GAME_DICT.ru = Object.assign(window.GAME_DICT.ru || {}, {
     window.GAME_DICT[l] = Object.assign(window.GAME_DICT[l] || {}, ADD[l]);
   });
 })();
+
+/* ===== 市场过期挂单（V16，2026-10-09） ===== */
+(function(){
+  var ADD = {
+    en: {
+      '已过期':'Expired','清算':'Settle',
+      '已清算，资产已退回卖家':'Settled — the asset has been returned to the seller'
+    },
+    ja: {
+      '已过期':'期限切れ','清算':'清算',
+      '已清算，资产已退回卖家':'清算済み — 資産は出品者に返却されました'
+    },
+    es: {
+      '已过期':'Expirado','清算':'Liquidar',
+      '已清算，资产已退回卖家':'Liquidado: el activo se devolvió al vendedor'
+    },
+    ko: {
+      '已过期':'만료됨','清算':'정산',
+      '已清算，资产已退回卖家':'정산 완료 — 자산이 판매자에게 반환되었습니다'
+    },
+    ru: {
+      '已过期':'Истёк','清算':'Расчёт',
+      '已清算，资产已退回卖家':'Расчёт выполнен — актив возвращён продавцу'
+    }
+  };
+  Object.keys(ADD).forEach(function(l){
+    window.GAME_DICT[l] = Object.assign(window.GAME_DICT[l] || {}, ADD[l]);
+  });
+})();
