@@ -162,7 +162,7 @@ function renderBossPicks(){
         const active = S.boss.heroId===h.id;
         const e = ELEMENTS[h.element]||ELEMENTS[0];
         const staminaPct = Math.min(100, (h.stamina/Math.max(1,h.staminaMax || STAMINA_MAX_FALLBACK))*100);
-        return `<button onclick="selectBossHero(${h.id})" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
+        return `<button onclick="selectBossHero(${h.id}, this)" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
           <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${heroImg(h.element, h.id, h.skin)}" alt="英雄#${h.id}"></span>
           <span class="pick-body">
             <span class="pick-title"><b>#${h.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
@@ -186,7 +186,7 @@ function renderBossPicks(){
         const active = S.boss.weaponId===w.id;
         const e = ELEMENTS[w.element]||ELEMENTS[0];
         const stars = '★'.repeat(w.stars)+'☆'.repeat(5-w.stars);
-        return `<button onclick="selectBossWeapon(${w.id})" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
+        return `<button onclick="selectBossWeapon(${w.id}, this)" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
           <span class="pick-avatar" style="background:${e.soft};border:1px solid ${e.border};"><img src="${weaponImg(w.element,w.stars)}" alt="武器#${w.id}" class="w-full h-full object-cover rounded-lg"></span>
           <span class="pick-body">
             <span class="pick-title"><b>#${w.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
@@ -199,5 +199,29 @@ function renderBossPicks(){
     }
   }
 }
-function selectBossHero(id){ S.boss.heroId = id; renderBossPicks(); }
-function selectBossWeapon(id){ S.boss.weaponId = id; renderBossPicks(); }
+function selectBossHero(id, el){
+  S.boss.heroId = id;
+  const hero = S.heroes.find(x=>x.id===id);
+  const e = hero ? (ELEMENTS[hero.element]||ELEMENTS[0]) : ELEMENTS[0];
+  document.querySelectorAll('#bossHeroSel .pick-chip').forEach(chip=>{
+    chip.classList.remove('pick-active'); chip.style.borderColor=''; chip.style.background='';
+    const radio = chip.querySelector('.pick-radio'); if(radio){ radio.classList.remove('pick-radio-on'); radio.textContent=''; }
+  });
+  if(el){
+    el.classList.add('pick-active'); el.style.borderColor=e.border; el.style.background=e.soft;
+    const radio = el.querySelector('.pick-radio'); if(radio){ radio.classList.add('pick-radio-on'); radio.textContent='✓'; }
+  }
+}
+function selectBossWeapon(id, el){
+  S.boss.weaponId = id;
+  const wpn = S.weapons.find(x=>x.id===id);
+  const e = wpn ? (ELEMENTS[wpn.element]||ELEMENTS[0]) : ELEMENTS[0];
+  document.querySelectorAll('#bossWeaponSel .pick-chip').forEach(chip=>{
+    chip.classList.remove('pick-active'); chip.style.borderColor=''; chip.style.background='';
+    const radio = chip.querySelector('.pick-radio'); if(radio){ radio.classList.remove('pick-radio-on'); radio.textContent=''; }
+  });
+  if(el){
+    el.classList.add('pick-active'); el.style.borderColor=e.border; el.style.background=e.soft;
+    const radio = el.querySelector('.pick-radio'); if(radio){ radio.classList.add('pick-radio-on'); radio.textContent='✓'; }
+  }
+}

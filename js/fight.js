@@ -60,7 +60,7 @@ async function renderFight(){
     heroSel.innerHTML = S.heroes.map(h=>{
       const active = S.fight.heroId===h.id;
       const e = ELEMENTS[h.element]||ELEMENTS[0];
-      const staminaPct = Math.min(100, (h.stamina/5)*100);
+      const staminaPct = Math.min(100, (h.stamina/Math.max(1, h.staminaMax || STAMINA_MAX_FALLBACK))*100);
       return `<button onclick="selectFightHero(${h.id}, this)" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
         <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img class="char3d" src="${heroImg(h.element, h.id, h.skin)}" alt="英雄#${h.id}"></span>
         <span class="pick-body">
