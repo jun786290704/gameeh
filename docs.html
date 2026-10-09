@@ -170,6 +170,41 @@ footer .fl{color:var(--gold);margin:0 8px}
 .rune-sep{display:flex;align-items:center;justify-content:center;gap:12px;margin:34px 0 30px;color:rgba(251,191,36,.5)}
 .rune-sep::before,.rune-sep::after{content:'';height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--line2),transparent)}
 .rune-sep span{font-size:14px;letter-spacing:.5em}
+
+/* ===== 邀请与生成器 ===== */
+.inv-stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));margin:18px 0 22px}
+.inv-stat{position:relative;background:linear-gradient(160deg,rgba(251,191,36,.10),var(--panel) 64%);border:1px solid var(--line);border-radius:14px;padding:14px 16px;overflow:hidden}
+.inv-stat::after{content:'';position:absolute;right:-26px;top:-26px;width:84px;height:84px;border-radius:50%;background:rgba(251,191,36,.10)}
+.inv-stat .k{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.inv-stat .v{font-size:23px;font-weight:900;color:var(--gold);margin:6px 0 3px;font-family:ui-monospace,monospace;line-height:1.1}
+.inv-stat .d{font-size:12px;color:#93a4c0;line-height:1.65}
+
+.inv-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0}
+.inv-box h4{font-size:15px;color:#fff;font-family:'Noto Sans SC',sans-serif;font-weight:800;margin-bottom:4px}
+.inv-lab{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+.inv-row{display:flex;gap:10px;flex-wrap:wrap}
+.inv-row input{flex:1;min-width:210px;background:var(--bg2);border:1px solid var(--line2);border-radius:11px;padding:11px 14px;color:var(--text);font-size:13.5px;font-family:ui-monospace,monospace;outline:none;transition:border-color .16s}
+.inv-row input:focus{border-color:rgba(251,191,36,.62)}
+.inv-row input::placeholder{color:#6b7d99;font-family:'Noto Sans SC',sans-serif}
+.inv-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 18px;border-radius:11px;border:1px solid transparent;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1305;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:filter .16s,transform .12s}
+.inv-btn:hover{filter:brightness(1.07);text-decoration:none}
+.inv-btn:active{transform:scale(.98)}
+.inv-btn.ghost{background:rgba(13,21,38,.72);border-color:var(--line2);color:var(--text)}
+.inv-btn.ghost:hover{border-color:rgba(251,191,36,.55);color:var(--gold)}
+.inv-btn.sm{padding:8px 14px;font-size:12.5px}
+.inv-out{margin-top:14px;display:none}
+.inv-out.on{display:block}
+.inv-link{display:flex;gap:8px;align-items:center;background:var(--bg2);border:1px dashed rgba(251,191,36,.45);border-radius:11px;padding:11px 13px}
+.inv-link code{background:none;border:0;padding:0;flex:1;color:var(--gold);font-size:13px;word-break:break-all;white-space:normal;line-height:1.6}
+.inv-share{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.inv-msg{font-size:12.5px;margin-top:10px;display:none}
+.inv-msg.on{display:block}
+.inv-msg.err{color:#f87171}
+.inv-msg.ok{color:#4ade80}
+.inv-tip{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.7}
+.inv-tip b{color:var(--gold)}
+.toc-g{margin-top:15px}
+.toc-g:first-of-type{margin-top:0}
 </style>
 </head>
 <body>
@@ -190,9 +225,10 @@ footer .fl{color:var(--gold);margin:0 8px}
 
 <div class="layout">
   <aside class="side" id="toc">
-    <h4>文档目录</h4>
+    <h4 class="toc-g">世界观</h4>
     <a href="#world">00 · 世界观与纪元</a>
     <a href="#overview">01 · 项目简介</a>
+    <h4 class="toc-g">玩法</h4>
     <a href="#start">02 · 快速开始</a>
     <a href="#elements">03 · 五行与克制</a>
     <a href="#heroes">04 · 英雄系统</a>
@@ -200,13 +236,16 @@ footer .fl{color:var(--gold);margin:0 8px}
     <a href="#enhance">06 · 精粹与强化</a>
     <a href="#battle">07 · 战斗与奖励</a>
     <a href="#boss">08 · 世界 BOSS</a>
+    <h4 class="toc-g">经济与资产</h4>
     <a href="#market">09 · 市场交易</a>
     <a href="#vault">10 · 金库与领取</a>
     <a href="#rank">11 · 排行与图鉴</a>
     <a href="#token">12 · 代币与经济</a>
-    <a href="#contracts">13 · 合约与网络</a>
-    <a href="#faq">14 · 常见问题</a>
-    <a href="#community">15 · 社群与链接</a>
+    <a href="#invite">13 · 邀请与返现</a>
+    <h4 class="toc-g">其他</h4>
+    <a href="#contracts">14 · 合约与网络</a>
+    <a href="#faq">15 · 常见问题</a>
+    <a href="#community">16 · 社群与链接</a>
   </aside>
 
   <main class="main">
@@ -621,8 +660,68 @@ footer .fl{color:var(--gold);margin:0 8px}
     </section>
 
     <!-- 13 -->
+    <section id="invite">
+      <h2><span class="n">13</span>邀请与返现</h2>
+      <p class="lead">邀请好友一起冒险：对方每次战斗胜利，你都能分到奖励的一部分，还可以把其中一定比例返现给下线。</p>
+
+      <div class="inv-stats">
+        <div class="inv-stat"><div class="k">邀请分成</div><div class="v">10%</div><div class="d">下线每笔战斗胜利奖励的 10% 进入邀请分成池</div></div>
+        <div class="inv-stat"><div class="k">返现比例</div><div class="v">0 ~ 90%</div><div class="d">你可决定分成池中返给下线多少，其余自留</div></div>
+        <div class="inv-stat"><div class="k">快照锁定</div><div class="v">绑定即固化</div><div class="d">下线绑定 / 首次铸造时的比例被永久锁定</div></div>
+        <div class="inv-stat"><div class="k">调整冷却</div><div class="v">7 天</div><div class="d">同一账户每 7 天可修改一次返现比例</div></div>
+      </div>
+
+      <h3>它是怎么算的</h3>
+      <p>设推荐人为 A、下线为 B。B 每赢得一场战斗、拿到奖励 <code>R</code> 时：</p>
+      <ul>
+        <li><b>邀请分成池</b> = <code>R × 10%</code>，由金库单独记账，与 B 自己的战斗奖励互不影响。</li>
+        <li>其中 <b>返现给 B</b> = 分成池 × <b>A 设定的返现比例</b>（0 ~ 90%）。</li>
+        <li>剩下的 <b>A 自留</b> = 分成池 − 返现部分。</li>
+      </ul>
+      <div class="note"><b>举例：</b>A 把返现比例设为 30%。B 一场胜利拿到 100 EH 奖励，则分成池 10 EH，其中 <b>3 EH 返现给 B</b>、<b>7 EH 归 A</b>。B 自己的 100 EH 不受影响 —— 返现是额外奖励，不从下线身上扣。</div>
+
+      <h3>三步开始邀请</h3>
+      <ol class="steps">
+        <li><b>注册邀请码。</b>进入游戏 →「邀请中心」→ 点「注册邀请码」，系统生成 4~10 位短码（形如 <code>ehk7m2</code>，字母数字、不含易混淆字符），并自动复制你的邀请链接。</li>
+        <li><b>分享链接。</b>把 <code>game.html?ref=你的短码</code> 发给好友；也可以用下面的生成器做成便于传播的分享链接。</li>
+        <li><b>好友铸造时自动绑定。</b>好友通过链接进入游戏后，首次召唤英雄时会自动把你设为推荐人（也可手动填写邀请码或钱包地址）。绑定即开始为你产生邀请分成。</li>
+      </ol>
+      <p class="inv-lab" style="margin-top:12px">没有注册短码也能用 —— 直接分享 <code>?ref=你的钱包地址</code> 同样有效，只是链接更长。</p>
+
+      <div class="inv-box">
+        <h4><i class="fa-solid fa-link" style="color:var(--gold)"></i> 邀请链接生成器</h4>
+        <div class="inv-lab">填入你的邀请短码或钱包地址，生成可直接分享的链接。纯本地计算：不联网、不连钱包。</div>
+        <div class="inv-row">
+          <input id="invRef" type="text" autocomplete="off" spellcheck="false" placeholder="邀请短码（如 ehk7m2）或钱包地址 0x…">
+          <button class="inv-btn" id="invGen" type="button"><i class="fa-solid fa-wand-magic-sparkles"></i>生成链接</button>
+        </div>
+        <div class="inv-msg" id="invMsg"></div>
+        <div class="inv-out" id="invOut">
+          <div class="inv-link">
+            <code id="invLink"></code>
+            <button class="inv-btn ghost sm" id="invCopy" type="button"><i class="fa-solid fa-copy"></i>复制</button>
+          </div>
+          <div class="inv-share">
+            <a class="inv-btn ghost sm" id="invTg" target="_blank" rel="noopener"><i class="fa-brands fa-telegram"></i>分享到电报</a>
+            <a class="inv-btn ghost sm" id="invX" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter"></i>分享到 X</a>
+            <a class="inv-btn ghost sm" id="invGo" target="_blank" rel="noopener"><i class="fa-solid fa-play"></i>先自己试一次</a>
+          </div>
+        </div>
+        <div class="inv-tip">短码在游戏内「邀请中心 → 注册邀请码」生成。本页只做<b>格式校验</b>，不会去链上核对短码是否存在。</div>
+      </div>
+
+      <h3>领取与查询</h3>
+      <ul>
+        <li><b>邀请奖励</b>与<b>战斗奖励</b>分开记账，在「金库」页分别领取。</li>
+        <li>下线的<b>返现</b>由下线本人在金库页领取。</li>
+        <li>「邀请中心」可查看：邀请码与链接、下线列表、每个下线的贡献、累计推荐奖励、当前返现比例与快照状态。</li>
+      </ul>
+      <div class="note warn"><b>注意：</b>返现比例修改后<b>只对之后绑定的下线生效</b>；已绑定的下线沿用他们绑定时锁定的比例，不会追溯变化。绑定关系一旦上链不可更改。</div>
+    </section>
+
+    <!-- 14 -->
     <section id="contracts">
-      <h2><span class="n">13</span>合约与网络</h2>
+      <h2><span class="n">14</span>合约与网络</h2>
       <p class="lead">当前部署在 BSC 测试网（chainId 97），以下为主力合约地址。</p>
       <table>
         <thead><tr><th>合约</th><th>说明</th><th>地址</th></tr></thead>
@@ -656,9 +755,9 @@ footer .fl{color:var(--gold);margin:0 8px}
       </table>
     </section>
 
-    <!-- 14 -->
+    <!-- 15 -->
     <section id="faq">
-      <h2><span class="n">14</span>常见问题</h2>
+      <h2><span class="n">15</span>常见问题</h2>
       <p class="lead">新手最容易卡住的几件事。</p>
       <div class="faq">
         <details open><summary>为什么提示链 ID 不一致？</summary><div class="body">钱包当前不在 BSC 测试网。点击连接钱包时前端会自动发起切换请求，若被拒绝请在钱包中手动添加/切换到 chainId 97 的网络。</div></details>
@@ -668,12 +767,15 @@ footer .fl{color:var(--gold);margin:0 8px}
         <details><summary>官网写 USDT，游戏里显示 EH，哪个是对的？</summary><div class="body">都对。奖励以美元计价，官网按 USDT 展示；链上按金库模式发放——代币模式折算成 EH，USDT 模式直接发 USDT。游戏内显示的是实际到账的代币。</div></details>
         <details><summary>锻造/召唤的价格会变吗？</summary><div class="body">会。价格来自链上价格预言机，管理员可调整。游戏内各页面显示的金额即为当前实时价格。</div></details>
         <details><summary>交易一直失败或卡住怎么办？</summary><div class="body">先确认钱包在 BSC 测试网且有足够测试 BNB；若某条待揭示记录已过期，可在「待揭示」面板手动揭示或清理，系统也会自动扫描失效记录。</div></details>
+        <details><summary>邀请链接发给好友了，为什么没有绑上？</summary><div class="body">绑定发生在<b>好友首次召唤英雄时</b>，只是打开链接不会立即绑定。请确认链接是 <code>game.html?ref=…</code> 形式、短码拼写完整；若好友在点击链接前已经铸造过英雄，绑定关系可能已经固化，无法再改。</div></details>
+        <details><summary>返现比例改了，为什么老下线没变化？</summary><div class="body">返现比例在下线<b>绑定 / 首次铸造的时刻被快照锁定</b>，之后永远沿用那个比例。修改只对之后新绑定的下线生效；另外同一账户每 7 天才能修改一次，未到冷却时间会提示失败。</div></details>
+        <details><summary>邀请奖励是从下线的奖励里扣的吗？</summary><div class="body">不是。邀请分成是下线战斗奖励的 10%，由金库额外发放，下线的原始奖励不受影响。若你设置了返现比例，下线还会额外收到分成池的一部分 —— 相当于双方都多拿。</div></details>
       </div>
     </section>
 
-    <!-- 15 -->
+    <!-- 16 -->
     <section id="community">
-      <h2><span class="n">15</span>社群与链接</h2>
+      <h2><span class="n">16</span>社群与链接</h2>
       <p class="lead">有问题来社群，公告与进度在推特。</p>
       <div class="grid g3">
         <a class="card" href="https://t.me/bscehgame" target="_blank" rel="noopener" style="text-decoration:none"><div class="ic" style="background:rgba(34,197,94,.14);color:#34d399"><i class="fa-brands fa-telegram"></i></div><h4>电报 Telegram</h4><p>玩家交流社区与官方客服支持，实时答疑。</p></a>
@@ -706,6 +808,92 @@ footer .fl{color:var(--gold);margin:0 8px}
     });
   }, { rootMargin: '-84px 0px -70% 0px', threshold: 0 });
   secs.forEach(function(s){ io.observe(s); });
+})();
+</script>
+
+<script>
+/* ===== 邀请链接生成器（纯本地，不联网 / 不连钱包） ===== */
+(function(){
+  var input = document.getElementById('invRef');
+  var gen = document.getElementById('invGen');
+  var out = document.getElementById('invOut');
+  var msg = document.getElementById('invMsg');
+  var linkEl = document.getElementById('invLink');
+  var btnCopy = document.getElementById('invCopy');
+  var tgEl = document.getElementById('invTg');
+  var xEl = document.getElementById('invX');
+  var goEl = document.getElementById('invGo');
+  if(!input || !gen || !out) return;
+
+  var gameUrl = new URL('./game.html', location.href);
+
+  function showMsg(t, err){
+    msg.textContent = t;
+    msg.className = 'inv-msg on' + (err ? ' err' : ' ok');
+  }
+  function fallbackCopy(t, cb){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = t;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      cb();
+    }catch(e){ showMsg('复制失败，请手动选中链接复制', true); }
+  }
+  // 校验：42 位地址 或 4~10 位字母数字短码（与游戏内 getRefFromUrl 规则一致）
+  function normalize(v){
+    var s = String(v || '').trim();
+    if(/^0x[a-fA-F0-9]{40}$/.test(s)) return { v: s, type: 'addr' };
+    if(/^[a-zA-Z0-9]{4,10}$/.test(s)) return { v: s.toLowerCase(), type: 'code' };
+    return null;
+  }
+  function build(v){
+    gameUrl.search = '?ref=' + encodeURIComponent(v);
+    return gameUrl.href;
+  }
+  function render(r){
+    var link = build(r.v);
+    linkEl.textContent = link;
+    out.classList.add('on');
+    var share = '一起来玩元素英雄 · 链上五行 RPG';
+    tgEl.href = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(share);
+    xEl.href = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(share);
+    goEl.href = link;
+    showMsg(r.type === 'addr' ? '已生成（钱包地址模式，链接较长）' : '已生成（短码 ' + r.v + '）', false);
+  }
+  function doGen(){
+    var r = normalize(input.value);
+    if(!r){
+      out.classList.remove('on');
+      showMsg('格式不正确：请填 4~10 位字母数字短码，或 0x 开头的 42 位地址', true);
+      return;
+    }
+    render(r);
+  }
+  gen.addEventListener('click', doGen);
+  input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); doGen(); } });
+  input.addEventListener('input', function(){
+    if(out.classList.contains('on')){ out.classList.remove('on'); msg.className = 'inv-msg'; }
+  });
+  btnCopy.addEventListener('click', function(){
+    var t = linkEl.textContent;
+    var done = function(){
+      btnCopy.innerHTML = '<i class="fa-solid fa-check"></i>已复制';
+      setTimeout(function(){ btnCopy.innerHTML = '<i class="fa-solid fa-copy"></i>复制'; }, 1600);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(done).catch(function(){ fallbackCopy(t, done); });
+    } else { fallbackCopy(t, done); }
+  });
+  // 本页 URL 自带 ?ref= 时自动填入并生成 —— 于是「文档链接」本身就能当邀请链接分享
+  try{
+    var pre = new URLSearchParams(location.search).get('ref');
+    if(pre){ input.value = pre; doGen(); }
+  }catch(e){}
 })();
 </script>
 </body>
