@@ -44,6 +44,7 @@ function marketCardHtml(l){
       <span class="badge bg-[#1a2740] text-gold"><i class="fa-solid ${ic} mr-1"></i>${tag} #${l.tokenId}</span>
       <span class="badge" style="background:#0d1526;color:#8ea0bd">#${l.lid}</span>
     </div>
+    ${l.nftType===1?`<div class="w-24 h-24 rounded-xl overflow-hidden mb-2 mx-auto" style="border:1px solid ${(ELEMENTS[l.element]||ELEMENTS[0]).border}55;background:#0d1526;"><img src="${weaponImg(l.element,l.stars)}" alt="武器#${l.tokenId}" class="w-full h-full object-cover"></div>`:''}
     <div class="flex items-center gap-2 mb-1.5 flex-wrap">${meta}</div>
     <div class="text-[12px] text-muted mb-2">卖家 ${shortAddr(l.seller)}</div>
     <div class="text-xl font-black text-gold num-mono mb-3">${fmtUnits(l.price,S.tokenDecimals,2)} ${S.tokenSymbol}</div>

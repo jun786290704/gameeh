@@ -91,7 +91,7 @@ async function renderFight(){
       const e = ELEMENTS[w.element]||ELEMENTS[0];
       const stars = '★'.repeat(w.stars)+'☆'.repeat(5-w.stars);
       return `<button onclick="selectFightWeapon(${w.id}, this)" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
-        <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};">🗡️</span>
+        <span class="pick-avatar char3d-wrap" style="background:${e.soft};border:1px solid ${e.border};"><img src="${weaponImg(w.element,w.stars)}" alt="武器#${w.id}" class="w-full h-full object-cover rounded-lg"></span>
         <span class="pick-body">
           <span class="pick-title"><b>#${w.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
           <span class="pick-sub"><b class="text-gold">${stars}</b></span>
@@ -313,7 +313,8 @@ async function autoPreviewFight(){
             <div class="w-14 h-14 mx-auto rounded-2xl overflow-hidden mb-1" style="background:${he.soft};border:2px solid ${he.color}44;"><img src="${heroImg(heroData.element, heroData.id, heroData.skin)}" alt="英雄#${h}" class="w-full h-full object-cover"></div>
             <div class="font-black text-[13px]" style="color:${he.color};">英雄 #${h}</div>
             <div class="text-[10px] text-muted">${he.name}系 · Lv.${heroData.level}</div>
-            <div class="text-[10px] text-muted mt-0.5">🗡️ #${w} · ${'★'.repeat(wpnData.stars||1)}</div>
+            <div class="w-10 h-10 mx-auto rounded-xl overflow-hidden mb-0.5" style="background:${we.soft};border:1px solid ${we.border}55;"><img src="${weaponImg(wpnData.element, wpnData.stars)}" alt="武器#${w}" class="w-full h-full object-cover"></div>
+            <div class="text-[10px] text-muted">🗡️ #${w} · ${'★'.repeat(wpnData.stars||1)}</div>
           </div>
           <div class="flex flex-col items-center px-1">
             <div class="text-2xl font-black text-gold mb-1">VS</div>

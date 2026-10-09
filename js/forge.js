@@ -95,7 +95,7 @@ async function parseForgeResult(rec, p){
   if(stage){
     const limited = results.slice(0, 100);
     stage.innerHTML = limited.map(r=>{
-      if(r.type==='weapon') return `<div class="flip-card w-24 h-32 flipped"><div class="flip-inner w-full h-full"><div class="flip-back absolute inset-0 rounded-xl border-2 flex flex-col items-center justify-center p-1.5" style="border-color:${ELEMENTS[r.element].color};background:linear-gradient(160deg,#1c2a44,#101a2c)"><div class="text-2xl">🗡️</div><div class="text-[11px] font-black" style="color:${ELEMENTS[r.element].color}">${'★'.repeat(r.stars)}</div></div></div></div>`;
+      if(r.type==='weapon') return `<div class="flip-card w-24 h-32 flipped"><div class="flip-inner w-full h-full"><div class="flip-back absolute inset-0 rounded-xl border-2 flex flex-col items-center justify-center p-1.5" style="border-color:${ELEMENTS[r.element].color};background:linear-gradient(160deg,#1c2a44,#101a2c)"><img src="${weaponImg(r.element,r.stars)}" alt="武器" class="w-14 h-14 object-cover rounded-lg mb-1" style="border:1px solid ${ELEMENTS[r.element].color}55;"><div class="text-[11px] font-black" style="color:${ELEMENTS[r.element].color}">${'★'.repeat(r.stars)}</div></div></div></div>`;
       if(r.type==='shard') return `<div class="flip-card w-24 h-32 flipped"><div class="flip-inner w-full h-full"><div class="flip-back absolute inset-0 rounded-xl border-2 border-purple-400/60 flex flex-col items-center justify-center" style="background:linear-gradient(160deg,#251c3f,#101a2c)"><div class="text-2xl">💎</div><div class="text-[11px] font-black text-purple-300">碎片 ${r.id}×${r.qty}</div></div></div></div>`;
       return `<div class="flip-card w-24 h-32 flipped"><div class="flip-inner w-full h-full"><div class="flip-back absolute inset-0 rounded-xl border border-[#33415c] flex items-center justify-center" style="background:#0d1526"><div class="text-2xl grayscale">💨</div></div></div></div>`;
     }).join('');
@@ -139,7 +139,7 @@ async function parseSynthResult(rec){
       const el = Number(w.element), stars = Number(w.stars), bonus = Number(w.bonusBp);
       openModal({html:`
         <div class="text-center py-3">
-          <div class="w-24 h-24 mx-auto rounded-xl flex items-center justify-center text-4xl anim-flip" style="border:2px solid ${ELEMENTS[el].border};background:radial-gradient(circle at 50% 35%, ${ELEMENTS[el].soft}, #0d1526 75%)">🗡️</div>
+          <div class="w-24 h-24 mx-auto rounded-xl overflow-hidden anim-flip" style="border:2px solid ${ELEMENTS[el].border};background:radial-gradient(circle at 50% 35%, ${ELEMENTS[el].soft}, #0d1526 75%)"><img src="${weaponImg(el,stars)}" alt="武器#${wid}" class="w-full h-full object-cover"></div>
           <div class="text-xl font-black mt-3">武器 #${wid}</div>
           <div class="mt-1">${'★'.repeat(stars)} <span class="text-gold font-bold">${stars}星</span> ${elBadge(el)}</div>
           <div class="text-[12px] text-green-400 mt-1">强化加成 +${bpToPct(bonus)}</div>

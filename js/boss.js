@@ -187,7 +187,7 @@ function renderBossPicks(){
         const e = ELEMENTS[w.element]||ELEMENTS[0];
         const stars = '★'.repeat(w.stars)+'☆'.repeat(5-w.stars);
         return `<button onclick="selectBossWeapon(${w.id})" class="pick-chip ${active?'pick-active':''}" style="${active?`border-color:${e.border};background:${e.soft};`:''}">
-          <span class="pick-avatar" style="background:${e.soft};border:1px solid ${e.border};">🗡️</span>
+          <span class="pick-avatar" style="background:${e.soft};border:1px solid ${e.border};"><img src="${weaponImg(w.element,w.stars)}" alt="武器#${w.id}" class="w-full h-full object-cover rounded-lg"></span>
           <span class="pick-body">
             <span class="pick-title"><b>#${w.id}</b><em class="pick-tag" style="color:${e.color};">${e.name}系</em></span>
             <span class="pick-sub"><b class="text-gold">${stars}</b></span>

@@ -31,6 +31,11 @@ function heroImg(el, id, skin){
   return v>0 ? 'img/hero_'+g+'_'+e+'_'+v+'.png' : 'img/hero_'+g+'_'+e+'.png';
 }
 function monImg(id){ return 'img/mon_'+(Number(id)%10)+'.png'; }
+// 武器 NFT 图：img/weapon_{元素}_{星级}.png（5 元素 × 5 星级 = 25 张）
+function weaponImg(el, stars){
+  const e = Number(el)%5, s = Math.min(5, Math.max(1, Number(stars)||1));
+  return 'img/weapon_'+e+'_'+s+'.png';
+}
 const ELEMENTS = {
   0:{name:'金',icon:'🪙',color:'#f59e0b',soft:'rgba(245,158,11,.14)',border:'rgba(251,191,36,.5)'},
   1:{name:'木',icon:'🌿',color:'#22c55e',soft:'rgba(34,197,94,.14)',border:'rgba(34,197,94,.5)'},

@@ -20,7 +20,7 @@ function weaponCardHtml(w){
   const e = ELEMENTS[w.element]||ELEMENTS[0];
   return `<div class="game-card overflow-hidden anim-fade">
     <div class="relative h-28 flex items-center justify-center text-4xl overflow-hidden" style="background:radial-gradient(circle at 50% 30%, ${e.soft}, #0d1526 82%);">
-      <span style="filter:drop-shadow(0 8px 14px rgba(0,0,0,.55));">⚔️</span>
+      <span style="filter:drop-shadow(0 8px 14px rgba(0,0,0,.55));"><img src="${weaponImg(w.element,w.stars)}" alt="武器#${w.id}" class="w-20 h-20 object-cover rounded-xl" style="border:1px solid ${e.border}55;"></span>
       <span class="absolute top-2 left-2 text-[11px] font-black px-2 py-0.5 rounded-lg" style="background:rgba(8,12,24,.72);color:${e.color};border:1px solid ${e.border}55;">${e.icon} ${e.name}系</span>
       <span class="absolute top-2 right-2 text-[12px] font-black px-2 py-0.5 rounded-lg badge" style="background:rgba(15,23,42,.85);">${'★'.repeat(w.stars)}${'☆'.repeat(5-w.stars)}</span>
       <span class="absolute bottom-0 left-0 right-0 px-3 pt-4 pb-1.5 text-[12px] font-black text-left" style="background:linear-gradient(180deg,transparent,rgba(8,12,24,.88) 60%);">武器 #${w.id} · ${w.stars}星</span>
