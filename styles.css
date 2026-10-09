@@ -396,3 +396,13 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .char3d-card:hover .char3d{transform:translateZ(34px);}
 .char3d{transition:transform .35s ease;}
 .char3d-card:hover .gallery-art img{transform:scale(1.06) translateZ(34px);}
+
+/* ===== 市场：移动端分类横向滚动 ===== */
+@media (max-width:640px){
+  .mkt-fchips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .mkt-fchips::-webkit-scrollbar{display:none;}
+  .mkt-stats-row{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+  .mkt-stats-row::-webkit-scrollbar{display:none;}
+  .mkt-stat-chip{flex:0 0 auto;}
+  .mkt-chip{flex:0 0 auto;}
+}

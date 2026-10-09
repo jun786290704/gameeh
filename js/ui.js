@@ -233,10 +233,11 @@ function mktFilterPanelHTML(st, kind, tiers){
 // 是否有任何细分筛选生效（用于"清除筛选"按钮）
 function mktHasAnyFilter(st){
   if(st.type!==null && st.type!==undefined) return true;
+  if(st.search) return true;
   return [st.el, st.level, st.star, st.item, st.band].some(v=>v!==null && v!==undefined);
 }
 
-// 按维度过滤（tiers 为价格分档）
+// 按维度过滤（tiers 为价格分档；search 为关键词：tokenId / 挂单号 / 卖家地址）
 function applyMarketFilters(list, st, tiers){
   let l = (list||[]).slice();
   if(st.type!==null && st.type!==undefined) l = l.filter(x=>x.nftType===st.type);
@@ -245,6 +246,12 @@ function applyMarketFilters(list, st, tiers){
   if(st.star!==null && st.star!==undefined) l = l.filter(x=>x.nftType===1 && Number(x.stars||0)===st.star);
   if(st.item!==null && st.item!==undefined) l = l.filter(x=>(x.nftType===2||x.nftType===3) && Number(x.tokenId)===st.item);
   if(st.band!==null && st.band!==undefined && tiers) l = l.filter(x=>mktBandOf(x.price, tiers)===st.band);
+  if(st.search){
+    const q = String(st.search).trim().toLowerCase();
+    if(q) l = l.filter(x=> String(x.tokenId).includes(q)
+      || String(x.lid).includes(q)
+      || String(x.seller||'').toLowerCase().includes(q));
+  }
   return l;
 }
 
@@ -388,9 +395,13 @@ function setMarketBand(v){ S.marketFilterBand = mktToggleVal(S.marketFilterBand,
 function clearMarketFilters(){
   S.marketFilterType=null; S.marketFilterEl=null; S.marketFilterLevel=null;
   S.marketFilterStar=null; S.marketFilterItem=null; S.marketFilterBand=null;
+  S.marketSearch='';
+  const inp = document.getElementById('marketSearchInp'); if(inp) inp.value='';
   S.marketPage=0; loadActiveListings();
 }
 function setMarketSort(v){ S.marketSort = v; S.marketPage=0; loadActiveListings(); }
+// 市场 / 我的上架 搜索（关键词：tokenId / 挂单号 / 卖家地址）
+function setMarketSearch(v){ S.marketSearch = (v||'').trim(); S.marketPage=0; loadActiveListings(); }
 function toggleWeaponGroup(el, star){ toggleCollapse(wGroupKey(el, star)); renderWeapons(); }
 function toggleMarketGroup(el, sub){ toggleCollapse(mGroupKey(el, sub)); loadActiveListings(); }
 function toggleMarketTypeGroup(t){ toggleCollapse('mt-'+t); loadActiveListings(); }
@@ -415,9 +426,12 @@ function setMyListBand(v){ S.myListFilterBand = mktToggleVal(S.myListFilterBand,
 function clearMyListFilters(){
   S.myListFilterType=null; S.myListFilterEl=null; S.myListFilterLevel=null;
   S.myListFilterStar=null; S.myListFilterItem=null; S.myListFilterBand=null;
+  S.myListSearch='';
+  const inp = document.getElementById('myListSearchInp'); if(inp) inp.value='';
   loadMyListings();
 }
 function setMyListSort(v){ S.myListSort = v; loadMyListings(); }
+function setMyListSearch(v){ S.myListSearch = (v||'').trim(); loadMyListings(); }
 function toggleMyListTypeGroup(t){ toggleCollapse('mymt-'+t); loadMyListings(); }
 
 /* ============ 数据缓存 ============ */

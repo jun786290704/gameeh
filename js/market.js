@@ -16,7 +16,12 @@ async function openSellTab(){
   if(!(S.marketList||[]).length){ try{ await fetchListings(); }catch(e){} }
   await onSellTypeChange();
 }
-async function fetchListings(){
+// force=true 时忽略缓存（上架/购买/取消/清算等操作后必须强制）
+async function fetchListings(force){
+  if(!force){
+    const c = cacheGet('mkt_listings');
+    if(c){ S.marketList = c; return; }
+  }
   try{
     const mkt = mustC('marketplace');
     const ids = await mkt.getActiveListings();
@@ -41,6 +46,7 @@ async function fetchListings(){
       }catch(e){ return null; }
     }));
     S.marketList = results.filter(x=>x!==null);
+    cacheSet('mkt_listings', S.marketList);
   }catch(e){ console.warn('market',e); }
 }
 
@@ -315,8 +321,8 @@ function buildMarketGroups(items, cardFn, opts){
 /* ---------- 筛选条渲染 ---------- */
 function mktFilterState(prefix){
   return prefix==='mine'
-    ? {type:S.myListFilterType, el:S.myListFilterEl, level:S.myListFilterLevel, star:S.myListFilterStar, item:S.myListFilterItem, band:S.myListFilterBand}
-    : {type:S.marketFilterType, el:S.marketFilterEl, level:S.marketFilterLevel, star:S.marketFilterStar, item:S.marketFilterItem, band:S.marketFilterBand};
+    ? {type:S.myListFilterType, el:S.myListFilterEl, level:S.myListFilterLevel, star:S.myListFilterStar, item:S.myListFilterItem, band:S.myListFilterBand, search:S.myListSearch}
+    : {type:S.marketFilterType, el:S.marketFilterEl, level:S.marketFilterLevel, star:S.marketFilterStar, item:S.marketFilterItem, band:S.marketFilterBand, search:S.marketSearch};
 }
 function mktRenderBars(prefix, counts, total, avg, tiers){
   const st = mktFilterState(prefix);
@@ -339,11 +345,13 @@ function mktRenderBars(prefix, counts, total, avg, tiers){
 }
 
 /* ---------- 在售列表 ---------- */
-async function loadActiveListings(){
+async function loadActiveListings(force){
   await loadMarketFee();
   const grid = $('#listGrid');
-  grid.innerHTML = skeletonBlock(4, 'h-36');
-  await fetchListings();
+  // 首次或强制刷新才显示骨架；筛选/分页切换用缓存渲染，避免闪烁
+  const hasCache = !!cacheGet('mkt_listings');
+  if(force || !hasCache) grid.innerHTML = skeletonBlock(4, 'h-36');
+  await fetchListings(force);
   recomputeMarketStats();
 
   // 过期挂单不展示：它 active 仍为 true 但购买必然 revert(ListingAlreadyExpired)
@@ -370,17 +378,18 @@ async function loadActiveListings(){
 function marketPage(d){ S.marketPage += d; loadActiveListings(); }
 
 /* ---------- 我的上架 ---------- */
-async function loadMyListings(){
+async function loadMyListings(force){
   const grid = $('#myListGrid'); if(!grid) return;
   const empty = $('#myListEmpty');
-  grid.innerHTML = skeletonBlock(3, 'h-32');
+  const hasCache = !!cacheGet('mkt_listings');
+  if(force || !hasCache) grid.innerHTML = skeletonBlock(3, 'h-32');
   if(!S.account){
     grid.innerHTML = '';
     if(empty) empty.classList.remove('hidden');
     return;
   }
   if(empty) empty.classList.add('hidden');
-  await fetchListings();
+  await fetchListings(force);
   const mineAll = S.marketList.filter(l=>String(l.seller).toLowerCase()===S.account.toLowerCase());
 
   const counts = {0:0,1:0,2:0,3:0};
@@ -421,7 +430,7 @@ async function buyFlow(lid){
     withBusy(null,true);
     await (await mustC('marketplace').connect(S.signer).buyItem(lid)).wait();
     toast('购买成功！','success');
-    await loadActiveListings(); await refreshBalances();
+    await loadActiveListings(true); await refreshBalances();
   }catch(e){ toast(errMsg(e),'error'); }
   finally{ withBusy(null,false); }
 }
@@ -432,7 +441,7 @@ async function expireListingFlow(lid){
     withBusy(null,true);
     await (await mustC('marketplace').connect(S.signer).expireListing(lid)).wait();
     toast('已清算，资产已退回卖家','success');
-    await loadMyListings(); await loadActiveListings();
+    await loadMyListings(true); await loadActiveListings(true);
   }catch(e){ toast(errMsg(e),'error'); }
   finally{ withBusy(null,false); }
 }
@@ -442,7 +451,7 @@ async function cancelListingFlow(lid){
     withBusy(null,true);
     await (await mustC('marketplace').connect(S.signer).cancelListing(lid)).wait();
     toast('已取消','success');
-    await loadMyListings(); await loadActiveListings();
+    await loadMyListings(true); await loadActiveListings(true);
   }catch(e){ toast(errMsg(e),'error'); }
   finally{ withBusy(null,false); }
 }
@@ -512,7 +521,7 @@ function sellPickCardHtml(it, t, on){
     thumb = `<div class="sell-pick-ico" style="color:${accent}"><i class="fa-solid ${t===2?'fa-gem':'fa-flask'}"></i><em>${ROMAN[Math.min(it.id,5)]||it.id}</em></div>`;
     meta = `<span class="mkt-tag ${t===2?'shard':'essence'}">${mktItemKindName(t)} <i class="roman">${ROMAN[it.id]||it.id}</i></span><span class="mkt-tag">×${it.amount}</span>`;
   }
-  return `<button type="button" class="sell-pick-card${on?' on':''}" style="--accent:${accent}" onclick="pickSellAsset(${it.id})" title="#${it.id}">
+  return `<button type="button" class="sell-pick-card${on?' on':''}" style="--accent:${accent}" onclick="pickSellAsset(${it.id})" data-id="${it.id}" title="#${it.id}">
     <span class="sell-pick-check"><i class="fa-solid fa-check"></i></span>
     <span class="sell-pick-thumb">${thumb}</span>
     <span class="sell-pick-id">#${it.id}</span>
@@ -560,8 +569,13 @@ function pickSellAsset(id){
   const sel = $('#sellTokenSel');
   S.sellPickId = Number(id);
   if(sel) sel.value = String(id);
+  // 只切换卡片高亮/勾选，不整格重绘（避免闪烁与选择状态不同步）
+  document.querySelectorAll('.sell-pick-card').forEach(c=>{
+    const on = Number(c.dataset.id)===S.sellPickId;
+    c.classList.toggle('on', on);
+  });
   onSellAssetChange();
-  renderSellPicker();
+  updateSellHelper();
 }
 function setSellPickEl(v){ S.sellPickEl = mktToggleVal(S.sellPickEl, v); S.sellPickId = null; renderSellPicker(); }
 function setSellPickStar(v){ S.sellPickStar = mktToggleVal(S.sellPickStar, v); S.sellPickId = null; renderSellPicker(); }
@@ -653,7 +667,7 @@ async function listItemFlow(){
     // 资产已转入市场合约持有，强制刷新持有列表（不能沿用缓存）
     try{ cacheInvalidate('heroes_'+S.account); cacheInvalidate('weapons_'+S.account); }catch(e){}
     S.heroes = []; S.weapons = [];
-    await loadActiveListings(); await loadMyListings(); await onSellTypeChange();
+    await loadActiveListings(true); await loadMyListings(true); await onSellTypeChange();
   }catch(e){ toast(errMsg(e),'error'); }
   finally{ withBusy('listItemBtn', false); }
 }
