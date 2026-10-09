@@ -335,18 +335,23 @@ if(!window.ethers){
       <div id="listPager" class="flex items-center justify-center gap-3 mt-4" data-page-node-id="OMWzUM4C6TCNNu5qDVIKLZ"></div>
     </div>
     <div id="mtab-sell" class="hidden" data-page-node-id="smpBUcYcH9YgUp9nRnvYIv">
-      <div class="game-card p-4 max-w-2xl elbg-3" data-page-node-id="fIQ5kFyoq8UeykH024SA1c">
+      <div class="game-card p-4 sell-form elbg-3" data-page-node-id="fIQ5kFyoq8UeykH024SA1c">
         <div class="font-bold mb-3" data-page-node-id="Ye0LITDuPd9L8pKggMwD51">🏷️ 上架出售</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" data-page-node-id="DKgBtCjBfmSMLaxSaCeBlR">
-          <div data-page-node-id="jvcnl8D469wbprbTUMPyG6"><div class="lbl" data-page-node-id="NH0XQT0IL3zNfzHwI4LLZS">NFT 类型</div>
+          <div class="sell-span" data-page-node-id="jvcnl8D469wbprbTUMPyG6"><div class="lbl" data-page-node-id="NH0XQT0IL3zNfzHwI4LLZS">NFT 类型</div>
             <select id="sellTypeSel" class="input" onchange="onSellTypeChange()" data-page-node-id="351E0S8gTBWmvIcktDR8n7">
               <option value="0" data-page-node-id="bM8CqSqxPHKKrxOkTkfEKQ">英雄</option><option value="1" data-page-node-id="kMW9IgmTr6JHHMHYjsf4ri">武器</option>
               <option value="2" data-page-node-id="D4Py4Mruzaeuebbn6T6DLt">碎片</option><option value="3" data-page-node-id="UdW0aVyydQKBkr2cW4gTgB">精粹</option>
             </select>
           </div>
-          <div data-page-node-id="2p1HejGvZMgzDF1k5gL9rn"><div class="lbl" data-page-node-id="XoaERy0FL9nAAZHeUhGtSe">选择资产</div><select id="sellTokenSel" class="input" onchange="onSellAssetChange()" data-page-node-id="pxjQa8yVP98EF1NEkrOqW7"></select></div>
+          <div class="sell-span" data-page-node-id="2p1HejGvZMgzDF1k5gL9rn">
+            <div class="lbl" data-page-node-id="XoaERy0FL9nAAZHeUhGtSe">选择资产 <span id="sellHoldHint" class="sell-hint"></span></div>
+            <div id="sellPicker" class="sell-picker"></div>
+            <select id="sellTokenSel" class="hidden" onchange="onSellAssetChange()" data-page-node-id="pxjQa8yVP98EF1NEkrOqW7"></select>
+          </div>
           <div id="sellAmountWrap" class="hidden" data-page-node-id="FBYVWDG9G1V7PBJvG6o2c6"><div class="lbl" data-page-node-id="2Sc1SzdE3FQh0sO4NUrFj9">数量</div><input id="sellAmountInp" type="number" min="1" step="1" value="1" class="input" data-page-node-id="JXFVBrbhb89HLkBdm3KNau"></div>
-          <div data-page-node-id="3db7Rl3DHbc8SrEhSfUiV9"><div class="lbl" data-page-node-id="bC2AlIImlGCIYjGJeyZDmk">价格（GameToken）</div><input id="sellPriceInp" type="number" min="0" step="0.01" class="input" placeholder="如 100" data-page-node-id="tHzLCyR3mvX3i2lzmaqyEK"></div>
+          <div data-page-node-id="3db7Rl3DHbc8SrEhSfUiV9"><div class="lbl" data-page-node-id="bC2AlIImlGCIYjGJeyZDmk">价格（GameToken）</div><input id="sellPriceInp" type="number" min="0" step="0.01" class="input" placeholder="如 100" oninput="updateSellHelper()" data-page-node-id="tHzLCyR3mvX3i2lzmaqyEK"></div>
+          <div class="sell-span" id="sellHelper"></div>
         </div>
         <div class="mt-3 flex items-center justify-between gap-2 flex-wrap bg-[#0d1526] rounded-xl p-3 border border-[#24304a]" data-page-node-id="nuvcID3VHAAgviwOtCZQgg">
           <div class="text-[13px]" data-page-node-id="TsWL3soMXG7ZEU0rDoDoii"><i class="fa-solid fa-shield-halved text-info mr-1" data-page-node-id="GPo9Jn9O9Ld2UfpnGg1PEW"></i>第 1 步：授权 NFT</div>

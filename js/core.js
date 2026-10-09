@@ -247,6 +247,7 @@ const S = {
   marketSort:'default', marketTypeCounts:{0:0,1:0,2:0,3:0}, marketAvgPrice:0n, marketPriceTiers:null,
   myListFilterEl:null, myListFilterType:null, myListFilterLevel:null, myListFilterStar:null, myListFilterItem:null, myListFilterBand:null,
   myListSort:'default', myListTypeCounts:{0:0,1:0,2:0,3:0}, myListTotalValue:0n, myListPriceTiers:null,
+  sellItems:[], sellPickId:null, sellPickEl:null, sellPickStar:null, sellPickLevel:null, sellPickLoading:false,
   collapsedGroups:{}, weaponsFilterEl:null, weaponsFilterStar:null, weaponsSort:'bonus', weaponSearch:'',
   rankPage:0, rankSize:10,
   fight:{heroId:null, weaponId:null, monsterId:null},

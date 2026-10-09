@@ -74,6 +74,9 @@ window.GAME_RE = [
   [/^不能设置自己为推荐人$/, () => 'Cannot refer yourself'],
   [/^铸造强制邀请码已开启$/, () => 'Mint referrer requirement ON'],
   [/^铸造强制邀请码已关闭$/, () => 'Mint referrer requirement OFF'],
+  // 上架页资产选择器
+  [/^可上架 (\d+)$/, m => 'Listable ' + m[1]],
+  [/^(碎片|精粹) (\d+)（持有 (\d+)）$/, m => m[1] + ' ' + m[2] + ' (own ' + m[3] + ')'],
 ];
 
 window.GAME_I18N = (function () {

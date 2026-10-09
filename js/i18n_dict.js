@@ -4761,3 +4761,37 @@ window.GAME_DICT.ru = Object.assign(window.GAME_DICT.ru || {}, {
     window.GAME_DICT[l] = Object.assign(window.GAME_DICT[l] || {}, ADD[l]);
   });
 })();
+
+/* ===== 上架页资产选择器（2026-10-09） ===== */
+(function(){
+  var ADD = {
+    en: {
+      '选择资产':'Choose asset','连接钱包后显示可上架资产':'Connect wallet to see listable assets',
+      '加载中…':'Loading…','没有匹配的资产':'No matching assets',
+      '同类最低':'Same-type low','全类最低':'Overall low','到手':'You receive','一键填入最低价':'Use lowest price'
+    },
+    ja: {
+      '选择资产':'資産を選択','连接钱包后显示可上架资产':'ウォレット接続後に出品可能な資産を表示',
+      '加载中…':'読み込み中…','没有匹配的资产':'該当する資産がありません',
+      '同类最低':'同種最安値','全类最低':'全体最安値','到手':'受取額','一键填入最低价':'最安値を入力'
+    },
+    es: {
+      '选择资产':'Elegir activo','连接钱包后显示可上架资产':'Conecta la cartera para ver tus activos',
+      '加载中…':'Cargando…','没有匹配的资产':'Sin activos coincidentes',
+      '同类最低':'Mínimo del mismo tipo','全类最低':'Mínimo global','到手':'Recibes','一键填入最低价':'Usar precio más bajo'
+    },
+    ko: {
+      '选择资产':'자산 선택','连接钱包后显示可上架资产':'지갑 연결 후 등록 가능 자산 표시',
+      '加载中…':'불러오는 중…','没有匹配的资产':'일치하는 자산 없음',
+      '同类最低':'동종 최저가','全类最低':'전체 최저가','到手':'수령액','一键填入最低价':'최저가 입력'
+    },
+    ru: {
+      '选择资产':'Выбрать актив','连接钱包后显示可上架资产':'Подключите кошелёк, чтобы увидеть активы',
+      '加载中…':'Загрузка…','没有匹配的资产':'Нет подходящих активов',
+      '同类最低':'Мин. по типу','全类最低':'Мин. общий','到手':'К получению','一键填入最低价':'Подставить мин. цену'
+    }
+  };
+  Object.keys(ADD).forEach(function(l){
+    window.GAME_DICT[l] = Object.assign(window.GAME_DICT[l] || {}, ADD[l]);
+  });
+})();

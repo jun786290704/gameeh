@@ -9,7 +9,12 @@ function switchMarketTab(t){
   $('#mtab-mine').classList.toggle('hidden', t!=='mine');
   if(t==='list') loadActiveListings();
   else if(t==='mine') loadMyListings();
-  else if(t==='sell') onSellTypeChange();
+  else if(t==='sell') openSellTab();
+}
+// 上架页需要"同类在售参考价"，首次进入时顺带拉一次列表（只填缓存，不渲染）
+async function openSellTab(){
+  if(!(S.marketList||[]).length){ try{ await fetchListings(); }catch(e){} }
+  await onSellTypeChange();
 }
 async function fetchListings(){
   try{
@@ -413,38 +418,181 @@ async function cancelListingFlow(lid){
   finally{ withBusy(null,false); }
 }
 
-/* ---------- 上架 ---------- */
+/* ---------- 上架：可视化资产选择器 ---------- */
+function sellKind(){ return Number(S.sellType||0); }
+
+// 可上架资产（英雄/武器带元数据，碎片/精粹按余额过滤）
+function sellItemsOfType(t){
+  if(t===0) return (S.heroes||[]).slice().sort((a,b)=> (b.level||0)-(a.level||0) || (b.power||0)-(a.power||0))
+      .map(h=>({id:h.id, element:h.element, level:h.level, power:h.power, skin:h.skin}));
+  if(t===1) return (S.weapons||[]).slice().sort((a,b)=> (b.bonusBp||0)-(a.bonusBp||0) || (b.stars||0)-(a.stars||0))
+      .map(w=>({id:w.id, element:w.element, stars:w.stars, bonusBp:w.bonusBp}));
+  const bal = t===2 ? (S.shardsBal||{}) : (S.essenceBal||{});
+  return mktItemIds(t).filter(id=>(bal[id]||0) > 0).map(id=>({id:id, amount:bal[id]||0}));
+}
+function sellFilteredItems(){
+  const t = sellKind();
+  let arr = sellItemsOfType(t);
+  if(t===0 || t===1){
+    if(S.sellPickEl!==null && S.sellPickEl!==undefined) arr = arr.filter(x=>x.element===S.sellPickEl);
+    if(t===0 && S.sellPickLevel!==null && S.sellPickLevel!==undefined){
+      const b = MKT_LEVEL_BANDS[S.sellPickLevel];
+      if(b) arr = arr.filter(x=>{ const lv=Number(x.level||0); return lv>=b.min && lv<=b.max; });
+    }
+    if(t===1 && S.sellPickStar) arr = arr.filter(x=>Number(x.stars)===Number(S.sellPickStar));
+  }
+  return arr;
+}
+function sellFilterBar(t){
+  const rows = [];
+  const elOn = S.sellPickEl!==null && S.sellPickEl!==undefined;
+  let c1 = mktChip('全部', !elOn, 'setSellPickEl(null)');
+  c1 += ELEMENT_ORDER.map(el=>{
+    const e = ELEMENTS[el];
+    return mktChip(`${e.icon} ${e.name}`, S.sellPickEl===el, `setSellPickEl(${el})`, {color:e.color, soft:e.soft, border:e.border});
+  }).join('');
+  rows.push(mktChipRow('元素','fa-shapes',c1));
+  if(t===0){
+    const on = S.sellPickLevel!==null && S.sellPickLevel!==undefined;
+    let c = mktChip('全部', !on, 'setSellPickLevel(null)');
+    c += MKT_LEVEL_BANDS.map(b=>mktChip(b.label, S.sellPickLevel===b.id, `setSellPickLevel(${b.id})`)).join('');
+    rows.push(mktChipRow('等级','fa-signal',c));
+  } else if(t===1){
+    const on = S.sellPickStar!==null && S.sellPickStar!==undefined;
+    let c = mktChip('全部', !on, 'setSellPickStar(null)');
+    c += [1,2,3,4,5].map(s=>mktChip('★'.repeat(s), S.sellPickStar===s, `setSellPickStar(${s})`)).join('');
+    rows.push(mktChipRow('星级','fa-star',c));
+  }
+  return `<div class="mkt-filter-panel sell-filter">${rows.join('')}</div>`;
+}
+// 单个可上架资产小卡
+function sellPickCardHtml(it, t, on){
+  let accent = '#fbbf24', thumb = '', meta = '';
+  if(t===0){
+    const e = ELEMENTS[it.element] || ELEMENTS[0];
+    accent = e.color;
+    thumb = `<img class="sell-pick-img is-hero" src="${heroImg(it.element, it.id, it.skin)}" alt="">`;
+    meta = `${elBadge(it.element)} <span class="mkt-tag"><i class="fa-solid fa-signal"></i>Lv.${it.level||'?'}</span>`;
+  } else if(t===1){
+    const sc = {1:'#94a3b8',2:'#60a5fa',3:'#a78bfa',4:'#f97316',5:'#fbbf24'};
+    accent = sc[it.stars] || '#fbbf24';
+    thumb = `<img class="sell-pick-img" src="${weaponImg(it.element, it.stars)}" alt="">`;
+    meta = `${elBadge(it.element)} <span class="mkt-tag star">${'★'.repeat(it.stars||0)}</span> <span class="mkt-tag plus">+${bpToPct(it.bonusBp)}</span>`;
+  } else {
+    accent = t===2 ? '#a78bfa' : '#34d399';
+    thumb = `<div class="sell-pick-ico" style="color:${accent}"><i class="fa-solid ${t===2?'fa-gem':'fa-flask'}"></i><em>${ROMAN[Math.min(it.id,5)]||it.id}</em></div>`;
+    meta = `<span class="mkt-tag ${t===2?'shard':'essence'}">${mktItemKindName(t)} <i class="roman">${ROMAN[it.id]||it.id}</i></span><span class="mkt-tag">×${it.amount}</span>`;
+  }
+  return `<button type="button" class="sell-pick-card${on?' on':''}" style="--accent:${accent}" onclick="pickSellAsset(${it.id})" title="#${it.id}">
+    <span class="sell-pick-check"><i class="fa-solid fa-check"></i></span>
+    <span class="sell-pick-thumb">${thumb}</span>
+    <span class="sell-pick-id">#${it.id}</span>
+    <span class="sell-pick-meta">${meta}</span>
+  </button>`;
+}
+async function renderSellPicker(){
+  const box = $('#sellPicker'); if(!box) return;
+  const sel = $('#sellTokenSel');
+  const hint = $('#sellHoldHint');
+  const amtWrap = $('#sellAmountWrap');
+  const t = sellKind();
+  if(!S.account){
+    box.innerHTML = `<div class="sell-empty"><i class="fa-solid fa-wallet"></i>连接钱包后显示可上架资产</div>`;
+    if(hint) hint.textContent = '';
+    if(sel) sel.innerHTML = '';
+    if(amtWrap) amtWrap.classList.add('hidden');
+    return;
+  }
+  box.innerHTML = `<div class="sell-empty"><span class="spinner inline-block mr-2"></span>加载中…</div>`;
+  try{
+    if(t===0 && !(S.heroes||[]).length) S.heroes = await fetchHeroes();
+    if(t===1 && !(S.weapons||[]).length) S.weapons = await fetchWeapons();
+  }catch(e){}
+
+  const all = sellItemsOfType(t);
+  const items = sellFilteredItems();
+  let cur = S.sellPickId;
+  if(cur===null || cur===undefined || !items.some(x=>x.id===cur)) cur = items.length ? items[0].id : null;
+  S.sellPickId = cur;
+
+  if(sel) sel.innerHTML = items.map(x=>`<option value="${x.id}">#${x.id}</option>`).join('');
+  if(sel && cur!==null) sel.value = String(cur);
+  if(hint) hint.textContent = all.length ? `可上架 ${all.length}` : '';
+
+  if(amtWrap) amtWrap.classList.toggle('hidden', !(t===2 || t===3));
+  box.innerHTML = (t===0 || t===1 ? sellFilterBar(t) : '')
+    + (items.length
+        ? `<div class="sell-pick-grid">${items.map(x=>sellPickCardHtml(x,t,x.id===cur)).join('')}</div>`
+        : `<div class="sell-empty">没有匹配的资产</div>`);
+  if(t===2 || t===3) onSellAssetChange();
+  updateSellHelper();
+}
+function pickSellAsset(id){
+  const sel = $('#sellTokenSel');
+  S.sellPickId = Number(id);
+  if(sel) sel.value = String(id);
+  onSellAssetChange();
+  renderSellPicker();
+}
+function setSellPickEl(v){ S.sellPickEl = mktToggleVal(S.sellPickEl, v); S.sellPickId = null; renderSellPicker(); }
+function setSellPickStar(v){ S.sellPickStar = mktToggleVal(S.sellPickStar, v); S.sellPickId = null; renderSellPicker(); }
+function setSellPickLevel(v){ S.sellPickLevel = mktToggleVal(S.sellPickLevel, v); S.sellPickId = null; renderSellPicker(); }
+
+// 同类在售参考价
+function sellRefOf(t, item){
+  const list = (S.marketList||[]).filter(l=>l.active && l.nftType===t);
+  if(!list.length) return null;
+  let same = list;
+  if(t===1 && item && item.stars) same = list.filter(l=>Number(l.stars||0)===Number(item.stars));
+  if(t===0 && item && item.level) same = list.filter(l=>mktLevelBandOf(l)===mktLevelBandOf(item));
+  if(!same.length) same = list;
+  const minOf = arr => arr.reduce((m,l)=> (m===null||l.price<m) ? l.price : m, null);
+  return {min: minOf(list), minSame: minOf(same), sameCount: same.length, count: list.length};
+}
+function updateSellHelper(){
+  const box = $('#sellHelper'); if(!box) return;
+  const t = sellKind();
+  const feeBp = Number(S.marketFeeBp||0);
+  const inp = $('#sellPriceInp');
+  const priceStr = inp ? String(inp.value||'').trim() : '';
+  const price = priceStr ? Number(priceStr) : 0;
+  const net = price > 0 ? price * (1 - feeBp/10000) : 0;
+  const item = (S.sellItems||[]).concat(sellItemsOfType(t)).find(x=>x.id===S.sellPickId) || null;
+  const ref = sellRefOf(t, item);
+  const fmtP = wei => fmtUnits(wei, S.tokenDecimals, 2) + ' ' + S.tokenSymbol;
+  box.innerHTML = `<div class="sell-helper">
+    <div class="sell-helper-item"><span>同类最低</span><b>${ref ? fmtP(ref.minSame) : '--'}</b></div>
+    <div class="sell-helper-item"><span>全类最低</span><b>${ref ? fmtP(ref.min) : '--'}</b></div>
+    <div class="sell-helper-item"><span>手续费</span><b>${(feeBp/100).toFixed(2)}%</b></div>
+    <div class="sell-helper-item is-net"><span>到手</span><b>${price>0 ? net.toLocaleString('zh-CN',{maximumFractionDigits:2}) + ' ' + S.tokenSymbol : '--'}</b></div>
+    ${ref ? `<button type="button" class="mkt-chip sell-ref-btn" onclick="fillSellRefPrice('${ref.minSame}')"><i class="fa-solid fa-wand-magic-sparkles"></i>一键填入最低价</button>` : ''}
+  </div>`;
+}
+function fillSellRefPrice(wei){
+  const inp = $('#sellPriceInp'); if(!inp) return;
+  try{ inp.value = ethers.formatUnits(BigInt(wei), S.tokenDecimals); }catch(e){}
+  updateSellHelper();
+}
+
+/* ---------- 上架流程 ---------- */
 async function onSellTypeChange(){
   S.sellType = $('#sellTypeSel').value;
   S.sellApproved = false;
+  S.sellPickId = null; S.sellPickEl = null; S.sellPickStar = null; S.sellPickLevel = null;
   const btn = $('#approveNftBtn'); if(btn) btn.innerHTML = '<i class="fa-solid fa-shield-halved mr-1"></i>授权 NFT';
-  $('#listItemBtn').disabled = true;
-  const sel = $('#sellTokenSel');
-  const amtWrap = $('#sellAmountWrap');
-  if(!S.account){ sel.innerHTML = '<option value="">连接钱包后</option>'; amtWrap.classList.add('hidden'); return; }
-  try{
-    if(S.sellType==='0' || S.sellType==='1'){
-      amtWrap.classList.add('hidden');
-      const nft = mustC(S.sellType==='0'?'characters':'weapons');
-      const ids = await nft.tokensOfOwner(S.account);
-      if(!ids.length){ sel.innerHTML = '<option value="">暂无可用资产</option>'; return; }
-      sel.innerHTML = ids.map(id=>`<option value="${id}">#${id}</option>`).join('');
-    } else {
-      amtWrap.classList.remove('hidden');
-      const idRange = S.sellType==='2' ? [1,2,3,4,5] : [1,2,3,4];
-      const bals = S.sellType==='2' ? S.shardsBal : S.essenceBal;
-      sel.innerHTML = idRange.map(id=>`<option value="${id}">${S.sellType==='2'?'碎片':'精粹'} ${id}（持有 ${bals[id]||0}）</option>`).join('');
-      onSellAssetChange();
-    }
-  }catch(e){ sel.innerHTML = '<option value="">读取失败</option>'; }
+  const listBtn = $('#listItemBtn'); if(listBtn) listBtn.disabled = true;
+  await renderSellPicker();
+  updateSellHelper();
 }
 function onSellAssetChange(){
-  if(S.sellType==='2' || S.sellType==='3'){
+  const t = sellKind();
+  if(t===2 || t===3){
     const id = Number($('#sellTokenSel').value);
-    const bals = S.sellType==='2' ? S.shardsBal : S.essenceBal;
+    const bals = t===2 ? S.shardsBal : S.essenceBal;
     const inp = $('#sellAmountInp');
-    if(inp) inp.max = bals[id]||0;
+    if(inp) inp.max = (bals||{})[id]||0;
   }
+  updateSellHelper();
 }
 async function approveNftForSell(){
   if(!needWallet()) return;
@@ -472,8 +620,11 @@ async function listItemFlow(){
     const price = ethers.parseUnits(priceStr, S.tokenDecimals);
     await (await mustC('marketplace').connect(S.signer).listItem(Number(S.sellType), tokenId, amount, price)).wait();
     toast('上架成功！','success');
-    $('#sellPriceInp').value = '';
-    await loadActiveListings(); await loadMyListings(); onSellTypeChange();
+    const pin = $('#sellPriceInp'); if(pin) pin.value = '';
+    // 资产已转入市场合约持有，强制刷新持有列表（不能沿用缓存）
+    try{ cacheInvalidate('heroes_'+S.account); cacheInvalidate('weapons_'+S.account); }catch(e){}
+    S.heroes = []; S.weapons = [];
+    await loadActiveListings(); await loadMyListings(); await onSellTypeChange();
   }catch(e){ toast(errMsg(e),'error'); }
   finally{ withBusy('listItemBtn', false); }
 }
