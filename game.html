@@ -16,7 +16,7 @@ if(!window.ethers){
 }
 </script>
 <link rel="stylesheet" href="./vendor/fontawesome/css/all.min.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'" data-page-node-id="NPgwuOLXe4TdfMaSjqEADx">
-<link rel="stylesheet" href="./styles.css?v=20260928" data-page-node-id="qA8u54aM0w37ERSMbqRxOS">
+<link rel="stylesheet" href="./styles.css?v=20261009m" data-page-node-id="qA8u54aM0w37ERSMbqRxOS">
 <style>
   /* 被地图页以 iframe 嵌入时，隐藏自己的页头与页签栏，避免出现两套导航。
      放在 game.html 自己身上做（而不是让父页面跨域改写 DOM），
@@ -325,7 +325,12 @@ if(!window.ethers){
         <div class="text-[13px] text-muted" data-page-node-id="BFdcsc6IKNMe4IbC9wuL1C">手续费 <b id="feeTxt" class="text-gold" data-page-node-id="hZdgIepNQOxtZ6zYdZGrlW">--</b></div>
         <button onclick="loadActiveListings()" class="btn btn-sm btn-ghost" data-page-node-id="r6SduTIW5OoOExrRgZwOc1"><i class="fa-solid fa-rotate" data-page-node-id="RShyffg7FqsWpiIrSCEvuO"></i>刷新</button>
       </div>
-      <div id="marketFilterBar" class="flex items-center gap-2 flex-wrap mb-3" data-page-node-id="DITNHiL5mx0O08c7T0A6vz"></div>
+      <div id="marketStatsBar" class="mkt-stats-row mb-3"></div>
+      <div id="marketTypeBar" class="flex items-center gap-2 flex-wrap mb-2"></div>
+      <div class="flex items-center justify-between gap-2 flex-wrap mb-3">
+        <div id="marketElBar" class="flex items-center gap-2 flex-wrap"></div>
+        <div id="marketSortBar" class="flex items-center gap-2 shrink-0"></div>
+      </div>
       <div id="listGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3" data-page-node-id="spxgdPKMGV1eLCsF8E6JsU"></div>
       <div id="listPager" class="flex items-center justify-center gap-3 mt-4" data-page-node-id="OMWzUM4C6TCNNu5qDVIKLZ"></div>
     </div>
@@ -355,6 +360,13 @@ if(!window.ethers){
         <div class="text-[13px] text-muted" data-page-node-id="w8yxAohjYNEI46ovc0Pqz7">我的上架</div>
         <button onclick="loadMyListings()" class="btn btn-sm btn-ghost" data-page-node-id="kBUSi4aR05hbhJx24Cz7aC"><i class="fa-solid fa-rotate" data-page-node-id="QQe0cqblf0w8APRBCEBvxh"></i>刷新</button>
       </div>
+      <div id="myListStatsBar" class="mkt-stats-row mb-3"></div>
+      <div id="myListTypeBar" class="flex items-center gap-2 flex-wrap mb-2"></div>
+      <div class="flex items-center justify-between gap-2 flex-wrap mb-3">
+        <div id="myListElBar" class="flex items-center gap-2 flex-wrap"></div>
+        <div id="myListSortBar" class="flex items-center gap-2 shrink-0"></div>
+      </div>
+      <div id="myListEmpty" class="hidden text-center text-muted py-8">连接钱包后查看</div>
       <div id="myListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" data-page-node-id="yAxK5ACVIPSj2LdxNsIBim"></div>
     </div>
   </section>
@@ -415,21 +427,21 @@ if(!window.ethers){
 <div id="errBadge" class="fixed bottom-2 left-2 z-[210] hidden max-w-[60vw] text-[10px] text-red-300 bg-red-950/80 border border-red-500/40 rounded-lg px-2 py-1 break-all" data-page-node-id="GxrdODUrHleH6t9CL4adr1"></div>
 
 <!-- i18n: 多语言（最先加载，覆盖式翻译，不侵入业务 JS） -->
-<script src="./js/i18n_dict.js" defer></script>
+<script src="./js/i18n_dict.js?v=20261009m" defer></script>
 <script src="./js/i18n.js" defer></script>
 <!-- app.js 已按功能拆分为 js/*.js（顺序即依赖顺序） -->
-<script src="./js/core.js?v=20261010e" defer></script>
+<script src="./js/core.js?v=20261009m" defer></script>
 <script src="./js/utils.js?v=20261010h" defer></script>
 <script src="./js/wallet.js?v=20261010e" defer></script>
 <script src="./js/pending.js" defer></script>
 <script src="./js/approvals.js" defer></script>
-<script src="./js/ui.js" defer></script>
+<script src="./js/ui.js?v=20261009m" defer></script>
 <script src="./js/heroes.js?v=20261010e" defer></script>
 <script src="./js/weapons.js?v=20261010h" defer></script>
 <script src="./js/forge.js?v=20261010h" defer></script>
 <script src="./js/fight.js?v=20261010h" defer></script>
 <script src="./js/boss.js?v=20261010h" defer></script>
-<script src="./js/market.js?v=20261010h" defer></script>
+<script src="./js/market.js?v=20261009m" defer></script>
 <script src="./js/stats.js" defer></script>
 <script src="./js/invite.js?v=20261009a" defer></script>
 <script src="./js/gallery.js" defer></script>

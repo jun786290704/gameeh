@@ -31,95 +31,364 @@ async function fetchListings(){
     S.marketList = results.filter(x=>x!==null);
   }catch(e){ console.warn('market',e); }
 }
-function marketCardHtml(l){
-  const ic = ['fa-user-ninja','fa-khanda','fa-gem','fa-flask'][l.nftType]||'fa-box';
-  const tag = ['英雄','武器','碎片','精粹'][l.nftType]||'物品';
-  let meta;
-  if(l.nftType===1) meta = `${elBadge(l.element||0)}<span class="text-gold text-[12px] font-bold">${'★'.repeat(l.stars||0)}</span>${l.bonusBp!==undefined?`<span class="text-green-400 text-[12px]">+${bpToPct(l.bonusBp)}</span><span class="text-gold text-[12px]">奖+${rewardBonusOf(l.stars||1, l.bonusBp)}%</span>`:''}`;
-  else if(l.nftType===0) meta = `${elBadge(l.element||0)}<span class="text-[12px] text-muted">Lv.${l.level||'?'}</span>`;
-  else if(l.nftType===2) meta = `<span class="badge bg-purple-500/15 text-purple-300">碎片 ${l.tokenId} ×${l.amount}</span>`;
-  else meta = `<span class="badge bg-emerald-500/15 text-emerald-300">精粹 ${l.tokenId} ×${l.amount}</span>`;
-  return `<div class="game-card p-4 anim-fade">
-    <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
-      <span class="badge bg-[#1a2740] text-gold"><i class="fa-solid ${ic} mr-1"></i>${tag} #${l.tokenId}</span>
-      <span class="badge" style="background:#0d1526;color:#8ea0bd">#${l.lid}</span>
+
+// 计算类型分布 + 均价 + 最低价（仅用于展示）
+function recomputeMarketStats(){
+  const counts = {0:0,1:0,2:0,3:0};
+  let total = 0n, n = 0, minP = null;
+  for(const l of S.marketList){
+    if(!l.active) continue;
+    counts[l.nftType] = (counts[l.nftType]||0)+1;
+    total += l.price; n++;
+    if(minP===null || l.price < minP) minP = l.price;
+  }
+  S.marketTypeCounts = counts;
+  S.marketAvgPrice = n ? total/BigInt(n) : 0n;
+  S.marketMinPrice = minP;
+}
+
+/* ---------- 卡片 ---------- */
+// 类型强调色 / 稀有度色
+function mktAccentOf(l){
+  const M = MKT_TYPE_META[l.nftType] || {color:'#fbbf24', soft:'rgba(251,191,36,.14)'};
+  if(l.nftType===1){
+    const sc = {1:'#94a3b8',2:'#60a5fa',3:'#a78bfa',4:'#f97316',5:'#fbbf24'};
+    const c = sc[l.stars] || '#fbbf24';
+    return {color:c, soft:`color-mix(in srgb, ${c} 22%, transparent)`};
+  }
+  if(l.nftType===0){
+    const e = ELEMENTS[l.element] || ELEMENTS[0];
+    return {color:e.color, soft:e.soft};
+  }
+  return {color:M.color, soft:M.soft};
+}
+// 缩略图区（武器图 / 英雄立绘 / 碎片·精粹图标）
+function mktThumbHtml(l){
+  if(l.nftType===1) return `<img class="mkt-thumb-img" src="${weaponImg(l.element||0, l.stars||1)}" alt="">`;
+  if(l.nftType===0) return `<img class="mkt-thumb-img is-hero" src="${heroImg(l.element||0, l.tokenId)}" alt="">`;
+  if(l.nftType===2) return `<div class="mkt-thumb-ico" style="color:#a78bfa"><i class="fa-solid fa-gem"></i><em>${ROMAN[Math.min(5,l.tokenId)]||l.tokenId}</em></div>`;
+  return `<div class="mkt-thumb-ico" style="color:#34d399"><i class="fa-solid fa-flask"></i><em>${ROMAN[Math.min(4,l.tokenId)]||l.tokenId}</em></div>`;
+}
+// 属性徽章行
+function mktMetaHtml(l){
+  const out = [];
+  if(l.nftType===0){
+    out.push(elBadge(l.element||0));
+    out.push(`<span class="mkt-tag"><i class="fa-solid fa-signal"></i>Lv.${l.level||'?'}</span>`);
+  } else if(l.nftType===1){
+    out.push(elBadge(l.element||0));
+    out.push(`<span class="mkt-tag star">${'★'.repeat(l.stars||0)}</span>`);
+    if(l.bonusBp!==undefined){
+      out.push(`<span class="mkt-tag plus">+${bpToPct(l.bonusBp)}</span>`);
+      const rb = rewardBonusOf(l.stars||1, l.bonusBp);
+      if(rb>0) out.push(`<span class="mkt-tag reward"><i class="fa-solid fa-coins"></i>+${rb}%</span>`);
+    }
+  } else {
+    const kind = l.nftType===2 ? '碎片' : '精粹';
+    const cls = l.nftType===2 ? 'shard' : 'essence';
+    out.push(`<span class="mkt-tag ${cls}">${kind} <i class="roman">${ROMAN[Math.min(l.tokenId,5)]||l.tokenId}</i></span>`);
+    out.push(`<span class="mkt-tag">×${l.amount}</span>`);
+  }
+  return out.join('');
+}
+// 统一卡片（列表页 / 我的上架）
+function mktCardHtml(l, opts){
+  opts = opts || {};
+  const mine = !!opts.mine;
+  const M = MKT_TYPE_META[l.nftType] || {name:'物品', icon:'fa-box'};
+  const ac = mktAccentOf(l);
+  const unitPrice = (l.amount>1) ? l.price/BigInt(l.amount) : null;
+  const status = mine
+    ? (l.active ? `<span class="mkt-badge on">在售</span>` : `<span class="mkt-badge">已售</span>`)
+    : '';
+  const btn = mine
+    ? (l.active ? `<button onclick="cancelListingFlow(${l.lid})" class="btn btn-sm btn-danger mkt-buy"><i class="fa-solid fa-ban"></i>取消</button>` : '')
+    : `<button onclick="buyFlow(${l.lid})" class="btn btn-gold mkt-buy"><i class="fa-solid fa-cart-shopping"></i>购买</button>`;
+
+  return `<div class="game-card mkt-card ${mine&&!l.active?'dim':''} anim-fade" style="--accent:${ac.color};--accent-soft:${ac.soft}">
+    <div class="mkt-card-bar"></div>
+    <div class="mkt-thumb" style="border-color:${ac.color}">
+      ${mktThumbHtml(l)}
+      <span class="mkt-thumb-tag" style="color:${ac.color};border-color:${ac.color}"><i class="fa-solid ${M.icon}"></i>${M.name} #${l.tokenId}</span>
+      ${status}
     </div>
-    ${l.nftType===1?`<div class="w-24 h-24 rounded-xl overflow-hidden mb-2 mx-auto" style="border:1px solid ${(ELEMENTS[l.element]||ELEMENTS[0]).border}55;background:#0d1526;"><img src="${weaponImg(l.element,l.stars)}" alt="武器#${l.tokenId}" class="w-full h-full object-cover"></div>`:''}
-    <div class="flex items-center gap-2 mb-1.5 flex-wrap">${meta}</div>
-    <div class="text-[12px] text-muted mb-2">卖家 ${shortAddr(l.seller)}</div>
-    <div class="text-xl font-black text-gold num-mono mb-3">${fmtUnits(l.price,S.tokenDecimals,2)} ${S.tokenSymbol}</div>
-    <button onclick="buyFlow(${l.lid})" class="btn btn-gold w-full"><i class="fa-solid fa-cart-shopping"></i>购买</button>
+    <div class="mkt-body">
+      <div class="mkt-meta">${mktMetaHtml(l)}</div>
+      <div class="mkt-seller"><i class="fa-solid fa-user"></i>${shortAddr(l.seller)} <span class="mkt-lid">#${l.lid}</span></div>
+      <div class="mkt-foot">
+        <div class="mkt-price-wrap">
+          <div class="mkt-price">${fmtUnits(l.price,S.tokenDecimals,2)}<span>${S.tokenSymbol}</span></div>
+          ${unitPrice!==null?`<div class="mkt-unit">${fmtUnits(unitPrice,S.tokenDecimals,2)} / 件</div>`:''}
+        </div>
+        ${btn}
+      </div>
+    </div>
   </div>`;
 }
-function buildMarketGroups(items, cardFn){
-  cardFn = cardFn || marketCardHtml;
-  if(!items.length) return `<div class="col-span-full text-center text-muted py-10">暂无在售物品</div>`;
-  const byEl = {};
-  for(const l of items){
-    let e;
-    if(l.nftType===0 || l.nftType===1) e = (l.element===null||l.element===undefined)?-1:l.element;
-    else e = l.nftType===2 ? -2 : -3;
-    (byEl[e]=byEl[e]||[]).push(l);
-  }
+// 兼容旧调用名
+function marketCardHtml(l){ return mktCardHtml(l); }
+function mineCardHtml(l){ return mktCardHtml(l, {mine:true}); }
+
+/* ---------- 分组行 ---------- */
+function mktMinPrice(arr){
+  let m = null;
+  for(const l of arr){ if(m===null || l.price<m) m = l.price; }
+  return m;
+}
+function mktHeadHtml(o){
+  const cls = o.level===1 ? 'mkt-gh' : (o.level===2 ? 'mkt-gh mkt-gh-2' : 'mkt-gh mkt-gh-3');
+  const ico = o.fa
+    ? `<i class="fa-solid ${o.icon}"></i>`
+    : `<span class="mkt-gh-emoji">${o.icon}</span>`;
+  return `<button type="button" onclick="${o.toggle}" class="${cls}" style="--gh:${o.color};--gh-soft:${o.soft};--gh-border:${o.border}">
+    <span class="mkt-gh-ico">${ico}</span>
+    <span class="mkt-gh-name">${o.name}</span>
+    ${o.roman?`<i class="roman">${o.roman}</i>`:''}
+    <span class="mkt-gh-n">${o.count}</span>
+    ${o.price!==null&&o.price!==undefined?`<span class="mkt-gh-price"><i class="fa-solid fa-arrow-down"></i>${fmtUnits(o.price,S.tokenDecimals,0)}</span>`:''}
+    ${o.extra||''}
+    <span class="mkt-gh-caret">${groupCaret(o.open)}</span>
+  </button>`;
+}
+
+// 生成"分组行"序列：[{kind:'head'|'cards', ...}]，便于按组切页
+// opts: {filterType, typePrefix, emptyText}
+function buildMarketRows(items, opts){
+  opts = opts || {};
+  const t = opts.filterType;
+  const typePrefix = opts.typePrefix || 'mt';
+  const sortKind = typePrefix==='mymt' ? 'mine' : 'list';
+  if(!items.length) return [];
+
   const elNames = {...ELEMENTS};
   elNames[-1] = {name:'未知属性',icon:'❓',color:'#94a3b8',border:'#475569',soft:'rgba(148,163,184,.1)'};
-  elNames[-2] = {name:'碎片',icon:'💎',color:'#a78bfa',border:'rgba(167,139,250,.5)',soft:'rgba(167,139,250,.1)'};
-  elNames[-3] = {name:'精粹',icon:'🧪',color:'#34d399',border:'rgba(52,211,153,.5)',soft:'rgba(52,211,153,.1)'};
-  let html = '';
-  for(const el of ELEMENT_ORDER.concat([-2,-3,-1])){
-    const arr = byEl[el]; if(!arr) continue;
-    const elKey = mGroupKey(el);
-    const elOpen = !isCollapsed(elKey);
-    const info = elNames[el];
-    html += `<button type="button" onclick="toggleMarketGroup(${el})" class="col-span-full w-full flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-xl border text-left transition-all active:scale-[.99]" style="border-color:${info.border};background:linear-gradient(90deg,${info.soft},transparent 72%)">
-      <span class="text-lg leading-none">${info.icon}</span>
-      <span class="font-black text-[14px]" style="color:${info.color}">${info.name}</span>
-      <span class="badge bg-[#0d1526] text-muted num-mono">${arr.length} 件</span>
-      <span class="ml-auto">${groupCaret(elOpen)}</span>
-    </button>`;
-    if(!elOpen) continue;
-    if(el>=0){
-      const heroes = arr.filter(l=>l.nftType===0);
-      if(heroes.length){
-        const subKey = mGroupKey(el,'hero');
-        const subOpen = !isCollapsed(subKey);
-        html += subGroupHeader(subKey, 'fa-user-ninja', '英雄', heroes.length, `toggleMarketGroup(${el},'hero')`, subOpen);
-        if(subOpen) html += heroes.map(cardFn).join('');
-      }
-      for(let s=1;s<=5;s++){
-        const sub = arr.filter(l=>l.nftType===1 && l.stars===s);
-        if(!sub.length) continue;
-        const subKey = mGroupKey(el,s);
-        const subOpen = !isCollapsed(subKey);
-        html += subGroupHeader(subKey, 'fa-khanda', `${'★'.repeat(s)} ${starLabel(s)}`, sub.length, `toggleMarketGroup(${el},${s})`, subOpen);
-        if(subOpen) html += sub.map(cardFn).join('');
+
+  const rows = [];
+  const typeSeq = (t===null||t===undefined) ? MKT_TYPE_ORDER : [t];
+  const toggleTypeFn = typePrefix==='mymt' ? 'toggleMyListTypeGroup' : 'toggleMarketTypeGroup';
+
+  for(const tt of typeSeq){
+    const groupItems = items.filter(l=>l.nftType===tt);
+    if(!groupItems.length) continue;
+    const meta = MKT_TYPE_META[tt];
+    const typeKey = typePrefix+'-'+tt;
+    const typeOpen = !isCollapsed(typeKey);
+    const totalPrice = groupItems.reduce((s,l)=>s+l.price, 0n);
+
+    rows.push({kind:'head', level:1, html: mktHeadHtml({
+      level:1, fa:true, icon:meta.icon, name:meta.name, color:meta.color, soft:meta.soft, border:meta.border,
+      count:groupItems.length, price:mktMinPrice(groupItems),
+      extra:`<span class="mkt-gh-sum">Σ ${fmtUnits(totalPrice,S.tokenDecimals,0)} ${S.tokenSymbol}</span>`,
+      toggle:`${toggleTypeFn}(${tt})`, open:typeOpen
+    })});
+    if(!typeOpen) continue;
+
+    if(tt===0 || tt===1){
+      // 元素层
+      for(const el of ELEMENT_ORDER.concat([-1])){
+        const arr = groupItems.filter(l=>((l.element===null||l.element===undefined)?-1:l.element)===el);
+        if(!arr.length) continue;
+        const info = elNames[el];
+        const elKey = mktElKey(tt, el);
+        const elOpen = !isCollapsed(elKey);
+        rows.push({kind:'head', level:2, html: mktHeadHtml({
+          level:2, fa:false, icon:info.icon, name:`${info.name}属性`, color:info.color, soft:info.soft, border:info.border,
+          count:arr.length, price:mktMinPrice(arr),
+          toggle:`toggleMarketEl('${sortKind}',${tt},${el})`, open:elOpen
+        })});
+        if(!elOpen) continue;
+
+        if(tt===0){
+          // 英雄：等级段
+          for(const band of MKT_LEVEL_BANDS){
+            const sub = arr.filter(l=>mktLevelBandOf(l)===band.id);
+            if(!sub.length) continue;
+            const bKey = mktSubKey(tt, el, band.id);
+            const bOpen = !isCollapsed(bKey);
+            rows.push({kind:'head', level:3, html: mktHeadHtml({
+              level:3, fa:true, icon:'fa-signal', name:band.label, color:info.color, soft:info.soft, border:info.border,
+              count:sub.length, price:mktMinPrice(sub),
+              toggle:`toggleMarketSub('${sortKind}',${tt},${el},${band.id})`, open:bOpen
+            })});
+            if(bOpen) rows.push({kind:'cards', cards:sub});
+          }
+        } else {
+          // 武器：星级（高星在前）
+          for(const s of mktStarIds()){
+            const sub = arr.filter(l=>Number(l.stars||0)===s);
+            if(!sub.length) continue;
+            const sKey = mktSubKey(tt, el, s);
+            const sOpen = !isCollapsed(sKey);
+            rows.push({kind:'head', level:3, html: mktHeadHtml({
+              level:3, fa:true, icon:'fa-star', name:'★'.repeat(s), color:info.color, soft:info.soft, border:info.border,
+              count:sub.length, price:mktMinPrice(sub),
+              toggle:`toggleMarketSub('${sortKind}',${tt},${el},${s})`, open:sOpen
+            })});
+            if(sOpen) rows.push({kind:'cards', cards:sub});
+          }
+          const noStar = arr.filter(l=>!l.stars);
+          if(noStar.length) rows.push({kind:'cards', cards:noStar});
+        }
       }
     } else {
-      html += arr.map(cardFn).join('');
+      // 碎片 / 精粹：按编号
+      const ids = mktItemIds(tt);
+      for(const id of ids){
+        const sub = groupItems.filter(l=>Number(l.tokenId)===id);
+        if(!sub.length) continue;
+        const k = mktSubKey(tt, null, id);
+        const open = !isCollapsed(k);
+        rows.push({kind:'head', level:3, html: mktHeadHtml({
+          level:3, fa:false, icon:'#'+id, name:mktItemKindName(tt), roman:ROMAN[id]||String(id),
+          color:meta.color, soft:meta.soft, border:meta.border,
+          count:sub.length, price:mktMinPrice(sub),
+          toggle:`toggleMarketSub('${sortKind}',${tt},null,${id})`, open:open
+        })});
+        if(open) rows.push({kind:'cards', cards:sub});
+      }
+      const rest = groupItems.filter(l=>ids.indexOf(Number(l.tokenId))<0);
+      if(rest.length) rows.push({kind:'cards', cards:rest});
     }
   }
-  return html;
+  return rows;
 }
+
+// 按"不切断分组"的方式分页
+function paginateRows(rows, size, page){
+  const pages = [];
+  let cur = [], curCount = 0, pending = [];
+  const flushHeads = ()=>{ if(pending.length){ for(const h of pending) cur.push(h); pending = []; } };
+  for(const r of rows){
+    if(r.kind !== 'cards'){ pending.push(r); continue; }
+    const len = r.cards.length;
+    if(curCount > 0 && curCount + len > size){
+      pages.push(cur); cur = []; curCount = 0;
+    }
+    flushHeads();
+    cur.push(r); curCount += len;
+    if(curCount >= size){ pages.push(cur); cur = []; curCount = 0; }
+  }
+  if(pending.length){
+    if(curCount > 0){ pages.push(cur); cur = []; curCount = 0; }
+    flushHeads();
+  }
+  if(cur.length) pages.push(cur);
+  const P = pages.filter(p=>p.length);
+  const total = Math.max(1, P.length);
+  const idx = Math.min(Math.max(Number(page)||0, 0), total-1);
+  return {rows:P[idx]||[], total, idx};
+}
+function renderMarketRows(rows, cardFn){
+  cardFn = cardFn || marketCardHtml;
+  return rows.map(r=> r.kind==='cards' ? r.cards.map(cardFn).join('') : r.html).join('');
+}
+// 向后兼容：旧签名（内部改为"整表渲染，不分页"）
+function buildMarketGroups(items, cardFn, opts){
+  opts = opts || {};
+  const rows = buildMarketRows(items, opts);
+  if(!rows.length) return `<div class="col-span-full text-center text-muted py-10">${opts.emptyText||'暂无在售物品'}</div>`;
+  return renderMarketRows(rows, cardFn);
+}
+
+/* ---------- 筛选条渲染 ---------- */
+function mktFilterState(prefix){
+  return prefix==='mine'
+    ? {type:S.myListFilterType, el:S.myListFilterEl, level:S.myListFilterLevel, star:S.myListFilterStar, item:S.myListFilterItem, band:S.myListFilterBand}
+    : {type:S.marketFilterType, el:S.marketFilterEl, level:S.marketFilterLevel, star:S.marketFilterStar, item:S.marketFilterItem, band:S.marketFilterBand};
+}
+function mktRenderBars(prefix, counts, total, avg, tiers){
+  const st = mktFilterState(prefix);
+  const N = mktSetNames(prefix);
+  const ids = prefix==='mine'
+    ? {stats:'#myListStatsBar', type:'#myListTypeBar', panel:'#myListElBar', sort:'#myListSortBar'}
+    : {stats:'#marketStatsBar', type:'#marketTypeBar', panel:'#marketElBar', sort:'#marketSortBar'};
+  const stats = $(ids.stats);
+  if(stats) stats.innerHTML = mktStatsRow(counts, total, avg, S.tokenSymbol, S.tokenDecimals, st.type, N.type, prefix==='mine'?S.myListMinPrice:S.marketMinPrice);
+  const typeBar = $(ids.type);
+  if(typeBar) typeBar.innerHTML = `<span class="mkt-flabel"><i class="fa-solid fa-layer-group"></i><span>分类</span></span>` + mktTypeChips(st.type, N.type, counts, total);
+  const panel = $(ids.panel);
+  if(panel){
+    panel.className = 'mkt-filter-panel';
+    panel.innerHTML = mktFilterPanelHTML(st, prefix, tiers)
+      + (mktHasAnyFilter(st) ? `<div class="mkt-fgroup"><button type="button" class="mkt-clear" onclick="${N.clear}()"><i class="fa-solid fa-xmark"></i>清除筛选</button></div>` : '');
+  }
+  const sortBar = $(ids.sort);
+  if(sortBar) sortBar.innerHTML = `<span class="mkt-flabel"><i class="fa-solid fa-arrow-down-wide-short"></i></span>` + mktSortSelect(prefix==='mine'?S.myListSort:S.marketSort, prefix==='mine'?'setMyListSort':'setMarketSort');
+}
+
+/* ---------- 在售列表 ---------- */
 async function loadActiveListings(){
   await loadMarketFee();
   const grid = $('#listGrid');
   grid.innerHTML = skeletonBlock(4, 'h-36');
   await fetchListings();
-  const active = S.marketList.filter(l=>l.active);
-  const fe = S.marketFilterEl;
-  const filtered = (fe===null||fe===undefined) ? active : active.filter(l=>l.element===fe);
-  const size = S.marketPageSize;
-  const pages = Math.max(1, Math.ceil(filtered.length/size));
-  S.marketPage = Math.min(S.marketPage, pages-1);
-  const pageItems = filtered.slice(S.marketPage*size, S.marketPage*size+size);
-  const bar = $('#marketFilterBar');
-  if(bar) bar.innerHTML = `<span class="text-[12px] text-muted shrink-0">分类：</span>` + filterChips(S.marketFilterEl, 'setMarketFilter');
-  grid.innerHTML = filtered.length ? buildMarketGroups(pageItems) : `<div class="col-span-full text-center text-muted py-10">暂无在售物品</div>`;
-  $('#listPager').innerHTML = `<button onclick="marketPage(-1)" class="btn btn-sm btn-ghost" ${S.marketPage<=0?'disabled':''}><i class="fa-solid fa-chevron-left"></i>上一页</button>
-    <span class="text-[13px] text-muted num-mono">${S.marketPage+1} / ${pages}</span>
-    <button onclick="marketPage(1)" class="btn btn-sm btn-ghost" ${S.marketPage>=pages-1?'disabled':''}>下一页<i class="fa-solid fa-chevron-right"></i></button>`;
+  recomputeMarketStats();
+
+  const all = S.marketList.filter(l=>l.active);
+  S.marketPriceTiers = mktPriceTiersOf(all);
+  const st = mktFilterState('list');
+  const filtered = applyMarketFilters(all, st, S.marketPriceTiers);
+  const sorted = sortMarketList(filtered, S.marketSort);
+
+  const rows = buildMarketRows(sorted, {filterType:S.marketFilterType, typePrefix:'mt'});
+  const pg = paginateRows(rows, S.marketPageSize, S.marketPage);
+  S.marketPage = pg.idx;
+
+  mktRenderBars('list', S.marketTypeCounts, all.length, S.marketAvgPrice, S.marketPriceTiers);
+
+  grid.innerHTML = pg.rows.length
+    ? renderMarketRows(pg.rows, marketCardHtml)
+    : `<div class="col-span-full text-center text-muted py-10">暂无在售物品</div>`;
+  const pager = $('#listPager');
+  if(pager) pager.innerHTML = `<button onclick="marketPage(-1)" class="btn btn-sm btn-ghost" ${pg.idx<=0?'disabled':''}><i class="fa-solid fa-chevron-left"></i>上一页</button>
+    <span class="text-[13px] text-muted num-mono">${sorted.length} 件 · ${pg.idx+1}/${pg.total}</span>
+    <button onclick="marketPage(1)" class="btn btn-sm btn-ghost" ${pg.idx>=pg.total-1?'disabled':''}>下一页<i class="fa-solid fa-chevron-right"></i></button>`;
 }
 function marketPage(d){ S.marketPage += d; loadActiveListings(); }
+
+/* ---------- 我的上架 ---------- */
+async function loadMyListings(){
+  const grid = $('#myListGrid'); if(!grid) return;
+  const empty = $('#myListEmpty');
+  grid.innerHTML = skeletonBlock(3, 'h-32');
+  if(!S.account){
+    grid.innerHTML = '';
+    if(empty) empty.classList.remove('hidden');
+    return;
+  }
+  if(empty) empty.classList.add('hidden');
+  await fetchListings();
+  const mineAll = S.marketList.filter(l=>String(l.seller).toLowerCase()===S.account.toLowerCase());
+
+  const counts = {0:0,1:0,2:0,3:0};
+  let totalValue = 0n, minPrice = null;
+  for(const l of mineAll){
+    counts[l.nftType] = (counts[l.nftType]||0)+1;
+    if(l.active){
+      totalValue += l.price;
+      if(minPrice===null || l.price<minPrice) minPrice = l.price;
+    }
+  }
+  S.myListTypeCounts = counts;
+  S.myListTotalValue = totalValue;
+  S.myListMinPrice = minPrice;
+  S.myListPriceTiers = mktPriceTiersOf(mineAll.filter(l=>l.active));
+
+  const st = mktFilterState('mine');
+  const filtered = applyMarketFilters(mineAll, st, S.myListPriceTiers);
+  const sorted = sortMarketList(filtered, S.myListSort);
+  const rows = buildMarketRows(sorted, {filterType:S.myListFilterType, typePrefix:'mymt'});
+  const pg = paginateRows(rows, S.marketPageSize, S.myListPage||0);
+  S.myListPage = pg.idx;
+
+  mktRenderBars('mine', counts, mineAll.length, 0n, S.myListPriceTiers);
+
+  grid.innerHTML = pg.rows.length
+    ? renderMarketRows(pg.rows, mineCardHtml)
+    : '<div class="col-span-full text-center text-muted py-8">没有匹配的上架记录</div>';
+}
+
+/* ---------- 交易操作 ---------- */
 async function buyFlow(lid){
   if(!needWallet()) return;
   try{
@@ -133,6 +402,18 @@ async function buyFlow(lid){
   }catch(e){ toast(errMsg(e),'error'); }
   finally{ withBusy(null,false); }
 }
+async function cancelListingFlow(lid){
+  if(!needWallet()) return;
+  try{
+    withBusy(null,true);
+    await (await mustC('marketplace').connect(S.signer).cancelListing(lid)).wait();
+    toast('已取消','success');
+    await loadMyListings(); await loadActiveListings();
+  }catch(e){ toast(errMsg(e),'error'); }
+  finally{ withBusy(null,false); }
+}
+
+/* ---------- 上架 ---------- */
 async function onSellTypeChange(){
   S.sellType = $('#sellTypeSel').value;
   S.sellApproved = false;
@@ -195,35 +476,4 @@ async function listItemFlow(){
     await loadActiveListings(); await loadMyListings(); onSellTypeChange();
   }catch(e){ toast(errMsg(e),'error'); }
   finally{ withBusy('listItemBtn', false); }
-}
-async function loadMyListings(){
-  const grid = $('#myListGrid'); if(!grid) return;
-  grid.innerHTML = skeletonBlock(3, 'h-32');
-  if(!S.account){ grid.innerHTML = '<div class="col-span-full text-center text-muted py-8">连接钱包后查看</div>'; return; }
-  await fetchListings();
-  const mine = S.marketList.filter(l=>String(l.seller).toLowerCase()===S.account.toLowerCase());
-  grid.innerHTML = mine.length ? buildMarketGroups(mine, mineCardHtml) : '<div class="col-span-full text-center text-muted py-8">还没有上架记录</div>';
-}
-function mineCardHtml(l){
-  const ic = ['fa-user-ninja','fa-khanda','fa-gem','fa-flask'][l.nftType]||'fa-box';
-  const tag = ['英雄','武器','碎片','精粹'][l.nftType]||'物品';
-  return `<div class="game-card p-4 ${l.active?'':'dim'} anim-fade">
-    <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
-      <span class="font-bold text-[13px]"><i class="fa-solid ${ic} mr-1"></i>${tag} #${l.tokenId}${l.amount>1?' ×'+l.amount:''}</span>
-      <span class="badge ${l.active?'bg-green-500/15 text-green-400':'bg-[#1a2740] text-muted'}">${l.active?'在售':'已售'}</span>
-    </div>
-    <div class="text-[12px] text-muted mb-2">单号 #${l.lid}</div>
-    <div class="text-lg font-black text-gold num-mono mb-3">${fmtUnits(l.price,S.tokenDecimals,2)} ${S.tokenSymbol}</div>
-    ${l.active?`<button onclick="cancelListingFlow(${l.lid})" class="btn btn-sm btn-danger w-full"><i class="fa-solid fa-ban"></i>取消上架</button>`:''}
-  </div>`;
-}
-async function cancelListingFlow(lid){
-  if(!needWallet()) return;
-  try{
-    withBusy(null,true);
-    await (await mustC('marketplace').connect(S.signer).cancelListing(lid)).wait();
-    toast('已取消','success');
-    await loadMyListings(); await loadActiveListings();
-  }catch(e){ toast(errMsg(e),'error'); }
-  finally{ withBusy(null,false); }
 }

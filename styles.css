@@ -98,6 +98,99 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 #modalRoot .mbody{width:min(94vw,520px);max-height:84vh;overflow-y:auto;border-radius:20px;animation:popIn .35s cubic-bezier(.22,1,.36,1) both;}
 .market-tab{padding:.5rem 1rem;border-radius:10px;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;border:1px solid transparent;}
 .market-tab.active{background:rgba(251,191,36,.12);color:var(--gold);border-color:rgba(251,191,36,.35);}
+
+/* ============ 市场 v2：汇总条 / 类型芯片 / 卡片 ============ */
+.mkt-stats-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:stretch;}
+.mkt-stat-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .85rem;border-radius:12px;border:1px solid #24304a;background:#0d1526;transition:transform .15s,border-color .15s,background .15s;cursor:pointer;min-height:44px;}
+.mkt-stat-chip:active{transform:scale(.97);}
+.mkt-stat-chip:not(.pointer-events-none):hover{border-color:rgba(251,191,36,.45);}
+.mkt-stats-row>div.mkt-stat-chip{cursor:default;}
+.mkt-type-chip{white-space:nowrap;}
+.mkt-sort-select{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23fbbf24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .6rem center;}
+.mkt-card{position:relative;}
+.mkt-card-bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px;opacity:.85;z-index:2;}
+.mkt-card:hover .mkt-card-bar{opacity:1;width:5px;}
+
+/* ===================== 市场分类升级 ===================== */
+/* 筛选面板（每行一个维度） */
+.mkt-filter-panel{display:flex;flex-direction:column;gap:.4rem;width:100%;}
+.mkt-fgroup{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;min-height:34px;}
+.mkt-flabel{display:inline-flex;align-items:center;gap:.3rem;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;white-space:nowrap;}
+.mkt-flabel i{opacity:.75;font-size:10px;}
+.mkt-fchips{display:inline-flex;align-items:center;gap:.3rem;flex-wrap:wrap;flex:1;min-width:0;}
+.mkt-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .6rem;border-radius:10px;border:1px solid #24304a;background:#0d1526;color:#8ea0bd;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;min-height:32px;font-family:inherit;}
+.mkt-chip:hover{border-color:rgba(251,191,36,.45);color:#e8eefc;}
+.mkt-chip.on{color:#fbbf24;border-color:rgba(251,191,36,.6);background:rgba(251,191,36,.12);}
+.mkt-chip:active{transform:scale(.96);}
+.mkt-chip-n{font-style:normal;font-size:10px;font-weight:700;padding:.05rem .28rem;border-radius:6px;background:rgba(255,255,255,.08);color:inherit;opacity:.9;}
+.mkt-chip .roman{font-style:normal;color:#fbbf24;}
+.mkt-clear{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:10px;border:1px dashed rgba(239,68,68,.5);background:rgba(239,68,68,.08);color:#f87171;font-size:12px;font-weight:700;cursor:pointer;min-height:32px;font-family:inherit;}
+.mkt-clear:hover{background:rgba(239,68,68,.16);}
+#marketElBar,#myListElBar{flex:1 1 100%;}
+#marketSortBar,#myListSortBar{flex:1 1 100%;justify-content:flex-end;}
+#marketSortBar select,#myListSortBar select{width:auto;min-width:148px;flex:0 0 auto;}
+
+/* 顶部汇总 */
+.mkt-stat-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .7rem;border-radius:12px;border:1px solid #24304a;background:#0d1526;color:#8ea0bd;cursor:pointer;transition:all .15s;min-height:40px;font-family:inherit;}
+.mkt-stat-chip:hover{border-color:rgba(251,191,36,.45);}
+.mkt-stat-chip.on{color:#fbbf24;border-color:rgba(251,191,36,.55);background:rgba(251,191,36,.12);}
+.mkt-stat-chip.is-info{cursor:default;color:#e8eefc;}
+.mkt-stat-chip.is-info:hover{border-color:#24304a;}
+.mkt-stat-chip i{font-size:11px;opacity:.85;}
+.mkt-stat-k{font-size:11px;opacity:.75;}
+.mkt-stat-v{font-size:14px;font-weight:800;font-family:var(--font-mono,ui-monospace,monospace);}
+
+/* 三级分组头 */
+.mkt-gh{grid-column:1/-1;display:flex;align-items:center;gap:.5rem;width:100%;padding:.55rem .7rem;border-radius:12px;border:1px solid var(--gh-border);background:linear-gradient(90deg,var(--gh-soft),transparent 70%);cursor:pointer;text-align:left;transition:all .15s;min-height:44px;font-family:inherit;}
+.mkt-gh:hover{border-color:var(--gh);}
+.mkt-gh:active{transform:scale(.995);}
+.mkt-gh-2{padding:.45rem .7rem;min-height:40px;}
+.mkt-gh-3{padding:.35rem .6rem;min-height:36px;border-radius:10px;background:linear-gradient(90deg,var(--gh-soft),transparent 55%);}
+.mkt-gh-ico{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:var(--gh-soft);color:var(--gh);font-size:12px;flex:none;}
+.mkt-gh-2 .mkt-gh-ico{width:22px;height:22px;font-size:11px;}
+.mkt-gh-3 .mkt-gh-ico{width:20px;height:20px;font-size:10px;border-radius:6px;}
+.mkt-gh-emoji{font-size:13px;line-height:1;}
+.mkt-gh-name{font-weight:800;font-size:14px;color:var(--gh);}
+.mkt-gh-2 .mkt-gh-name{font-size:13px;}
+.mkt-gh-3 .mkt-gh-name{font-size:12px;}
+.mkt-gh .roman{font-style:normal;font-weight:800;color:var(--gh);font-size:13px;}
+.mkt-gh-3 .roman{font-size:11px;}
+.mkt-gh-n{font-size:11px;font-weight:700;padding:.1rem .4rem;border-radius:999px;background:rgba(255,255,255,.07);color:#cbd6ea;}
+.mkt-gh-price{display:inline-flex;align-items:center;gap:.25rem;font-size:11px;font-weight:700;color:#fbbf24;font-family:var(--font-mono,monospace);}
+.mkt-gh-price i{font-size:9px;opacity:.8;}
+.mkt-gh-sum{font-size:11px;color:var(--muted);font-family:var(--font-mono,monospace);}
+.mkt-gh-caret{margin-left:auto;color:var(--gh);opacity:.8;}
+
+/* 卡片 */
+.mkt-card{display:flex;flex-direction:column;overflow:hidden;transition:transform .18s,border-color .18s;}
+.mkt-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+.mkt-thumb{position:relative;margin:.6rem .6rem 0;height:104px;border-radius:12px;border:1px solid;background:radial-gradient(circle at 50% 30%,var(--accent-soft),rgba(13,21,38,.9));display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.mkt-thumb-img{width:100%;height:100%;object-fit:cover;}
+.mkt-thumb-img.is-hero{object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.55));}
+.mkt-thumb-ico{display:flex;flex-direction:column;align-items:center;gap:.15rem;font-size:30px;}
+.mkt-thumb-ico em{font-style:normal;font-size:12px;font-weight:800;color:#cbd6ea;}
+.mkt-thumb-tag{position:absolute;left:.4rem;top:.4rem;display:inline-flex;align-items:center;gap:.25rem;font-size:10px;font-weight:800;padding:.12rem .4rem;border-radius:999px;border:1px solid;background:rgba(7,12,24,.82);}
+.mkt-badge{position:absolute;right:.4rem;top:.4rem;font-size:10px;font-weight:800;padding:.12rem .4rem;border-radius:999px;background:#1a2740;color:#8ea0bd;}
+.mkt-badge.on{background:rgba(34,197,94,.16);color:#4ade80;}
+.mkt-body{padding:.6rem .7rem .7rem;display:flex;flex-direction:column;gap:.45rem;}
+.mkt-meta{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;}
+.mkt-tag{display:inline-flex;align-items:center;gap:.25rem;font-size:11px;font-weight:700;padding:.12rem .4rem;border-radius:8px;background:#141f33;color:#a9b8d0;border:1px solid #24304a;}
+.mkt-tag i{font-size:9px;opacity:.85;}
+.mkt-tag.star{color:#fbbf24;border-color:rgba(251,191,36,.4);}
+.mkt-tag.plus{color:#4ade80;border-color:rgba(74,222,128,.35);}
+.mkt-tag.reward{color:#fbbf24;}
+.mkt-tag.shard{color:#c4b5fd;border-color:rgba(167,139,250,.4);}
+.mkt-tag.essence{color:#6ee7b7;border-color:rgba(52,211,153,.4);}
+.mkt-tag .roman{font-style:normal;}
+.mkt-seller{display:flex;align-items:center;gap:.3rem;font-size:11px;color:var(--muted);}
+.mkt-seller i{font-size:9px;opacity:.7;}
+.mkt-lid{margin-left:auto;font-family:var(--font-mono,monospace);opacity:.7;}
+.mkt-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:.5rem;}
+.mkt-price-wrap{min-width:0;}
+.mkt-price{font-size:19px;font-weight:900;color:#fbbf24;font-family:var(--font-mono,monospace);line-height:1.15;}
+.mkt-price span{font-size:11px;font-weight:500;color:var(--muted);margin-left:.2rem;}
+.mkt-unit{font-size:10px;color:var(--muted);font-family:var(--font-mono,monospace);}
+.mkt-buy{padding:.35rem .7rem;font-size:12px;min-height:34px;border-radius:10px;white-space:nowrap;}
 .bg-grid{background-image:linear-gradient(rgba(148,163,184,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.045) 1px,transparent 1px);background-size:34px 34px;}
 .text-gold{color:var(--gold);}.text-muted{color:var(--muted);}.num-mono{font-variant-numeric:tabular-nums;}
 /* 以下三个在 game.html / js 里被用到，但既非 tailwind 内置、也未在别处定义，此处补齐 */
