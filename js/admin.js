@@ -361,7 +361,7 @@ async function secOverview(el, isOwner){
   const [fee, mode, heroCost, bossRounds] = await Promise.all([
     readCall('marketplace', c=>c.marketFeeBp()).catch(()=>null),
     readCall('vault', c=>c.rewardMode()).catch(()=>null),
-    readCall('oracle', c=>c.getHeroCost()).catch(()=>null),
+    heroCostOf().catch(()=>null),
     readCall('boss', c=>c.roundCount()).catch(()=>null)
   ]);
   const chips = [
@@ -396,13 +396,16 @@ async function secOverview(el, isOwner){
 /* ============ 价格预言机 ============ */
 async function secOracle(el, isOwner){
   const o = adminCt('oracle');
-  const [st, heroU, wpnU, w10U, w100U, twap, fb, minLiq, stale, last] = await Promise.all([
+  const [st, heroU, wpnU, w10U, w100U, twap, fb, minLiq, stale, last, hCost, wCost, w10Cost, w100Cost] = await Promise.all([
     o.getPriceStatus().catch(()=>null),
     o.heroPriceUSD().catch(()=>null), o.weaponPriceUSD().catch(()=>null),
     o.weapon10PriceUSD().catch(()=>null), o.weapon100PriceUSD().catch(()=>null),
     o.twapPrice().catch(()=>null), o.fallbackTokenPrice().catch(()=>null),
     o.minLiquidityUSD().catch(()=>null), o.stalePriceThreshold().catch(()=>null),
-    o.lastPrice().catch(()=>null)
+    o.lastPrice().catch(()=>null),
+    // 实际成本：无池时预言机返回 0，回退到合约固定值
+    heroCostOf().catch(()=>null), forgeCostOf(1).catch(()=>null),
+    forgeCostOf(10).catch(()=>null), forgeCostOf(100).catch(()=>null)
   ]);
   const usd = x => x!==null ? '$'+fmtUnits(x,18,2) : '-';
   const usd6 = x => x!==null ? '$'+fmtUnits(x,18,6) : '-';
@@ -415,9 +418,9 @@ async function secOracle(el, isOwner){
       aRow('保底价', usd6(fb)) + aRow('流动性 USD', st?fmtUnits(st.liquidityUSD,18,0):'-') +
       aRow('价格有效性', st?(st.valid?'<span class="text-green-400">有效</span>':'<span class="text-red-400">失效</span>'):'-'),
       isOwner ? aAct('更新 TWAP', 'adminDoUpdateTwap()', 'fa-rotate') : '')
-    + aCard('实际成本（按当前报价换算）','fa-calculator',
-      aRow('召唤英雄', st?tok(st.heroCost):'-') + aRow('锻造武器', st?tok(st.weaponCost):'-') +
-      aRow('10连锻造', st?tok(st.weapon10Cost):'-') + aRow('100连锻造', st?tok(st.weapon100Cost):'-'))
+    + aCard('实际成本（无池时用合约固定 ELEM 价）','fa-calculator',
+      aRow('召唤英雄', tok(hCost)) + aRow('锻造武器', tok(wCost)) +
+      aRow('10连锻造', tok(w10Cost)) + aRow('100连锻造', tok(w100Cost)))
     + aCard('风控阈值','fa-shield',
       aRow('最低流动性门槛', minLiq!==null?fmtUnits(minLiq,18,0):'-') + aRow('报价过期阈值（秒）', stale!==null?String(stale):'-'),
       isOwner ? aAct('修改阈值', 'adminOpenSetThresholds()', 'fa-pen') + aAct('修改保底价', 'adminOpenSetFallback()', 'fa-pen') : '')

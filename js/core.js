@@ -64,6 +64,10 @@ const ABIs = {
     "function downlineCount(address) view returns (uint256)",
     "function downlineAt(address,uint256) view returns (address)",
     "function downlineEarned(address) view returns (uint256)",
+    // V15：首铸赠武器（weapons 合约地址 + 赠送事件）
+    "function weapons() view returns (address)",
+    "function setWeapons(address)",
+    "event GiftWeapon(address indexed player,uint256 indexed weaponId,uint8 stars,uint32 bonusBp)",
     "event AccountReferrerBound(address indexed player,address indexed referrer)",
     "event ReferrerRequiredSet(bool required)",
     "event PendingReferrerSet(address indexed player,address indexed referrer)",
@@ -76,6 +80,9 @@ const ABIs = {
     "function balanceOf(address) view returns (uint256)",
     "function isApprovedForAll(address,address) view returns (bool)",
     "function setApprovalForAll(address,bool)",
+    // V15：Characters 作为武器 minter 的授权状态
+    "function minters(address) view returns (bool)",
+    "function setMinter(address,bool)",
     "event Transfer(address indexed from,address indexed to,uint256 indexed tokenId)"
   ],
   gameToken: ["function balanceOf(address) view returns (uint256)","function allowance(address,address) view returns (uint256)","function approve(address,uint256) returns (bool)","function decimals() view returns (uint8)","function symbol() view returns (string)"],
@@ -83,6 +90,7 @@ const ABIs = {
   essence: ["function balanceOf(address,uint256) view returns (uint256)","function balanceOfBatch(address[],uint256[]) view returns (uint256[])","function setApprovalForAll(address,bool)","function isApprovedForAll(address,address) view returns (bool)","event TransferSingle(address indexed operator,address indexed from,address indexed to,uint256 id,uint256 value)"],
   forgeShop: [
     "function owner() view returns (address)",
+    "function DEFAULT_FORGE_COST() view returns (uint256)","function DEFAULT_FORGE10_COST() view returns (uint256)","function DEFAULT_FORGE100_COST() view returns (uint256)",
     "function commitForgeWeapon(bytes32) returns (uint256)",
     "function commitForgeWeapon10(bytes32) returns (uint256)",
     "function commitForgeWeapon100(bytes32) returns (uint256)",
@@ -144,7 +152,8 @@ const ABIs = {
     "event PlayerLocked(address indexed player,string reason)",
     "event TokensBurnedForFight(address indexed player,uint256 amount,uint256 price)",
     "event RewardAccumulated(address indexed player,uint256 amount)",
-    "event ReferralReward(address indexed referrer,uint256 indexed heroId,uint256 amount)"
+    "event ReferralReward(address indexed referrer,uint256 indexed heroId,uint256 amount)",
+    "function DEFAULT_HERO_COST() view returns (uint256)"
   ],
   viewHelper: [
     "function previewFight(address,uint256,uint256,uint256) view returns (uint32 eff,uint16 chance)",

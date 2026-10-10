@@ -21,6 +21,18 @@ function rewardBonusOf(stars, bonusBp){
   if(s <= 2) return 0;
   return (Math.floor(b/4)/100); // bp/4 → 百分比（保留至多 0.25% 粒度）
 }
+/* 铸造成本：预言机在「无真实市场价格（未上池）」时返回 0，
+   此时需回退到合约内的固定 ELEM 价（与链上 _heroCost / _forgeCost 的兜底分支一致）。 */
+async function heroCostOf(){
+  try{ const c = await readCall('oracle', x=>x.getHeroCost()); if(c && BigInt(c) > 0n) return BigInt(c); }catch(e){}
+  try{ return BigInt(await readCall('v3', x=>x.DEFAULT_HERO_COST())); }catch(e){ return 0n; }
+}
+async function forgeCostOf(count){
+  const m = { 1:['getWeaponCost','DEFAULT_FORGE_COST'], 10:['getWeapon10Cost','DEFAULT_FORGE10_COST'], 100:['getWeapon100Cost','DEFAULT_FORGE100_COST'] };
+  const pair = m[count] || m[1];
+  try{ const c = await readCall('oracle', x=>x[pair[0]]()); if(c && BigInt(c) > 0n) return BigInt(c); }catch(e){}
+  try{ return BigInt(await readCall('forgeShop', x=>x[pair[1]]())); }catch(e){ return 0n; }
+}
 function shortAddr(a){ if(!a) return '--'; a = String(a); return a.slice(0,6)+'…'+a.slice(-4); }
 function heroImg(el, id, skin){
   const e = Number(el)%5;
@@ -45,12 +57,12 @@ const ELEMENTS = {
 };
 const ELEMENT_ORDER = [0,1,2,3,4];
 /* 体力兜底值：仅当链上 getStaminaInfo 读取失败时使用（正常路径一律用链上值）。
-   链上实际配置（V14 数值放大方案）：上限 120 点、每 180 秒（3 分钟）恢复 1 点、每场战斗消耗 10 点；
-   节奏与「12 点 / 30 分钟 / 1 点」完全等价（每 30 分钟攒够一场，回满 6 小时）。
+   链上实际配置（V16 经济版）：上限 120 点、每 300 秒（5 分钟）恢复 1 点、每场战斗消耗 10 点；
+   节奏：每 50 分钟攒够一场（回满 10 小时），配合星级奖励上限将回本周期控制在 7~30 天。
    ⚠ 合约源码里的常量默认值（MAX_STAMINA=5 / STAMINA_REGEN=5 minutes）与链上不一致，
      判断实际值请调 staminaRegen() / maxStamina() / staminaCost()。 */
 const STAMINA_MAX_FALLBACK = 120;
-const STAMINA_REGEN_FALLBACK = 180;
+const STAMINA_REGEN_FALLBACK = 300;
 const STAMINA_COST_FALLBACK = 10;
 const STAR_LABELS = {1:'一星',2:'二星',3:'三星',4:'四星',5:'五星'};
 function starLabel(n){ return STAR_LABELS[n]||(n+'星'); }

@@ -4,9 +4,10 @@
 async function renderForge(){
   try{
     const o = mustC('oracle');
-    try{ const wc = await o.getWeaponCost(); $('#forgeCostTxt').textContent=fmtUnits(wc,S.tokenDecimals,2); }catch(e){}
-    try{ const w10 = await o.getWeapon10Cost(); $('#forge10CostTxt').textContent=fmtUnits(w10,S.tokenDecimals,2); }catch(e){}
-    try{ const w100 = await o.getWeapon100Cost(); $('#forge100CostTxt').textContent=fmtUnits(w100,S.tokenDecimals,2); }catch(e){}
+    // 无池时预言机返回 0，需回退到合约固定武器价（forgeCostOf 内已处理）
+    try{ $('#forgeCostTxt').textContent = fmtUnits(await forgeCostOf(1), S.tokenDecimals, 2); }catch(e){}
+    try{ $('#forge10CostTxt').textContent = fmtUnits(await forgeCostOf(10), S.tokenDecimals, 2); }catch(e){}
+    try{ $('#forge100CostTxt').textContent = fmtUnits(await forgeCostOf(100), S.tokenDecimals, 2); }catch(e){}
   }catch(e){}
 }
 async function forgeFlow(count){
@@ -15,13 +16,13 @@ async function forgeFlow(count){
     const fs = mustC('forgeShop');
     let cfg;
     if(count===1){
-      cfg = { cost: await readCall('oracle', c=>c.getWeaponCost()), busyId:'forge1Btn',
+      cfg = { cost: await forgeCostOf(1), busyId:'forge1Btn',
               commit: h=>fs.commitForgeWeapon(h), staticCall: h=>fs.commitForgeWeapon.staticCall(h) };
     } else if(count===10){
-      cfg = { cost: await readCall('oracle', c=>c.getWeapon10Cost()), busyId:'forge10Btn',
+      cfg = { cost: await forgeCostOf(10), busyId:'forge10Btn',
               commit: h=>fs.commitForgeWeapon10(h), staticCall: h=>fs.commitForgeWeapon10.staticCall(h) };
     } else {
-      cfg = { cost: await readCall('oracle', c=>c.getWeapon100Cost()), busyId:'forge100Btn',
+      cfg = { cost: await forgeCostOf(100), busyId:'forge100Btn',
               commit: h=>fs.commitForgeWeapon100(h), staticCall: h=>fs.commitForgeWeapon100.staticCall(h) };
     }
     const deposit = cfg.cost * 500n / 10000n;

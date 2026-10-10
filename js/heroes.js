@@ -77,7 +77,7 @@ async function mintHeroFlow(){
     // 铸造限额：动态读取 maxMintPerAddr（0=不限制）
     try{ S.mintLimit = Number(await ch.maxMintPerAddr() || 4); }catch(e){ S.mintLimit = 4; }
     if(S.mintLimit > 0 && Number(minted) >= S.mintLimit){ toast('铸造数量已达上限('+S.mintLimit+')','warn'); return; }
-    const cost = await readCall('oracle', c=>c.getHeroCost());
+    const cost = await heroCostOf();   // 无池时回退到固定英雄价（链上 DEFAULT_HERO_COST）
     const tb = await readCall('gameToken', cc=>cc.balanceOf(S.account));
     if(BigInt(tb) < BigInt(cost)){ toast('代币余额不足','warn'); return; }
     const tokenAmount = BigInt(cost) * 105n / 100n; // commit 保证金5% + reveal 全款
@@ -289,9 +289,12 @@ async function renderSummonResult(rec){
   const user = S.account ? S.account.toLowerCase() : null;
   const cif = new ethers.Interface(ABIs.characters);
   let hid = null;
+  // V15：首铸赠武器事件（同一笔 reveal 交易内，Characters._mint 触发 GiftWeapon）
+  let gift = null;
   for(const log of rec.logs){
     try{ const d = cif.parseLog(log);
       if(d && d.name==='Transfer' && d.args.from===ethers.ZeroAddress && user && (d.args.to||'').toLowerCase()===user){ hid = d.args.tokenId.toString(); }
+      if(d && d.name==='GiftWeapon' && user && (d.args.player||'').toLowerCase()===user){ gift = { wid:d.args.weaponId.toString(), stars:Number(d.args.stars), bp:Number(d.args.bonusBp) }; }
     }catch(e){}
   }
   const el = $('summonOverlay');
@@ -311,12 +314,16 @@ async function renderSummonResult(rec){
       const refLine = (ref && ref !== ethers.ZeroAddress)
         ? `<div class="summon-hero-ref"><i class="fa-solid fa-user-plus"></i>推荐人 <b>${shortAddr(ref)}</b></div>`
         : `<div class="summon-hero-ref muted">可绑定推荐人，该地址战斗胜利其获 10% 奖励</div>`;
+      const giftLine = gift
+        ? `<div class="summon-hero-ref" style="color:#fbbf24;border-color:rgba(251,191,36,.4);"><i class="fa-solid fa-gift"></i>首铸礼包：<b>${gift.stars} 星武器</b>已到账${gift.bp>0?`（附赠加成 ${gift.bp/1000}×）`:''}</div>`
+        : '';
       html = done(`
         <div class="summon-result-card">
           <div class="summon-hero-avatar" style="border-color:${e.border};background:radial-gradient(circle at 50% 32%, ${e.soft}, #0d1526 78%);box-shadow:0 0 46px -6px ${e.color}88;"><img src="${heroImg(eln, hid)}" alt="${e.name}系英雄" class="w-full h-full object-cover"></div>
           <div class="summon-result-title">召唤成功！</div>
           <div class="summon-hero-name" style="color:${e.color};">${e.name}系英雄 #${hid}</div>
           <div class="summon-hero-stats"><span>⚔ 战力 ${fmt(Number(pw),0)}</span><span>Lv.${h.level}</span>${elBadge(eln)}</div>
+          ${giftLine}
           ${refLine}
           <button onclick="hideSummonOverlay();switchTab('heroes')" class="btn btn-gold w-full mt-1">查看我的英雄</button>
         </div>`);
