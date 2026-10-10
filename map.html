@@ -5048,12 +5048,20 @@ function openPlay(tab, name, icon){
     try{
       var d = fr.contentDocument; if(!d) return;
       var hd = d.querySelector('header');  if(hd) hd.style.display = 'none';
-      var nb = d.getElementById('tabBar'); if(nb) nb.style.display = 'none';
+      /* 管理后台页签由 game.html 自行判定权限，浮层里不隐藏导航栏，避免无权限时被困住 */
+      var nb = d.getElementById('tabBar'); if(nb && tab !== 'admin') nb.style.display = 'none';
       var mn = d.getElementById('mainArea'); if(mn){ mn.style.paddingTop = '8px'; mn.style.maxWidth = '100%'; }
     }catch(err){ /* 跨域或非同源时忽略 */ }
   };
   fr.setAttribute('src', './game.html#' + (tab || ''));
 }
+/* game.html 判定无管理权限时回传，关闭浮层并提示 */
+window.addEventListener('message', function(e){
+  var d = e && e.data;
+  if(!d || d.type !== 'eh:admin-denied') return;
+  try{ closePlay(); }catch(err){}
+  try{ toast('议会塔 · 议会事务仅对管理员开放', 'warn'); }catch(err){}
+});
 function closePlay(){
   el('playOverlay').classList.remove('show');
   refreshGameData(true);

@@ -2,6 +2,8 @@
 
 /* ============ Tab ============ */
 function switchTab(tab){
+  // 管理后台仅管理员可进入（按钮默认隐藏，此处为兜底：直接改 hash / 控制台调用也进不来）
+  if(tab==='admin' && typeof canViewAdmin==='function' && !canViewAdmin()) return;
   S.tab = tab;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   document.querySelectorAll('#mainArea > section').forEach(s=>s.classList.add('hidden'));

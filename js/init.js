@@ -10,6 +10,7 @@ async function init(){
   await loadOracleConfig();
   await loadTokenInfo();
   await loadVaultMode(true);
+  await detectAdminAccess(true);
   await refreshCurrentTabAsync();
   await refreshBalances();
   if(window.ethereum){
@@ -32,6 +33,7 @@ async function init(){
     window.ethereum.on('chainChanged', async ()=>{
       toast('钱包链已切换，请重新连接','warn');
       S.signer=null; S.account=null; updateConnectUI(); warnChainMismatch();
+      await detectAdminAccess(true);
     });
     window.ethereum.on('accountsChanged', async (accs)=>{
       if(!accs || !accs.length){
@@ -39,6 +41,7 @@ async function init(){
         S.signer=null; S.account=null; updateConnectUI();
         S.pending=[]; try{ localStorage.removeItem('eh_pending'); }catch(e){}
         renderPending();
+        await detectAdminAccess(true);
         return;
       }
       try{
@@ -48,7 +51,8 @@ async function init(){
         S.pending=[]; try{ localStorage.removeItem('eh_pending'); }catch(e){}
         renderPending();
         rebuildContracts();
-        await loadTokenInfo(); await loadVaultMode(true); await refreshBalances(); await refreshCurrentTabAsync();
+        S.admin.status='idle';
+        await loadTokenInfo(); await loadVaultMode(true); await detectAdminAccess(true); await refreshBalances(); await refreshCurrentTabAsync();
         toast('账户已切换：'+shortAddr(S.account),'info');
       }catch(e){ toast('账户切换失败，请手动连接','warn'); }
     });

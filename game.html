@@ -176,7 +176,8 @@ if(!window.ethers){
   <button class="tab-btn" data-tab="invite" onclick="switchTab('invite')"><i class="fa-solid fa-user-group"></i>邀请</button>
   <button class="tab-btn" data-tab="rank" onclick="switchTab('rank')" data-page-node-id="FFcuy0Bu8ScCweiheWfVy1"><i class="fa-solid fa-ranking-star" data-page-node-id="c7OmgUTSz9R2qiYSREZqZz"></i>排行</button>
   <button class="tab-btn" data-tab="gallery" onclick="switchTab('gallery')" data-page-node-id="8stwbKBb92U2NWiyFeIIKC"><i class="fa-solid fa-book-open" data-page-node-id="zbaoSAejvmA0RN7s5k2sOw"></i>图鉴</button>
-  <button class="tab-btn" data-tab="admin" onclick="switchTab('admin')" data-page-node-id="pPvFYQzuUFtSoejMzLoPqG"><i class="fa-solid fa-shield-halved" data-page-node-id="NhCdg1Cj4kXFeCB50k1IKI"></i>管理</button>
+  <!-- 管理页签：默认隐藏，仅管理员（合约 owner / 金库 DEFAULT_ADMIN 角色）连接钱包后由 detectAdminAccess() 显示 -->
+  <button class="tab-btn hidden" style="display:none" data-tab="admin" onclick="switchTab('admin')" data-page-node-id="pPvFYQzuUFtSoejMzLoPqG"><i class="fa-solid fa-shield-halved" data-page-node-id="NhCdg1Cj4kXFeCB50k1IKI"></i>管理</button>
 </nav>
 
 <main class="max-w-7xl mx-auto px-3 sm:px-5 py-4 space-y-4" id="mainArea" data-page-node-id="kWgBM8aJBvTvUra2J6X63F">
@@ -456,10 +457,10 @@ if(!window.ethers){
 <!-- app.js 已按功能拆分为 js/*.js（顺序即依赖顺序） -->
 <script src="./js/core.js?v=20261010r" defer></script>
 <script src="./js/utils.js?v=20261010n" defer></script>
-<script src="./js/wallet.js?v=20261010r" defer></script>
+<script src="./js/wallet.js?v=20261011a" defer></script>
 <script src="./js/pending.js" defer></script>
 <script src="./js/approvals.js" defer></script>
-<script src="./js/ui.js?v=20261010i" defer></script>
+<script src="./js/ui.js?v=20261011a" defer></script>
 <script src="./js/heroes.js?v=20261010m" defer></script>
 <script src="./js/weapons.js?v=20261010h" defer></script>
 <script src="./js/forge.js?v=20261010m" defer></script>
@@ -469,9 +470,9 @@ if(!window.ethers){
 <script src="./js/stats.js?v=20261010r" defer></script>
 <script src="./js/invite.js?v=20261010r" defer></script>
 <script src="./js/gallery.js" defer></script>
-<script src="./js/admin.js?v=20261010r" defer></script>
+<script src="./js/admin.js?v=20261011a" defer></script>
 <script src="./js/admin-governance.js?v=20261006a" defer></script>
-<script src="./js/init.js?v=20261010r" defer></script>
+<script src="./js/init.js?v=20261011a" defer></script>
 <!-- 锚点直达页签：game.html#boss（来自 3D 世界地图等入口） -->
 <script>
 window.addEventListener('DOMContentLoaded', function(){

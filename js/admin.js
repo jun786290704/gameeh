@@ -293,19 +293,50 @@ function adminFormVals(n){
 }
 
 /* ============ 入口 ============ */
-async function renderAdmin(){
-  const body = $('#adminBody'); if(!body) return;
-  if(!S.account){
-    body.innerHTML = '<div class="game-card p-5 text-center max-w-lg mx-auto"><i class="fa-solid fa-wallet text-3xl text-gold block mb-2"></i><div class="font-bold mb-2">连接钱包后检测</div><button onclick="connectWallet()" class="btn btn-gold"><i class="fa-solid fa-link"></i>连接钱包</button></div>';
-    return;
-  }
-  if(S.admin.status!=='loaded' || S.admin.forAccount!==S.account){ await checkAdminAccess(); return; }
-  renderAdminBody();
+/* ---- 可见性：管理后台仅管理员可见 ---- */
+const ADMIN_PROBE_TTL = 60000;
+const _adminProbe = { account:null, ts:0, rows:null, isOwner:false };
+
+function adminTabBtn(){ return document.querySelector('#tabBar .tab-btn[data-tab="admin"]'); }
+// 是否可进入管理后台（唯一判据）
+function canViewAdmin(){ return !!(S.admin && S.admin.isOwner === true); }
+function setAdminTabVisible(v){
+  const b = adminTabBtn(); if(!b) return;
+  // 注意：styles.css 的 .tab-btn{display:inline-flex} 晚于 tailwind 加载，
+  // 单靠 .hidden 会被同名同权规则盖掉 ⇒ 必须用内联样式
+  b.classList.toggle('hidden', !v);
+  b.style.display = v ? '' : 'none';
+  b.setAttribute('aria-hidden', v ? 'false' : 'true');
 }
-async function checkAdminAccess(){
-  const body = $('#adminBody');
-  S.admin.status='checking'; S.admin.forAccount=S.account;
-  body.innerHTML = skeletonBlock(4,'h-16');
+// 按当前权限刷新按钮显隐；无权限时把已停在管理页的人送回去
+let _adminDeniedNotified = false;
+function notifyAdminDenied(){
+  if(_adminDeniedNotified) return; _adminDeniedNotified = true;
+  try{
+    // 被 3D 世界地图的玩法浮层（iframe）打开时，通知父页关闭浮层
+    if(window.parent && window.parent !== window) window.parent.postMessage({ type:'eh:admin-denied' }, '*');
+    else if(typeof toast === 'function') toast('管理后台仅对管理员开放','warn');
+  }catch(e){}
+}
+function applyAdminVisibility(){
+  const ok = canViewAdmin();
+  setAdminTabVisible(ok);
+  if(ok){
+    // 恢复 #admin 锚点直达（探测晚于页面 hash 处理，此处补一次）
+    if(String(location.hash||'')==='#admin' && S.tab!=='admin'){ try{ switchTab('admin'); }catch(e){} }
+  } else {
+    if(String(location.hash||'')==='#admin') notifyAdminDenied();
+    if(S.tab==='admin'){ try{ switchTab('heroes'); }catch(e){} }
+  }
+  return ok;
+}
+// 只查权限、不写面板（供全局初始化/切账户时静默调用）
+async function probeAdminOwnership(force){
+  const key = String(S.account||'').toLowerCase();
+  if(!force && _adminProbe.rows && _adminProbe.account===key && (Date.now()-_adminProbe.ts)<ADMIN_PROBE_TTL){
+    S.admin = {...S.admin, status:'loaded', forAccount:S.account, isOwner:_adminProbe.isOwner, rows:_adminProbe.rows};
+    return S.admin;
+  }
   const rows = await Promise.all(ADMIN_CONTRACTS.map(async cfg=>{
     const addr = addrOf(cfg.key);
     if(!addr) return {...cfg, state:'unset', owner:null, paused:null};
@@ -315,6 +346,7 @@ async function checkAdminAccess(){
       const ct = new ethers.Contract(addr, abi, getReadProvider());
       // Vault 采用 AccessControl 角色制管理（无 owner()）
       if(cfg.key === 'vault'){
+        if(!S.account) return {...cfg, state:'ok', owner:null, paused:null, roleBased:true};
         const [roleOk, paused] = await Promise.all([
           ct.hasRole(ethers.ZeroHash, S.account).catch(()=>null),
           ct.paused().catch(()=>null)
@@ -329,8 +361,44 @@ async function checkAdminAccess(){
       return {...cfg, state:'ok', owner, paused, roleBased:false};
     }catch(e){ return {...cfg, state:'err', owner:null, paused:null}; }
   }));
-  const owned = rows.filter(r=>r.owner && S.account && String(r.owner).toLowerCase()===S.account.toLowerCase());
-  S.admin = { status:'loaded', forAccount:S.account, isOwner:owned.length>0, rows, panel: S.admin.panel || 'overview' };
+  const me = String(S.account||'').toLowerCase();
+  const isOwner = !!me && rows.some(r=>r.owner && String(r.owner).toLowerCase()===me);
+  _adminProbe.account = key; _adminProbe.ts = Date.now(); _adminProbe.rows = rows; _adminProbe.isOwner = isOwner;
+  S.admin = {...S.admin, status:'loaded', forAccount:S.account, isOwner, rows};
+  return S.admin;
+}
+// 全局静默检测：决定「管理」页签是否出现（未连接钱包 → 一律隐藏）
+async function detectAdminAccess(force){
+  // 非游戏页（如 3D 世界地图 map.html，也引了 core/wallet/ui）不参与，避免无谓 RPC
+  if(!adminTabBtn() && !document.getElementById('adminBody')) return false;
+  if(!S.account){
+    _adminProbe.account = ''; _adminProbe.ts = 0; _adminProbe.rows = null; _adminProbe.isOwner = false;
+    S.admin = {...S.admin, status:'idle', forAccount:null, isOwner:false, rows:[]};
+    return applyAdminVisibility();
+  }
+  if(S.admin.status!=='loaded' || S.admin.forAccount!==S.account || force){
+    try{ await probeAdminOwnership(force); }catch(e){ S.admin = {...S.admin, isOwner:false}; }
+  }
+  return applyAdminVisibility();
+}
+
+async function renderAdmin(){
+  const body = $('#adminBody'); if(!body) return;
+  if(!S.account){
+    body.innerHTML = '<div class="game-card p-5 text-center max-w-lg mx-auto"><i class="fa-solid fa-wallet text-3xl text-gold block mb-2"></i><div class="font-bold mb-2">连接钱包后检测</div><button onclick="connectWallet()" class="btn btn-gold"><i class="fa-solid fa-link"></i>连接钱包</button></div>';
+    return;
+  }
+  if(S.admin.status!=='loaded' || S.admin.forAccount!==S.account || !canViewAdmin()){ await checkAdminAccess(); }
+  if(!canViewAdmin()){ applyAdminVisibility(); return; }
+  renderAdminBody();
+}
+async function checkAdminAccess(force){
+  const body = $('#adminBody'); if(!body) return;
+  S.admin.status='checking'; S.admin.forAccount=S.account;
+  body.innerHTML = skeletonBlock(4,'h-16');
+  await probeAdminOwnership(force);
+  applyAdminVisibility();
+  if(!canViewAdmin()){ body.innerHTML=''; return; }
   renderAdminBody();
 }
 function renderAdminBody(){
@@ -343,7 +411,7 @@ function renderAdminBody(){
     <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
       <div class="text-[12px] text-muted">当前账户：<b class="num-mono text-gold">${S.account?shortAddr(S.account):'-'}</b></div>
       <div class="flex gap-2">
-        <button class="btn btn-ghost" onclick="checkAdminAccess()"><i class="fa-solid fa-arrows-rotate mr-1"></i>重新检测</button>
+        <button class="btn btn-ghost" onclick="checkAdminAccess(true)"><i class="fa-solid fa-arrows-rotate mr-1"></i>重新检测</button>
         <button class="btn btn-ghost" onclick="renderAdminPanel()"><i class="fa-solid fa-rotate mr-1"></i>刷新</button>
       </div>
     </div>

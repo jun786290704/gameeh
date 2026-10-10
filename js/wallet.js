@@ -65,6 +65,7 @@ async function connectWallet(){
     await loadOracleConfig();
     await loadTokenInfo();
     await loadVaultMode(true);
+    await detectAdminAccess(true);
     await refreshCurrentTabAsync();
     toast(walletName+' 已连接：'+shortAddr(S.account),'success');
     setTimeout(()=>validatePending(), 500);
