@@ -835,6 +835,12 @@ async function secV3(el, isOwner){
     ch.staminaRegen().catch(()=>null), ch.maxStamina().catch(()=>null), ch.staminaCost().catch(()=>null),
     ch.maxMintPerAddr().catch(()=>null), ch.referrerRequired().catch(()=>null)
   ]);
+  // V15：首铸赠武器配置状态（Characters.weapons + Weapons.minter(Characters)）
+  let giftWeapons = null, giftMinter = null;
+  try { giftWeapons = (await ch.weapons()) || ethers.ZeroAddress; } catch(e) { giftWeapons = null; }
+  if (giftWeapons && giftWeapons !== ethers.ZeroAddress) {
+    try { giftMinter = await adminCt('weapons').minters(addrOf('characters')).catch(()=>null); } catch(e) { giftMinter = null; }
+  }
   let paceRow = '';
   if(sRegen && sMax){
     const regen = Number(sRegen), cost = Number(sCost===null?1n:sCost);
@@ -860,13 +866,20 @@ async function secV3(el, isOwner){
       : aRow('每地址铸造上限', Number(mintLimit)>0 ? String(Number(mintLimit)) + ' 个' : '不限制（0）') +
         '<div class="text-[11px] text-muted px-1 pt-1">仅限制「铸造」次数；持有数量不限，市场可自由交易。设为 0 关闭限制。</div>',
     isOwner ? aAct('设置铸造上限', 'adminOpenSetMaxMint()', 'fa-pen') + aAct('查询地址已铸造数', 'adminOpenQueryMinted()', 'fa-magnifying-glass') : '');
+  const giftCard = aCard('首铸赠武器','fa-gift',
+    giftWeapons===null
+      ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>当前链上 Characters 尚未升级到 V15（读不到 weapons()）。</div>'
+      : aRow('武器合约', giftWeapons===ethers.ZeroAddress ? '<span class="text-red-400">未配置</span>' : shortAddr(giftWeapons)) +
+        (giftWeapons!==ethers.ZeroAddress ? aRow('Weapons.minter(Characters)', giftMinter===null ? '未知' : (giftMinter ? '<span class="text-green-400">已授权</span>' : '<span class="text-red-400">未授权</span>')) : '') +
+        '<div class="text-[11px] text-muted px-1 pt-1">每个地址铸造第 1 个英雄时，自动获赠 1 把 1 星武器（bonusBp 1000~2000 伪随机）。<b>1 星武器不享受奖励加成</b> —— 奖励加成仅 3 星及以上武器享有，1~2 星恒为 ×1.00（赠送武器只提供战力，不影响战斗奖励）。武器合约未配置或调用失败时跳过赠送，不阻塞英雄铸造。</div>',
+    isOwner ? aAct('配置武器合约', 'adminOpenSetWeapons()', 'fa-wand-magic-sparkles') : '');
   const refCard = aCard('邀请系统（推荐人 10%）','fa-user-plus',
     '<div class="text-[12px] text-muted">铸造强制：<b class="num-mono">' + (refReq===null ? '未知' : (refReq ? '开启（首次铸造必须设置推荐人）' : '关闭')) + '</b>' +
     (refReq ? '<div class="text-[11px] text-muted/80 mt-0.5">玩家首次铸造前须 setPendingReferrer（推荐人须已注册邀请码）；铸造时自动绑定并固化，后续铸造复用同一推荐人。</div>' : '') +
     '<div class="text-[12px] text-muted mt-1">推荐人绑定到<b class="num-mono">玩家地址</b>（bindAccountReferrer），该地址铸造/购买的<b>所有英雄</b>战斗胜利时，推荐人额外获得奖励的 10%（金库支付，不从玩家奖励中扣）。铸造前 setPendingReferrer 会自动固化；也可铸造后手动 bindAccountReferrer 绑定（仅一次、不可改）。</div>' +
     '<div class="text-[12px] text-muted mt-1">邀请链接：玩家可注册 4~10 位短码（<b class="num-mono">registerReferrerCode</b>），链接 <b class="num-mono">?ref=短码</b> 更短；前端 resolveReferrerCode 解析回地址再绑定。未注册时用完整地址。</div>',
     isOwner ? aAct('查询地址短码', 'adminOpenQueryCode()', 'fa-tag') + aAct('查询账户推荐人', 'adminOpenQueryAccountRef()', 'fa-user') + (refReq!==null ? aAct(refReq?'关闭强制':'开启强制', refReq ? "adminToggleReferrerRequired(false)" : "adminToggleReferrerRequired(true)", refReq?'fa-toggle-off':'fa-toggle-on') : '') : '');
-  const body = staminaCard + mintCard + refCard
+  const body = staminaCard + mintCard + giftCard + refCard
     + aCard('commit 配置','fa-hourglass-half',
     aRow('过期块数', exp!==null?String(exp):'-') + aRow('每人待处理上限', maxp!==null?String(maxp):'-') + aRow('注册玩家数', pc!==null?String(pc):'-'),
     isOwner ? aAct('修改过期块数', 'adminPromptUint(\'v3\',\'setPendingExpiryBlocks\',\'过期块数（100~450）：\',{min:100,max:450})', 'fa-pen') +
@@ -1282,17 +1295,37 @@ async function adminDoSetStaminaCost(){
     await (await adminCt('characters',true).setStaminaCost(BigInt(n))).wait();
   });
 }
-/* 数值放大方案：上限 120 点 / 每 3 分钟恢复 1 点 / 每场消耗 10 点。
-   与「12 点 / 30 分钟 / 1 点」节奏完全等价（每 30 分钟攒够一场、回满 6 小时），仅放大数字与恢复粒度。 */
+/* V16 经济版：上限 120 点 / 每 5 分钟恢复 1 点 / 每场消耗 10 点。
+   节奏：每 50 分钟攒够一场、空→满 10 小时；配合星级奖励上限将回本周期控制在 7~30 天。 */
 async function adminApplyStaminaV14(){
   const ch = adminCt('characters');
   const [r, c] = await Promise.all([ch.staminaRegen().catch(()=>null), ch.staminaCost().catch(()=>null)]);
   if(r===null || c===null){ toast('链上 Characters 尚未升级到 V14（缺少 staminaCost）','warn'); return; }
-  if(!confirm('把体力改为：上限 120 点、每 3 分钟恢复 1 点、每场消耗 10 点？\n\n节奏与当前完全等价（每 30 分钟攒够一场、空→满 6 小时）。用一次原子交易同时改三项，不会出现中间态。')) return;
-  await adminExec('应用 V14 体力参数', async()=>{
+  if(!confirm('把体力改为：上限 120 点、每 5 分钟恢复 1 点、每场消耗 10 点？\n\n节奏：每 50 分钟攒够一场、空→满 10 小时（V16 经济版，回本周期 7~30 天）。用一次原子交易同时改三项，不会出现中间态。')) return;
+  await adminExec('应用体力参数', async()=>{
     const ct = adminCt('characters', true);
     // 三项一次性设置：避免「上限已变大、消耗还没变」的中间态导致产出暴增
-    await (await ct.setStaminaParams(180, 120, 10)).wait();
+    await (await ct.setStaminaParams(300, 120, 10)).wait();
+  });
+}
+
+/* ============ 首铸赠武器（V15） ============ */
+async function adminOpenSetWeapons(){
+  const ch = adminCt('characters');
+  let cur = '';
+  try { const w = await ch.weapons(); cur = (w && w !== ethers.ZeroAddress) ? w : ''; } catch(e) {}
+  adminFormModal('配置首铸赠武器合约',[
+    {label:'武器合约地址（Characters 将向此合约发放 1 星武器；留空 = 关闭赠送）', value: cur}
+  ], 'adminDoSetWeapons()');
+}
+async function adminDoSetWeapons(){
+  const v = adminFormVals(1);
+  const input = (v[0]||'').trim();
+  if(input && !/^0x[a-fA-F0-9]{40}$/.test(input)){ toast('地址格式不正确','warn'); return; }
+  const wAddr = input || ethers.ZeroAddress;
+  await adminExec('配置首铸赠武器', async()=>{
+    await (await adminCt('characters',true).setWeapons(wAddr)).wait();
+    toast('已配置。若填写了地址，还需在「关联设置」确认 Characters 已授权为武器 minter（升级脚本自动完成）。','info');
   });
 }
 
