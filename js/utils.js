@@ -21,6 +21,28 @@ function rewardBonusOf(stars, bonusBp){
   if(s <= 2) return 0;
   return (Math.floor(b/4)/100); // bp/4 → 百分比（保留至多 0.25% 粒度）
 }
+/* ============ 战斗数值（必须与合约 ElementHeroesV3 同口径）============
+   怪物「战力」缩放 = 10000 + t(t+1) × 15100，t = floor(英雄等级 / 10)。
+   ⚠ 链上 V3._monsterPowerMultBp 用的就是 15100（已对照实现字节码 0x14FDd998… 确认含 0x3afc）。
+     这里 / ElementHeroesViewHelper 曾写成 561 —— 会把怪物战力算小 27 倍，
+     导致「预估胜率」虚高（满级5★预估 95%、实际只有 70%）。
+     改这个系数必须同步合约 ElementHeroesV3._monsterPowerMultBp，反之亦然。 */
+const MONSTER_POWER_MULT_BP = 15100;
+function monsterPowerMultBp(tier){
+  const t = Number(tier) || 0;
+  return 10000 + t * (t + 1) * MONSTER_POWER_MULT_BP;
+}
+/* 怪物实际战力 = 基础战力 × 缩放（怪物战力随英雄等级同步放大，与 _doFight 一致） */
+function scaledMonsterPower(power, heroLv){
+  const t = Math.floor((Number(heroLv) || 1) / 10);
+  return Math.floor((Number(power) || 0) * monsterPowerMultBp(t) / 10000);
+}
+/* 胜率（bp）= floor(e×10000 / (e + monPower))，夹在 [1000, 9500] —— 与 _calcFight 完全一致 */
+function winChanceBp(eff, monPower){
+  const e = Number(eff) || 0;
+  const d = Math.max(1, e + (Number(monPower) || 0));
+  return Math.max(1000, Math.min(9500, Math.floor(e * 10000 / d)));
+}
 /* 铸造成本：预言机在「无真实市场价格（未上池）」时返回 0，
    此时需回退到合约内的固定 ELEM 价（与链上 _heroCost / _forgeCost 的兜底分支一致）。 */
 async function heroCostOf(){

@@ -240,11 +240,9 @@ async function autoPreviewFight(){
       else if((monEl + 1) % 5 === wEl) elMult = 7500;
       eff = Math.floor(basePower * elMult / 10000);
       if((heroEl + 1) % 5 === monEl) eff = Math.floor(eff * 110 / 100);
-      // 怪物战力随等级缩放 —— 与合约 _monsterPowerMultBp 同型（二次，bp 基准 10000）
-      const tier = Math.floor(heroLv / 10);
-      const monMult = 10000 + tier * (tier + 1) * 561;
-      monPower = Math.floor(Number(mon.power) * monMult / 10000);
-      chance = Math.max(1000, Math.min(9500, Math.floor(eff * 10000 / (eff + monPower + 1))));
+      // 怪物战力随等级缩放 + 胜率：统一走 utils 的共享函数（口径与链上 _doFight/_calcFight 一致）
+      monPower = scaledMonsterPower(mon.power, heroLv);
+      chance = winChanceBp(eff, monPower);
     } else {
       const power = await readCall('v3', cc=>cc.getFightPower(h, w));
       const mon = S.monsters.find(x=>x.id===m) || {power:0, element:0};
@@ -254,9 +252,7 @@ async function autoPreviewFight(){
       const weaponsCt = new ethers.Contract(addrOf('weapons'), ABIs.weapons, getReadProvider());
       const wpn = await weaponsCt.weapons(w);
       wEl = Number(wpn.element); monEl = randomMonsterElement;  // 用随机五行属性
-      const tier = Math.floor(heroLv / 10);
-      const monMult = 10000 + tier * (tier + 1) * 561;   // 同 _monsterPowerMultBp
-      monPower = Math.floor(Number(mon.power) * monMult / 10000);
+      monPower = scaledMonsterPower(mon.power, heroLv);
       elMult = 10000;
       if((wEl + 1) % 5 === monEl) elMult = 13000;
       else if((monEl + 1) % 5 === wEl) elMult = 7500;
@@ -265,7 +261,7 @@ async function autoPreviewFight(){
       eff = Math.floor(rawPower * elMult / 10000);
       if((heroEl + 1) % 5 === monEl) eff = Math.floor(eff * 110 / 100);
       basePower = rawPower;
-      chance = Math.max(1000, Math.min(9500, Math.floor(eff * 10000 / (eff + monPower + 1))));
+      chance = winChanceBp(eff, monPower);
     }
     const heroData = S.heroes.find(x=>x.id===h)||{element:heroEl||0,level:heroLv||1};
     const wpnData = S.weapons.find(x=>x.id===w)||{element:wEl||0,stars:1};
