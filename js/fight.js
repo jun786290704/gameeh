@@ -344,7 +344,7 @@ async function autoPreviewFight(){
         <div class="grid grid-cols-2 gap-2 text-[11px]">
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5"><span class="text-muted">基础战力</span><div class="font-bold text-gold num-mono">${fmt(basePower,0)}</div></div>
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5"><span class="text-muted">元素加成</span><div class="font-bold num-mono" style="color:${elAdvColor};">${(elMult/100).toFixed(0)}%</div></div>
-          <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">预计奖励（胜利时${starCap!==null?' · 本星上限 '+fmtUnits(starCap, estDec, 2)+' '+estSym:''}）</span><div class="font-bold text-gold num-mono">${estReward===null?'--':'+ '+fmtUnits(estReward, estDec, 2)+' '+estSym}</div></div>
+          <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">预计奖励（胜利时）</span><div class="font-bold text-gold num-mono">${estReward===null?'--':'+ '+fmtUnits(estReward, estDec, 2)+' '+estSym}</div></div>
           ${burnLine}
         </div>
       </div>`;
