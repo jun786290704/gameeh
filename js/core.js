@@ -295,7 +295,7 @@ const S = {
   heroes:[], weapons:[], monsters:[],
   mintLimit:4, // 铸造限额（maxMintPerAddr，0=不限制；链上读取后覆盖）
   shardsBal:{}, essenceBal:{}, tokenBal:0n, tokenDecimals:18, tokenSymbol:TOKEN_SYMBOL,
-  vaultReward:0n, vaultMode:0, vaultSym:TOKEN_SYMBOL, vaultDec:18,
+  vaultReward:0n, vaultMode:0, vaultSym:TOKEN_SYMBOL, vaultDec:18, vaultModeLoaded:false,
   marketList:[], marketPage:0, marketPageSize:12, marketTab:'list', marketFeeBp:200,
   marketFilterEl:null, marketFilterType:null, marketFilterLevel:null, marketFilterStar:null, marketFilterItem:null, marketFilterBand:null, marketSearch:'',
   marketSort:'default', marketTypeCounts:{0:0,1:0,2:0,3:0}, marketAvgPrice:0n, marketPriceTiers:null,

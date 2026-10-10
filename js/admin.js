@@ -881,7 +881,7 @@ async function secBoss(el, isOwner){
         aRow('BOSS 血量', fmt(Number(r.hp),0)+' / '+fmt(Number(r.maxHp),0)) +
         aRow('状态', r.dead?'<span class="text-green-400">已讨伐</span>':'<span class="text-red-400">讨伐中</span>') +
         aRow('进度', `<div class="bar h-2 w-32"><div class="bar-fill boss" style="width:${pct}%"></div></div>`) +
-        aRow('奖池', fmtUnits(BigInt(r.rewardPool)/((S.vaultMode===1)?1000000000000n:1n), (S.vaultMode===1)?6:S.tokenDecimals, 0) + (S.vaultMode===1?' USDT':(' '+S.tokenSymbol))) +
+        aRow('奖池', fmtVaultUnits(BigInt(r.rewardPool), 0)) +
         aRow('总伤害', fmt(Number(r.totalDamage),0)) +
         aRow('武器得主', r.weaponWinner?shortAddr(r.weaponWinner):'-') +
         aRow('本轮我的可领', rw!==null?fmt(Number(rw),0):'-');

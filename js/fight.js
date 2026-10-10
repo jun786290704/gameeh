@@ -39,6 +39,7 @@ async function fetchMonsters(){
   return S.monsters;
 }
 async function renderFight(){
+  await loadVaultMode();          // 确保奖励符号/精度正确（USDT 而非 EH）
   await fetchMonsters();
   const heroSel = $('#fightHeroSel'); if(!heroSel) return;
   const monsterIcons = ['👹','👺','👻','💀','🐉','🦇','🕷️','🐍','🦂','🐺'];
@@ -279,7 +280,7 @@ async function autoPreviewFight(){
     const elAdvantage = elMult > 10000 ? '克制' : elMult < 10000 ? '被克制' : '中性';
     const elAdvColor = elMult > 10000 ? '#22c55e' : elMult < 10000 ? '#ef4444' : '#8b92a5';
     /* 预计奖励（与链上 _calcReward 同口径） */
-    let estReward = null, estDec = S.tokenDecimals, estSym = S.tokenSymbol||TOKEN_SYMBOL;
+    let estReward = null, estU = vaultRewardUnit();
     try{
       const monTier = Math.floor(heroLv / 10);
       const monMult = 100 + 15 * monTier;
@@ -288,8 +289,9 @@ async function autoPreviewFight(){
       const lvBonus = 10000 + lvT * 500;
       // 奖励 = 怪物基础奖励 × 等级档位缩放(1+0.15×tier) × 武器星级乘数 × 英雄等级乘数
       // 已移除星级奖励上限(cap)：星级只做乘数、不再封顶，与链上 _calcReward 保持一致
+      // 结果与链上 _calcReward 同一个量级（18 位小数）：EH 模式为代币数量，USDT 模式即 USDT 数量
+      // （BSC-USD decimals=18，不再像旧代码那样再除 1e12，否则会把金额显示成 0.00）
       estReward = BigInt(monData.reward||0) * BigInt(monMult) * 10000000000000000n / 100n * BigInt(starBonus) / 10000n * BigInt(lvBonus) / 10000n;
-      if(S.vaultMode === 1){ estDec = 6; estSym = 'USDT'; estReward = estReward / 1000000000000n; }
     }catch(e){ estReward = null; }
     /* 本次战斗销毁（按代币价格阶梯，转账到黑洞） */
     let burnAmt = 0n;
@@ -344,7 +346,7 @@ async function autoPreviewFight(){
         <div class="grid grid-cols-2 gap-2 text-[11px]">
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5"><span class="text-muted">基础战力</span><div class="font-bold text-gold num-mono">${fmt(basePower,0)}</div></div>
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5"><span class="text-muted">元素加成</span><div class="font-bold num-mono" style="color:${elAdvColor};">${(elMult/100).toFixed(0)}%</div></div>
-          <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">预计奖励（胜利时）</span><div class="font-bold text-gold num-mono">${estReward===null?'--':'+ '+fmtUnits(estReward, estDec, 2)+' '+estSym}</div></div>
+          <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">预计奖励（胜利时）</span><div class="font-bold text-gold num-mono">${estReward===null?'--':'+ '+fmtUnits(estReward, estU.dec, 2)+' '+estU.sym}</div></div>
           ${burnLine}
         </div>
       </div>`;
@@ -394,7 +396,10 @@ async function fightFlow(){
     const tx = await sendRevealTx(eh, 'fightOnce', [heroId, weaponId, monsterId, monsterElement]);
     toast('战斗中…','info');
     const rec = await tx.wait();
-    
+
+    // 结算后再确认一次金库模式（管理员可能刚切换），保证结果弹层按 USDT 显示
+    await loadVaultMode(true);
+
     // 提取战斗结果
     const rec3 = extractFightResult(rec);
     if(rec3){
@@ -489,12 +494,12 @@ async function playBattleAnimation(rec2){
           <span>胜率 <b>${(rec2.winChanceBp/100).toFixed(1)}%</b></span>
           <span>判定 <b>${rec2.roll}/100</b></span>
         </div>
-        ${win?`<div class="battle-reward">
-          <div class="battle-reward-item gold"><i class="fa-solid fa-coins"></i>+${fmtUnits(BigInt(rec2.reward)/((S.vaultMode===1)?1000000000000n:1n), (S.vaultMode===1)?6:S.tokenDecimals, 2)} ${(S.vaultMode===1)?'USDT':(S.tokenSymbol||TOKEN_SYMBOL)}</div>
+        ${win?`
+          <div class="battle-reward">
+            <div class="battle-reward-item gold"><i class="fa-solid fa-coins"></i>+${fmtVaultUnits(BigInt(rec2.reward), 2)}</div>
+            <div class="battle-reward-item xp"><i class="fa-solid fa-star"></i>+${rec2.xp} XP</div>
           </div>
-          <div class="battle-reward-note"><i class="fa-solid fa-vault mr-1"></i>奖励已存入金库，可前往「金库」页领取</div>
-          <div class="battle-reward-item xp"><i class="fa-solid fa-star"></i>+${rec2.xp} XP</div>
-        </div>`:''}
+          <div class="battle-reward-note"><i class="fa-solid fa-vault mr-1"></i>奖励已存入金库，可前往「金库」页领取</div>`:''}
         <button id="battleContinueBtn" onclick="closeBattleStage()" class="btn ${win?'btn-gold':'btn-ghost'} w-full text-base py-3 mt-3">${win?'继续冒险':'再战一次'}</button>
       </div>
     </div>`;

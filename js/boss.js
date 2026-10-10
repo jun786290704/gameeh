@@ -33,9 +33,9 @@ async function refreshBoss(){
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-          <div class="bg-[#0d1526] rounded-xl p-2.5"><div class="text-[10px] text-muted">奖池</div><div class="font-black text-gold num-mono text-[13px]">${fmtUnits(BigInt(r.rewardPool)/((S.vaultMode===1)?1000000000000n:1n), (S.vaultMode===1)?6:S.tokenDecimals, 2)} ${(S.vaultMode===1)?'USDT':(S.tokenSymbol||TOKEN_SYMBOL)}</div></div>
+          <div class="bg-[#0d1526] rounded-xl p-2.5"><div class="text-[10px] text-muted">奖池</div><div class="font-black text-gold num-mono text-[13px]">${fmtVaultUnits(BigInt(r.rewardPool), 2)}</div></div>
           <div class="bg-[#0d1526] rounded-xl p-2.5"><div class="text-[10px] text-muted">总伤害</div><div class="font-black num-mono text-[13px]">${fmt(Number(r.totalDamage),0)}</div></div>
-          <div class="bg-[#0d1526] rounded-xl p-2.5"><div class="text-[10px] text-muted">我的伤害</div><div class="font-black text-green-400 num-mono text-[13px]">${fmt(Number(myDmg),0)}</div>${est>0n?`<div class="text-[10px] text-muted mt-0.5">预估可分 ≈ <b class="text-gold num-mono">${fmtUnits(est/((S.vaultMode===1)?1000000000000n:1n), (S.vaultMode===1)?6:S.tokenDecimals, 2)} ${(S.vaultMode===1)?'USDT':(S.tokenSymbol||TOKEN_SYMBOL)}</b></div>`:''}</div>
+          <div class="bg-[#0d1526] rounded-xl p-2.5"><div class="text-[10px] text-muted">我的伤害</div><div class="font-black text-green-400 num-mono text-[13px]">${fmt(Number(myDmg),0)}</div>${est>0n?`<div class="text-[10px] text-muted mt-0.5">预估可分 ≈ <b class="text-gold num-mono">${fmtVaultUnits(est, 2)}</b></div>`:''}</div>
           <div class="bg-[#0d1526] rounded-xl p-2.5"><div class="text-[10px] text-muted">剩余 HP</div><div class="font-black num-mono text-[13px]">${fmt(Number(r.hp),0)}</div></div>
         </div>
         <div class="mt-3">

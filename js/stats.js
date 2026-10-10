@@ -1,25 +1,58 @@
 'use strict';
 
+/* ============ 金库奖励模式（全局） ============
+ * 金库有两种奖励模式：0 = EH 代币（按预言机折算），1 = USDT 直发。
+ * 战斗页 / 金库页 / 排行榜都要用，之前只在「金库」「邀请」「BOSS」页加载，
+ * 导致在战斗页开打时 S.vaultMode 还是默认 0 → 胜利奖励被标成 EH、金额按 18 位
+ * 小数去显示而变成 0.00。这里统一在初始化与连接钱包时加载一次。
+ * 注：BSC-USD decimals = 18，与链上 V3/金库记账口径一致，直接按 usdt().decimals() 展示即可。
+ */
+async function loadVaultMode(force){
+  if(S.vaultModeLoaded && !force) return S.vaultMode;
+  try{
+    const vault = mustC('vault');
+    const mode = Number(await vault.rewardMode());
+    S.vaultMode = mode;
+    if(mode === 1){
+      S.vaultSym = 'USDT';
+      let dec = 18;
+      try{
+        const u = await vault.usdt();
+        const erc = new ethers.Contract(u, ["function decimals() view returns (uint8)"], (S.signer||getReadProvider()));
+        dec = Number(await erc.decimals());
+      }catch(e){ dec = 18; }
+      S.vaultDec = dec;
+    } else {
+      S.vaultSym = S.tokenSymbol || TOKEN_SYMBOL;
+      S.vaultDec = S.tokenDecimals || 18;
+    }
+    S.vaultModeLoaded = true;
+  }catch(e){ /* 保留上一次已知值，避免误标成 EH */ }
+  return S.vaultMode;
+}
+/* 当前奖励模式的展示精度与符号（供战斗/金库/BOSS/后台统一调用） */
+function vaultRewardUnit(){
+  const usdt = (S.vaultMode === 1);
+  return {
+    dec: usdt ? (S.vaultDec || 18) : (S.tokenDecimals || 18),
+    sym: usdt ? 'USDT' : (S.tokenSymbol || TOKEN_SYMBOL)
+  };
+}
+function fmtVaultUnits(v, d){
+  const u = vaultRewardUnit();
+  return fmtUnits(v, u.dec, d===undefined?2:d) + ' ' + u.sym;
+}
+
 /* ============ 金库 ============ */
 async function refreshVault(){
   const tag = $('#vaultModeTag');
   if(!S.account){ $('#vaultReward').textContent='--'; if(tag) tag.textContent='--'; return; }
   try{
     const vault = mustC('vault');
-    const mode = Number(await vault.rewardMode());
-    S.vaultMode = mode;
-    if(tag) tag.textContent = mode===0 ? (S.tokenSymbol+' 模式') : 'USDT 模式';
+    await loadVaultMode(true);
+    if(tag) tag.textContent = S.vaultMode===0 ? (S.tokenSymbol+' 模式') : 'USDT 模式';
     const r = await vault.getPendingReward(S.account);
-    let dec = S.tokenDecimals, sym = S.tokenSymbol;
-    if(mode===1){
-      try{
-        const usdtAddr = await vault.usdt();
-        const erc20 = new ethers.Contract(usdtAddr, ["function decimals() view returns (uint8)","function symbol() view returns (string)"], (S.signer||getReadProvider()));
-        dec = Number(await erc20.decimals());
-        sym = await erc20.symbol();
-      }catch(e){ sym='USDT'; dec=18; }
-    }
-    $('#vaultReward').textContent = fmtUnits(r, dec, 2) + ' ' + sym;
+    $('#vaultReward').textContent = fmtVaultUnits(r, 2);
   }catch(e){ $('#vaultReward').textContent = '--'; }
 }
 async function claimVault(){
@@ -90,7 +123,7 @@ async function loadBattleRecords(){
       <div class="flex-1"><div class="text-[13px] font-bold">${m.name}</div></div>
       <span class="badge ${r.win?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${r.win?'胜':'负'}</span>
       <div class="text-right w-24">
-        <div class="text-[12px] font-bold text-gold num-mono">${r.win?'+'+fmtUnits(BigInt(r.reward)/((S.vaultMode===1)?1000000000000n:1n), (S.vaultMode===1)?6:S.tokenDecimals, 2):'0'} ${(S.vaultMode===1)?'USDT':(S.tokenSymbol||TOKEN_SYMBOL)}</div>
+        <div class="text-[12px] font-bold text-gold num-mono">${r.win?('+'+fmtVaultUnits(BigInt(r.reward), 2)):('0 '+(S.vaultMode===1?'USDT':(S.tokenSymbol||TOKEN_SYMBOL)))}</div>
         <div class="text-[11px] text-green-400 num-mono">+${r.xp} XP</div>
       </div>
     </div>`;

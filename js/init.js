@@ -9,6 +9,7 @@ async function init(){
   rebuildContracts();
   await loadOracleConfig();
   await loadTokenInfo();
+  await loadVaultMode(true);
   await refreshCurrentTabAsync();
   await refreshBalances();
   if(window.ethereum){
@@ -47,7 +48,7 @@ async function init(){
         S.pending=[]; try{ localStorage.removeItem('eh_pending'); }catch(e){}
         renderPending();
         rebuildContracts();
-        await loadTokenInfo(); await refreshBalances(); await refreshCurrentTabAsync();
+        await loadTokenInfo(); await loadVaultMode(true); await refreshBalances(); await refreshCurrentTabAsync();
         toast('账户已切换：'+shortAddr(S.account),'info');
       }catch(e){ toast('账户切换失败，请手动连接','warn'); }
     });

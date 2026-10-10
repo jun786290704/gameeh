@@ -37,8 +37,7 @@ async function loadInvitePanel(){
     // 推荐人
     const myRef = await ch.referrerOfAccount(S.account).catch(()=>ethers.ZeroAddress);
     // 模式与代币
-    const mode = Number(await vault.rewardMode().catch(()=>0));
-    S.vaultMode = mode;
+    const mode = await loadVaultMode(true);
     let dec = S.tokenDecimals, sym = S.tokenSymbol;
     if(mode===1){ try{ const u = await vault.usdt(); const erc20 = new ethers.Contract(u, ["function decimals() view returns (uint8)","function symbol() view returns (string)"], (S.signer||getReadProvider())); dec = Number(await erc20.decimals()); sym = await erc20.symbol(); }catch(e){ sym='USDT'; dec=18; } }
     // 分账读取：战斗奖励（pending）+ 邀请奖励（pendingReferral）+ 返现（pendingCashback）+ 已领取 + 我的返现档位 + 冷却/快照
