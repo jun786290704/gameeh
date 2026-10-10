@@ -490,7 +490,7 @@ async function playBattleAnimation(rec2){
           <span>判定 <b>${rec2.roll}/100</b></span>
         </div>
         ${win?`<div class="battle-reward">
-          <div class="battle-reward-item gold"><i class="fa-solid fa-coins"></i>+${fmtUnits(BigInt(rec2.reward), S.tokenDecimals, 2)} ${S.tokenSymbol||TOKEN_SYMBOL}</div>
+          <div class="battle-reward-item gold"><i class="fa-solid fa-coins"></i>+${fmtUnits(BigInt(rec2.reward)/((S.vaultMode===1)?1000000000000n:1n), (S.vaultMode===1)?6:S.tokenDecimals, 2)} ${(S.vaultMode===1)?'USDT':(S.tokenSymbol||TOKEN_SYMBOL)}</div>
           </div>
           <div class="battle-reward-note"><i class="fa-solid fa-vault mr-1"></i>奖励已存入金库，可前往「金库」页领取</div>
           <div class="battle-reward-item xp"><i class="fa-solid fa-star"></i>+${rec2.xp} XP</div>

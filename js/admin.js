@@ -133,7 +133,14 @@ const ADMIN_ABIS = {
     "function totalDistributed() view returns (uint256)","function totalDistributedUSDT() view returns (uint256)",
     "function vaultBalance() view returns (uint256)","function getPendingReward(address) view returns (uint256)",
     "function authorizedGames(address) view returns (bool)","function authorizedGameCount() view returns (uint256)","function setAuthorizedGame(address,bool)",
-    "function adminClearPlayerPending(address)","function deposit(uint256)","function depositUSDT(uint256)","function priceOracle() view returns (address)","function dailyLimitUSD() view returns (uint256)","function todaySpentUSD() view returns (uint256)","function spendDay() view returns (uint256)","function setDailyLimitUSD(uint256)","function setPriceOracle(address)"
+    "function adminClearPlayerPending(address)","function deposit(uint256)","function depositUSDT(uint256)","function priceOracle() view returns (address)","function dailyLimitUSD() view returns (uint256)","function todaySpentUSD() view returns (uint256)","function spendDay() view returns (uint256)","function setDailyLimitUSD(uint256)","function setPriceOracle(address)",
+    // V13：BNB→USDT 自动兑换（PancakeSwap Router V2）
+    "function swapRouter() view returns (address)","function wbnb() view returns (address)",
+    "function minSwapBNB() view returns (uint256)","function keepGasBNB() view returns (uint256)",
+    "function slippageBp() view returns (uint256)","function swapEnabled() view returns (bool)",
+    "function totalSwappedBNB() view returns (uint256)","function totalSwappedUSDT() view returns (uint256)",
+    "function setSwapRouter(address)","function setSwapParams(uint256,uint256,uint256)","function setSwapEnabled(bool)",
+    "function execSwap(uint256)","function execSwapAll()","function depositBNB()"
   ],
   boss: [
     "function owner() view returns (address)","function paused() view returns (bool)","function pause()","function unpause()",
@@ -532,17 +539,59 @@ async function secVault(el, isOwner){
       isOwner ? aAct('存入 EH', 'adminOpenDeposit()', 'fa-circle-plus') + aAct('存入 USDT', 'adminOpenDepositUSDT()', 'fa-circle-plus') : '')
     + aCard('应急管理','fa-toolbox',
       `<div class="text-[12px] text-muted">清理玩家待领取记录（每 ${delay!==null?(Number(delay)/86400).toFixed(1):'-'} 天限一次）。</div>`,
-      isOwner ? aAct('清理玩家待领取', 'adminOpenClearPlayer()', 'fa-broom') : '')
-    + aCard('暂停控制','fa-pause',
-      `<div class="text-[12px] text-muted">暂停后金库存入/领取全部冻结。</div>`);
+      isOwner ? aAct('清理玩家待领取', 'adminOpenClearPlayer()', 'fa-broom') : '');
   const limitCard = aCard('每日支出限额（USDT 等值）','fa-hourglass-half',
-    aRow('每日限额', dl!==null&&typeof dailyLimitUSD!=='undefined' ? fmtUnits(dl,18,0)+' USDT' : '（旧版金库无此功能）') +
+    aRow('每日限额', dailyLimitUSD!==null&&dailyLimitUSD!==undefined ? fmtUnits(dailyLimitUSD,18,0)+' USDT' : '（旧版金库无此功能）') +
     aRow('今日已支出', typeof todaySpentUSD!=='undefined'&&todaySpentUSD!==null ? fmtUnits(todaySpentUSD,18,2)+' USDT' : '-') +
     aRow('限额剩余', (typeof dailyLimitUSD!=='undefined'&&typeof todaySpentUSD!=='undefined'&&dailyLimitUSD!==null&&todaySpentUSD!==null) ? fmtUnits(dailyLimitUSD>todaySpentUSD?dailyLimitUSD-todaySpentUSD:0n,18,2)+' USDT' : '-') +
     aRow('价格预言机', priceOracle?shortAddr(priceOracle):'未设置（EH 模式支出需配置）') +
     aRow('口径', 'USDT 直接计；EH 按 PriceOracle 折算。按自然日 UTC 重置。'),
     isOwner ? aAct('设置每日限额', 'adminOpenSetDailyLimit()', 'fa-pen') + aAct('设置价格预言机', "adminPromptAddr('vault','setPriceOracle','请输入 PriceOracle 地址：')", 'fa-pen') : '');
-  el.innerHTML = body + limitCard + (isOwner ? aCard('暂停控制','fa-toggle-on','', aPauseBtn('vault', paused)) : '');
+  /* ---- BNB → USDT 兑换（V13，PancakeSwap Router V2） ---- */
+  const swapCfg = { router:null, wbnb:null, enabled:false, min:null, keep:null, slip:null, tb:null, tu:null, bnbBal:null, est:null };
+  const _isZeroAddr = a => !a || String(a)===ethers.ZeroAddress;
+  try{
+    const [sr,wb,se,mn,kp,sp,tb,tu] = await Promise.all([
+      vt.swapRouter().catch(()=>null), vt.wbnb().catch(()=>null), vt.swapEnabled().catch(()=>null),
+      vt.minSwapBNB().catch(()=>null), vt.keepGasBNB().catch(()=>null), vt.slippageBp().catch(()=>null),
+      vt.totalSwappedBNB().catch(()=>null), vt.totalSwappedUSDT().catch(()=>null)
+    ]);
+    swapCfg.router=sr; swapCfg.wbnb=wb; swapCfg.enabled=!!se; swapCfg.min=mn; swapCfg.keep=kp;
+    swapCfg.slip=sp; swapCfg.tb=tb; swapCfg.tu=tu;
+  }catch(e){ /* 旧版金库无 swap 功能 */ }
+  try{ swapCfg.bnbBal = await getReadProvider().getBalance(addrOf('vault')); }catch(e){}
+  if(!_isZeroAddr(swapCfg.router) && swapCfg.bnbBal!==null && !_isZeroAddr(usdt)){
+    const keep = swapCfg.keep!==null ? BigInt(swapCfg.keep) : 0n;
+    const balWei = BigInt(swapCfg.bnbBal);
+    const amt = balWei>keep ? balWei-keep : 0n;
+    if(amt>0n){
+      try{
+        const wbAddr = _isZeroAddr(swapCfg.wbnb) ? defaultWbnb() : swapCfg.wbnb;
+        const rct = new ethers.Contract(swapCfg.router, ['function getAmountsOut(uint256,address[]) view returns (uint256[])'], getReadProvider());
+        const out = await rct.getAmountsOut(amt, [wbAddr, usdt]);
+        swapCfg.est = out[1];
+      }catch(e){ swapCfg.est = null; }
+    }
+  }
+  const swapCard = aCard('BNB → USDT 兑换（PancakeSwap）','fa-right-left',
+    aRow('兑换路由', _isZeroAddr(swapCfg.router) ? '<span class="text-red-400">未配置</span>' : shortAddr(swapCfg.router)) +
+    aRow('WBNB', _isZeroAddr(swapCfg.wbnb) ? '<span class="text-muted">配置路由后自动读取</span>' : shortAddr(swapCfg.wbnb)) +
+    aRow('自动兑换', swapCfg.enabled ? '<span class="text-green-400">已启用</span>' : '<span class="text-muted">已关闭</span>') +
+    aRow('触发阈值', swapCfg.min!==null ? fmtUnits(swapCfg.min,18,4)+' BNB' : '-') +
+    aRow('保留 gas', swapCfg.keep!==null ? fmtUnits(swapCfg.keep,18,4)+' BNB' : '-') +
+    aRow('滑点容忍', swapCfg.slip!==null ? (Number(swapCfg.slip)/100).toFixed(2)+' %' : '-') +
+    aRow('金库 BNB 余额', swapCfg.bnbBal!==null ? '<b class="text-gold">'+fmtUnits(swapCfg.bnbBal,18,6)+' BNB</b>' : '-') +
+    aRow('金库 USDT 余额', (bal!==null&&Number(mode)===1) ? fmtUnits(bal,18,2)+' USDT' : '-') +
+    aRow('预计可兑得', swapCfg.est!==null ? '≈ '+fmtUnits(swapCfg.est,18,2)+' USDT' : '<span class="text-muted">配置路由后显示报价</span>') +
+    aRow('累计兑换', (swapCfg.tb!==null?fmtUnits(swapCfg.tb,18,4):'0')+' BNB → '+(swapCfg.tu!==null?fmtUnits(swapCfg.tu,18,2):'0')+' USDT') +
+    `<div class="text-[11px] text-muted px-1 pt-1">兑换所得 USDT 直接进入金库奖励池（计入奖励池收入）。「一键兑换全部」把金库 BNB 余额中超出「保留 gas」的部分全部换成 USDT；启用自动兑换后，向金库转入 BNB 超过阈值时会自动兑换。</div>`,
+    isOwner ? aAct('一键兑换全部','adminDoExecSwapAll()','fa-bolt') + aAct('兑换指定数量','adminOpenExecSwap()','fa-pen') +
+              aAct('配置兑换路由','adminOpenSetSwapRouter()','fa-road') + aAct('设置兑换参数','adminOpenSetSwapParams()','fa-sliders') +
+              aAct(swapCfg.enabled?'关闭自动兑换':'启用自动兑换','adminToggleSwapEnabled()','fa-power-off') +
+              aAct('存入 BNB','adminOpenDepositBNB()','fa-circle-plus') : '');
+  el.innerHTML = body + limitCard + swapCard + aCard('暂停控制','fa-toggle-on',
+    `<div class="text-[12px] text-muted">暂停后金库存入/领取全部冻结。</div>`,
+    isOwner ? aPauseBtn('vault', paused) : '');
 }
 async function adminOpenSetToken(){
   adminFormModal('写入金库 ERC20 代币（代币部署后调用，仅一次）',[
@@ -657,6 +706,97 @@ async function adminDoDepositUSDT(){
   });
 }
 
+/* ---- BNB → USDT 兑换（PancakeSwap Router V2） ---- */
+function defaultPancakeRouter(){
+  return Number(NET.chainId)===56 ? '0x10ED43C718714eb63d5aA57B78B54704E256024E' : '0xD99D1c33F9fC3444f8101754aBC46c52416550D1';
+}
+function defaultWbnb(){
+  return Number(NET.chainId)===56 ? '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' : '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd';
+}
+async function adminOpenSetSwapRouter(){
+  const cur = await adminCt('vault').swapRouter().catch(()=>null);
+  adminFormModal('配置 BNB→USDT 兑换路由（PancakeSwap Router V2）',[
+    {label:'Router 地址（填 0x0 或留空 = 禁用兑换）', value: (cur && cur!==ethers.ZeroAddress) ? cur : defaultPancakeRouter(), placeholder: defaultPancakeRouter()}
+  ],'adminDoSetSwapRouter()');
+}
+async function adminDoSetSwapRouter(){
+  const v = adminFormVals(1);
+  const a = (v[0]||'').trim();
+  if(a && !/^0x[a-fA-F0-9]{40}$/.test(a)){ toast('地址格式不正确','warn'); return; }
+  await adminExec('配置兑换路由', async()=>{
+    await (await adminCt('vault',true).setSwapRouter(a || ethers.ZeroAddress)).wait();
+  });
+}
+async function adminOpenSetSwapParams(){
+  const vt = adminCt('vault');
+  const [mn,kp,sp] = await Promise.all([vt.minSwapBNB().catch(()=>null), vt.keepGasBNB().catch(()=>null), vt.slippageBp().catch(()=>null)]);
+  adminFormModal('设置 BNB→USDT 兑换参数',[
+    {label:'触发阈值 minSwapBNB（BNB，自动兑换门槛，建议 0.2）', value: mn!==null?ethers.formatEther(mn):'0.2'},
+    {label:'保留 gas keepGasBNB（BNB，不参与兑换，建议 0.01）', value: kp!==null?ethers.formatEther(kp):'0.01'},
+    {label:'滑点容忍 slippageBp（万分数，0~1000，50 = 0.5%）', value: sp!==null?String(sp):'50'}
+  ],'adminDoSetSwapParams()');
+}
+async function adminDoSetSwapParams(){
+  const v = adminFormVals(3);
+  let mn,kp;
+  try{ mn = ethers.parseEther(String(v[0]||'0').trim()||'0'); kp = ethers.parseEther(String(v[1]||'0').trim()||'0'); }
+  catch(e){ toast('BNB 数量格式不正确','warn'); return; }
+  const sp = Math.round(Number(v[2]||0));
+  if(!Number.isFinite(sp) || sp<0 || sp>1000){ toast('滑点需在 0~1000（万分数，1000=10%）','warn'); return; }
+  if(mn<kp){ toast('触发阈值需 ≥ 保留 gas','warn'); return; }
+  await adminExec('设置兑换参数', async()=>{
+    await (await adminCt('vault',true).setSwapParams(mn,kp,BigInt(sp))).wait();
+  });
+}
+async function adminToggleSwapEnabled(){
+  const vt = adminCt('vault');
+  const cur = await vt.swapEnabled().catch(()=>false);
+  const next = !cur;
+  if(next){
+    const r = await vt.swapRouter().catch(()=>null);
+    if(!r || r===ethers.ZeroAddress){ toast('请先配置兑换路由（PancakeSwap Router）','warn'); return; }
+  }
+  await adminExec(next?'启用自动兑换':'关闭自动兑换', async()=>{
+    await (await adminCt('vault',true).setSwapEnabled(next)).wait();
+  });
+}
+async function adminDoExecSwapAll(){
+  await adminExec('兑换全部 BNB → USDT', async()=>{
+    const r = await adminCt('vault').swapRouter().catch(()=>null);
+    if(!r || r===ethers.ZeroAddress) throw new Error('未配置兑换路由，请先配置 PancakeSwap Router');
+    await (await adminCt('vault',true).execSwapAll()).wait();
+  }, false);
+}
+async function adminOpenExecSwap(){
+  const bnb = await getReadProvider().getBalance(addrOf('vault')).catch(()=>null);
+  adminFormModal('兑换指定数量的金库 BNB 为 USDT',[
+    {label:'BNB 数量（金库当前 '+(bnb!==null?ethers.formatEther(bnb):'-')+' BNB）', placeholder:'如 0.1'}
+  ],'adminDoExecSwap()');
+}
+async function adminDoExecSwap(){
+  const v = adminFormVals(1);
+  let amt;
+  try{ amt = ethers.parseEther(String(v[0]||'0').trim()||'0'); }catch(e){ toast('数量格式不正确','warn'); return; }
+  if(amt<=0n){ toast('请输入大于 0 的数量','warn'); return; }
+  await adminExec('兑换 BNB → USDT', async()=>{
+    await (await adminCt('vault',true).execSwap(amt)).wait();
+  }, false);
+}
+async function adminOpenDepositBNB(){
+  adminFormModal('存入 BNB 到金库',[
+    {label:'BNB 数量（已启用自动兑换且超阈值时，入账即自动换成 USDT）', placeholder:'如 0.1'}
+  ],'adminDoDepositBNB()');
+}
+async function adminDoDepositBNB(){
+  const v = adminFormVals(1);
+  let amt;
+  try{ amt = ethers.parseEther(String(v[0]||'0').trim()||'0'); }catch(e){ toast('数量格式不正确','warn'); return; }
+  if(amt<=0n){ toast('请输入大于 0 的数量','warn'); return; }
+  await adminExec('存入 BNB', async()=>{
+    await (await adminCt('vault',true).depositBNB({ value: amt })).wait();
+  });
+}
+
 /* ============ 市场 ============ */
 async function secMarket(el, isOwner){
   const mk = adminCt('marketplace');
@@ -741,7 +881,7 @@ async function secBoss(el, isOwner){
         aRow('BOSS 血量', fmt(Number(r.hp),0)+' / '+fmt(Number(r.maxHp),0)) +
         aRow('状态', r.dead?'<span class="text-green-400">已讨伐</span>':'<span class="text-red-400">讨伐中</span>') +
         aRow('进度', `<div class="bar h-2 w-32"><div class="bar-fill boss" style="width:${pct}%"></div></div>`) +
-        aRow('奖池', fmtUnits(BigInt(r.rewardPool), S.tokenDecimals, 0)) +
+        aRow('奖池', fmtUnits(BigInt(r.rewardPool)/((S.vaultMode===1)?1000000000000n:1n), (S.vaultMode===1)?6:S.tokenDecimals, 0) + (S.vaultMode===1?' USDT':(' '+S.tokenSymbol))) +
         aRow('总伤害', fmt(Number(r.totalDamage),0)) +
         aRow('武器得主', r.weaponWinner?shortAddr(r.weaponWinner):'-') +
         aRow('本轮我的可领', rw!==null?fmt(Number(rw),0):'-');

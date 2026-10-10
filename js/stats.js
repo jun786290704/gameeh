@@ -90,7 +90,7 @@ async function loadBattleRecords(){
       <div class="flex-1"><div class="text-[13px] font-bold">${m.name}</div></div>
       <span class="badge ${r.win?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${r.win?'胜':'负'}</span>
       <div class="text-right w-24">
-        <div class="text-[12px] font-bold text-gold num-mono">${r.win?'+'+fmtUnits(BigInt(r.reward), S.tokenDecimals, 2):'0'} 💰</div>
+        <div class="text-[12px] font-bold text-gold num-mono">${r.win?'+'+fmtUnits(BigInt(r.reward)/((S.vaultMode===1)?1000000000000n:1n), (S.vaultMode===1)?6:S.tokenDecimals, 2):'0'} ${(S.vaultMode===1)?'USDT':(S.tokenSymbol||TOKEN_SYMBOL)}</div>
         <div class="text-[11px] text-green-400 num-mono">+${r.xp} XP</div>
       </div>
     </div>`;
