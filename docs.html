@@ -254,7 +254,7 @@ footer .fl{color:var(--gold);margin:0 8px}
       <p>在这片名为<b>衡洲</b>的大陆上，五行秩序曾被炼成环、又被一头龙咬碎。这份文档先讲清楚它为何崩坏、谁在守护，再讲清楚链上规则：五行克制、英雄与武器、锻造熔炼、战斗结算、世界 BOSS、市场与金库，以及当前部署的合约地址。所有数值均取自合约与前端实现，随链上配置变动时以游戏内实时显示为准。</p>
       <div class="chips">
         <span class="chip">世界 <b>衡洲 · 五纪元</b></span>
-        <span class="chip">网络 <b>BSC 测试网（chainId 97）</b></span>
+        <span class="chip">网络 <b>BSC 主网（chainId 56）</b></span>
         <span class="chip">游戏内代币 <b>EH</b></span>
         <span class="chip">官网计价 <b>USDT</b></span>
         <span class="chip">结算方式 <b>commit-reveal 链上随机</b></span>
@@ -419,13 +419,13 @@ footer .fl{color:var(--gold);margin:0 8px}
       <p class="lead">三分钟从零到第一次出战。</p>
       <ol class="steps">
         <li><b>准备钱包。</b>在浏览器安装 MetaMask（或兼容的 EVM 钱包）并创建/导入账户。</li>
-        <li><b>切换到 BSC 测试网。</b>网络参数：链 ID <code>97</code>，RPC <code>https://data-seed-prebsc-1-s1.bnbchain.org:8545</code>，币种 BNB。游戏连接钱包时会提示自动切换，未成功请手动确认。</li>
-        <li><b>领取测试币。</b>到 BSC 测试网水龙头领取测试 BNB 用于支付 gas（游戏内交易已固定 0.12 gwei gasPrice）。</li>
+        <li><b>切换到 BSC 主网。</b>网络参数：链 ID <code>56</code>，RPC <code>https://bsc-dataseed3.bnbchain.org</code>，币种 BNB。游戏连接钱包时会提示自动切换，未成功请手动确认。</li>
+        <li><b>准备少量 BNB。</b>用于支付链上手续费（前端默认 gasPrice 0.1 gwei，单笔成本极低）。</li>
         <li><b>获取 EH。</b>战斗与 BOSS 奖励会产出代币；也可由管理端向金库注入奖励池。召唤英雄与锻造武器需要消耗 EH。</li>
         <li><b>召唤第一位英雄。</b>进入游戏 →「英雄」页 → 召唤英雄，等待若干区块后自动揭示，得到随机元素与基础战力。</li>
         <li><b>锻造并出战。</b>「锻造」页拿到武器 →「战斗」页选择英雄 + 武器 + 怪物 → 开打，胜利奖励进金库，去「金库」页领取。</li>
       </ol>
-      <div class="note warn"><b>注意：</b>当前部署在 BSC 测试网，所有资产均为测试资产，不具备真实价值；合约参数（召唤/锻造价格、奖池、怪物数值等）可由管理员调整，实际数值请以游戏内实时显示为准。</div>
+      <div class="note warn"><b>注意：</b>当前部署在 <b>BSC 主网</b>，链上资产与 USDT 均为真实资产，请谨慎操作；合约参数（召唤/锻造价格、奖池、怪物数值等）可由管理员调整，实际数值请以游戏内实时显示为准。</div>
     </section>
 
     <!-- 03 -->
@@ -721,33 +721,34 @@ footer .fl{color:var(--gold);margin:0 8px}
     <!-- 14 -->
     <section id="contracts">
       <h2><span class="n">14</span>合约与网络</h2>
-      <p class="lead">当前部署在 BSC 测试网（chainId 97），以下为主力合约地址。</p>
+      <p class="lead">当前部署在 BSC 主网（chainId 56），以下为主力合约地址。</p>
       <table>
         <thead><tr><th>合约</th><th>说明</th><th>地址</th></tr></thead>
         <tbody>
-          <tr><td>GameToken</td><td>游戏代币 EH</td><td class="mono">0xF3Aa1d13Ca2307d462506d9EB88B273166E145A8</td></tr>
-          <tr><td>Characters</td><td>英雄 NFT + 体力</td><td class="mono">0xfE567116A40A5CB37801d15047F619e187f0C3D6</td></tr>
-          <tr><td>Weapons</td><td>武器 NFT</td><td class="mono">0xcE1CEac63127A5f526E0C497Ab91B838F899bfbB</td></tr>
-          <tr><td>Shards</td><td>碎片 ERC-1155</td><td class="mono">0x64d731f84323CFd7a0E44f5bfdee8D5175be38ba</td></tr>
-          <tr><td>Essence</td><td>精粹 ERC-1155</td><td class="mono">0x60c101926f8000691a17E27d19AF7a54C5745B2A</td></tr>
-          <tr><td>ElementHeroesV3</td><td>核心玩法（召唤/战斗）</td><td class="mono">0x1E66133b8d32a54bA12C7064f9085Cd3FB0029d8</td></tr>
-          <tr><td>ForgeShop</td><td>锻造 / 熔炼 / 合成</td><td class="mono">0x66C3C273a359473845D5DBa852E171a01C0cd00b</td></tr>
-          <tr><td>EnhanceShop</td><td>武器强化</td><td class="mono">0x2C84Ba6ffdbF16952eFbece29d83093837B4147D</td></tr>
-          <tr><td>RandomOracleV2</td><td>链上随机数预言机</td><td class="mono">0x4D999B99397AB696AAddA032B8A1F3af2BFc8F06</td></tr>
-          <tr><td>PriceOracle</td><td>价格预言机（定价）</td><td class="mono">0xB1AD6B80FbFAFbA4C884a943e50652183Aa45E2A</td></tr>
-          <tr><td>Vault</td><td>金库（奖励发放）</td><td class="mono">0xbdeC90ED2e839261538AC72078026D73b8dA2E1A</td></tr>
-          <tr><td>Marketplace</td><td>市场</td><td class="mono">0x686E3cE4d0aa25C7CFd6D4Bbbc670b8B35d5370A</td></tr>
-          <tr><td>WorldBossV2</td><td>世界 BOSS</td><td class="mono">0x21316E9C757314e62d33A836b5D66A58E937e0c3</td></tr>
+          <tr><td>GameToken</td><td>游戏代币 EH</td><td class="mono">0x5f672Bfa19f1E29178f90C159070981976687777</td></tr>
+          <tr><td>Characters</td><td>英雄 NFT + 体力</td><td class="mono">0x77BEfa8152c99200944577429B441b9dfA2e3e43</td></tr>
+          <tr><td>Weapons</td><td>武器 NFT</td><td class="mono">0xD4f5cf84Db3532596924DF915a86bfc6E06da82F</td></tr>
+          <tr><td>Shards</td><td>碎片 ERC-1155</td><td class="mono">0x62870116f680160025508394408e22E4108051DD</td></tr>
+          <tr><td>Essence</td><td>精粹 ERC-1155</td><td class="mono">0xFA2A074D691f7A5bC5Aa57FF0E147CC6eC06F7D0</td></tr>
+          <tr><td>ElementHeroesV3</td><td>核心玩法（召唤/战斗）</td><td class="mono">0x1d1E3301b5B92C8451BA4526Da83a835efeE33C9</td></tr>
+          <tr><td>ForgeShop</td><td>锻造 / 熔炼 / 合成</td><td class="mono">0x73B54aC80062BF2e8AdD6B8449f87304F6327466</td></tr>
+          <tr><td>EnhanceShop</td><td>武器强化</td><td class="mono">0x3B0356B4c1AcF5B97b02164B36B9e8069d58C518</td></tr>
+          <tr><td>RandomOracleV2</td><td>链上随机数预言机</td><td class="mono">0xAfE4a0fb9d4dF033e98682eB6a1D6ED00e646e3e</td></tr>
+          <tr><td>PriceOracle</td><td>价格预言机（定价）</td><td class="mono">0x65e0d43F6c1aECA6101f4ea97Ae5172E5b8d796e</td></tr>
+          <tr><td>Vault</td><td>金库（USDT 奖励发放）</td><td class="mono">0x9e606ab644b5Df96D587924fDb9C16bd746f26F7</td></tr>
+          <tr><td>Marketplace</td><td>市场</td><td class="mono">0x372d8D364A70A857Ca38Ce2473E6De48351D9A5F</td></tr>
+          <tr><td>WorldBossV2</td><td>世界 BOSS</td><td class="mono">0x0Fb2457CDF46Ef4E89bD32d29dF3F1e7EF4de95e</td></tr>
         </tbody>
       </table>
       <h3>网络参数</h3>
       <table>
         <thead><tr><th>项</th><th>值</th></tr></thead>
         <tbody>
-          <tr><td>链名称</td><td>BSC 测试网</td></tr>
-          <tr><td>Chain ID</td><td class="mono">97 (0x61)</td></tr>
-          <tr><td>RPC</td><td class="mono">https://data-seed-prebsc-1-s1.bnbchain.org:8545</td></tr>
-          <tr><td>交易 gasPrice</td><td class="mono">0.12 gwei（前端固定）</td></tr>
+          <tr><td>链名称</td><td>BNB Smart Chain 主网</td></tr>
+          <tr><td>Chain ID</td><td class="mono">56 (0x38)</td></tr>
+          <tr><td>RPC</td><td class="mono">https://bsc-dataseed3.bnbchain.org</td></tr>
+          <tr><td>交易 gasPrice</td><td class="mono">0.1 gwei（前端默认）</td></tr>
+          <tr><td>奖励代币</td><td class="mono">USDT（BSC-USD 0x55d3…7955）</td></tr>
           <tr><td>确认数</td><td>3 个区块</td></tr>
           <tr><td>随机延迟</td><td>3 ~ 450 个区块（可配置）</td></tr>
         </tbody>
@@ -759,13 +760,13 @@ footer .fl{color:var(--gold);margin:0 8px}
       <h2><span class="n">15</span>常见问题</h2>
       <p class="lead">新手最容易卡住的几件事。</p>
       <div class="faq">
-        <details open><summary>为什么提示链 ID 不一致？</summary><div class="body">钱包当前不在 BSC 测试网。点击连接钱包时前端会自动发起切换请求，若被拒绝请在钱包中手动添加/切换到 chainId 97 的网络。</div></details>
+        <details open><summary>为什么提示链 ID 不一致？</summary><div class="body">钱包当前不在 BSC 主网。点击连接钱包时前端会自动发起切换请求，若被拒绝请在钱包中手动添加/切换到 chainId 56 的网络。</div></details>
         <details><summary>提交交易后为什么还要再确认一次？</summary><div class="body">召唤、锻造、合成、强化、BOSS 攻击都采用 commit-reveal：第一笔提交承诺与押金，等待若干区块后前端自动发起第二笔揭示交易，随机数在揭示时生成。顶部「待揭示」气泡会显示进度。</div></details>
         <details><summary>体力多久恢复一点？</summary><div class="body">当前链上为<b>上限 120 点、每 3 分钟恢复 1 点、每场战斗消耗 10 点</b>，从空回满约 6 小时。换算成节奏就是：每小时约 2 场、每天约 48 场、满体力可连打 12 场。该参数由合约配置（可被管理员调整，以链上实际值为准），游戏中以英雄卡片上的实时进度与倒计时为准。</div></details>
         <details><summary>奖励为什么没直接到账？</summary><div class="body">奖励统一写入金库，需要到「金库」页主动 claim。这样可以把多次小额奖励合并成一笔转账，节省 gas。</div></details>
-        <details><summary>官网写 USDT，游戏里显示 EH，哪个是对的？</summary><div class="body">都对。奖励以美元计价，官网按 USDT 展示；链上按金库模式发放——代币模式折算成 EH，USDT 模式直接发 USDT。游戏内显示的是实际到账的代币。</div></details>
+        <details><summary>奖励是什么币？和 EH 有什么关系？</summary><div class="body">战斗/邀请等<b>奖励统一以 USDT 发放</b>（金库已切换为 USDT 模式，奖励累计后到「金库」页领取）。<b>EH</b> 是游戏内代币，用于召唤英雄、锻造武器、强化与市场交易等消耗。</div></details>
         <details><summary>锻造/召唤的价格会变吗？</summary><div class="body">会。价格来自链上价格预言机，管理员可调整。游戏内各页面显示的金额即为当前实时价格。</div></details>
-        <details><summary>交易一直失败或卡住怎么办？</summary><div class="body">先确认钱包在 BSC 测试网且有足够测试 BNB；若某条待揭示记录已过期，可在「待揭示」面板手动揭示或清理，系统也会自动扫描失效记录。</div></details>
+        <details><summary>交易一直失败或卡住怎么办？</summary><div class="body">先确认钱包在 BSC 主网且有少量 BNB 支付 gas；若某条待揭示记录已过期，可在「待揭示」面板手动揭示或清理，系统也会自动扫描失效记录。</div></details>
         <details><summary>邀请链接发给好友了，为什么没有绑上？</summary><div class="body">绑定发生在<b>好友首次召唤英雄时</b>，只是打开链接不会立即绑定。请确认链接是 <code>game.html?ref=…</code> 形式、短码拼写完整；若好友在点击链接前已经铸造过英雄，绑定关系可能已经固化，无法再改。</div></details>
         <details><summary>返现比例改了，为什么老下线没变化？</summary><div class="body">返现比例在下线<b>绑定 / 首次铸造的时刻被快照锁定</b>，之后永远沿用那个比例。修改只对之后新绑定的下线生效；另外同一账户每 7 天才能修改一次，未到冷却时间会提示失败。</div></details>
         <details><summary>邀请奖励是从下线的奖励里扣的吗？</summary><div class="body">不是。邀请分成是下线战斗奖励的 10%，由金库额外发放，下线的原始奖励不受影响。若你设置了返现比例，下线还会额外收到分成池的一部分 —— 相当于双方都多拿。</div></details>
@@ -792,7 +793,7 @@ footer .fl{color:var(--gold);margin:0 8px}
   <a class="fl" href="./game.html">进入游戏</a>
   <a class="fl" href="https://t.me/bscehgame" target="_blank" rel="noopener">电报</a>
   <a class="fl" href="https://x.com/bscgamebuild" target="_blank" rel="noopener">推特 X</a>
-  <div style="margin-top:8px">当前版本部署于 BSC 测试网，文档数值以链上实时配置为准。</div>
+  <div style="margin-top:8px">当前版本部署于 BSC 主网，文档数值以链上实时配置为准。</div>
 </footer>
 
 <script>

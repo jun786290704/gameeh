@@ -29,21 +29,30 @@ const NETWORKS = {
   },
   mainnet: {
     chainId: 56, chainIdHex: '0x38',
-    rpcUrl: 'https://bsc-dataseed.binance.org',
-    rpcFallbacks: ['https://bsc-dataseed1.bnbchain.org','https://bsc-dataseed2.bnbchain.org','https://bsc-dataseed3.bnbchain.org'],
+    rpcUrl: 'https://bsc-dataseed3.bnbchain.org',
+    rpcFallbacks: ['https://bsc-dataseed1.bnbchain.org','https://bsc-dataseed2.bnbchain.org','https://bsc-rpc.publicnode.com','https://bsc.drpc.org'],
     name: 'BSC 主网',
-    gasPrice: 3000000000n, // 主网建议 3 gwei
+    gasPrice: 100000000n, // 0.1 gwei（BSC 主网当前实际价 ~0.05 gwei）
     contracts: {
-      gameToken:   '0x5f672bfa19f1e29178f90c159070981976687777', // 主网游戏代币（已部署）
-      vault:       '0x9e606ab644b5Df96D587924fDb9C16bd746f26F7', // 主网金库（已部署）
-      characters:  '', weapons: '', shards: '', essence: '', v3: '',
-      forgeShop:   '', enhanceShop: '', randomOracle: '', oracle: '',
-      marketplace: '', boss: '', governance: ''
+      gameToken:   '0x5f672Bfa19f1E29178f90C159070981976687777', // EH（主网已部署）
+      characters:  '0x77BEfa8152c99200944577429B441b9dfA2e3e43',
+      weapons:     '0xD4f5cf84Db3532596924DF915a86bfc6E06da82F',
+      shards:      '0x62870116f680160025508394408e22E4108051DD',
+      essence:     '0xFA2A074D691f7A5bC5Aa57FF0E147CC6eC06F7D0',
+      v3:          '0x1d1E3301b5B92C8451BA4526Da83a835efeE33C9',
+      forgeShop:   '0x73B54aC80062BF2e8AdD6B8449f87304F6327466',
+      enhanceShop: '0x3B0356B4c1AcF5B97b02164B36B9e8069d58C518',
+      randomOracle:'0xAfE4a0fb9d4dF033e98682eB6a1D6ED00e646e3e',
+      oracle:      '0x65e0d43F6c1aECA6101f4ea97Ae5172E5b8d796e',
+      vault:       '0x9e606ab644b5Df96D587924fDb9C16bd746f26F7',
+      marketplace: '0x372d8D364A70A857Ca38Ce2473E6De48351D9A5F',
+      boss:        '0x0Fb2457CDF46Ef4E89bD32d29dF3F1e7EF4de95e',
+      governance:  '' // 治理合约（主网部署后填写，空 = 治理未启用）
     }
   }
 };
 function _ehNetKey() {
-  try { return (localStorage.getItem('eh_net') === 'mainnet') ? 'mainnet' : 'testnet'; } catch (e) { return 'testnet'; }
+  try { return (localStorage.getItem('eh_net') === 'testnet') ? 'testnet' : 'mainnet'; } catch (e) { return 'mainnet'; }
 }
 let NET_CURRENT = _ehNetKey();
 let NET = NETWORKS[NET_CURRENT];
