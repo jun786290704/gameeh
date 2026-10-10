@@ -1,27 +1,55 @@
 'use strict';
 
 /* =================================================================
-   合约地址
+   网络与合约地址（测试网 / 主网，可切换）
    ================================================================= */
-const CONTRACTS = {
-  gameToken:   '0xF3Aa1d13Ca2307d462506d9EB88B273166E145A8',
-  characters:  '0xfE567116A40A5CB37801d15047F619e187f0C3D6',
-  weapons:     '0xcE1CEac63127A5f526E0C497Ab91B838F899bfbB',
-  shards:      '0x64d731f84323CFd7a0E44f5bfdee8D5175be38ba',
-  essence:     '0x60c101926f8000691a17E27d19AF7a54C5745B2A',
-  v3:          '0x1E66133b8d32a54bA12C7064f9085Cd3FB0029d8',
-  forgeShop:   '0x66C3C273a359473845D5DBa852E171a01C0cd00b',
-  enhanceShop: '0x2C84Ba6ffdbF16952eFbece29d83093837B4147D',
-  randomOracle:'0x4D999B99397AB696AAddA032B8A1F3af2BFc8F06',
-  oracle:      '0xB1AD6B80FbFAFbA4C884a943e50652183Aa45E2A',
-  vault:       '0xbdeC90ED2e839261538AC72078026D73b8dA2E1A',
-  marketplace: '0x686E3cE4d0aa25C7CFd6D4Bbbc670b8B35d5370A',
-  boss:        '0x21316E9C757314e62d33A836b5D66A58E937e0c3',
-  governance:  '' // 治理合约（主网部署后填写，空 = 治理未启用）
+const NETWORKS = {
+  testnet: {
+    chainId: 97, chainIdHex: '0x61',
+    rpcUrl: 'https://bsc-testnet.publicnode.com',
+    rpcFallbacks: ['https://data-seed-prebsc-1-s2.bnbchain.org:8545','https://bsc-testnet.drpc.org','https://data-seed-prebsc-1-s1.bnbchain.org:8545'],
+    name: 'BSC 测试网',
+    gasPrice: 120000000n, // 0.12 gwei
+    contracts: {
+      gameToken:   '0xF3Aa1d13Ca2307d462506d9EB88B273166E145A8',
+      characters:  '0xfE567116A40A5CB37801d15047F619e187f0C3D6',
+      weapons:     '0xcE1CEac63127A5f526E0C497Ab91B838F899bfbB',
+      shards:      '0x64d731f84323CFd7a0E44f5bfdee8D5175be38ba',
+      essence:     '0x60c101926f8000691a17E27d19AF7a54C5745B2A',
+      v3:          '0x1E66133b8d32a54bA12C7064f9085Cd3FB0029d8',
+      forgeShop:   '0x66C3C273a359473845D5DBa852E171a01C0cd00b',
+      enhanceShop: '0x2C84Ba6ffdbF16952eFbece29d83093837B4147D',
+      randomOracle:'0x4D999B99397AB696AAddA032B8A1F3af2BFc8F06',
+      oracle:      '0xB1AD6B80FbFAFbA4C884a943e50652183Aa45E2A',
+      vault:       '0xbdeC90ED2e839261538AC72078026D73b8dA2E1A',
+      marketplace: '0x686E3cE4d0aa25C7CFd6D4Bbbc670b8B35d5370A',
+      boss:        '0x21316E9C757314e62d33A836b5D66A58E937e0c3',
+      governance:  '' // 治理合约（主网部署后填写，空 = 治理未启用）
+    }
+  },
+  mainnet: {
+    chainId: 56, chainIdHex: '0x38',
+    rpcUrl: 'https://bsc-dataseed.binance.org',
+    rpcFallbacks: ['https://bsc-dataseed1.bnbchain.org','https://bsc-dataseed2.bnbchain.org','https://bsc-dataseed3.bnbchain.org'],
+    name: 'BSC 主网',
+    gasPrice: 3000000000n, // 主网建议 3 gwei
+    contracts: {
+      gameToken:   '0x5f672bfa19f1e29178f90c159070981976687777', // 主网游戏代币（已部署）
+      vault:       '0x9e606ab644b5Df96D587924fDb9C16bd746f26F7', // 主网金库（已部署）
+      characters:  '', weapons: '', shards: '', essence: '', v3: '',
+      forgeShop:   '', enhanceShop: '', randomOracle: '', oracle: '',
+      marketplace: '', boss: '', governance: ''
+    }
+  }
 };
-const NET = { chainId: 97, chainIdHex: '0x61', rpcUrl: 'https://bsc-testnet.publicnode.com', rpcFallbacks: ['https://data-seed-prebsc-1-s2.bnbchain.org:8545','https://bsc-testnet.drpc.org','https://data-seed-prebsc-1-s1.bnbchain.org:8545'], name: 'BSC 测试网' };
+function _ehNetKey() {
+  try { return (localStorage.getItem('eh_net') === 'mainnet') ? 'mainnet' : 'testnet'; } catch (e) { return 'testnet'; }
+}
+let NET_CURRENT = _ehNetKey();
+let NET = NETWORKS[NET_CURRENT];
+let CONTRACTS = NET.contracts;
+let GAS_PRICE = NET.gasPrice;
 const CONFIG = { confirmations: 3 };
-const GAS_PRICE = 120000000n; // 0.12 gwei（BSC 测试网交易 gasPrice）
 
 /* ============ ABI ============ */
 const ABIs = {
@@ -277,3 +305,30 @@ const S = {
   busy:false
 };
 const c = {};
+
+/* ============ 网络切换（测试网 ⇄ 主网） ============ */
+function toggleNetMenu(ev) {
+  if (ev) ev.stopPropagation();
+  const m = document.getElementById('netMenu');
+  if (m) m.classList.toggle('hidden');
+}
+function switchNetwork(key) {
+  if (!NETWORKS[key] || key === NET_CURRENT) return false;
+  try { localStorage.setItem('eh_net', key); } catch (e) { /* ignore */ }
+  location.reload();
+  return true;
+}
+/* 供 UI 显示当前网络名/chainId（在 DOM 就绪后调用） */
+function applyNetUi() {
+  const el = document.getElementById('netName');
+  if (el) el.textContent = NET.name;
+  const meta = document.getElementById('netChainMeta');
+  if (meta) meta.textContent = 'chainId ' + NET.chainId;
+}
+document.addEventListener('DOMContentLoaded', function () { applyNetUi(); });
+/* 点击页面其它区域时收起网络菜单 */
+document.addEventListener('click', function (e) {
+  const w = document.getElementById('netWrap');
+  const m = document.getElementById('netMenu');
+  if (w && m && !w.contains(e.target)) m.classList.add('hidden');
+});
