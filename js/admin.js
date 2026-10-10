@@ -200,11 +200,37 @@ const ADMIN_SECTIONS = [
 ];
 
 /* ============ 通用工具 ============ */
+// 管理 ABI 与核心 ABI 合并去重。
+// 只写一份 ABI 很容易漏函数 —— 例如 ADMIN_ABIS.characters 缺 staminaCost()/weapons()，
+// 而 secV3 里 ch.staminaCost() 是「同步调用失败」，连 .catch 都拦不住，
+// 直接把整个「核心玩法」分区打成「加载失败」。合并后单靠 ADMIN_ABIS 漏项也不会再崩。
+function adminAbi(key){
+  const seen = new Set(), out = [];
+  const push = arr => { if(!arr) return; for(const f of arr){ const sig = typeof f==='string' ? f : JSON.stringify(f); if(seen.has(sig)) continue; seen.add(sig); out.push(f); } };
+  push(ADMIN_ABIS[key]);
+  push(ABIs[key]);
+  return out;
+}
 function adminCt(key, withSigner){
   const a = addrOf(key); if(!a) throw new Error('未配置 '+key);
-  const abi = ADMIN_ABIS[key] || ABIs[key];
-  if(!abi || !abi.length) throw new Error(key+' 缺少管理 ABI');
+  const abi = adminAbi(key);
+  if(!abi.length) throw new Error(key+' 缺少管理 ABI');
   return new ethers.Contract(a, abi, withSigner ? S.signer : (S.signer || getReadProvider()));
+}
+// 公共 RPC 会间歇性 `noNetwork` / 429 / 超时 —— 这类失败重试一次基本就过。
+// 用它区分「调用 revert（= 链上真的没这个函数/未升级）」和「读不到（= 网络抖动）」，
+// 否则会把 RPC 抖动误报成「合约尚未升级」。
+function isRpcFlaky(e){
+  const s = String((e && (e.code || '')) + ' ' + (e && (e.message || '')) + ' ' + (e && (e.info && e.info.error && e.info.error.code) || ''));
+  return /noNetwork|network|NETWORK_ERROR|timeout|TIMEOUT|429|rate|too many|fetch failed|ECONNRESET|ECONNREFUSED|SERVER_ERROR|-32005|missing response|bad response/i.test(s);
+}
+async function ro(fn){
+  try{ return await fn(); }
+  catch(e){
+    if(!isRpcFlaky(e)) return null;                 // 真 revert → 认为不支持
+    try{ await new Promise(r=>setTimeout(r,700)); return await fn(); }
+    catch(e2){ return null; }
+  }
 }
 async function adminExec(label, fn, needOwner){
   if(needOwner!==false && !S.admin.isOwner){ toast('无管理权限','warn'); return; }
@@ -1018,19 +1044,41 @@ async function adminDoSetBossLinks(){
 }
 
 /* ============ 核心玩法 V3 ============ */
+// MonsterRegistry 接口（与前端战斗同源）
+const MONREG_ABI = [
+  "function owner() view returns (address)",
+  "function monstersLength() view returns (uint256)",
+  "function getMonster(uint256) view returns (string name,uint8 element,uint32 power,uint32 reward,uint32 xp)",
+  "function addMonster(string,uint8,uint32,uint32,uint32)"
+];
+// 怪物数据源：设置了 monsterRegistry 时以它为准（链上结算读的就是它），
+// 否则回退 V3 本地 monsters[]。
+// ⚠ V3.monstersCount() 只返回本地数组长度 —— 主网上本地数组是空的（怪物全在 Registry），
+//   必须用 monstersLength()（有 registry 时自动转发）才能拿到真实数量。
+async function monsterSource(core){
+  core = core || adminCt('v3');
+  const a = await ro(()=>core.monsterRegistry());
+  const reg = (a && a !== ethers.ZeroAddress) ? a : null;
+  const rc = reg ? new ethers.Contract(reg, MONREG_ABI, getReadProvider()) : null;
+  let count = rc ? Number((await ro(()=>rc.monstersLength())) || 0) : 0;
+  if(!count) count = Number((await ro(()=>core.monstersLength())) || 0);
+  return { reg, rc, count };
+}
+async function monsterAt(src, core, i){
+  if(src.rc){ const m = await ro(()=>src.rc.getMonster(BigInt(i))); if(m) return m; }
+  return await ro(()=>core.monsters(BigInt(i)));
+}
 async function secV3(el, isOwner){
   const core = adminCt('v3');
-  const [exp, maxp, pc, mc, paused] = await Promise.all([
-    core.pendingExpiryBlocks().catch(()=>null), core.maxPendingPerPlayer().catch(()=>null),
-    core.playerCount().catch(()=>null), core.monstersCount().catch(()=>0n),
-    core.paused().catch(()=>false)
+  const [exp, maxp, pc, paused] = await Promise.all([
+    ro(()=>core.pendingExpiryBlocks()), ro(()=>core.maxPendingPerPlayer()),
+    ro(()=>core.playerCount()), ro(()=>core.paused())
   ]);
+  const msrc = await monsterSource(core);
+  const mcnt = msrc.count;
   let monRows = '';
-  const mcnt = Number(mc||0);
   if(mcnt>0){
-    const ms = [];
-    for(let i=0;i<mcnt;i++) ms.push(core.monsters(BigInt(i)).catch(()=>null));
-    const list = await Promise.all(ms);
+    const list = await Promise.all(Array.from({length:mcnt},(_,i)=>monsterAt(msrc, core, i)));
     monRows = list.map((m,i)=> m?`
       <div class="flex items-center gap-2 px-3 py-1.5 bg-[#0d1526] rounded-lg border border-[#24304a]">
         <span class="text-[12px] font-bold num-mono w-6">${i}</span>
@@ -1043,14 +1091,14 @@ async function secV3(el, isOwner){
   } else { monRows = '<div class="text-[12px] text-muted">暂无怪物</div>'; }
   const ch = adminCt('characters');
   const [sRegen, sMax, sCost, mintLimit, refReq] = await Promise.all([
-    ch.staminaRegen().catch(()=>null), ch.maxStamina().catch(()=>null), ch.staminaCost().catch(()=>null),
-    ch.maxMintPerAddr().catch(()=>null), ch.referrerRequired().catch(()=>null)
+    ro(()=>ch.staminaRegen()), ro(()=>ch.maxStamina()), ro(()=>ch.staminaCost()),
+    ro(()=>ch.maxMintPerAddr()), ro(()=>ch.referrerRequired())
   ]);
   // V15：首铸赠武器配置状态（Characters.weapons + Weapons.minter(Characters)）
   let giftWeapons = null, giftMinter = null;
-  try { giftWeapons = (await ch.weapons()) || ethers.ZeroAddress; } catch(e) { giftWeapons = null; }
+  giftWeapons = (await ro(()=>ch.weapons())) || null;
   if (giftWeapons && giftWeapons !== ethers.ZeroAddress) {
-    try { giftMinter = await adminCt('weapons').minters(addrOf('characters')).catch(()=>null); } catch(e) { giftMinter = null; }
+    giftMinter = await ro(()=>adminCt('weapons').minters(addrOf('characters')));
   }
   let paceRow = '';
   if(sRegen && sMax){
@@ -1062,7 +1110,7 @@ async function secV3(el, isOwner){
   }
   const staminaCard = aCard('英雄体力系统','fa-bolt',
     (sRegen===null || sMax===null)
-      ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>当前链上 Characters 合约尚未升级，暂无法读取/设置体力参数。</div>'
+      ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>未能读取体力参数：可能是链上 Characters 未升级到 V14，也可能是 RPC 读取失败。点右上「刷新」重试；仍失败再对照浏览器控制台。</div>'
       : aRow('体力恢复间隔', (Number(sRegen)/60)+' 分钟/点（'+String(sRegen)+' 秒）') +
         aRow('体力上限', String(Number(sMax)) + ' 点') +
         aRow('每场战斗消耗', sCost===null ? '未知（需升级 V14）' : String(Number(sCost)) + ' 点') +
@@ -1073,7 +1121,7 @@ async function secV3(el, isOwner){
              (sCost===null ? '' : aAct('一键应用 120/3分钟/10点', 'adminApplyStaminaV14()', 'fa-wand-magic-sparkles')) : '');
   const mintCard = aCard('铸造限额','fa-hashtag',
     mintLimit===null
-      ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>当前链上 Characters 尚未升级到 V4，无法读取铸造限额。</div>'
+      ? '<div class="text-[12px] text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>未能读取铸造限额：可能是链上 Characters 未升级到 V4，也可能是 RPC 读取失败。点右上「刷新」重试。</div>'
       : aRow('每地址铸造上限', Number(mintLimit)>0 ? String(Number(mintLimit)) + ' 个' : '不限制（0）') +
         '<div class="text-[11px] text-muted px-1 pt-1">仅限制「铸造」次数；持有数量不限，市场可自由交易。设为 0 关闭限制。</div>',
     isOwner ? aAct('设置铸造上限', 'adminOpenSetMaxMint()', 'fa-pen') + aAct('查询地址已铸造数', 'adminOpenQueryMinted()', 'fa-magnifying-glass') : '');
@@ -1096,8 +1144,10 @@ async function secV3(el, isOwner){
     isOwner ? aAct('修改过期块数', 'adminPromptUint(\'v3\',\'setPendingExpiryBlocks\',\'过期块数（100~450）：\',{min:100,max:450})', 'fa-pen') +
              aAct('修改每人上限', 'adminPromptUint(\'v3\',\'setMaxPendingPerPlayer\',\'每人待处理上限：\',{min:1,max:10})', 'fa-pen') +
              aAct('清理单个过期', 'adminPromptUint(\'v3\',\'cleanupExpiredAction\',\'commitId：\',{})', 'fa-broom') : '')
-    + aCard('怪物图鉴（'+mcnt+'）','fa-biohazard', monRows,
-      isOwner ? aAct('添加怪物', 'adminOpenAddMonster()', 'fa-plus') + aAct('更新怪物', 'adminOpenUpdateMonster()', 'fa-pen') : '')
+    + aCard('怪物图鉴（'+mcnt+'）','fa-biohazard',
+      `<div class="text-[11px] text-muted px-1 pb-1">数据源：<b class="num-mono">${msrc.reg?shortAddr(msrc.reg)+' MonsterRegistry（与链上结算同源）':'V3 本地 monsters[]（未设置 Registry）'}</b></div>` + monRows
+      + (msrc.reg && isOwner ? '<div class="text-[11px] text-amber-400 px-1 pt-1"><i class="fa-solid fa-circle-info mr-1"></i>MonsterRegistry 合约没有 update 方法，已添加的怪物无法修改；如需调整数据请部署新 Registry 后用「设置关联」切换。</div>' : ''),
+      isOwner ? aAct('添加怪物', 'adminOpenAddMonster()', 'fa-plus') + (msrc.reg ? '' : aAct('更新怪物', 'adminOpenUpdateMonster()', 'fa-pen')) : '')
     + aCard('关联设置','fa-link',
       `<div class="text-[12px] text-muted">核心玩法关联的 8 个合约地址。</div>`,
       isOwner ? aAct('设置关联', 'adminOpenSetV3Links()', 'fa-pen') +
@@ -1253,7 +1303,8 @@ async function adminDoSetWinRate(){
 }
 
 async function adminOpenAddMonster(){
-  adminFormModal('添加怪物',[
+  const src = await monsterSource().catch(()=>({reg:null}));
+  adminFormModal('添加怪物 → '+(src.reg?'MonsterRegistry':'V3 本地数组'),[
     {label:'怪物名称', placeholder:'如 火焰巨魔'},
     {label:'元素', type:'select', options:[0,1,2,3,4].map(i=>({v:String(i), t:ELEMENTS[i].icon+' '+ELEMENTS[i].name})), value:'0'},
     {label:'战力（≤1000000）', placeholder:'100'},
@@ -1263,20 +1314,25 @@ async function adminOpenAddMonster(){
 }
 async function adminDoAddMonster(){
   const v = adminFormVals(5);
+  const src = await monsterSource();
   await adminExec('添加怪物', async()=>{
-    await (await adminCt('v3',true).addMonster(v[0].trim(), BigInt(Number(v[1])||0),
+    const args = [v[0].trim(), BigInt(Number(v[1])||0),
       BigInt(Math.max(1,Math.min(1000000,Number(v[2])||100))),
       BigInt(Math.max(0,Math.min(10000,Number(v[3])||0))),
-      BigInt(Math.max(0,Math.min(10000,Number(v[4])||0))))).wait();
+      BigInt(Math.max(0,Math.min(10000,Number(v[4])||0)))];
+    // 有 Registry 时写入 Registry（链上结算读的就是它）；否则写入 V3 本地数组
+    const addCt = src.reg ? new ethers.Contract(src.reg, MONREG_ABI, S.signer) : adminCt('v3', true);
+    await (await addCt.addMonster(...args)).wait();
   });
 }
 async function adminOpenUpdateMonster(){
   const core = adminCt('v3');
-  const mc = await core.monstersCount().catch(()=>0n);
-  if(Number(mc)===0){ toast('暂无怪物可更新','warn'); return; }
-  const m = await core.monsters(BigInt(0)).catch(()=>null);
+  const src = await monsterSource(core);
+  if(src.reg){ toast('当前使用 MonsterRegistry（无 update 方法），无法修改怪物','warn'); return; }
+  if(!src.count){ toast('暂无怪物可更新','warn'); return; }
+  const m = await monsterAt(src, core, 0);
   adminFormModal('更新怪物（先填 ID）',[
-    {label:'怪物 ID（0~'+(Number(mc)-1)+'）', value:'0'},
+    {label:'怪物 ID（0~'+(src.count-1)+'）', value:'0'},
     {label:'名称', value: m?m.name:''},
     {label:'元素', type:'select', options:[0,1,2,3,4].map(i=>({v:String(i), t:ELEMENTS[i].icon+' '+ELEMENTS[i].name})), value: m?String(Number(m.element)):'0'},
     {label:'战力', value: m?String(Number(m.power)):''},
@@ -1286,6 +1342,8 @@ async function adminOpenUpdateMonster(){
 }
 async function adminDoUpdateMonster(){
   const v = adminFormVals(6);
+  const src = await monsterSource();
+  if(src.reg){ toast('当前使用 MonsterRegistry（无 update 方法），无法修改怪物','warn'); return; }
   await adminExec('更新怪物', async()=>{
     await (await adminCt('v3',true).updateMonster(BigInt(Math.round(Number(v[0])||0)), v[1].trim(), BigInt(Number(v[2])||0),
       BigInt(Math.max(1,Math.min(1000000,Number(v[3])||1))),
