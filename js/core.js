@@ -9,6 +9,7 @@ const NETWORKS = {
     rpcUrl: 'https://bsc-testnet.publicnode.com',
     rpcFallbacks: ['https://data-seed-prebsc-1-s2.bnbchain.org:8545','https://bsc-testnet.drpc.org','https://data-seed-prebsc-1-s1.bnbchain.org:8545'],
     name: 'BSC 测试网',
+    explorer: 'https://testnet.bscscan.com',
     gasPrice: 120000000n, // 0.12 gwei
     contracts: {
       gameToken:   '0xF3Aa1d13Ca2307d462506d9EB88B273166E145A8',
@@ -32,6 +33,7 @@ const NETWORKS = {
     rpcUrl: 'https://bsc-dataseed3.bnbchain.org',
     rpcFallbacks: ['https://bsc-dataseed1.bnbchain.org','https://bsc-dataseed2.bnbchain.org','https://bsc-rpc.publicnode.com','https://bsc.drpc.org'],
     name: 'BSC 主网',
+    explorer: 'https://bscscan.com',
     gasPrice: 100000000n, // 0.1 gwei（BSC 主网当前实际价 ~0.05 gwei）
     contracts: {
       gameToken:   '0x5f672Bfa19f1E29178f90C159070981976687777', // EH（主网已部署）
@@ -59,6 +61,10 @@ let NET = NETWORKS[NET_CURRENT];
 let CONTRACTS = NET.contracts;
 let GAS_PRICE = NET.gasPrice;
 const CONFIG = { confirmations: 3 };
+
+/* ============ 区块浏览器链接（随当前网络切换；主网不能用 testnet.bscscan.com） ============ */
+function explorerTxUrl(hash){ return ((NET && NET.explorer) || 'https://bscscan.com') + '/tx/' + hash; }
+function explorerAddrUrl(addr){ return ((NET && NET.explorer) || 'https://bscscan.com') + '/address/' + addr; }
 
 /* ============ ABI ============ */
 const ABIs = {
@@ -127,6 +133,12 @@ const ABIs = {
   essence: ["function balanceOf(address,uint256) view returns (uint256)","function balanceOfBatch(address[],uint256[]) view returns (uint256[])","function setApprovalForAll(address,bool)","function isApprovedForAll(address,address) view returns (bool)","event TransferSingle(address indexed operator,address indexed from,address indexed to,uint256 id,uint256 value)"],
   forgeShop: [
     "function owner() view returns (address)",
+    // 揭示窗口：ForgeShop 自己只认 commitExpiryBlocks（主网 256），比 RandomOracle.maxDelayBlocks(450) 更短，
+    // 前端必须按它判定过期，否则会一直重试已失效的 commit → 一直「揭示失败」
+    "function commitExpiryBlocks() view returns (uint256)",
+    "function maxPendingPerPlayer() view returns (uint256)",
+    "function playerPendingCount(address) view returns (uint256)",
+    "function cleanupExpiredCommit(uint256)",
     "function DEFAULT_FORGE_COST() view returns (uint256)","function DEFAULT_FORGE10_COST() view returns (uint256)","function DEFAULT_FORGE100_COST() view returns (uint256)",
     "function commitForgeWeapon(bytes32) returns (uint256)",
     "function commitForgeWeapon10(bytes32) returns (uint256)",
@@ -143,6 +155,8 @@ const ABIs = {
   ],
   enhanceShop: [
     "function owner() view returns (address)",
+    "function commitExpiryBlocks() view returns (uint256)",
+    "function cleanupExpiredCommit(uint256)",
     "function commitEnhance(bytes32,uint256,uint256,uint8) returns (uint256)",
     "function composeEssence(uint8,uint256)",
     "event EnhanceCommitted(address indexed player,uint256 indexed commitId,uint256 indexed weaponId,uint256 amount,uint8 essenceTier)",
@@ -188,6 +202,11 @@ const ABIs = {
     "event HeroLocked(uint256 indexed heroId,string reason)",
     "event PlayerLocked(address indexed player,string reason)",
     "event TokensBurnedForFight(address indexed player,uint256 amount,uint256 price)",
+    // V22：战斗 gas 补贴
+    "function gasSubsidy() view returns (uint256)",
+    "function setGasSubsidy(uint256)",
+    "event GasSubsidySet(uint256 amount)",
+    "event GasSubsidyGranted(address indexed player,uint256 amount)",
     "event RewardAccumulated(address indexed player,uint256 amount)",
     "event ReferralReward(address indexed referrer,uint256 indexed heroId,uint256 amount)",
     "function DEFAULT_HERO_COST() view returns (uint256)"
@@ -310,7 +329,7 @@ const S = {
   fightW:{el:null, star:null}, bossW:{el:null, star:null},
   battleRecords:[],
   admin:{status:'idle', forAccount:null, isOwner:false, rows:[]},
-  oracleCfg:{ minDelay:3, maxDelay:450 },
+  oracleCfg:{ minDelay:3, maxDelay:450, windows:{} },
   busy:false
 };
 const c = {};

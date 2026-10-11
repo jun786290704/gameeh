@@ -94,7 +94,11 @@ const ADMIN_ABIS = {
     "function burnAmountLow() view returns (uint256)",
     "function burnAmountMid() view returns (uint256)",
     "function burnAmountHigh() view returns (uint256)",
-    "function setBurnParams(uint256,uint256,uint256,uint256,uint256,uint256)"
+    "function setBurnParams(uint256,uint256,uint256,uint256,uint256,uint256)",
+    // V22：战斗 gas 补贴（每场战斗向金库记一笔固定 USDT，胜负都发）
+    "function gasSubsidy() view returns (uint256)",
+    "function setGasSubsidy(uint256)",
+    "event GasSubsidySet(uint256 amount)"
   ],
   forgeShop: [
     "function owner() view returns (address)","function paused() view returns (bool)","function pause()","function unpause()",
@@ -1157,12 +1161,13 @@ async function secV3(el, isOwner){
 /* ========== 反作弊管理 ========== */
 async function secAntiCheat(el, isOwner){
   const v3 = adminCt('v3');
-  const [maxStreak, minFights, maxRateBp, threshold, burnAmt] = await Promise.all([
+  const [maxStreak, minFights, maxRateBp, threshold, burnAmt, subAmt] = await Promise.all([
     v3.maxWinStreak().catch(()=>null),
     v3.minFightsForCheck().catch(()=>null),
     v3.maxWinRateBp().catch(()=>null),
     v3.highLevelMonsterThreshold().catch(()=>null),
-    v3.getFightBurnAmount().catch(()=>null)
+    v3.getFightBurnAmount().catch(()=>null),
+    v3.gasSubsidy().catch(()=>null)
   ]);
   const [btl, btm, bth, abl, abm, abh] = await Promise.all([
     v3.burnThresholdLow().catch(()=>null), v3.burnThresholdMid().catch(()=>null), v3.burnThresholdHigh().catch(()=>null),
@@ -1182,6 +1187,17 @@ async function secAntiCheat(el, isOwner){
     '<div class="text-[11px] text-muted px-1 pt-1">按代币/USDT 价格阶梯销毁玩家代币（转账到黑洞 0xdEaD）。价格读不到/无流动池时按最低档。需玩家授权 V3 合约代币。</div>',
     isOwner ? aAct('设置销毁阶梯', 'adminOpenSetBurn()', 'fa-pen') : '');
 
+  /* V22：战斗 gas 补贴。实测一场 fightOnce ≈ 231,285 gas（BNB=$749.63 时 0.1 gwei ≈ $0.0173），
+     另需销毁 50 EH；每场消耗 10 体力（单号上限约 115 场/天）⇒ 补贴不可被无成本刷量。 */
+  const gasSubCard = aCard('战斗 gas 补贴','fa-gas-pump',
+    aRow('当前每场补贴', subAmt!==null ? (BigInt(subAmt)>0n ? '⛽ '+fmtUnits(subAmt,18,4)+' USDT/场' : '未开启（0）') : '-') +
+    aRow('建议区间', '0.01 ~ 0.03 USDT/场（默认 0.02）') +
+    aRow('发放范围', '胜负都发 · 与胜利奖励同池，claim 时一并领取') +
+    '<div class="text-[11px] text-muted px-1 pt-1">每场战斗（胜负都算）向金库记一笔固定 USDT 补贴，玩家领取时无需额外交易。' +
+    '实测：一场战斗 ≈ 231,285 gas（BNB≈$750 时 0.05 gwei ≈ 0.0087 / 0.1 gwei ≈ 0.0173 / 0.3 gwei ≈ 0.052 USDT），另需销毁 50 EH。' +
+    '⛔ 补贴是按固定金额而非按实际 gas 换算 —— 链上取不到 gasUsed，只能读玩家自选的 gasPrice，做成比例会被自设高价刷爆。gas 涨价时用此处改大即可（上限 1 USDT/场）。</div>',
+    isOwner ? aAct('设置 gas 补贴', 'adminOpenSetGasSubsidy()', 'fa-pen') : '');
+
   const body = aCard('反作弊规则','fa-shield-virus',
     aRow('最大连胜次数', maxStreak!==null ? String(Number(maxStreak)) : '-') +
     aRow('高等级怪物阈值', threshold!==null ? '#'+String(Number(threshold))+' 及以上' : '-') +
@@ -1192,6 +1208,7 @@ async function secAntiCheat(el, isOwner){
              aAct('设置怪物阈值', 'adminPromptUint(\'v3\',\'setHighLevelMonsterThreshold\',\'高等级怪物 ID 阈值（4~9）：\',{min:4,max:9})', 'fa-pen') +
              aAct('设置胜率参数', 'adminOpenSetWinRate()', 'fa-percent') : '')
     + burnCard
+    + gasSubCard
     + aCard('英雄锁定管理','fa-lock',
     '<div class="text-[12px] text-muted">输入英雄 ID 查看是否被锁定，或解锁英雄。</div>' +
     '<div class="flex gap-2 mt-2"><input id="antiCheatHeroId" type="number" placeholder="英雄 ID" class="input flex-1"><button class="btn btn-gold" onclick="adminCheckHeroLock()">查询</button></div>' +
@@ -1232,6 +1249,26 @@ async function adminDoSetBurn(){
   if(t1>=t2 || t2>=t3){ toast('阈值需递增','warn'); return; }
   await adminExec('设置销毁阶梯', async()=>{
     await (await adminCt('v3',true).setBurnParams(t1,t2,t3,a1,a2,a3)).wait();
+  });
+}
+
+async function adminOpenSetGasSubsidy(){
+  const v3 = adminCt('v3');
+  const cur = await v3.gasSubsidy().catch(()=>null);
+  adminFormModal('设置战斗 gas 补贴',[
+    {label:'每场补贴（USDT，建议 0.01~0.03，默认 0.02；0 = 关闭；硬上限 1）', value: cur!==null?fmtUnits(cur,18,4):'0.02'}
+  ], 'adminDoSetGasSubsidy()');
+}
+async function adminDoSetGasSubsidy(){
+  const v = adminFormVals(1);
+  const n = Number(v[0]);
+  if(!Number.isFinite(n) || n<0 || n>1){ toast('请输入 0 ~ 1 之间的 USDT 金额','warn'); return; }
+  // 建议区间外二次确认（实测每场 gas 成本 0.0087~0.052 USDT，低于 0.01 玩家仍亏、高于 0.03 易被刷）
+  if(n > 0.03 && !confirm('补贴 '+n+' USDT/场 高于建议上限 0.03。\n实测每场 gas 成本约 0.0087~0.052 USDT，过高会增加金库支出。\n确定继续？')) return;
+  if(n > 0 && n < 0.01 && !confirm('补贴 '+n+' USDT/场 低于建议下限 0.01。\n玩家仍需自付大部分 gas。\n确定继续？')) return;
+  await adminExec('设置 gas 补贴', async()=>{
+    // 用字符串直接 parseUnits，避免浮点误差（0.03 → "0.03"）
+    await (await adminCt('v3',true).setGasSubsidy(ethers.parseUnits(String(n),18))).wait();
   });
 }
 

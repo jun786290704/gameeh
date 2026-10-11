@@ -40,6 +40,7 @@ async function fetchMonsters(){
 }
 async function renderFight(){
   await loadVaultMode();          // 确保奖励符号/精度正确（USDT 而非 EH）
+  await loadGasSubsidy(true);     // V22：刷新每场战斗的 gas 补贴（管理员可能刚改）
   await fetchMonsters();
   const heroSel = $('#fightHeroSel'); if(!heroSel) return;
   const monsterIcons = ['👹','👺','👻','💀','🐉','🦇','🕷️','🐍','🦂','🐺'];
@@ -304,6 +305,12 @@ async function autoPreviewFight(){
     const burnLine = burnAmt > 0n
       ? `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">本次战斗销毁（转账黑洞）</span><div class="font-bold text-red-400 num-mono">🔥 ${fmtUnits(burnAmt, S.tokenDecimals, 0)} ${S.tokenSymbol||TOKEN_SYMBOL}</div></div>`
       : '';
+    /* V22：每场战斗 gas 补贴（胜负都给，与胜利奖励同池，claim 时一并领取） */
+    let gasSub = 0n;
+    try{ if(S.signer) gasSub = BigInt(await loadGasSubsidy()) || 0n; }catch(e){}
+    const subLine = gasSub > 0n
+      ? `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">每场战斗 gas 补贴（胜负都给）</span><div class="font-bold text-cyan-300 num-mono">⛽ + ${fmtVaultUnits(gasSub, 4)}</div></div>`
+      : '';
     if(barWin) barWin.textContent = chancePct + '%';
     if(barSum) barSum.textContent = `英雄 #${h} vs ${monData.name} · 战力 ${fmt(eff,0)} VS ${fmt(monPower,0)}`;
     if(box) box.innerHTML = `
@@ -348,6 +355,7 @@ async function autoPreviewFight(){
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5"><span class="text-muted">元素加成</span><div class="font-bold num-mono" style="color:${elAdvColor};">${(elMult/100).toFixed(0)}%</div></div>
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">预计奖励（胜利时）</span><div class="font-bold text-gold num-mono">${estReward===null?'--':'+ '+fmtUnits(estReward, estU.dec, 2)+' '+estU.sym}</div></div>
           ${burnLine}
+          ${subLine}
         </div>
       </div>`;
   }catch(e){
@@ -433,17 +441,41 @@ async function parseFightResult(rec, p){
 }
 function extractFightResult(rec){
   const iface = new ethers.Interface(ABIs.v3);
-  let ev = null;
+  let ev = null, subsidy = 0n;
+  const me = String(S.account||'').toLowerCase();
   for(const log of rec.logs){
-    try{ const d = iface.parseLog(log); if(d && d.name==='FightResult'){ ev = d.args; break; } }catch(e){}
+    try{
+      const d = iface.parseLog(log); if(!d) continue;
+      if(d.name==='FightResult'){ if(!ev) ev = d.args; }
+      // V22：每场战斗的 gas 补贴（胜负都发）。同一笔交易里只有本玩家的事件。
+      else if(d.name==='GasSubsidyGranted'){
+        if(!me || !d.args.player || String(d.args.player).toLowerCase()===me) subsidy = BigInt(d.args.amount);
+      }
+    }catch(e){}
   }
   if(!ev) return null;
+  /* ⚠ 事件字段名是 effPower / winChanceBp（见 contracts/ElementHeroesV3.sol 的 FightResult）。
+     旧代码写成 ev.eff / ev.chance ⇒ 取到 undefined ⇒ 战斗结算面板的战力/胜率显示成 NaN。
+     这里按名字取，并保留位置下标兜底。 */
   const rec2 = { ts:Date.now(), heroId:Number(ev.heroId), monsterId:Number(ev.monsterId), win:ev.win,
     reward: ev.reward.toString(), xp:Number(ev.xpGained),
-    effPower:Number(ev.eff), winChanceBp:Number(ev.chance), roll:Number(ev.roll) };
+    effPower: Number(ev.effPower ?? ev[7] ?? ev.eff ?? 0),
+    winChanceBp: Number(ev.winChanceBp ?? ev[8] ?? ev.chance ?? 0),
+    roll: Number(ev.roll ?? ev[9] ?? 0),
+    weaponId: ev.weaponId !== undefined ? Number(ev.weaponId) : null,
+    subsidy: subsidy.toString() };
   S.battleRecords.unshift(rec2); if(S.battleRecords.length>20)S.battleRecords.length=20;
   try{ localStorage.setItem('eh_battles', JSON.stringify(S.battleRecords)); }catch(e){}
   return rec2;
+}
+
+/* V22：每场战斗的 gas 补贴（链上 V3.gasSubsidy()，胜负都发；0 = 未开启）。
+   读不到按 0 处理（不显示这一行），不影响战斗流程。 */
+async function loadGasSubsidy(force){
+  if(!force && S.gasSubsidy !== undefined && S.gasSubsidy !== null) return S.gasSubsidy;
+  try{ S.gasSubsidy = BigInt(await mustC('v3').gasSubsidy()); }
+  catch(e){ S.gasSubsidy = 0n; }
+  return S.gasSubsidy;
 }
 
 /* ============ 战斗动画舞台（12秒回合制互殴） ============ */
@@ -456,6 +488,7 @@ async function playBattleAnimation(rec2){
   const monsterIcons = ['👹','👺','👻','💀','🐉','🦇','🕷️','🐍','🦂','🐺'];
   const icon = monsterIcons[rec2.monsterId % monsterIcons.length] || '👾';
   const win = !!rec2.win;
+  const sub = BigInt(rec2.subsidy || 0);   // V22 gas 补贴（胜负都有）
   const hpHero = Math.max(Math.round((hero.power||rec2.effPower||100)/10), 8);
   const hpMon  = Math.max(Math.round((m.power||100)/10), 8);
   const heroSkills = ['🗡️ 飞剑','💥 '+he.name+'冲击','🌪️ 旋风斩','✨ 星光弹'];
@@ -494,12 +527,13 @@ async function playBattleAnimation(rec2){
           <span>胜率 <b>${(rec2.winChanceBp/100).toFixed(1)}%</b></span>
           <span>判定 <b>${rec2.roll}/100</b></span>
         </div>
-        ${win?`
+        ${(win || sub>0n)?`
           <div class="battle-reward">
-            <div class="battle-reward-item gold"><i class="fa-solid fa-coins"></i>+${fmtVaultUnits(BigInt(rec2.reward), 2)}</div>
+            ${win?`<div class="battle-reward-item gold"><i class="fa-solid fa-coins"></i>+${fmtVaultUnits(BigInt(rec2.reward), 2)}</div>`:''}
+            ${sub>0n?`<div class="battle-reward-item xp" title="每场战斗的 gas 补贴（胜负都给）"><i class="fa-solid fa-gas-pump"></i>+${fmtVaultUnits(sub, 4)}</div>`:''}
             <div class="battle-reward-item xp"><i class="fa-solid fa-star"></i>+${rec2.xp} XP</div>
           </div>
-          <div class="battle-reward-note"><i class="fa-solid fa-vault mr-1"></i>奖励已存入金库，可前往「金库」页领取</div>`:''}
+          <div class="battle-reward-note"><i class="fa-solid fa-vault mr-1"></i>${win?'胜利奖励与 gas 补贴':'gas 补贴'}已存入金库，可前往「金库」页领取</div>`:''}
         <button id="battleContinueBtn" onclick="closeBattleStage()" class="btn ${win?'btn-gold':'btn-ghost'} w-full text-base py-3 mt-3">${win?'继续冒险':'再战一次'}</button>
       </div>
     </div>`;

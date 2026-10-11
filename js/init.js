@@ -22,10 +22,10 @@ async function init(){
   setTimeout(async ()=>{
     await validatePending();
     const cur = await (S.signer ? S.provider : getReadProvider()).getBlockNumber().catch(()=>0);
-    const maxDelay = S.oracleCfg.maxDelay || 450;
     S.pending.filter(p=>!p.done).forEach(p=>{
       if(!p.ts) return;
-      if(p.commitBlock && cur && (cur - p.commitBlock) > maxDelay) return;
+      // 用「该商店自己的揭示窗口」判定（ForgeShop=256 块，比 oracle.maxDelay 450 更严格）
+      if(p.commitBlock && cur && (cur - p.commitBlock) > revealWindowFor(p)) return;
       waitAndReveal(p);
     });
   }, 3000);

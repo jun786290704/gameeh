@@ -161,12 +161,23 @@ async function readCall(key, fn){
 /* ============ 加载合约配置 ============ */
 async function loadOracleConfig(){
   try{
-    const ro = c.randomOracle; if(!ro) return;
+    const ro = c.randomOracle;
+    if(!ro){ return; }
     const [mn, mx] = await Promise.all([
       ro.minDelayBlocks().catch(()=>3n),
       ro.maxDelayBlocks().catch(()=>450n)
     ]);
-    S.oracleCfg = { minDelay: Number(mn), maxDelay: Number(mx) };
+    /* 各商店自己的 commit 有效期（commitExpiryBlocks）比 oracle.maxDelayBlocks 更严格：
+       ForgeShop 主网 = 256 < oracle 450。揭示窗口必须取二者较小值，否则前端会在
+       256~450 之间继续重试已被合约清理的 commit，永远「揭示失败」。 */
+    const windows = {};
+    const wSrc = [['forge','forgeShop'],['synthesize','forgeShop'],['enhance','enhanceShop']];
+    await Promise.all(wSrc.map(async ([action, key])=>{
+      const ct = c[key];
+      if(!ct || typeof ct.commitExpiryBlocks !== 'function') return;
+      try{ windows[action] = Number(await ct.commitExpiryBlocks()); }catch(e){}
+    }));
+    S.oracleCfg = { minDelay: Number(mn), maxDelay: Number(mx), windows };
   }catch(e){ console.warn('[oracleConfig]', e); toast('随机数预言机配置加载失败，使用默认值','warn'); }
 }
 async function loadMarketFee(){
