@@ -144,7 +144,11 @@ const ADMIN_ABIS = {
     "function slippageBp() view returns (uint256)","function swapEnabled() view returns (bool)",
     "function totalSwappedBNB() view returns (uint256)","function totalSwappedUSDT() view returns (uint256)",
     "function setSwapRouter(address)","function setSwapParams(uint256,uint256,uint256)","function setSwapEnabled(bool)",
-    "function execSwap(uint256)","function execSwapAll()","function depositBNB()"
+    "function execSwap(uint256)","function execSwapAll()","function depositBNB()",
+    // V23：管理员提现 BNB / USDT（保留 gas 与玩家待领奖励）
+    "function withdrawBNB(address,uint256)","function withdrawUSDT(address,uint256)",
+    "function withdrawableBNB() view returns (uint256)","function withdrawableUSDT() view returns (uint256)",
+    "function totalWithdrawnBNB() view returns (uint256)","function totalWithdrawnUSDT() view returns (uint256)"
   ],
   boss: [
     "function owner() view returns (address)","function paused() view returns (bool)","function pause()","function unpause()",
@@ -687,7 +691,26 @@ async function secVault(el, isOwner){
               aAct('配置兑换路由','adminOpenSetSwapRouter()','fa-road') + aAct('设置兑换参数','adminOpenSetSwapParams()','fa-sliders') +
               aAct(swapCfg.enabled?'关闭自动兑换':'启用自动兑换','adminToggleSwapEnabled()','fa-power-off') +
               aAct('存入 BNB','adminOpenDepositBNB()','fa-circle-plus') : '');
-  el.innerHTML = body + limitCard + swapCard + aCard('暂停控制','fa-toggle-on',
+  /* ---- 提现（V23：管理员提取 BNB / USDT） ---- */
+  const wdCfg = { bnb:null, usdt:null, tb:null, tu:null, ok:false };
+  try{
+    const [w1,w2,w3,w4] = await Promise.all([
+      vt.withdrawableBNB().catch(()=>null), vt.withdrawableUSDT().catch(()=>null),
+      vt.totalWithdrawnBNB().catch(()=>null), vt.totalWithdrawnUSDT().catch(()=>null)
+    ]);
+    wdCfg.bnb=w1; wdCfg.usdt=w2; wdCfg.tb=w3; wdCfg.tu=w4;
+    wdCfg.ok = (w1!==null || w2!==null);
+  }catch(e){ /* 旧版金库无提现功能 */ }
+  const keepTxt = swapCfg.keep!==null ? fmtUnits(swapCfg.keep,18,4)+' BNB' : '0.02 BNB';
+  const pendTxt = tpu!==null ? fmtUnits(tpu,18,2)+' USDT' : '-';
+  const withdrawCard = aCard('提现（管理员提取金库资金）','fa-money-bill-transfer',
+    aRow('可提 BNB', wdCfg.bnb!==null ? '<b class="text-gold">'+fmtUnits(wdCfg.bnb,18,6)+' BNB</b>' : '<span class="text-muted">（需升级金库实现）</span>') +
+    aRow('可提 USDT', wdCfg.usdt!==null ? '<b class="text-gold">'+fmtUnits(wdCfg.usdt,18,2)+' USDT</b>' : '<span class="text-muted">-</span>') +
+    aRow('累计提取 BNB', wdCfg.tb!==null ? fmtUnits(wdCfg.tb,18,6)+' BNB' : '-') +
+    aRow('累计提取 USDT', wdCfg.tu!==null ? fmtUnits(wdCfg.tu,18,2)+' USDT' : '-') +
+    `<div class="text-[11px] text-muted px-1 pt-1">硬约束：BNB 保留 <b>${keepTxt}</b> 供合约发起交易；USDT 保留玩家待领奖励 <b>${pendTxt}</b>。只有二者之外的余额可提取，玩家奖励不可能被挪用。提现不受「暂停」影响。</div>`,
+    (isOwner && wdCfg.ok) ? aAct('提现 BNB','adminOpenWithdrawBNB()','fa-coins') + aAct('提现 USDT','adminOpenWithdrawUSDT()','fa-dollar-sign') : '');
+  el.innerHTML = body + limitCard + swapCard + withdrawCard + aCard('暂停控制','fa-toggle-on',
     `<div class="text-[12px] text-muted">暂停后金库存入/领取全部冻结。</div>`,
     isOwner ? aPauseBtn('vault', paused) : '');
 }
@@ -893,6 +916,55 @@ async function adminDoDepositBNB(){
   await adminExec('存入 BNB', async()=>{
     await (await adminCt('vault',true).depositBNB({ value: amt })).wait();
   });
+}
+/* ---- 提现（V23：管理员提取 BNB / USDT） ---- */
+async function adminOpenWithdrawBNB(){
+  const vt = adminCt('vault');
+  const [w, keep] = await Promise.all([
+    vt.withdrawableBNB().catch(()=>null), vt.keepGasBNB().catch(()=>null)
+  ]);
+  if(w===null){ toast('当前金库实现不支持提现，请先升级金库','warn'); return; }
+  adminFormModal('提现金库 BNB',[
+    {label:'接收地址（留空=当前钱包）', value:S.account||'', placeholder:'0x…'},
+    {label:'BNB 数量（可提上限 '+ethers.formatEther(w)+' BNB'+(keep!==null?'；合约保留 '+ethers.formatEther(keep)+' BNB 作 gas':'')+'）', value: ethers.formatEther(w), placeholder:'如 0.05'}
+  ],'adminDoWithdrawBNB()');
+}
+async function adminDoWithdrawBNB(){
+  const v = adminFormVals(2);
+  const to = String(v[0]||'').trim() || S.account;
+  if(!ethers.isAddress(to)){ toast('接收地址不正确','warn'); return; }
+  let amt;
+  try{ amt = ethers.parseEther(String(v[1]||'0').trim()||'0'); }catch(e){ toast('数量格式不正确','warn'); return; }
+  if(amt<=0n){ toast('请输入大于 0 的数量','warn'); return; }
+  const w = await adminCt('vault').withdrawableBNB().catch(()=>null);
+  if(w!==null && amt>w){ toast('超过可提上限（'+ethers.formatEther(w)+' BNB）','warn'); return; }
+  await adminExec('提现 BNB', async()=>{
+    await (await adminCt('vault',true).withdrawBNB(to, amt)).wait();
+  }, false);
+}
+async function adminOpenWithdrawUSDT(){
+  const vt = adminCt('vault');
+  const [w, pend] = await Promise.all([
+    vt.withdrawableUSDT().catch(()=>null), vt.totalPendingUSDT().catch(()=>null)
+  ]);
+  if(w===null){ toast('当前金库实现不支持提现，请先升级金库','warn'); return; }
+  adminFormModal('提现金库 USDT',[
+    {label:'接收地址（留空=当前钱包）', value:S.account||'', placeholder:'0x…'},
+    {label:'USDT 数量（可提上限 '+ethers.formatUnits(w,18)+' USDT'+(pend!==null?'；须为玩家保留 '+ethers.formatUnits(pend,18)+' USDT':'')+'）', value: ethers.formatUnits(w,18), placeholder:'如 10'}
+  ],'adminDoWithdrawUSDT()');
+}
+async function adminDoWithdrawUSDT(){
+  const v = adminFormVals(2);
+  const to = String(v[0]||'').trim() || S.account;
+  if(!ethers.isAddress(to)){ toast('接收地址不正确','warn'); return; }
+  let amt;
+  try{ amt = ethers.parseUnits(String(v[1]||'0').trim()||'0',18); }catch(e){ toast('数量格式不正确','warn'); return; }
+  if(amt<=0n){ toast('请输入大于 0 的数量','warn'); return; }
+  const w = await adminCt('vault').withdrawableUSDT().catch(()=>null);
+  if(w!==null && amt>w){ toast('超过可提上限（'+ethers.formatUnits(w,18)+' USDT）','warn'); return; }
+  await adminExec('提现 USDT', async()=>{
+    await (await adminCt('vault',true).withdrawUSDT(to, amt)).wait();
+  }, false);
 }
 
 /* ============ 市场 ============ */

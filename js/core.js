@@ -92,7 +92,7 @@ const FIGHT_GAS_AUTO_BUMP = true;
 
 /* 前端构建标记：手机钱包内置浏览器缓存顽固时，可用它确认是否已加载到新版
    （控制台会打印，管理页「核心玩法」也会显示）。改前端记得同步 game.html / map.html 的 ?v= */
-const EH_BUILD = '20261011h';
+const EH_BUILD = '20261011i';
 try{ console.log('%c[元素英雄] 前端构建 '+EH_BUILD,'color:#fbbf24;font-weight:bold'); }catch(e){}
 
 /* PancakeSwap V2 Router / WBNB（按链取，供 gas 成本折算成 USDT 用） */
