@@ -311,6 +311,17 @@ async function autoPreviewFight(){
     const subLine = gasSub > 0n
       ? `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">每场战斗 gas 补贴（胜负都给）</span><div class="font-bold text-cyan-300 num-mono">⛽ + ${fmtVaultUnits(gasSub, 4)}</div></div>`
       : '';
+    /* V22：本次战斗的实际 gas 成本（恒定值）与「补贴 − gas」净额 */
+    let gasLine = '', netLine = '';
+    try{
+      const g = await fightGasCost();
+      const bnbTxt = (Number(g.wei) / 1e18).toFixed(8);
+      gasLine = `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">本次战斗 gas（恒定，前端自动填入）</span><div class="font-bold text-slate-300 num-mono">⛽ ${FIGHT_GAS_LIMIT.toLocaleString()} × ${(Number(FIGHT_GAS_PRICE)/1e9).toFixed(4)} gwei = ${bnbTxt} BNB${g.usdt>0n ? ' ≈ '+fmtUnits(g.usdt, 18, 4)+' USDT' : ''}</div></div>`;
+      if(gasSub > 0n && g.usdt > 0n){
+        const net = gasSub - g.usdt;
+        netLine = `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">补贴 − gas 净额</span><div class="font-bold num-mono" style="color:${net>=0n?'#22c55e':'#ef4444'};">${net>=0n?'+':'−'} ${fmtUnits(net>=0n?net:-net, 18, 4)} USDT</div></div>`;
+      }
+    }catch(e){}
     if(barWin) barWin.textContent = chancePct + '%';
     if(barSum) barSum.textContent = `英雄 #${h} vs ${monData.name} · 战力 ${fmt(eff,0)} VS ${fmt(monPower,0)}`;
     if(box) box.innerHTML = `
@@ -356,6 +367,8 @@ async function autoPreviewFight(){
           <div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">预计奖励（胜利时）</span><div class="font-bold text-gold num-mono">${estReward===null?'--':'+ '+fmtUnits(estReward, estU.dec, 2)+' '+estU.sym}</div></div>
           ${burnLine}
           ${subLine}
+          ${gasLine}
+          ${netLine}
         </div>
       </div>`;
   }catch(e){
@@ -401,7 +414,11 @@ async function fightFlow(){
     const monsterElement = S.monsterRandomElements && S.monsterRandomElements[monsterIdx] !== undefined 
       ? S.monsterRandomElements[monsterIdx] 
       : Math.floor(Math.random() * 5);
-    const tx = await sendRevealTx(eh, 'fightOnce', [heroId, weaponId, monsterId, monsterElement]);
+    /* V22：战斗交易用**恒定** gas（350,000 @ 0.0715 gwei），不再走 estimateGas，
+       这样每场 gas 成本可预算（≈0.00002503 BNB ≈ 0.0188 USDT @BNB$750），
+       正好被 0.02 USDT/场的补贴覆盖。改参数见 core.js 的 FIGHT_GAS_LIMIT / FIGHT_GAS_PRICE。 */
+    const tx = await eh.fightOnce(heroId, weaponId, monsterId, monsterElement,
+      { gasLimit: FIGHT_GAS_LIMIT, gasPrice: FIGHT_GAS_PRICE });
     toast('战斗中…','info');
     const rec = await tx.wait();
 
@@ -467,6 +484,28 @@ function extractFightResult(rec){
   S.battleRecords.unshift(rec2); if(S.battleRecords.length>20)S.battleRecords.length=20;
   try{ localStorage.setItem('eh_battles', JSON.stringify(S.battleRecords)); }catch(e){}
   return rec2;
+}
+
+/* V22：把「恒定 gas」（FIGHT_GAS_LIMIT × FIGHT_GAS_PRICE）折算成 USDT
+   —— 走 Pancake V2 的 WBNB→USDT 链上报价，不依赖外部行情 API。
+   拿不到报价就只显示 BNB 数量，不阻塞渲染。报价缓存 10 分钟。 */
+let _fightGasQuote = { usdt: 0n, ts: 0 };
+async function fightGasCost(){
+  const wei = FIGHT_GAS_LIMIT * FIGHT_GAS_PRICE; // 350,000 × 0.0715 gwei = 0.0000250250 BNB
+  if(_fightGasQuote.usdt > 0n && (Date.now() - _fightGasQuote.ts) < 600000){
+    return { wei, usdt: _fightGasQuote.usdt };
+  }
+  try{
+    const usdtAddr = await mustC('vault').usdt().catch(()=>null);
+    if(usdtAddr && usdtAddr !== '0x0000000000000000000000000000000000000000'){
+      const rct = new ethers.Contract(pancakeRouterAddr(),
+        ['function getAmountsOut(uint256,address[]) view returns (uint256[])'], getReadProvider());
+      const out = await rct.getAmountsOut(wei, [wbnbAddr(), usdtAddr]);
+      _fightGasQuote = { usdt: BigInt(out[out.length-1]), ts: Date.now() };
+      return { wei, usdt: _fightGasQuote.usdt };
+    }
+  }catch(e){}
+  return { wei, usdt: 0n };
 }
 
 /* V22：每场战斗的 gas 补贴（链上 V3.gasSubsidy()，胜负都发；0 = 未开启）。

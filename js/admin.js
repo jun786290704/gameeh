@@ -1193,8 +1193,10 @@ async function secAntiCheat(el, isOwner){
     aRow('当前每场补贴', subAmt!==null ? (BigInt(subAmt)>0n ? '⛽ '+fmtUnits(subAmt,18,4)+' USDT/场' : '未开启（0）') : '-') +
     aRow('建议区间', '0.01 ~ 0.03 USDT/场（默认 0.02）') +
     aRow('发放范围', '胜负都发 · 与胜利奖励同池，claim 时一并领取') +
+    aRow('前端战斗 gas', '恒定 350,000 @ 0.0715 gwei ≈ 0.00002503 BNB（≈0.0188 USDT，BNB=$750）') +
     '<div class="text-[11px] text-muted px-1 pt-1">每场战斗（胜负都算）向金库记一笔固定 USDT 补贴，玩家领取时无需额外交易。' +
-    '实测：一场战斗 ≈ 231,285 gas（BNB≈$750 时 0.05 gwei ≈ 0.0087 / 0.1 gwei ≈ 0.0173 / 0.3 gwei ≈ 0.052 USDT），另需销毁 50 EH。' +
+    '实测一场 fightOnce ≈ 231,285 gas；前端已改为**恒定**发送 350,000 gas @ 0.0715 gwei（见 core.js 的 FIGHT_GAS_LIMIT / FIGHT_GAS_PRICE），' +
+    '故每场 gas 成本固定在 ≈0.0188 USDT（BNB=$750），0.02 的补贴刚好覆盖（净 +0.0012）。另需销毁 50 EH。' +
     '⛔ 补贴是按固定金额而非按实际 gas 换算 —— 链上取不到 gasUsed，只能读玩家自选的 gasPrice，做成比例会被自设高价刷爆。gas 涨价时用此处改大即可（上限 1 USDT/场）。</div>',
     isOwner ? aAct('设置 gas 补贴', 'adminOpenSetGasSubsidy()', 'fa-pen') : '');
 

@@ -34,7 +34,7 @@ const NETWORKS = {
     rpcFallbacks: ['https://bsc-dataseed1.bnbchain.org','https://bsc-dataseed2.bnbchain.org','https://bsc-rpc.publicnode.com','https://bsc.drpc.org'],
     name: 'BSC 主网',
     explorer: 'https://bscscan.com',
-    gasPrice: 100000000n, // 0.1 gwei（BSC 主网当前实际价 ~0.05 gwei）
+    gasPrice: 71500000n, // 0.0715 gwei（恒定值，不随链上波动；见下方 FIGHT_GAS_* 说明）
     contracts: {
       gameToken:   '0x5f672Bfa19f1E29178f90C159070981976687777', // EH（主网已部署）
       characters:  '0x77BEfa8152c99200944577429B441b9dfA2e3e43',
@@ -61,6 +61,30 @@ let NET = NETWORKS[NET_CURRENT];
 let CONTRACTS = NET.contracts;
 let GAS_PRICE = NET.gasPrice;
 const CONFIG = { confirmations: 3 };
+
+/* ============ 战斗 gas 恒定参数（V22） ============
+   战斗交易不再走 estimateGas，直接用固定的 gasLimit + gasPrice，让「每场 gas 成本」可被预算：
+     · FIGHT_GAS_LIMIT = 350,000（实测一场 fightOnce = 231,285 gas，留 ~51% 余量）
+     · FIGHT_GAS_PRICE = NET.gasPrice（主网 0.0715 gwei，测试网 0.12 gwei）
+   成本：350,000 × 0.0715 gwei = 0.0000250250 BNB
+        BNB=$750 时 ≈ $0.0188 —— 稳稳落在每场 0.02 USDT 的补贴之内（净赚约 +0.0012 USDT）。
+   ⚠ 这两个值是「恒定」的：前端不再读取节点建议价，因此若 BSC 最低 gasPrice 涨过 0.0715 gwei，
+     交易会卡住（当前 BSC 实际价约 0.05 gwei，0.0715 反而更快被打包）。
+     需要调整时只改这里即可（FIGHT_GAS_PRICE 也可直接写死一个 bigint，不跟随 NET.gasPrice）。 */
+const FIGHT_GAS_LIMIT = 350000n;
+const FIGHT_GAS_PRICE = NET.gasPrice;
+
+/* PancakeSwap V2 Router / WBNB（按链取，供 gas 成本折算成 USDT 用） */
+function pancakeRouterAddr(){
+  return Number(NET.chainId) === 56
+    ? '0x10ED43C718714eb63d5aA57B78B54704E256024E'
+    : '0xD99D1c33F9fC3444f8101754aBC46c52416550D1';
+}
+function wbnbAddr(){
+  return Number(NET.chainId) === 56
+    ? '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'
+    : '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd';
+}
 
 /* ============ 区块浏览器链接（随当前网络切换；主网不能用 testnet.bscscan.com） ============ */
 function explorerTxUrl(hash){ return ((NET && NET.explorer) || 'https://bscscan.com') + '/tx/' + hash; }
