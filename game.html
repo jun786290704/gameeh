@@ -3,6 +3,11 @@
 <head data-page-node-id="qbdhfjGN8ZQooTQAd2dVDj">
 <meta charset="UTF-8" data-page-node-id="bjs0rLANQCg7AfS5TvfDU9">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" data-page-node-id="xFOFYn4Y3vj8OjABC6v5s6">
+<!-- 禁用页面缓存：手机钱包内置浏览器（TokenPocket 等）对 HTML 缓存很顽固，
+     会导致页面里引用的 JS 版本号停留在旧值、前端改动不生效 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>元素英雄 · RPG</title>
 <link rel="stylesheet" href="./vendor/tailwind.min.css">
 <script src="./vendor/ethers.umd.min.js"></script>
@@ -453,26 +458,26 @@ if(!window.ethers){
 
 <!-- i18n: 多语言（最先加载，覆盖式翻译，不侵入业务 JS） -->
 <script src="./js/i18n_dict.js?v=20261009u" defer></script>
-<script src="./js/i18n.js?v=20261011e" defer></script>
+<script src="./js/i18n.js?v=20261011f" defer></script>
 <!-- app.js 已按功能拆分为 js/*.js（顺序即依赖顺序） -->
-<script src="./js/core.js?v=20261011e" defer></script>
-<script src="./js/utils.js?v=20261011e" defer></script>
-<script src="./js/wallet.js?v=20261011e" defer></script>
-<script src="./js/pending.js?v=20261011e" defer></script>
+<script src="./js/core.js?v=20261011f" defer></script>
+<script src="./js/utils.js?v=20261011f" defer></script>
+<script src="./js/wallet.js?v=20261011f" defer></script>
+<script src="./js/pending.js?v=20261011f" defer></script>
 <script src="./js/approvals.js" defer></script>
 <script src="./js/ui.js?v=20261011a" defer></script>
 <script src="./js/heroes.js?v=20261010m" defer></script>
 <script src="./js/weapons.js?v=20261010h" defer></script>
 <script src="./js/forge.js?v=20261010m" defer></script>
-<script src="./js/fight.js?v=20261011e" defer></script>
+<script src="./js/fight.js?v=20261011f" defer></script>
 <script src="./js/boss.js?v=20261010r" defer></script>
 <script src="./js/market.js?v=20261010i" defer></script>
 <script src="./js/stats.js?v=20261010r" defer></script>
 <script src="./js/invite.js?v=20261010r" defer></script>
 <script src="./js/gallery.js" defer></script>
-<script src="./js/admin.js?v=20261011e" defer></script>
+<script src="./js/admin.js?v=20261011f" defer></script>
 <script src="./js/admin-governance.js?v=20261006a" defer></script>
-<script src="./js/init.js?v=20261011e" defer></script>
+<script src="./js/init.js?v=20261011f" defer></script>
 <!-- 锚点直达页签：game.html#boss（来自 3D 世界地图等入口） -->
 <script>
 window.addEventListener('DOMContentLoaded', function(){

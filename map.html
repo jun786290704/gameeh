@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<!-- 禁用页面缓存：手机钱包内置浏览器（TokenPocket 等）对 HTML 缓存很顽固 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>元素英雄 · 3D 世界地图（580m × 580m）</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070c18'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23fbbf24' stroke-width='5'/%3E%3Cpath d='M32 16 L38 30 L53 30 L41 39 L46 53 L32 44 L18 53 L23 39 L11 30 L26 30 Z' fill='%23fbbf24'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="./vendor/fontawesome/css/all.min.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'">
@@ -711,17 +715,17 @@ if(!window.ethers){
 </script>
 <!-- 本地物理引擎（碰撞 / 防穿模），离线可用；缺失也不影响页面其它功能 -->
 <script src="./vendor/physics.js" onerror="window.__physicsFailed=true"></script>
-<script src="./js/core.js?v=20261011e" defer></script>
-<script src="./js/utils.js?v=20261011e" defer></script>
-<script src="./js/wallet.js?v=20261011e" defer></script>
-<script src="./js/pending.js?v=20261011e" defer></script>
+<script src="./js/core.js?v=20261011f" defer></script>
+<script src="./js/utils.js?v=20261011f" defer></script>
+<script src="./js/wallet.js?v=20261011f" defer></script>
+<script src="./js/pending.js?v=20261011f" defer></script>
 <script src="./js/approvals.js" defer></script>
 <script src="./js/ui.js" defer></script>
 <script src="./js/heroes.js" defer></script>
 <script src="./js/hero_sprites.js" defer></script>
 <script src="./js/weapons.js" defer></script>
 <script src="./js/forge.js" defer></script>
-<script src="./js/fight.js?v=20261011e" defer></script>
+<script src="./js/fight.js?v=20261011f" defer></script>
 <script src="./js/boss.js" defer></script>
 <script src="./js/market.js" defer></script>
 <script src="./js/stats.js" defer></script>
