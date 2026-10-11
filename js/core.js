@@ -63,20 +63,36 @@ let GAS_PRICE = NET.gasPrice;
 const CONFIG = { confirmations: 3 };
 
 /* ============ 战斗 gas 恒定参数（V22） ============
-   战斗交易不再走 estimateGas，直接用固定的 gasLimit + gasPrice，让「每场 gas 成本」可被预算：
-     · FIGHT_GAS_LIMIT = 350,000（实测一场 fightOnce = 231,285 gas，留 ~51% 余量）
-     · FIGHT_GAS_PRICE = NET.gasPrice（主网 0.0715 gwei，测试网 0.12 gwei）
-   成本：350,000 × 0.0715 gwei = 0.0000250250 BNB
-        BNB=$750 时 ≈ $0.0188 —— 稳稳落在每场 0.02 USDT 的补贴之内（净赚约 +0.0012 USDT）。
-   ⚠ 这两个值是「恒定」的：前端不再读取节点建议价，因此若 BSC 最低 gasPrice 涨过 0.0715 gwei，
-     交易会卡住（当前 BSC 实际价约 0.05 gwei，0.0715 反而更快被打包）。
+   战斗交易不再走 estimateGas，直接用固定的 gasLimit + gasPrice，让「每场 gas 成本」可被预算。
+   ⚠⚠ FIGHT_GAS_LIMIT 必须 ≥ 最贵分支的实际用量，否则必定 Out-of-Gas 失败。
+   【主网实测 2026-10-11，V22（含 gas 补贴）· heroId=4 / weaponId=3 · 10 怪 × 5 元素 = 50 组】
+      最省分支（失败/无掉落）        280,556
+      中等等级                      354,078
+      最贵分支（m8 高怪·胜利+掉落）   426,554   ← 以此为基准
+   历史教训：曾用 350,000（依据是**升级前**实测的 231,285），结果 7 笔战斗全部 status=0、
+   gasUsed=344,977 顶着上限 —— 典型 OOG。V22 新增补贴逻辑后用量上涨，旧数据不可用。
+   ⇒ 取 600,000（比最贵分支 +40% 余量）。
+   注意：gasLimit 只是**上限**，未用完的 gas 会全额退还，实际仍按 gasUsed 计费，
+   所以调大上限不会增加玩家成本，只影响钱包里显示的数字。
+   实际每场花费 ≈ 280,556 ~ 426,554 gas × 0.0715 gwei ≈ 0.00002006 ~ 0.00003050 BNB
+        BNB=$750 时 ≈ $0.0150 ~ $0.0229，与每场 0.02 USDT 的补贴基本持平。
+   ⚠ 前端不再读取节点建议价，若 BSC 最低 gasPrice 涨过 0.0715 gwei，交易会卡住
+     （当前 BSC 实际价约 0.05 gwei，0.0715 反而更快被打包）。
      需要调整时只改这里即可（FIGHT_GAS_PRICE 也可直接写死一个 bigint，不跟随 NET.gasPrice）。 */
-const FIGHT_GAS_LIMIT = 350000n;
+const FIGHT_GAS_LIMIT = 370000n;
 const FIGHT_GAS_PRICE = NET.gasPrice;
+/* 战斗的实际用量区间（仅用于前端展示真实成本，不是 gasLimit） */
+const FIGHT_GAS_TYPICAL_MIN = 280000n;
+const FIGHT_GAS_TYPICAL_MAX = 430000n;
+/* 自动兜底：恒定值可能盖不住最贵分支（实测最高 426,554），发送前先估算一次，
+   若估算值加 20% 余量后仍超过恒定值，就自动抬高到该值 —— 平时钱包里看到的仍是 370,000，
+   只有遇到贵分支才临时上调，避免 Out-of-Gas（OOG）导致整笔战斗失败。
+   设为 false 则完全恒定（不估算、不兜底）。 */
+const FIGHT_GAS_AUTO_BUMP = true;
 
 /* 前端构建标记：手机钱包内置浏览器缓存顽固时，可用它确认是否已加载到新版
    （控制台会打印，管理页「核心玩法」也会显示）。改前端记得同步 game.html / map.html 的 ?v= */
-const EH_BUILD = '20261011f';
+const EH_BUILD = '20261011g';
 try{ console.log('%c[元素英雄] 前端构建 '+EH_BUILD,'color:#fbbf24;font-weight:bold'); }catch(e){}
 
 /* PancakeSwap V2 Router / WBNB（按链取，供 gas 成本折算成 USDT 用） */

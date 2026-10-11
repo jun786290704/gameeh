@@ -311,15 +311,21 @@ async function autoPreviewFight(){
     const subLine = gasSub > 0n
       ? `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">每场战斗 gas 补贴（胜负都给）</span><div class="font-bold text-cyan-300 num-mono">⛽ + ${fmtVaultUnits(gasSub, 4)}</div></div>`
       : '';
-    /* V22：本次战斗的实际 gas 成本（恒定值）与「补贴 − gas」净额 */
+    /* V22：本次战斗的实际 gas 成本（按实际用量区间计）与「补贴 − gas」净额 */
     let gasLine = '', netLine = '';
     try{
       const g = await fightGasCost();
-      const bnbTxt = (Number(g.wei) / 1e18).toFixed(8);
-      gasLine = `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">本次战斗 gas（恒定，前端自动填入）</span><div class="font-bold text-slate-300 num-mono">⛽ ${FIGHT_GAS_LIMIT.toLocaleString()} × ${(Number(FIGHT_GAS_PRICE)/1e9).toFixed(4)} gwei = ${bnbTxt} BNB${g.usdt>0n ? ' ≈ '+fmtUnits(g.usdt, 18, 4)+' USDT' : ''}</div></div>`;
-      if(gasSub > 0n && g.usdt > 0n){
-        const net = gasSub - g.usdt;
-        netLine = `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">补贴 − gas 净额</span><div class="font-bold num-mono" style="color:${net>=0n?'#22c55e':'#ef4444'};">${net>=0n?'+':'−'} ${fmtUnits(net>=0n?net:-net, 18, 4)} USDT</div></div>`;
+      const gpTxt = (Number(FIGHT_GAS_PRICE)/1e9).toFixed(4);
+      const bnbMin = (Number(g.weiMin) / 1e18).toFixed(8);
+      const bnbMax = (Number(g.weiMax) / 1e18).toFixed(8);
+      const usdTxt = (g.usdtMax > 0n)
+        ? ' ≈ ' + fmtUnits(g.usdtMin, 18, 4) + ' ~ ' + fmtUnits(g.usdtMax, 18, 4) + ' USDT'
+        : '';
+      gasLine = `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">本次战斗 gas（实际用量计费，上限 ${FIGHT_GAS_LIMIT.toLocaleString()} 未用完会退还）</span><div class="font-bold text-slate-300 num-mono">⛽ ${Number(FIGHT_GAS_TYPICAL_MIN).toLocaleString()}~${Number(FIGHT_GAS_TYPICAL_MAX).toLocaleString()} × ${gpTxt} gwei = ${bnbMin}~${bnbMax} BNB${usdTxt}</div></div>`;
+      if(gasSub > 0n && g.usdtMax > 0n){
+        // 用最贵分支（43 万）算净额，给玩家的是最保守的数字
+        const net = gasSub - g.usdtMax;
+        netLine = `<div class="bg-[#0d1526]/60 rounded-lg px-2 py-1.5 col-span-2"><span class="text-muted">补贴 − gas 净额（按最贵分支）</span><div class="font-bold num-mono" style="color:${net>=0n?'#22c55e':'#ef4444'};">${net>=0n?'+':'−'} ${fmtUnits(net>=0n?net:-net, 18, 4)} USDT</div></div>`;
       }
     }catch(e){}
     if(barWin) barWin.textContent = chancePct + '%';
@@ -414,11 +420,9 @@ async function fightFlow(){
     const monsterElement = S.monsterRandomElements && S.monsterRandomElements[monsterIdx] !== undefined 
       ? S.monsterRandomElements[monsterIdx] 
       : Math.floor(Math.random() * 5);
-    /* V22：战斗交易用**恒定** gas（350,000 @ 0.0715 gwei），不再走 estimateGas，
-       这样每场 gas 成本可预算（≈0.00002503 BNB ≈ 0.0188 USDT @BNB$750），
-       正好被 0.02 USDT/场的补贴覆盖。改参数见 core.js 的 FIGHT_GAS_LIMIT / FIGHT_GAS_PRICE。 */
-    const tx = await eh.fightOnce(heroId, weaponId, monsterId, monsterElement,
-      { gasLimit: FIGHT_GAS_LIMIT, gasPrice: FIGHT_GAS_PRICE });
+    /* V22：战斗交易用**恒定** gas（370,000 @ 0.0715 gwei），这样每场成本可预算。
+       参数见 core.js 的 FIGHT_GAS_LIMIT / FIGHT_GAS_PRICE / FIGHT_GAS_AUTO_BUMP。 */
+    const tx = await sendFightTx(eh, heroId, weaponId, monsterId, monsterElement);
     toast('战斗中…','info');
     const rec = await tx.wait();
 
@@ -486,26 +490,56 @@ function extractFightResult(rec){
   return rec2;
 }
 
-/* V22：把「恒定 gas」（FIGHT_GAS_LIMIT × FIGHT_GAS_PRICE）折算成 USDT
-   —— 走 Pancake V2 的 WBNB→USDT 链上报价，不依赖外部行情 API。
-   拿不到报价就只显示 BNB 数量，不阻塞渲染。报价缓存 10 分钟。 */
-let _fightGasQuote = { usdt: 0n, ts: 0 };
+/* V22：发送战斗交易。默认用恒定 gasLimit（370,000）与恒定 gasPrice（0.0715 gwei）。
+   若开启 FIGHT_GAS_AUTO_BUMP，会先 estimateGas 一次：估算值 +20% 仍高于恒定值时自动抬高，
+   杜绝 Out-of-Gas。
+   【历史事故 2026-10-11】恒定值取 350,000（依据是**升级前**实测的 231,285），
+   而 V22 上线后最贵分支要 426,554 ⇒ 7 笔战斗全部 status=0、gasUsed 顶到 344,977（典型 OOG）。
+   教训：合约升级后必须重测 gas，不能沿用旧数据；恒定值必须 ≥ 最贵分支 + 余量。 */
+async function sendFightTx(eh, heroId, weaponId, monsterId, monsterElement){
+  let gasLimit = FIGHT_GAS_LIMIT;
+  if(typeof FIGHT_GAS_AUTO_BUMP !== 'undefined' && FIGHT_GAS_AUTO_BUMP){
+    try{
+      const est = await eh.fightOnce.estimateGas(heroId, weaponId, monsterId, monsterElement);
+      const need = BigInt(est) * 120n / 100n;
+      if(need > gasLimit){
+        gasLimit = need;
+        console.warn('[fight] 估算 gas ' + est.toString() + ' 超出恒定值，自动抬升至 ' + gasLimit.toString());
+        try{ toast('本场战斗较复杂，已自动提高 gas 上限至 ' + Number(gasLimit).toLocaleString(), 'info'); }catch(e){}
+      }
+    }catch(e){
+      console.warn('[fight] estimateGas 失败，退回恒定 gasLimit', e && e.shortMessage ? e.shortMessage : e);
+    }
+  }
+  return eh.fightOnce(heroId, weaponId, monsterId, monsterElement,
+    { gasLimit, gasPrice: FIGHT_GAS_PRICE });
+}
+
+/* V22：把本次战斗的 gas 成本折算成 USDT —— 走 Pancake V2 的 WBNB→USDT 链上报价，
+   不依赖外部行情 API。拿不到报价就只显示 BNB 数量，不阻塞渲染。报价缓存 10 分钟。
+   ⚠ 按**实际用量区间**（FIGHT_GAS_TYPICAL_MIN ~ MAX）算，不是按 gasLimit：
+   gasLimit 只是上限，未用完的 gas 会全额退还，玩家实际按 gasUsed 付费。 */
+let _fightGasQuote = { bnbWei: 0n, usdt: 0n, ts: 0 };
 async function fightGasCost(){
-  const wei = FIGHT_GAS_LIMIT * FIGHT_GAS_PRICE; // 350,000 × 0.0715 gwei = 0.0000250250 BNB
+  const weiMin = FIGHT_GAS_TYPICAL_MIN * FIGHT_GAS_PRICE;
+  const weiMax = FIGHT_GAS_TYPICAL_MAX * FIGHT_GAS_PRICE;
   if(_fightGasQuote.usdt > 0n && (Date.now() - _fightGasQuote.ts) < 600000){
-    return { wei, usdt: _fightGasQuote.usdt };
+    const k = _fightGasQuote.usdt * 10000n / _fightGasQuote.bnbWei; // 每 1 wei BNB 值多少 USDT(18位)
+    return { weiMin, weiMax, usdtMin: weiMin * k / 10000n, usdtMax: weiMax * k / 10000n };
   }
   try{
     const usdtAddr = await mustC('vault').usdt().catch(()=>null);
     if(usdtAddr && usdtAddr !== '0x0000000000000000000000000000000000000000'){
       const rct = new ethers.Contract(pancakeRouterAddr(),
         ['function getAmountsOut(uint256,address[]) view returns (uint256[])'], getReadProvider());
-      const out = await rct.getAmountsOut(wei, [wbnbAddr(), usdtAddr]);
-      _fightGasQuote = { usdt: BigInt(out[out.length-1]), ts: Date.now() };
-      return { wei, usdt: _fightGasQuote.usdt };
+      const out = await rct.getAmountsOut(weiMax, [wbnbAddr(), usdtAddr]);
+      const usdtMax = BigInt(out[out.length-1]);
+      const usdtMin = weiMin > 0n ? usdtMax * weiMin / weiMax : 0n;
+      _fightGasQuote = { bnbWei: weiMax, usdt: usdtMax, ts: Date.now() };
+      return { weiMin, weiMax, usdtMin, usdtMax };
     }
   }catch(e){}
-  return { wei, usdt: 0n };
+  return { weiMin, weiMax, usdtMin: 0n, usdtMax: 0n };
 }
 
 /* V22：每场战斗的 gas 补贴（链上 V3.gasSubsidy()，胜负都发；0 = 未开启）。
