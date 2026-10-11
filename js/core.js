@@ -36,7 +36,7 @@ const NETWORKS = {
     explorer: 'https://bscscan.com',
     gasPrice: 71500000n, // 0.0715 gwei（恒定值，不随链上波动；见下方 FIGHT_GAS_* 说明）
     contracts: {
-      gameToken:   '0x5f672Bfa19f1E29178f90C159070981976687777', // EH（主网已部署）
+      gameToken:   '0x488adF4bfcEaD752F50A0b2DE4aDAA87140f7777', // EH（Flap 发行，2026-10-11 由 0x5f672B…7777 切换）
       characters:  '0x77BEfa8152c99200944577429B441b9dfA2e3e43',
       weapons:     '0xD4f5cf84Db3532596924DF915a86bfc6E06da82F',
       shards:      '0x62870116f680160025508394408e22E4108051DD',
@@ -92,7 +92,7 @@ const FIGHT_GAS_AUTO_BUMP = true;
 
 /* 前端构建标记：手机钱包内置浏览器缓存顽固时，可用它确认是否已加载到新版
    （控制台会打印，管理页「核心玩法」也会显示）。改前端记得同步 game.html / map.html 的 ?v= */
-const EH_BUILD = '20261011g';
+const EH_BUILD = '20261011h';
 try{ console.log('%c[元素英雄] 前端构建 '+EH_BUILD,'color:#fbbf24;font-weight:bold'); }catch(e){}
 
 /* PancakeSwap V2 Router / WBNB（按链取，供 gas 成本折算成 USDT 用） */
